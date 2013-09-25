@@ -319,11 +319,11 @@ except FileNotFoundError:
 # Print initial origin address
 if args.nolist == False:
     if args.format == 1:
-      print("%04X            org     $%04X" % (address, address))
+        print("%04X            org     $%04X" % (address, address))
     elif args.format == 2:
-      print("%04X            org     %04Xh" % (address, address))
+        print("%04X            org     %04Xh" % (address, address))
     else:
-      print("%04X            org     %04X" % (address, address))
+        print("%04X            org     %04X" % (address, address))
 
 while True:
     try:
@@ -335,7 +335,7 @@ while True:
             break
 
         if args.nolist == False:
-            print("%04X  " % address, end='') # Print current address
+            line = "%04X  " % address # Print current address
 
         op = ord(b) # Get opcode byte
 
@@ -346,18 +346,18 @@ while True:
         # Print instruction bytes
         if (n == 1):
             if args.nolist == False:
-                print("%02X        " % op, end='')
+                line += "%02X        " % op
         elif (n == 2):
             op1 = ord(f.read(1))
             if args.nolist == False:
-                print("%02X %02X     " % (op, op1), end='')
+                line += "%02X %02X     " % (op, op1)
         elif (n == 3):
             op1 = ord(f.read(1))
             op2 = ord(f.read(1))
             if args.nolist == False:
-                print("%02X %02X %02X  " % (op, op1, op2), end='')
+                line += "%02X %02X %02X  " % (op, op1, op2)
         if args.nolist == True:
-            print(" ", end='')
+            line + " "
 
         # If opcode starts with '*' then put in comment that this is an alternative op code (likely an error).
         if mnem[0] =="*":
@@ -366,27 +366,28 @@ while True:
         else:
             alternative = False
 
-        print(mnem, end='')
+        line += mnem
 
         # Print any operands
         if (n == 2):
             if args.format == 1:
-                print("$%02X" % op1, end='')
+                line += "$%02X" % op1
             elif args.format == 2:
-                print("%02Xh" % op1, end='')
+                line += "%02Xh" % op1
             else:
-                print("%02X" % op1, end='')
+                line += "%02X" % op1
         elif (n == 3):
             if args.format == 1:
-                print("$%02X%02X" % (op2, op1), end='')
+                line += "$%02X%02X" % (op2, op1)
             elif args.format == 2:
-                print("%02X%02Xh" % (op2, op1), end='')
+                line += "%02X%02Xh" % (op2, op1)
             else:
-                print("%02X%02X" % (op2, op1), end='')
+                line += "%02X%02X" % (op2, op1)
 
-        # TODO: Line up comment at fixed column position
         if alternative:
-            print(" ; Note: Alternative opcode used", end='')
+            mnem = mnem.replace(mnem[:1], '') # Remove the star
+            # Line up comment at fixed column position
+            line += ";Note: Alternative opcode used".rjust(67 - len(line))
 
         # Update address
         address = address + n
@@ -396,7 +397,8 @@ while True:
             address = address & 0xffff
 
         # Finished a line of disassembly
-        print()
+        print(line)
+        line = ""
 
     except KeyboardInterrupt:
         print("Interrupted by Control-C", file=sys.stderr)
