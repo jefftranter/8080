@@ -241,7 +241,7 @@ lookupTable = [
   [ "rz", 1 ], # C8
   [ "ret", 1 ], # C9
   [ "jz      ", 3 ], # CA
-  [ "*jmp    ", 3 ], # CB
+  [ "*jmp     ", 3 ], # CB
   [ "cz      ", 3 ], # CC
   [ "call    ", 3 ], # CD
   [ "aci     ", 2 ], # CE
@@ -260,7 +260,7 @@ lookupTable = [
   [ "jc      ", 3 ], # DA
   [ "in      ", 2 ], # DB
   [ "cc      ", 3 ], # DC
-  [ "*call   ", 3 ], # DD
+  [ "*call    ", 3 ], # DD
   [ "sbi     ", 2 ], # DE
   [ "rst     3", 1 ], # DF
 
@@ -277,7 +277,7 @@ lookupTable = [
   [ "jpe     ", 3 ], # EA
   [ "xchg", 1 ], # EB
   [ "cpe     ", 3 ], # EC
-  [ "*call   ", 3 ], # ED
+  [ "*call    ", 3 ], # ED
   [ "xri     ", 2 ], # EE
   [ "rst     5", 1 ], # EF
 
@@ -294,7 +294,7 @@ lookupTable = [
   [ "jm      ", 3 ], # FA
   [ "ei", 1 ], # FB
   [ "cm      ", 3 ], # FC
-  [ "*call   ", 3 ], # FD
+  [ "*call    ", 3 ], # FD
   [ "cpi     ", 2 ], # FE
   [ "rst     7", 1 ], # FF
 ]
@@ -337,6 +337,8 @@ while True:
 
         n = lookupTable[op][1] # Look up number of instruction bytes
 
+        mnem = lookupTable[op][0] # Get mnemonic
+
         # Print instruction bytes
         if (n == 1):
             print("%02X        " % op, end='')
@@ -348,8 +350,14 @@ while True:
             op2 = ord(f.read(1))
             print("%02X %02X %02X  " % (op, op1, op2), end='')
 
-        # TODO: Put in comment for alternative op codes (start with *)
-        print(lookupTable[op][0], end='')
+        # If opcode starts with '*' then put in comment that this is an alternative op code (likely an error).
+        if mnem[0] =="*":
+            alternative = True
+            mnem = mnem.replace(mnem[:1], '') // Remove the star
+        else:
+            alternative = False
+
+        print(mnem, end='')
 
         # Print any operands
         if (n == 2):
@@ -357,8 +365,11 @@ while True:
         elif (n == 3):
             print("$%02X%02X" % (op2, op1), end='')
 
+        if alternative:
+            print(" ; Note: Alternative opcode used", end='')
+
         # Update address
-        address = address + lookupTable[op][1]
+        address = address + n
 
         # Check for address exceeding 0xFFFF, if so wrap around.
         if (address > 0xffff):
