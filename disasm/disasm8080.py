@@ -1,4 +1,4 @@
-#! /usr/bin/env python3.3
+#! /usr/bin/env python3
 #
 # Disassembler for Intel 8080 microprocessor.
 # Copyright (c) 2013 by Jeff Tranter <tranter@pobox.com>
