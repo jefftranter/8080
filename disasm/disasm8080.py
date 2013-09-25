@@ -23,8 +23,6 @@
 # -h <n>          Hex number format: 1 = $1234 2 = 1234h 3 = 1234
 # -o              Display address/numbersin Octal rather than hex
 
-# TODO: Put code in github
-
 import sys
 import fileinput
 
@@ -57,7 +55,7 @@ lookupTable = [
   [ "ral", 1 ], # 17
   [ "*nop", 1 ], # 18
   [ "dad", 1 ], # 19
-  [ "ldax", 1 ], # 1A
+  [ "ldax d", 1 ], # 1A
   [ "dcx d", 1 ], # 1B
   [ "inr e", 1 ], # 1C
   [ "dcr e", 1 ], # 1D
@@ -155,7 +153,7 @@ lookupTable = [
   [ "mov m,e", 1 ], # 73
   [ "mov m,h", 1 ], # 74
   [ "mov m,l", 1 ], # 75
-  [ "hlt", 1 ], # 76
+  [ "hlt",     1 ], # 76
   [ "mov m,a", 1 ], # 77
   [ "mov a,b", 1 ], # 78
   [ "mov a,c", 1 ], # 79
