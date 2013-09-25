@@ -397,7 +397,7 @@ while True:
         # Finished a line of disassembly
         print()
 
-    except (KeyboardInterrupt, BrokenPipeError):
+    except KeyboardInterrupt:
         print("Interrupted by Control-C", file=sys.stderr)
         print("%04X            end" % address) # Exit if end of file reached.
         break
