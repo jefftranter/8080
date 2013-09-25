@@ -353,7 +353,7 @@ while True:
         # If opcode starts with '*' then put in comment that this is an alternative op code (likely an error).
         if mnem[0] =="*":
             alternative = True
-            mnem = mnem.replace(mnem[:1], '') // Remove the star
+            mnem = mnem.replace(mnem[:1], '') # Remove the star
         else:
             alternative = False
 
