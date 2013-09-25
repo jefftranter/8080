@@ -17,11 +17,9 @@
 
 # usage: disasm8080 [options] filename
 # options:
-# -a <address>    Specify base address
-# -i              Input is Intel hex file (rather than binary)
+# -a <address>    Specify starting address (defaults to $0000)
 # -n              Don't list instruction bytes (make output suitable for assembler)
-# -h <n>          Hex number format: 1 = $1234 2 = 1234h 3 = 1234
-# -o              Display address/numbersin Octal rather than hex
+# -h <n>          Use hex number format: 1 = $1234 2 = 1234h 3 = 1234 (default 1)
 
 import sys
 import fileinput
@@ -302,13 +300,13 @@ lookupTable = [
 ]
 
 # Variables
-address = 0x0000; # Current instruction address
+address = 0x0000 # Current instruction address
 
 # Validate command line arguments (should be one filename on command line).
 # TODO: Add support for options.
 if len(sys.argv) != 2:
-  print("error: invalid command line options.");
-  print("usage: %s <filename>" % sys.argv[0]);
+  print("error: invalid command line options.", file=sys.stderr)
+  print("usage: %s <filename>" % sys.argv[0], file=sys.stderr)
   sys.exit(1)
 
 # Get filename from command line.
@@ -319,52 +317,59 @@ filename = sys.argv[1]
 try:
     f = open(filename, "rb")
 except FileNotFoundError:
-    print("error: Input file '" + filename + "' not found.");
+    print("error: input file '" + filename + "' not found.", file=sys.stderr)
     sys.exit(1)
 
 # Print initial origin address
 print("%04X            org $%04X" % (address, address))
 
 while True:
-    # TODO: Catch keyboard interrupt
-    b = f.read(1) # Get binary byte from file
+    try:
+        b = f.read(1) # Get binary byte from file
 
-    if len(b) == 0:
+        if len(b) == 0:
+            print("%04X            end" % address) # Exit if end of file reached.
+            break
+
+        print("%04X  " % address, end='') # Print current address
+
+        op = ord(b) # Get opcode byte
+
+        n = lookupTable[op][1] # Look up number of instruction bytes
+
+        # Print instruction bytes
+        if (n == 1):
+            print("%02X        " % op, end='')
+        elif (n == 2):
+            op1 = ord(f.read(1))
+            print("%02X %02X     " % (op, op1), end='')
+        elif (n == 3):
+            op1 = ord(f.read(1))
+            op2 = ord(f.read(1))
+            print("%02X %02X %02X  " % (op, op1, op2), end='')
+
+        # TODO: Put in comment for alternative op codes (start with *)
+        print(lookupTable[op][0], end='')
+
+        # TODO: Pad with spaces after mnemonic to fill 8 chars?
+
+        # Print any operands
+        if (n == 2):
+            print("$%02X" % op1, end='')
+        elif (n == 3):
+            print("$%02X%02X" % (op2, op1), end='')
+
+        # Update address
+        address = address + lookupTable[op][1]
+
+        # Check for address exceeding 0xFFFF, if so wrap around.
+        if (address > 0xffff):
+            address = address & 0xffff
+
+        # Finished a line of disassembly
+        print()
+
+    except KeyboardInterrupt:
+        print("Interrupted by Control-C", file=sys.stderr)
         print("%04X            end" % address) # Exit if end of file reached.
         break
-
-    print("%04X  " % address, end='') # Print current address
-
-    op = ord(b) # Get opcode byte
-
-    n = lookupTable[op][1] # Look up number of instruction bytes
-
-    # Print instruction bytes
-    if (n == 1):
-        print("%02X        " % op, end='')
-    elif (n == 2):
-        op1 = ord(f.read(1))
-        print("%02X %02X     " % (op, op1), end='')
-    elif (n == 3):
-        op1 = ord(f.read(1))
-        op2 = ord(f.read(1))
-        print("%02X %02X %02X  " % (op, op1, op2), end='')
-
-    # TODO: Put in comment for alternative op codes (start with *)
-    print(lookupTable[op][0], end='')
-
-    # Print any operands
-    if (n == 2):
-        print("$%02X" % op1, end='')
-    elif (n == 3):
-        print("$%02X%02X" % (op2, op1), end='')
-
-    # Update address
-    address = address + lookupTable[op][1]
-
-    # Check for address exceeding 0xFFFF, if so wrap around.
-    if (address > 0xffff):
-        address = address & 0xffff
-
-    # Finished a line of disassembly
-    print()
