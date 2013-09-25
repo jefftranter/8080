@@ -23,6 +23,7 @@
 
 import sys
 import fileinput
+import argparse
 
 # Lookup table - given opcode byte as index, return mnemonic of instruction and length of instruction.
 lookupTable = [
@@ -299,18 +300,18 @@ lookupTable = [
   [ "rst     7", 1 ], # FF
 ]
 
-# Variables
-address = 0x0000 # Current instruction address
+# Parse command line options
+parser = argparse.ArgumentParser()
+parser.add_argument("filename", help="Binary file to disassemble")
+parser.add_argument("-n", "--nolist", help="Don't list  instruction bytes (make output suitable for assembler)", action="store_true")
+parser.add_argument("-a", "--address", help="Specify decimal starting address (defaults to 0)", default=0, type=int)
+parser.add_argument("-f", "--format", help="Use number format: 1 = $1234 2 = 1234h 3 = 1234 (default 1)", default=1, type=int)
+args = parser.parse_args()
 
-# Validate command line arguments (should be one filename on command line).
-# TODO: Add support for options.
-if len(sys.argv) != 2:
-  print("error: invalid command line options.", file=sys.stderr)
-  print("usage: %s <filename>" % sys.argv[0], file=sys.stderr)
-  sys.exit(1)
+# Get filename from command line arguments.
+filename = args.filename
 
-# Get filename from command line.
-filename = sys.argv[1]
+address = args.address # Current instruction address
 
 # Open input file.
 # Display error and exit if filename does not exist.
