@@ -4,8 +4,8 @@ disassembly. It requires Python 3. It has been tested on Linux but
 should work on any platform that supports Python. See the source code
 for more details.
 
-The file ex1.bin is an example binary file that can be used to test
-the disassembler.
+The files ex1.bin, ex2.bin, and ex3.bin are some example binary files
+that can be used to test the disassembler.
 
 usage: disasm8080.py [-h] [-n] [-a ADDRESS] [-f {1,2,3}] filename
 

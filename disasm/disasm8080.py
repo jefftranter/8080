@@ -308,6 +308,9 @@ filename = args.filename
 # Current instruction address. Silently force it to be in valid range.
 address = args.address & 0xffff
 
+# Contains a line of output
+line = ""
+
 # Open input file.
 # Display error and exit if filename does not exist.
 try:
