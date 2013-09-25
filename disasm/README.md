@@ -6,3 +6,18 @@ for more details.
 
 The file ex1.bin is an example binary file that can be used to test
 the disassembler.
+
+usage: disasm8080.py [-h] [-n] [-a ADDRESS] [-f {1,2,3}] filename
+
+positional arguments:
+  filename              Binary file to disassemble
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n, --nolist          Don't list instruction bytes (make output suitable for
+                        assembler)
+  -a ADDRESS, --address ADDRESS
+                        Specify decimal starting address (defaults to 0)
+  -f {1,2,3}, --format {1,2,3}
+                        Use number format: 1 = $1234 2 = 1234h 3 = 1234
+                        (default 1)

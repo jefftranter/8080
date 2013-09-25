@@ -15,85 +15,79 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# usage: disasm8080 [options] filename
-# options:
-# -a <address>    Specify starting address (defaults to $0000)
-# -n              Don't list instruction bytes (make output suitable for assembler)
-# -h <n>          Use hex number format: 1 = $1234 2 = 1234h 3 = 1234 (default 1)
-
 import sys
 import fileinput
 import argparse
 
 # Lookup table - given opcode byte as index, return mnemonic of instruction and length of instruction.
 lookupTable = [
-  [ "nop", 1 ], # 00
+  [ "nop", 1 ],        # 00
   [ "lxi     b,", 3 ], # 01
-  [ "stax    b", 1 ], # 02
-  [ "inx     b", 1 ], # 03
-  [ "inr     b", 1 ], # 04
-  [ "dcr     b", 1 ], # 05
+  [ "stax    b", 1 ],  # 02
+  [ "inx     b", 1 ],  # 03
+  [ "inr     b", 1 ],  # 04
+  [ "dcr     b", 1 ],  # 05
   [ "mvi     b,", 2 ], # 06
-  [ "rlc", 1 ], # 07
-  [ "*nop", 1 ], # 08
-  [ "dad     b", 1 ], # 09
-  [ "ldax    b", 1 ], # 0A
-  [ "dcx     b", 1 ], # 0B
-  [ "inr     c", 1 ], # 0C
-  [ "dcr     c", 1 ], # 0D
+  [ "rlc", 1 ],        # 07
+  [ "*nop", 1 ],       # 08
+  [ "dad     b", 1 ],  # 09
+  [ "ldax    b", 1 ],  # 0A
+  [ "dcx     b", 1 ],  # 0B
+  [ "inr     c", 1 ],  # 0C
+  [ "dcr     c", 1 ],  # 0D
   [ "mvi     c,", 2 ], # 0E
-  [ "rrc", 1 ], # 0F
+  [ "rrc", 1 ],        # 0F
 
   [ "*nop", 1 ], # 10
   [ "lxi     d,", 3 ], # 11
-  [ "stax    d", 1 ], # 12
-  [ "inx     d", 1 ], # 13
-  [ "inr     d", 1 ], # 14
-  [ "dcr     d", 1 ], # 15
+  [ "stax    d", 1 ],  # 12
+  [ "inx     d", 1 ],  # 13
+  [ "inr     d", 1 ],  # 14
+  [ "dcr     d", 1 ],  # 15
   [ "mvi     d,", 2 ], # 16
-  [ "ral", 1 ], # 17
-  [ "*nop", 1 ], # 18
-  [ "dad", 1 ], # 19
-  [ "ldax    d", 1 ], # 1A
-  [ "dcx     d", 1 ], # 1B
-  [ "inr     e", 1 ], # 1C
-  [ "dcr     e", 1 ], # 1D
+  [ "ral", 1 ],        # 17
+  [ "*nop", 1 ],       # 18
+  [ "dad", 1 ],        # 19
+  [ "ldax    d", 1 ],  # 1A
+  [ "dcx     d", 1 ],  # 1B
+  [ "inr     e", 1 ],  # 1C
+  [ "dcr     e", 1 ],  # 1D
   [ "mvi     e,", 2 ], # 1E
-  [ "rar", 1 ], # 1F
+  [ "rar", 1 ],        # 1F
 
-  [ "*nop", 1 ], # 20
+  [ "*nop", 1 ],       # 20
   [ "lxi     h,", 3 ], # 21
-  [ "shld    ", 3 ], # 22
-  [ "inx     h", 1 ], # 23
-  [ "inr     h", 1 ], # 24
-  [ "dcr     h", 1 ], # 25
+  [ "shld    ", 3 ],   # 22
+  [ "inx     h", 1 ],  # 23
+  [ "inr     h", 1 ],  # 24
+  [ "dcr     h", 1 ],  # 25
   [ "mvi     h,", 2 ], # 26
-  [ "daa", 1 ], # 27
-  [ "*nop", 1 ], # 28
-  [ "dad     h", 1 ], # 29
-  [ "lhld    ", 3 ], # 2A
-  [ "dcx     h", 1 ], # 2B
-  [ "inr     l", 1 ], # 2C
-  [ "dcr     l", 1 ], # 2D
+  [ "daa", 1 ],        # 27
+  [ "*nop", 1 ],       # 28
+  [ "dad     h", 1 ],  # 29
+  [ "lhld    ", 3 ],   # 2A
+  [ "dcx     h", 1 ],  # 2B
+  [ "inr     l", 1 ],  # 2C
+  [ "dcr     l", 1 ],  # 2D
   [ "mvi     l,", 2 ], # 2E
-  [ "cma", 1 ], # 2F
+  [ "cma", 1 ],        # 2F
 
-  [ "*nop", 1 ], # 30
+  [ "*nop", 1 ],       # 30
   [ "lxi     sp,", 3 ], # 31
-  [ "sta     ", 3 ], # 32
+  [ "sta     ", 3 ],   # 32
   [ "inx     sp", 1 ], # 33
-  [ "inr     m", 1 ], # 34
-  [ "dcr     m", 1 ], # 35
+  [ "inr     m", 1 ],  # 34
+  [ "dcr     m", 1 ],  # 35
   [ "mvi     m,", 2 ], # 36
-  [ "stc", 1 ], # 37
-  [ "*nop", 1 ], # 38
+  [ "stc", 1 ],        # 37
+  [ "*nop", 1 ],       # 38
   [ "dad     sp", 1 ], # 39
-  [ "lda     ", 3 ], # 3A
+  [ "lda     ", 3 ],   # 3A
   [ "dcx     sp", 1 ], # 3B
-  [ "inr     a", 1 ], # 3C
-  [ "dcr     a", 1 ], # 3D
+  [ "inr     a", 1 ],  # 3C
+  [ "dcr     a", 1 ],  # 3D
   [ "mvi     a,", 2 ], # 3E
-  [ "cmc", 1 ], # 3F
+  [ "cmc", 1 ],        # 3F
 
   [ "mov     b,b", 1 ], # 40
   [ "mov     b,c", 1 ], # 41
@@ -152,7 +146,7 @@ lookupTable = [
   [ "mov     m,e", 1 ], # 73
   [ "mov     m,h", 1 ], # 74
   [ "mov     m,l", 1 ], # 75
-  [ "hlt",     1 ], # 76
+  [ "hlt",     1 ],     # 76
   [ "mov     m,a", 1 ], # 77
   [ "mov     a,b", 1 ], # 78
   [ "mov     a,c", 1 ], # 79
@@ -231,72 +225,72 @@ lookupTable = [
   [ "cmp     m", 1 ], # BE
   [ "cmp     a", 1 ], # BF
 
-  [ "rnz", 1 ], # C0
+  [ "rnz", 1 ],       # C0
   [ "pop     b", 1 ], # C1
-  [ "jnz     ", 3 ], # C2
-  [ "jmp     ", 3 ], # C3
-  [ "cnz     ", 3 ], # C4
+  [ "jnz     ", 3 ],  # C2
+  [ "jmp     ", 3 ],  # C3
+  [ "cnz     ", 3 ],  # C4
   [ "push    b", 1 ], # C5
-  [ "adi     ", 2 ], # C6
+  [ "adi     ", 2 ],  # C6
   [ "rst     0", 1 ], # C7
-  [ "rz", 1 ], # C8
-  [ "ret", 1 ], # C9
-  [ "jz      ", 3 ], # CA
+  [ "rz", 1 ],        # C8
+  [ "ret", 1 ],       # C9
+  [ "jz      ", 3 ],  # CA
   [ "*jmp     ", 3 ], # CB
-  [ "cz      ", 3 ], # CC
-  [ "call    ", 3 ], # CD
-  [ "aci     ", 2 ], # CE
+  [ "cz      ", 3 ],  # CC
+  [ "call    ", 3 ],  # CD
+  [ "aci     ", 2 ],  # CE
   [ "rst     1", 1 ], # CF
 
-  [ "rnc", 1 ], # D0
+  [ "rnc", 1 ],       # D0
   [ "pop     d", 1 ], # D1
-  [ "jnc     ", 3 ], # D2
-  [ "out     ", 2 ], # D3
-  [ "cnc     ", 3 ], # D4
+  [ "jnc     ", 3 ],  # D2
+  [ "out     ", 2 ],  # D3
+  [ "cnc     ", 3 ],  # D4
   [ "push    d", 1 ], # D5
-  [ "sui     ", 2 ], # D6
+  [ "sui     ", 2 ],  # D6
   [ "rst     2", 1 ], # D7
-  [ "rc", 1 ], # D8
-  [ "*ret", 1 ], # D9
-  [ "jc      ", 3 ], # DA
-  [ "in      ", 2 ], # DB
-  [ "cc      ", 3 ], # DC
+  [ "rc", 1 ],        # D8
+  [ "*ret", 1 ],      # D9
+  [ "jc      ", 3 ],  # DA
+  [ "in      ", 2 ],  # DB
+  [ "cc      ", 3 ],  # DC
   [ "*call    ", 3 ], # DD
-  [ "sbi     ", 2 ], # DE
+  [ "sbi     ", 2 ],  # DE
   [ "rst     3", 1 ], # DF
 
-  [ "rpo", 1 ], # E0
+  [ "rpo", 1 ],       # E0
   [ "pop     h", 1 ], # E1
-  [ "jpo     ", 3 ], # E2
-  [ "xthl", 1 ], # E3
-  [ "cpo     ", 3 ], # E4
+  [ "jpo     ", 3 ],  # E2
+  [ "xthl", 1 ],      # E3
+  [ "cpo     ", 3 ],  # E4
   [ "push    h", 1 ], # E5
-  [ "ani     ", 2 ], # E6
+  [ "ani     ", 2 ],  # E6
   [ "rst     4", 1 ], # E7
-  [ "rpe", 1 ], # E8
-  [ "pchl", 1 ], # E9
-  [ "jpe     ", 3 ], # EA
-  [ "xchg", 1 ], # EB
-  [ "cpe     ", 3 ], # EC
+  [ "rpe", 1 ],       # E8
+  [ "pchl", 1 ],      # E9
+  [ "jpe     ", 3 ],  # EA
+  [ "xchg", 1 ],      # EB
+  [ "cpe     ", 3 ],  # EC
   [ "*call    ", 3 ], # ED
-  [ "xri     ", 2 ], # EE
+  [ "xri     ", 2 ],  # EE
   [ "rst     5", 1 ], # EF
 
-  [ "rp", 1 ], # F0
+  [ "rp", 1 ],        # F0
   [ "pop     psw", 1 ], # F1
-  [ "jp      ", 3 ], # F2
-  [ "di", 1 ], # F3
-  [ "cp      ", 3 ], # F4
+  [ "jp      ", 3 ],  # F2
+  [ "di", 1 ],        # F3
+  [ "cp      ", 3 ],  # F4
   [ "push    psw", 1 ], # F5
-  [ "ori     ", 2 ], # F6
+  [ "ori     ", 2 ],  # F6
   [ "rst     6", 1 ], # F7
-  [ "rm", 1 ], # F8
-  [ "sphl", 1 ], # F9
-  [ "jm      ", 3 ], # FA
-  [ "ei", 1 ], # FB
-  [ "cm      ", 3 ], # FC
+  [ "rm", 1 ],        # F8
+  [ "sphl", 1 ],      # F9
+  [ "jm      ", 3 ],  # FA
+  [ "ei", 1 ],        # FB
+  [ "cm      ", 3 ],  # FC
   [ "*call    ", 3 ], # FD
-  [ "cpi     ", 2 ], # FE
+  [ "cpi     ", 2 ],  # FE
   [ "rst     7", 1 ], # FF
 ]
 
@@ -305,13 +299,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument("filename", help="Binary file to disassemble")
 parser.add_argument("-n", "--nolist", help="Don't list  instruction bytes (make output suitable for assembler)", action="store_true")
 parser.add_argument("-a", "--address", help="Specify decimal starting address (defaults to 0)", default=0, type=int)
-parser.add_argument("-f", "--format", help="Use number format: 1 = $1234 2 = 1234h 3 = 1234 (default 1)", default=1, type=int)
+parser.add_argument("-f", "--format", help="Use number format: 1 = $1234 2 = 1234h 3 = 1234 (default 1)", default=1, type=int, choices=range(1, 4))
 args = parser.parse_args()
 
 # Get filename from command line arguments.
 filename = args.filename
 
-address = args.address # Current instruction address
+# Current instruction address
+address = args.address
 
 # Open input file.
 # Display error and exit if filename does not exist.
@@ -322,17 +317,25 @@ except FileNotFoundError:
     sys.exit(1)
 
 # Print initial origin address
-print("%04X            org     $%04X" % (address, address))
+if args.nolist == False:
+    if args.format == 1:
+      print("%04X            org     $%04X" % (address, address))
+    elif args.format == 2:
+      print("%04X            org     %04Xh" % (address, address))
+    else:
+      print("%04X            org     %04X" % (address, address))
 
 while True:
     try:
         b = f.read(1) # Get binary byte from file
 
         if len(b) == 0:
-            print("%04X            end" % address) # Exit if end of file reached.
+            if args.nolist == False:
+                print("%04X            end" % address) # Exit if end of file reached.
             break
 
-        print("%04X  " % address, end='') # Print current address
+        if args.nolist == False:
+            print("%04X  " % address, end='') # Print current address
 
         op = ord(b) # Get opcode byte
 
@@ -342,14 +345,19 @@ while True:
 
         # Print instruction bytes
         if (n == 1):
-            print("%02X        " % op, end='')
+            if args.nolist == False:
+                print("%02X        " % op, end='')
         elif (n == 2):
             op1 = ord(f.read(1))
-            print("%02X %02X     " % (op, op1), end='')
+            if args.nolist == False:
+                print("%02X %02X     " % (op, op1), end='')
         elif (n == 3):
             op1 = ord(f.read(1))
             op2 = ord(f.read(1))
-            print("%02X %02X %02X  " % (op, op1, op2), end='')
+            if args.nolist == False:
+                print("%02X %02X %02X  " % (op, op1, op2), end='')
+        if args.nolist == True:
+            print(" ", end='')
 
         # If opcode starts with '*' then put in comment that this is an alternative op code (likely an error).
         if mnem[0] =="*":
@@ -362,9 +370,19 @@ while True:
 
         # Print any operands
         if (n == 2):
-            print("$%02X" % op1, end='')
+            if args.format == 1:
+                print("$%02X" % op1, end='')
+            elif args.format == 2:
+                print("%02Xh" % op1, end='')
+            else:
+                print("%02X" % op1, end='')
         elif (n == 3):
-            print("$%02X%02X" % (op2, op1), end='')
+            if args.format == 1:
+                print("$%02X%02X" % (op2, op1), end='')
+            elif args.format == 2:
+                print("%02X%02Xh" % (op2, op1), end='')
+            else:
+                print("%02X%02X" % (op2, op1), end='')
 
         if alternative:
             print(" ; Note: Alternative opcode used", end='')
