@@ -18,6 +18,10 @@
 import sys
 import fileinput
 import argparse
+import signal
+
+# Avoids an error when output piped, e.g. to "less"
+signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 # Lookup table - given opcode byte as index, return mnemonic of instruction and length of instruction.
 lookupTable = [
