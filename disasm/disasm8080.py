@@ -36,7 +36,7 @@ lookupTable = [
   [ "inr     c", 1 ],   # 0C
   [ "dcr     c", 1 ],   # 0D
   [ "mvi     c,", 2 ],  # 0E
-  [ "rrc", 1 ],         # 0F
+  [ "rrc",        1 ],  # 0F
 
   [ "*nop", 1 ], # 10
   [ "lxi     d,", 3 ],  # 11
@@ -390,7 +390,10 @@ while True:
         if alternative:
             mnem = mnem.replace(mnem[:1], '') # Remove the star
             # Line up comment at fixed column position
-            line += ";Note: Alternative opcode used".rjust(67 - len(line))
+            if args.nolist == False:
+                line += ";Note: Alternative opcode used".rjust(67 - len(line))
+            else:
+                line += ";Note: Alternative opcode used".rjust(51 - len(line))
 
         # Update address
         address = address + n
