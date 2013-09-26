@@ -1,0 +1,32 @@
+#!/bin/sh
+# Stress test for disassembler
+
+head -1000 < /dev/urandom >TESTFILE
+
+./disasm8080.py /dev/null >/dev/null
+
+./disasm8080.py TESTFILE >/dev/null
+
+./disasm8080.py -a 0 TESTFILE >/dev/null
+./disasm8080.py -a 1000 TESTFILE >/dev/null
+./disasm8080.py -a 60000 TESTFILE >/dev/null
+
+./disasm8080.py -f 1 TESTFILE >/dev/null
+./disasm8080.py -f 2 TESTFILE >/dev/null
+./disasm8080.py -f 3 TESTFILE >/dev/null
+
+./disasm8080.py -n TESTFILE >/dev/null
+
+./disasm8080.py -n -f 1 TESTFILE >/dev/null
+./disasm8080.py -n -f 2 TESTFILE >/dev/null
+./disasm8080.py -n -f 3 TESTFILE >/dev/null
+
+./disasm8080.py -a 1000 -f 1 TESTFILE >/dev/null
+./disasm8080.py -a 1000 -f 2 TESTFILE >/dev/null
+./disasm8080.py -a 1000 -f 3 TESTFILE >/dev/null
+
+./disasm8080.py -n -a 1000 -f 1 TESTFILE >/dev/null
+./disasm8080.py -n -a 1000 -f 2 TESTFILE >/dev/null
+./disasm8080.py -n -a 1000 -f 3 TESTFILE >/dev/null
+
+rm TESTFILE

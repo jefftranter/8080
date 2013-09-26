@@ -294,6 +294,13 @@ lookupTable = [
   [ "rst     7", 1 ],   # FF
 ]
 
+def isprint(c):
+    "Return if character is printable ASCII"
+    if c >= '@' and c <= '~':
+        return True
+    else:
+        return False
+
 # Parse command line options
 parser = argparse.ArgumentParser()
 parser.add_argument("filename", help="Binary file to disassemble")
@@ -373,12 +380,15 @@ while True:
 
         # Print any operands
         if (n == 2):
-            if args.format == 1:
-                line += "$%02X" % op1
-            elif args.format == 2:
-                line += "%02Xh" % op1
+            if isprint(chr(op1)):
+                line += "'%c'" % op1
             else:
-                line += "%02X" % op1
+                if args.format == 1:
+                    line += "$%02X" % op1
+                elif args.format == 2:
+                    line += "%02Xh" % op1
+                else:
+                    line += "%02X" % op1
         elif (n == 3):
             if args.format == 1:
                 line += "$%02X%02X" % (op2, op1)
