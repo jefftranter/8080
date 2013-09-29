@@ -7,7 +7,7 @@ for more details.
 The files ex1.bin, ex2.bin, and ex3.bin are some example binary files
 that can be used to test the disassembler.
 
-usage: disasm8080.py [-h] [-n] [-a ADDRESS] [-f {1,2,3}] filename
+usage: disasm8080.py [-h] [-n] [-u] [-a ADDRESS] [-f {1,2,3}] filename
 
 positional arguments:
   filename              Binary file to disassemble
@@ -16,6 +16,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -n, --nolist          Don't list instruction bytes (make output suitable for
                         assembler)
+  -u, --uppercase       Use uppercase for mnemonics
   -a ADDRESS, --address ADDRESS
                         Specify decimal starting address (defaults to 0)
   -f {1,2,3}, --format {1,2,3}

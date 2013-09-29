@@ -14,6 +14,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# Possible enhancements:
+# - Option for octal output
+# - Disassemble for Z80 CPU
+# - Read Intel HEX file format
 
 import sys
 import fileinput
@@ -298,6 +303,8 @@ lookupTable = [
   [ "rst     7", 1 ],   # FF
 ]
 
+upperOption = False
+
 def isprint(c):
     "Return if character is printable ASCII"
     if c >= '@' and c <= '~':
@@ -305,10 +312,20 @@ def isprint(c):
     else:
         return False
 
+def case(s):
+    "Return string or uppercase version of string if option is set."
+    global upperOption
+
+    if upperOption:
+        return s.upper()
+    else:
+        return s
+
 # Parse command line options
 parser = argparse.ArgumentParser()
 parser.add_argument("filename", help="Binary file to disassemble")
 parser.add_argument("-n", "--nolist", help="Don't list  instruction bytes (make output suitable for assembler)", action="store_true")
+parser.add_argument("-u", "--uppercase", help="Use uppercase for mnemonics", action="store_true")
 parser.add_argument("-a", "--address", help="Specify decimal starting address (defaults to 0)", default=0, type=int)
 parser.add_argument("-f", "--format", help="Use number format: 1 = $1234 2 = 1234h 3 = 1234 (default 1)", default=1, type=int, choices=range(1, 4))
 args = parser.parse_args()
@@ -318,6 +335,9 @@ filename = args.filename
 
 # Current instruction address. Silently force it to be in valid range.
 address = args.address & 0xffff
+
+# Uppercase output option
+upperOption = args.uppercase
 
 # Contains a line of output
 line = ""
@@ -333,11 +353,11 @@ except FileNotFoundError:
 # Print initial origin address
 if args.nolist == False:
     if args.format == 1:
-        print("%04X            org     $%04X" % (address, address))
+        print("%04X            %s     $%04X" % (address, case("org"), address))
     elif args.format == 2:
-        print("%04X            org     %04Xh" % (address, address))
+        print("%04X            %s     %04Xh" % (address, case("org"), address))
     else:
-        print("%04X            org     %04X" % (address, address))
+        print("%04X            %s     %04X" % (address, case("org"), address))
 
 while True:
     try:
@@ -345,7 +365,7 @@ while True:
 
         if len(b) == 0:
             if args.nolist == False:
-                print("%04X            end" % address) # Exit if end of file reached.
+                print("%04X            %s" % (address, case("end"))) # Exit if end of file reached.
             break
 
         if args.nolist == False:
@@ -355,7 +375,7 @@ while True:
 
         n = lookupTable[op][1] # Look up number of instruction bytes
 
-        mnem = lookupTable[op][0] # Get mnemonic
+        mnem = case(lookupTable[op][0]) # Get mnemonic
 
         # Print instruction bytes
         if (n == 1):
@@ -429,5 +449,5 @@ while True:
 
     except KeyboardInterrupt:
         print("Interrupted by Control-C", file=sys.stderr)
-        print("%04X            end" % address) # Exit if end of file reached.
+        print("%04X            %s" % (address, case("end"))) # Exit if end of file reached.
         break
