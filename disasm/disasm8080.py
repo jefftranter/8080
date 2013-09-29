@@ -362,12 +362,19 @@ while True:
             if args.nolist == False:
                 line += "%02X        " % op
         elif (n == 2):
-            op1 = ord(f.read(1))
+            try: # Possible to get exception here if EOF reached.
+                op1 = ord(f.read(1))
+            except TypeError:
+                op1 = 0 # Fake it to recover from EOF
             if args.nolist == False:
                 line += "%02X %02X     " % (op, op1)
         elif (n == 3):
-            op1 = ord(f.read(1))
-            op2 = ord(f.read(1))
+            try: # Possible to get exception here if EOF reached.
+                op1 = ord(f.read(1))
+                op2 = ord(f.read(1))
+            except TypeError:
+                op1 = 0 # Fake it to recover from EOF
+                op2 = 0
             if args.nolist == False:
                 line += "%02X %02X %02X  " % (op, op1, op2)
         if args.nolist == True:
