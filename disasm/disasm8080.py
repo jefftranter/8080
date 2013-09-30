@@ -126,8 +126,8 @@ lookupTable = [
   [ "mov     e,c", 1 ], # 59
   [ "mov     e,d", 1 ], # 5A
   [ "mov     e,e", 1 ], # 5B
-  [ "mov     e,e", 1 ], # 5C
-  [ "mov     e,h", 1 ], # 5D
+  [ "mov     e,h", 1 ], # 5C
+  [ "mov     e,l", 1 ], # 5D
   [ "mov     e,m", 1 ], # 5E
   [ "mov     e,a", 1 ], # 5F
 
