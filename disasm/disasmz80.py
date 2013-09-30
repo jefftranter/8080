@@ -29,277 +29,277 @@ signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 # Lookup table - given opcode byte as index, return mnemonic of instruction and length of instruction.
 lookupTable = [
-  [ "nop", 1 ],         # 00
-  [ "ld      bc,", 3 ],  # 01
+  [ "nop", 1 ],            # 00
+  [ "ld      bc,", 3 ],    # 01
   [ "ld      (bc),a", 1 ], # 02
-  [ "inc     bc", 1 ],   # 03
-  [ "inc     b", 1 ],   # 04
-  [ "dec     b", 1 ],   # 05
-  [ "ld      b,", 2 ],  # 06
-  [ "rlca",      1 ],   # 07
-  [ "ex      af,af", 1 ], # 08
-  [ "add     hl,bc", 1 ], # 09
-  [ "ld      a,(bc)", 1 ], # 0A
-  [ "dec     bc", 1 ],   # 0B
-  [ "inc     c", 1 ],   # 0C
-  [ "dec     c", 1 ],   # 0D
-  [ "ld      c,", 2 ],  # 0E
-  [ "rrca",       1 ],  # 0F
+  [ "inc     bc", 1 ],     # 03
+  [ "inc     b", 1 ],      # 04
+  [ "dec     b", 1 ],      # 05
+  [ "ld      b,", 2 ],     # 06
+  [ "rlca",      1 ],      # 07
+  [ "ex      af,af", 1 ],  # 08
+  [ "add     hl,bc", 1 ],  # 09
+  [ "ld      a,(bc)", 1 ], #  0A
+  [ "dec     bc", 1 ],     #  0B
+  [ "inc     c", 1 ],      # 0C
+  [ "dec     c", 1 ],      # 0D
+  [ "ld      c,", 2 ],     # 0E
+  [ "rrca",       1 ],     # 0F
 
-  [ "djnz    ", 1 ], # 10
-  [ "ld      de,", 3 ],  # 11
-  [ "ld      (de),a,", 1 ],  # 12
-  [ "inc     de", 1 ],  # 13
-  [ "inc     d", 1 ],   # 14
-  [ "dec     d", 1 ],   # 15
-  [ "ld      d,", 2 ],  # 16
-  [ "rla", 1 ],         # 17
-  [ "jr      ", 1 ],    # 18
-  [ "add     hl,de", 1 ], # 19
-  [ "ld      a,(de)", 1 ],  # 1A
-  [ "dec     de", 1 ],   # 1B
-  [ "inc     e", 1 ],   # 1C
-  [ "dec     e", 1 ],   # 1D
-  [ "ld      e,", 2 ],  # 1E
-  [ "rra", 1 ],         # 1F
+  [ "djnz    ", 1 ],       # 10
+  [ "ld      de,", 3 ],    # 11
+  [ "ld      (de),a", 1 ], # 12
+  [ "inc     de", 1 ],     # 13
+  [ "inc     d", 1 ],      # 14
+  [ "dec     d", 1 ],      # 15
+  [ "ld      d,", 2 ],     # 16
+  [ "rla", 1 ],            # 17
+  [ "jr      ", 1 ],       # 18
+  [ "add     hl,de", 1 ],  # 19
+  [ "ld      a,(de)", 1 ], # 1A
+  [ "dec     de", 1 ],     # 1B
+  [ "inc     e", 1 ],      # 1C
+  [ "dec     e", 1 ],      # 1D
+  [ "ld      e,", 2 ],     # 1E
+  [ "rra", 1 ],            # 1F
 
-  [ "jr      nz,", 1 ], # 20
-  [ "ld      hl,", 3 ],  # 21
-  [ "ld      (", 3 ],    # 22
-  [ "inc     hl", 1 ],   # 23
-  [ "inc     h", 1 ],   # 24
-  [ "dec     h", 1 ],   # 25
-  [ "ld      h,", 2 ],  # 26
-  [ "daa", 1 ],         # 27
-  [ "jr      z,", 1 ],        # 28
-  [ "add     hl,jl", 1 ],   # 29
-  [ "ld      hl,(", 3 ],    # 2A
-  [ "dec     hl", 1 ],   # 2B
-  [ "inc     l", 1 ],   # 2C
-  [ "dec     l", 1 ],   # 2D
-  [ "ld      l,", 2 ],  # 2E
-  [ "cpl", 1 ],         # 2F
+  [ "jr      nz,", 1 ],    # 20
+  [ "ld      hl,", 3 ],    # 21
+  [ "ld      (", 3 ],      # 22 FIXME
+  [ "inc     hl", 1 ],     # 23
+  [ "inc     h", 1 ],      # 24
+  [ "dec     h", 1 ],      # 25
+  [ "ld      h,", 2 ],     # 26
+  [ "daa", 1 ],            # 27
+  [ "jr      z,", 1 ],     # 28
+  [ "add     hl,jl", 1 ],  # 29
+  [ "ld      hl,(", 3 ],   # 2A FIXME
+  [ "dec     hl", 1 ],     # 2B
+  [ "inc     l", 1 ],      # 2C
+  [ "dec     l", 1 ],      # 2D
+  [ "ld      l,", 2 ],     # 2E
+  [ "cpl", 1 ],            # 2F
 
-  [ "j       nc,", 1 ],        # 30
-  [ "ld      sp,", 3 ], # 31
-  [ "ld      (", 3 ],    # 32
-  [ "inc     sp", 1 ],  # 33
+  [ "j       nc,", 1 ],    # 30
+  [ "ld      sp,", 3 ],    # 31
+  [ "ld      (", 3 ],      # 32 FIXME
+  [ "inc     sp", 1 ],     # 33
   [ "inc     (hl)", 1 ],   # 34
   [ "dec     (hl)", 1 ],   # 35
   [ "ld      (hl),", 2 ],  # 36
-  [ "scf", 1 ],         # 37
-  [ "jr      c,", 1 ],        # 38
-  [ "add     hl,sp", 1 ],  # 39
+  [ "scf", 1 ],            # 37
+  [ "jr      c,", 1 ],     # 38
+  [ "add     hl,sp", 1 ],  # 39 FIXME
   [ "ld      a,(", 3 ],    # 3A
-  [ "dec     sp", 1 ],  # 3B
-  [ "inc     a", 1 ],   # 3C
-  [ "dec     a", 1 ],   # 3D
-  [ "ld      a,", 2 ],  # 3E
-  [ "ccf", 1 ],         # 3F
+  [ "dec     sp", 1 ],     # 3B
+  [ "inc     a", 1 ],      # 3C
+  [ "dec     a", 1 ],      # 3D
+  [ "ld      a,", 2 ],     # 3E
+  [ "ccf", 1 ],            # 3F
 
-  [ "ld      b,b", 1 ], # 40
-  [ "ld      b,c", 1 ], # 41
-  [ "ld      b,d", 1 ], # 42
-  [ "ld      b,e", 1 ], # 43
-  [ "ld      b,h", 1 ], # 44
-  [ "ld      b,l", 1 ], # 45
-  [ "ld      b,m", 1 ], # 46
-  [ "ld      b,a", 1 ], # 47
-  [ "ld      c,b", 1 ], # 48
-  [ "ld      c,c", 1 ], # 49
-  [ "ld      c,d", 1 ], # 4A
-  [ "ld      c,e", 1 ], # 4B
-  [ "ld      c,h", 1 ], # 4C
-  [ "ld      c,l", 1 ], # 4D
-  [ "ld      c,m", 1 ], # 4E
-  [ "ld      c,a", 1 ], # 4F
+  [ "ld      b,b", 1 ],    # 40
+  [ "ld      b,c", 1 ],    # 41
+  [ "ld      b,d", 1 ],    # 42
+  [ "ld      b,e", 1 ],    # 43
+  [ "ld      b,h", 1 ],    # 44
+  [ "ld      b,l", 1 ],    # 45
+  [ "ld      b,(hl)", 1 ], # 46
+  [ "ld      b,a", 1 ],    # 47
+  [ "ld      c,b", 1 ],    # 48
+  [ "ld      c,c", 1 ],    # 49
+  [ "ld      c,d", 1 ],    # 4A
+  [ "ld      c,e", 1 ],    # 4B
+  [ "ld      c,h", 1 ],    # 4C
+  [ "ld      c,l", 1 ],    # 4D
+  [ "ld      c,(hl)", 1 ], # 4E
+  [ "ld      c,a", 1 ],    # 4F
 
-  [ "ld      d,b", 1 ], # 50
-  [ "ld      d,c", 1 ], # 51
-  [ "ld      d,d", 1 ], # 52
-  [ "ld      d,e", 1 ], # 53
-  [ "ld      d,h", 1 ], # 54
-  [ "ld      d,l", 1 ], # 55
-  [ "ld      d,m", 1 ], # 56
-  [ "ld      d,a", 1 ], # 57
-  [ "ld      e,b", 1 ], # 58
-  [ "ld      e,c", 1 ], # 59
-  [ "ld      e,d", 1 ], # 5A
-  [ "ld      e,e", 1 ], # 5B
-  [ "ld      e,e", 1 ], # 5C
-  [ "ld      e,h", 1 ], # 5D
-  [ "ld      e,m", 1 ], # 5E
-  [ "ld      e,a", 1 ], # 5F
+  [ "ld      d,b", 1 ],    # 50
+  [ "ld      d,c", 1 ],    # 51
+  [ "ld      d,d", 1 ],    # 52
+  [ "ld      d,e", 1 ],    # 53
+  [ "ld      d,h", 1 ],    # 54
+  [ "ld      d,l", 1 ],    # 55
+  [ "ld      d,(hl)", 1 ], # 56
+  [ "ld      d,a", 1 ],    # 57
+  [ "ld      e,b", 1 ],    # 58
+  [ "ld      e,c", 1 ],    # 59
+  [ "ld      e,d", 1 ],    # 5A
+  [ "ld      e,e", 1 ],    # 5B
+  [ "ld      e,h", 1 ],    # 5C
+  [ "ld      e,l", 1 ],    # 5D
+  [ "ld      e,(hl)", 1 ], # 5E
+  [ "ld      e,a", 1 ],    # 5F
 
-  [ "ld      h,b", 1 ], # 60
-  [ "ld      h,c", 1 ], # 61
-  [ "ld      h,d", 1 ], # 62
-  [ "ld      h,e", 1 ], # 63
-  [ "ld      h,h", 1 ], # 64
-  [ "ld      h,l", 1 ], # 65
-  [ "ld      h,m", 1 ], # 66
-  [ "ld      h,a", 1 ], # 67
-  [ "ld      l,b", 1 ], # 68
-  [ "ld      l,c", 1 ], # 69
-  [ "ld      l,d", 1 ], # 6A
-  [ "ld      l,e", 1 ], # 6B
-  [ "ld      l,h", 1 ], # 6C
-  [ "ld      l,l", 1 ], # 6D
-  [ "ld      l,m", 1 ], # 6E
-  [ "ld      l,a", 1 ], # 6F
+  [ "ld      h,b", 1 ],    # 60
+  [ "ld      h,c", 1 ],    # 61
+  [ "ld      h,d", 1 ],    # 62
+  [ "ld      h,e", 1 ],    # 63
+  [ "ld      h,h", 1 ],    # 64
+  [ "ld      h,l", 1 ],    # 65
+  [ "ld      h,(hl)", 1 ], # 66
+  [ "ld      h,a", 1 ],    # 67
+  [ "ld      l,b", 1 ],    # 68
+  [ "ld      l,c", 1 ],    # 69
+  [ "ld      l,d", 1 ],    # 6A
+  [ "ld      l,e", 1 ],    # 6B
+  [ "ld      l,h", 1 ],    # 6C
+  [ "ld      l,l", 1 ],    # 6D
+  [ "ld      l,(hl)", 1 ], # 6E
+  [ "ld      l,a", 1 ],    # 6F
 
-  [ "ld      m,b", 1 ], # 70
-  [ "ld      m,c", 1 ], # 71
-  [ "ld      m,d", 1 ], # 72
-  [ "ld      m,e", 1 ], # 73
-  [ "ld      m,h", 1 ], # 74
-  [ "ld      m,l", 1 ], # 75
-  [ "hlt",         1 ], # 76
+  [ "ld      (hl),b", 1 ], # 70
+  [ "ld      (hl),c", 1 ], # 71
+  [ "ld      (hl),d", 1 ], # 72
+  [ "ld      (hl),e", 1 ], # 73
+  [ "ld      (hl),h", 1 ], # 74
+  [ "ld      (hl),l", 1 ], # 75
+  [ "halt",           1 ], # 76
   [ "ld      (hl),a", 1 ], # 77
-  [ "ld      a,b", 1 ], # 78
-  [ "ld      a,c", 1 ], # 79
-  [ "ld      a,d", 1 ], # 7A
-  [ "ld      a,e", 1 ], # 7B
-  [ "ld      a,h", 1 ], # 7C
-  [ "ld      a,l", 1 ], # 7D
-  [ "ld      a,m", 1 ], # 7E
-  [ "ld      a,a", 1 ], # 7F
+  [ "ld      a,b", 1 ],    # 78
+  [ "ld      a,c", 1 ],    # 79
+  [ "ld      a,d", 1 ],    # 7A
+  [ "ld      a,e", 1 ],    # 7B
+  [ "ld      a,h", 1 ],    # 7C
+  [ "ld      a,l", 1 ],    # 7D
+  [ "ld      a,(hl)", 1 ], # 7E
+  [ "ld      a,a", 1 ],    # 7F
 
-  [ "add     b", 1 ],   # 80
-  [ "add     c", 1 ],   # 81
-  [ "add     d", 1 ],   # 82
-  [ "add     e", 1 ],   # 83
-  [ "add     h", 1 ],   # 84
-  [ "add     l", 1 ],   # 85
-  [ "add     m", 1 ],   # 86
-  [ "add     a", 1 ],   # 87
-  [ "adc     b", 1 ],   # 88
-  [ "adc     c", 1 ],   # 89
-  [ "adc     d", 1 ],   # 8A
-  [ "adc     e", 1 ],   # 8B
-  [ "adc     h", 1 ],   # 8C
-  [ "adc     l", 1 ],   # 8D
-  [ "adc     m", 1 ],   # 8E
-  [ "adc     a", 1 ],   # 8F
+  [ "add     a,b", 1 ],    # 80
+  [ "add     a,c", 1 ],    # 81
+  [ "add     a,d", 1 ],    # 82
+  [ "add     a,ee", 1 ],   # 83
+  [ "add     a,h", 1 ],    # 84
+  [ "add     a,l", 1 ],    # 85
+  [ "add     a,(hl)", 1 ], # 86
+  [ "add     a,a", 1 ],    # 87
+  [ "adc     a,b", 1 ],    # 88
+  [ "adc     a,c", 1 ],    # 89
+  [ "adc     a,d", 1 ],    # 8A
+  [ "adc     a,e", 1 ],    # 8B
+  [ "adc     a,h", 1 ],    # 8C
+  [ "adc     a,l", 1 ],    # 8D
+  [ "adc     a,(hl)", 1 ], # 8E
+  [ "adc     a,a", 1 ],    # 8F
 
-  [ "sub     b", 1 ],   # 90
-  [ "sub     c", 1 ],   # 91    
-  [ "sub     d", 1 ],   # 92
-  [ "sub     e", 1 ],   # 93
-  [ "sub     h", 1 ],   # 94
-  [ "sub     l", 1 ],   # 95
-  [ "sub     m", 1 ],   # 96
-  [ "sub     a", 1 ],   # 97
-  [ "sbb     b", 1 ],   # 98
-  [ "sbb     c", 1 ],   # 99
-  [ "sbb     d", 1 ],   # 9A
-  [ "sbb     e", 1 ],   # 9B
-  [ "sbb     h", 1 ],   # 9C
-  [ "sbb     l", 1 ],   # 9D
-  [ "sbb     m", 1 ],   # 9E
-  [ "sbb     a", 1 ],   # 9F
+  [ "sub     b", 1 ],      # 90
+  [ "sub     c", 1 ],      # 91    
+  [ "sub     d", 1 ],      # 92
+  [ "sub     e", 1 ],      # 93
+  [ "sub     h", 1 ],      # 94
+  [ "sub     l", 1 ],      # 95
+  [ "sub     (hl)", 1 ],   # 96
+  [ "sub     a", 1 ],      # 97
+  [ "sbc     a,b", 1 ],    # 98
+  [ "sbc     a,c", 1 ],    # 99
+  [ "sbc     a,d", 1 ],    # 9A
+  [ "sbc     a,e", 1 ],    # 9B
+  [ "sbc     a,h", 1 ],    # 9C
+  [ "sbc     a,l", 1 ],    # 9D
+  [ "sbc     a,(hl)", 1 ], # 9E
+  [ "sbc     a,a", 1 ],    # 9F
 
-  [ "ana     b", 1 ],   # A0
-  [ "ana     c", 1 ],   # A1
-  [ "ana     d", 1 ],   # A2
-  [ "ana     e", 1 ],   # A3
-  [ "ana     h", 1 ],   # A4
-  [ "ana     l", 1 ],   # A5
-  [ "ana     m", 1 ],   # A6
-  [ "ana     a", 1 ],   # A7
-  [ "xra     b", 1 ],   # A8
-  [ "xra     c", 1 ],   # A9
-  [ "xra     d", 1 ],   # AA
-  [ "xra     e", 1 ],   # AB
-  [ "xra     h", 1 ],   # AC
-  [ "xra     l", 1 ],   # AD
-  [ "xra     m", 1 ],   # AE
-  [ "xra     a", 1 ],   # AF
+  [ "and     b", 1 ],      # A0
+  [ "and     c", 1 ],      # A1
+  [ "and     d", 1 ],      # A2
+  [ "and     e", 1 ],      # A3
+  [ "and     h", 1 ],      # A4
+  [ "and     l", 1 ],      # A5
+  [ "and     (hl)", 1 ],   # A6
+  [ "and     a", 1 ],      # A7
+  [ "xor     b", 1 ],      # A8
+  [ "xor     c", 1 ],      # A9
+  [ "xor     d", 1 ],      # AA
+  [ "xor     e", 1 ],      # AB
+  [ "xor     h", 1 ],      # AC
+  [ "xor     l", 1 ],      # AD
+  [ "xor     (hl)", 1 ],   # AE
+  [ "xor     a", 1 ],      # AF
 
-  [ "ora     b", 1 ],   # B0
-  [ "or      c", 1 ],   # B1
-  [ "ora     d", 1 ],   # B2
-  [ "ora     e", 1 ],   # B3
-  [ "ora     h", 1 ],   # B4
-  [ "ora     l", 1 ],   # B5
-  [ "ora     m", 1 ],   # B6
-  [ "ora     a", 1 ],   # B7
-  [ "cmp     b", 1 ],   # B8
-  [ "cmp     c", 1 ],   # B9
-  [ "cmp     d", 1 ],   # BA
-  [ "cmp     e", 1 ],   # BB
-  [ "cmp     h", 1 ],   # BC
-  [ "cmp     l", 1 ],   # BD
-  [ "cmp     m", 1 ],   # BE
-  [ "cmp     a", 1 ],   # BF
+  [ "or      b", 1 ],      # B0
+  [ "or      c", 1 ],      # B1
+  [ "or      d", 1 ],      # B2
+  [ "or      e", 1 ],      # B3
+  [ "or      h", 1 ],      # B4
+  [ "or      l", 1 ],      # B5
+  [ "or      (hl)", 1 ],   # B6
+  [ "or      a", 1 ],      # B7
+  [ "cp      b", 1 ],      # B8
+  [ "cp      c", 1 ],      # B9
+  [ "cp      d", 1 ],      # BA
+  [ "cp      e", 1 ],      # BB
+  [ "cp      h", 1 ],      # BC
+  [ "cp      l", 1 ],      # BD
+  [ "cp      (hl)", 1 ],   # BE
+  [ "cp      a", 1 ],      # BF
 
-  [ "rnz", 1 ],         # C0
-  [ "pop     b", 1 ],   # C1
-  [ "jnz     ", 3 ],    # C2
-  [ "jp      ", 3 ],    # C3
-  [ "cnz     ", 3 ],    # C4
-  [ "push    b", 1 ],   # C5
-  [ "adi     ", 2 ],    # C6
-  [ "rst     0", 1 ],   # C7
-  [ "ret     z", 1 ],          # C8
-  [ "ret", 1 ],         # C9
-  [ "jz      ", 3 ],    # CA
-  [ "table", 3 ],   # CB
-  [ "cz      ", 3 ],    # CC
-  [ "call    ", 3 ],    # CD
-  [ "aci     ", 2 ],    # CE
-  [ "rst     1", 1 ],   # CF
+  [ "ret     nz", 1 ],     # C0
+  [ "pop     bc", 1 ],     # C1
+  [ "jp      nz,", 3 ],    # C2
+  [ "jp      ", 3 ],       # C3
+  [ "call    nz,", 3 ],    # C4
+  [ "push    bc", 1 ],     # C5
+  [ "ada     a,", 2 ],     # C6
+  [ "rst     00", 1 ],     # C7
+  [ "ret     z", 1 ],      # C8
+  [ "ret", 1 ],            # C9
+  [ "jp      z,", 3 ],     # CA
+  [ "table", 3 ],          # CB
+  [ "call    z,", 3 ],     # CC
+  [ "call    ", 3 ],       # CD
+  [ "adc     ,", 2 ],      # CE
+  [ "rst     08", 1 ],     # CF
 
-  [ "rnc", 1 ],         # D0
-  [ "pop     d", 1 ],   # D1
-  [ "jnc     ", 3 ],    # D2
-  [ "out     ", 2 ],    # D3
-  [ "cnc     ", 3 ],    # D4
-  [ "push    d", 1 ],   # D5
-  [ "sui     ", 2 ],    # D6
-  [ "rst     2", 1 ],   # D7
-  [ "rc", 1 ],          # D8
-  [ "*ret", 1 ],        # D9
-  [ "jc      ", 3 ],    # DA
-  [ "in      ", 2 ],    # DB
-  [ "cc      ", 3 ],    # DC
-  [ "table", 3 ],   # DD
-  [ "sbi     ", 2 ],    # DE
-  [ "rst     3", 1 ],   # DF
+  [ "ret     nc", 1 ],     # D0
+  [ "pop     de", 1 ],     # D1
+  [ "jp      nc,", 3 ],    # D2
+  [ "out     (n),a", 2 ],  # D3 FIXME
+  [ "call    nc,", 3 ],    # D4
+  [ "push    de", 1 ],     # D5
+  [ "sub     ", 2 ],       # D6
+  [ "rst     10", 1 ],     # D7
+  [ "ret     c", 1 ],      # D8
+  [ "exx", 1 ],            # D9
+  [ "jp      c,", 3 ],     # DA
+  [ "in      a,(n)", 2 ],  # DB FIXME
+  [ "call    c,", 3 ],     # DC
+  [ "table", 3 ],          # DD
+  [ "sbc     a,", 2 ],     # DE
+  [ "rst     18", 1 ],     # DF
 
-  [ "rpo", 1 ],         # E0
-  [ "pop     h", 1 ],   # E1
-  [ "jpo     ", 3 ],    # E2
-  [ "xthl", 1 ],        # E3
-  [ "cpo     ", 3 ],    # E4
-  [ "push    h", 1 ],   # E5
-  [ "ani     ", 2 ],    # E6
-  [ "rst     4", 1 ],   # E7
-  [ "rpe", 1 ],         # E8
-  [ "pchl", 1 ],        # E9
-  [ "jpe     ", 3 ],    # EA
-  [ "xchg", 1 ],        # EB
-  [ "cpe     ", 3 ],    # EC
-  [ "table", 3 ],   # ED
-  [ "xri     ", 2 ],    # EE
-  [ "rst     5", 1 ],   # EF
+  [ "ret     po", 1 ],     # E0
+  [ "pop     hl", 1 ],     # E1
+  [ "jp      po,", 3 ],    # E2
+  [ "ex      (sp),hl", 1 ],# E3
+  [ "call    po,", 3 ],    # E4
+  [ "push    hl", 1 ],     # E5
+  [ "and     ", 2 ],       # E6
+  [ "rst     20", 1 ],     # E7
+  [ "ret     pe", 1 ],     # E8
+  [ "jp      (hl)", 1 ],   # E9
+  [ "jp      pe,", 3 ],    # EA
+  [ "ex      de,hl", 1 ],  # EB
+  [ "call    pe,", 3 ],    # EC
+  [ "table", 3 ],          # ED
+  [ "xor     ", 2 ],       # EE
+  [ "rst     28", 1 ],     # EF
 
-  [ "rp", 1 ],          # F0
-  [ "pop     psw", 1 ], # F1
-  [ "jp      ", 3 ],    # F2
-  [ "di", 1 ],          # F3
-  [ "cp      ", 3 ],    # F4
-  [ "push    psw", 1 ], # F5
-  [ "ori     ", 2 ],    # F6
-  [ "rst     6", 1 ],   # F7
-  [ "rm", 1 ],          # F8
-  [ "sphl", 1 ],        # F9
-  [ "jm      ", 3 ],    # FA
-  [ "ei", 1 ],          # FB
-  [ "cm      ", 3 ],    # FC
-  [ "table", 3 ],   # FD
-  [ "cpi     ", 2 ],    # FE
-  [ "rst     38", 1 ],   # FF
+  [ "ret     p", 1 ],      # F0
+  [ "pop     af", 1 ],     # F1
+  [ "jp      p,", 3 ],     # F2
+  [ "di", 1 ],             # F3
+  [ "call    p,", 3 ],     # F4
+  [ "push    af", 1 ],     # F5
+  [ "or      ", 2 ],       # F6
+  [ "rst     30", 1 ],     # F7
+  [ "ret     m", 1 ],      # F8
+  [ "ld      sp,phl", 1 ], # F9
+  [ "jp      m,", 3 ],     # FA
+  [ "ei", 1 ],             # FB
+  [ "call    m,", 3 ],     # FC
+  [ "table", 3 ],          # FD
+  [ "cp      ", 2 ],       # FE
+  [ "rst     38", 1 ],     # FF
 ]
 
 upperOption = False
