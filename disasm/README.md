@@ -4,6 +4,9 @@ disassembly. It requires Python 3. It has been tested on Linux but
 should work on any platform that supports Python. See the source code
 for more details.
 
+Also available is a version that disassembles code for the Z80
+microprocessor. It is not yet complete.
+
 The files ex1.bin, ex2.bin, and ex3.bin are some example binary files
 that can be used to test the disassembler.
 
