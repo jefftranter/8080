@@ -65,7 +65,7 @@ lookupTable = [
 
   [ "jr      nz,", 1 ],    # 20
   [ "ld      hl,", 3 ],    # 21
-  [ "ld      (", 3 ],      # 22 FIXME
+  [ "ld      (", 3 ],      # 22 then append "),hl"
   [ "inc     hl", 1 ],     # 23
   [ "inc     h", 1 ],      # 24
   [ "dec     h", 1 ],      # 25
@@ -73,7 +73,7 @@ lookupTable = [
   [ "daa", 1 ],            # 27
   [ "jr      z,", 1 ],     # 28
   [ "add     hl,jl", 1 ],  # 29
-  [ "ld      hl,(", 3 ],   # 2A FIXME
+  [ "ld      hl,(", 3 ],   # 2A then append ")"
   [ "dec     hl", 1 ],     # 2B
   [ "inc     l", 1 ],      # 2C
   [ "dec     l", 1 ],      # 2D
@@ -82,15 +82,15 @@ lookupTable = [
 
   [ "j       nc,", 1 ],    # 30
   [ "ld      sp,", 3 ],    # 31
-  [ "ld      (", 3 ],      # 32 FIXME
+  [ "ld      (", 3 ],      # 32 then append "),a"
   [ "inc     sp", 1 ],     # 33
   [ "inc     (hl)", 1 ],   # 34
   [ "dec     (hl)", 1 ],   # 35
   [ "ld      (hl),", 2 ],  # 36
   [ "scf", 1 ],            # 37
   [ "jr      c,", 1 ],     # 38
-  [ "add     hl,sp", 1 ],  # 39 FIXME
-  [ "ld      a,(", 3 ],    # 3A
+  [ "add     hl,sp", 1 ],  # 39
+  [ "ld      a,(", 3 ],    # 3A then append ")"
   [ "dec     sp", 1 ],     # 3B
   [ "inc     a", 1 ],      # 3C
   [ "dec     a", 1 ],      # 3D
@@ -244,7 +244,7 @@ lookupTable = [
   [ "ret     z", 1 ],      # C8
   [ "ret", 1 ],            # C9
   [ "jp      z,", 3 ],     # CA
-  [ "table", 3 ],          # CB
+  [ "prefix", 2 ],         # CB
   [ "call    z,", 3 ],     # CC
   [ "call    ", 3 ],       # CD
   [ "adc     ,", 2 ],      # CE
@@ -253,7 +253,7 @@ lookupTable = [
   [ "ret     nc", 1 ],     # D0
   [ "pop     de", 1 ],     # D1
   [ "jp      nc,", 3 ],    # D2
-  [ "out     (n),a", 2 ],  # D3 FIXME
+  [ "out     (", 2 ],      # D3 then append "),a"
   [ "call    nc,", 3 ],    # D4
   [ "push    de", 1 ],     # D5
   [ "sub     ", 2 ],       # D6
@@ -261,9 +261,9 @@ lookupTable = [
   [ "ret     c", 1 ],      # D8
   [ "exx", 1 ],            # D9
   [ "jp      c,", 3 ],     # DA
-  [ "in      a,(n)", 2 ],  # DB FIXME
+  [ "in      a,(", 2 ],    # DB then append ")"
   [ "call    c,", 3 ],     # DC
-  [ "table", 3 ],          # DD
+  [ "prefix", 2 ],         # DD
   [ "sbc     a,", 2 ],     # DE
   [ "rst     18", 1 ],     # DF
 
@@ -280,7 +280,7 @@ lookupTable = [
   [ "jp      pe,", 3 ],    # EA
   [ "ex      de,hl", 1 ],  # EB
   [ "call    pe,", 3 ],    # EC
-  [ "table", 3 ],          # ED
+  [ "prefix", 2 ],         # ED
   [ "xor     ", 2 ],       # EE
   [ "rst     28", 1 ],     # EF
 
@@ -297,7 +297,7 @@ lookupTable = [
   [ "jp      m,", 3 ],     # FA
   [ "ei", 1 ],             # FB
   [ "call    m,", 3 ],     # FC
-  [ "table", 3 ],          # FD
+  [ "prefix", 2 ],         # FD
   [ "cp      ", 2 ],       # FE
   [ "rst     38", 1 ],     # FF
 ]
@@ -376,6 +376,10 @@ while True:
 
         mnem = case(lookupTable[op][0]) # Get mnemonic
 
+        # TODO: Handle multi-byte opcodes (listed in table as "prefix").
+        if (mnem == "prefix"):
+            mnem = "prefix (not yet implemented...) "
+
         # Print instruction bytes
         if (n == 1):
             if args.nolist == False:
@@ -399,13 +403,6 @@ while True:
         if args.nolist == True:
             line + " "
 
-        # If opcode starts with '*' then put in comment that this is an alternative op code (likely an error).
-        if mnem[0] =="*":
-            alternative = True
-            mnem = mnem.replace(mnem[:1], '') # Remove the star
-        else:
-            alternative = False
-
         line += mnem
 
         # Print any operands
@@ -427,13 +424,13 @@ while True:
             else:
                 line += "%02X%02X" % (op2, op1)
 
-        if alternative:
-            mnem = mnem.replace(mnem[:1], '') # Remove the star
-            # Line up comment at fixed column position
-            if args.nolist == False:
-                line += ";Note: Alternative opcode used".rjust(67 - len(line))
-            else:
-                line += ";Note: Alternative opcode used".rjust(51 - len(line))
+        # Handle opcodes that are special cases that need additional characters appended at the end
+        if (op == 0x22):
+            line += "),hl"
+        elif (op in [0x2a, 0x3a, 0xdb]):
+            line += ")"
+        elif (op in [0x32, 0xd3]):
+            line += "),a"
 
         # Update address
         address = address + n
