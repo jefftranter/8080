@@ -312,6 +312,8 @@ lookupTable = [
 # Indicates if uppercase option is in effect.
 upperOption = False
 
+# Functions
+
 def isprint(c):
     "Return if character is printable ASCII"
     if c >= '@' and c <= '~':
@@ -322,11 +324,26 @@ def isprint(c):
 def case(s):
     "Return string or uppercase version of string if option is set."
     global upperOption
-
     if upperOption:
         return s.upper()
     else:
         return s
+
+def formatByte(data):
+    "Format an 8-bit byte using the current display format (e.g. hex or octal)"
+    global args
+    if args.format == 4: # Octal
+        return "%03o" % data
+    else: # Hex
+        return "%02X" % data
+
+def formatAddress(data):
+    "Format a 16-bit address using the current display format (e.g. hex or octal)"
+    global args
+    if args.format == 4: # Octal
+        return "%06o" % data
+    else: # Hex
+        return "%04X" % data
 
 # Parse command line options
 parser = argparse.ArgumentParser()
@@ -381,10 +398,7 @@ while True:
             break
 
         if args.nolist == False:
-            if args.format == 4:
-                line = "%06o  " % address # Print current address
-            else:
-                line = "%04X  " % address # Print current address
+            line = "%s  " % formatAddress(address) # Print current address
 
         op = ord(b) # Get opcode byte
 
@@ -417,10 +431,7 @@ while True:
                 op1 = 0 # Fake it to recover from EOF
                 op2 = 0
             if args.nolist == False:
-                if args.format == 4:
-                    line += "%03o %03o %03o  " % (op, op1, op2)
-                else:
-                    line += "%02X %02X %02X  " % (op, op1, op2)
+                line += "%s %s %s  " % (formatByte(op), formatByte(op1), formatByte(op2))
         if args.nolist == True:
             line += " "
 
@@ -439,22 +450,18 @@ while True:
                 line += "'%c'" % op1
             else:
                 if args.format == 1:
-                    line += "$%02X" % op1
+                    line += "$%s" % formatByte(op1)
                 elif args.format == 2:
-                    line += "%02Xh" % op1
-                elif args.format == 3:
-                    line += "%02X" % op1
+                    line += "%sh" % formatByte(op1)
                 else:
-                    line += "%03o" % op1
+                    line += "%s" % formatByte(op1)
         elif (n == 3):
             if args.format == 1:
-                line += "$%02X%02X" % (op2, op1)
+                line += "$%s%s" % (formatByte(op2), formatByte(op1))
             elif args.format == 2:
-                line += "%02X%02Xh" % (op2, op1)
-            elif args.format == 3:
-                line += "%02X%02X" % (op2, op1)
+                line += "%s%sh" % (formatByte(op2), formatByte(op1))
             else:
-                line += "%03o%03o" % (op2, op1)
+                line += "%s%s" % (formatByte(op2), formatByte(op1))
 
         if alternative:
             mnem = mnem.replace(mnem[:1], '') # Remove the star
@@ -478,7 +485,7 @@ while True:
     except KeyboardInterrupt:
         print("Interrupted by Control-C", file=sys.stderr)
         if args.format == 4:
-            print("%06o               %s" % (address, case("end"))) # Exit if end of file reached.
+            print("%s               %s" % (formatAddress(address), case("end"))) # Exit if end of file reached.
         else:
-            print("%04X            %s" % (address, case("end"))) # Exit if end of file reached.
+            print("%s            %s" % (formatAddress(address), case("end"))) # Exit if end of file reached.
         break
