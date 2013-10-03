@@ -10,7 +10,7 @@ microprocessor. It is not yet complete.
 The files ex1.bin, ex2.bin, and ex3.bin are some example binary files
 that can be used to test the disassembler.
 
-usage: disasm8080.py [-h] [-n] [-u] [-a ADDRESS] [-f {1,2,3}] filename
+usage: disasm8080.py [-h] [-n] [-u] [-a ADDRESS] [-f {1,2,3,4}] filename
 
 positional arguments:
   filename              Binary file to disassemble
@@ -22,6 +22,6 @@ optional arguments:
   -u, --uppercase       Use uppercase for mnemonics
   -a ADDRESS, --address ADDRESS
                         Specify decimal starting address (defaults to 0)
-  -f {1,2,3}, --format {1,2,3}
-                        Use number format: 1 = $1234 2 = 1234h 3 = 1234
+  -f {1,2,3,4}, --format {1,2,3,4}
+                        Use number format: 1=$1234 2=1234h 3=1234 4=177777
                         (default 1)

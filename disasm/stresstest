@@ -26,5 +26,9 @@ head -1000 < /dev/urandom >TESTFILE
 ./disasm8080.py -u -a 1000 TESTFILE >/dev/null
 ./disasm8080.py -u TESTFILE >/dev/null
 ./disasm8080.py -u -n -a 1000 -f 3 TESTFILE >/dev/null
+./disasm8080.py -f 4 TESTFILE >/dev/null
+./disasm8080.py -a 1000 -f 4 TESTFILE >/dev/null
+./disasm8080.py -n -a 1000 -f 4 TESTFILE >/dev/null
+./disasm8080.py -u -n -a 1000 -f 4 TESTFILE >/dev/null
 
 rm TESTFILE

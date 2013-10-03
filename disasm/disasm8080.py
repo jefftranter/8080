@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 # Possible enhancements:
-# - Option for octal output
 # - Read Intel HEX file format
 
 import sys
@@ -328,7 +327,7 @@ parser.add_argument("filename", help="Binary file to disassemble")
 parser.add_argument("-n", "--nolist", help="Don't list  instruction bytes (make output suitable for assembler)", action="store_true")
 parser.add_argument("-u", "--uppercase", help="Use uppercase for mnemonics", action="store_true")
 parser.add_argument("-a", "--address", help="Specify decimal starting address (defaults to 0)", default=0, type=int)
-parser.add_argument("-f", "--format", help="Use number format: 1 = $1234 2 = 1234h 3 = 1234 (default 1)", default=1, type=int, choices=range(1, 4))
+parser.add_argument("-f", "--format", help="Use number format: 1=$1234 2=1234h 3=1234 4=177777 (default 1)", default=1, type=int, choices=range(1, 5))
 args = parser.parse_args()
 
 # Get filename from command line arguments.
@@ -357,8 +356,10 @@ if args.nolist == False:
         print("%04X            %s     $%04X" % (address, case("org"), address))
     elif args.format == 2:
         print("%04X            %s     %04Xh" % (address, case("org"), address))
-    else:
+    elif args.format == 3:
         print("%04X            %s     %04X" % (address, case("org"), address))
+    else:
+        print("%06o               %s     %06o" % (address, case("org"), address))
 
 while True:
     try:
@@ -366,11 +367,17 @@ while True:
 
         if len(b) == 0: # EOF
             if args.nolist == False:
-                print("%04X            %s" % (address, case("end"))) # Exit if end of file reached.
+                if args.format == 4:
+                    print("%06o               %s" % (address, case("end"))) # Exit if end of file reached.
+                else:
+                    print("%04X            %s" % (address, case("end"))) # Exit if end of file reached.
             break
 
         if args.nolist == False:
-            line = "%04X  " % address # Print current address
+            if args.format == 4:
+                line = "%06o  " % address # Print current address
+            else:
+                line = "%04X  " % address # Print current address
 
         op = ord(b) # Get opcode byte
 
@@ -381,14 +388,20 @@ while True:
         # Print instruction bytes
         if (n == 1):
             if args.nolist == False:
-                line += "%02X        " % op
+                if args.format == 4:
+                    line += "%03o          " % op
+                else:
+                    line += "%02X        " % op
         elif (n == 2):
             try: # Possible to get exception here if EOF reached.
                 op1 = ord(f.read(1))
             except TypeError:
                 op1 = 0 # Fake it to recover from EOF
             if args.nolist == False:
-                line += "%02X %02X     " % (op, op1)
+                if args.format == 4:
+                    line += "%03o %03o      " % (op, op1)
+                else:
+                    line += "%02X %02X     " % (op, op1)
         elif (n == 3):
             try: # Possible to get exception here if EOF reached.
                 op1 = ord(f.read(1))
@@ -397,7 +410,10 @@ while True:
                 op1 = 0 # Fake it to recover from EOF
                 op2 = 0
             if args.nolist == False:
-                line += "%02X %02X %02X  " % (op, op1, op2)
+                if args.format == 4:
+                    line += "%03o %03o %03o  " % (op, op1, op2)
+                else:
+                    line += "%02X %02X %02X  " % (op, op1, op2)
         if args.nolist == True:
             line + " "
 
@@ -419,15 +435,19 @@ while True:
                     line += "$%02X" % op1
                 elif args.format == 2:
                     line += "%02Xh" % op1
-                else:
+                elif args.format == 3:
                     line += "%02X" % op1
+                else:
+                    line += "%03o" % op1
         elif (n == 3):
             if args.format == 1:
                 line += "$%02X%02X" % (op2, op1)
             elif args.format == 2:
                 line += "%02X%02Xh" % (op2, op1)
-            else:
+            elif args.format == 3:
                 line += "%02X%02X" % (op2, op1)
+            else:
+                line += "%03o%03o" % (op2, op1)
 
         if alternative:
             mnem = mnem.replace(mnem[:1], '') # Remove the star
@@ -450,5 +470,8 @@ while True:
 
     except KeyboardInterrupt:
         print("Interrupted by Control-C", file=sys.stderr)
-        print("%04X            %s" % (address, case("end"))) # Exit if end of file reached.
+        if args.format == 4:
+            print("%06o               %s" % (address, case("end"))) # Exit if end of file reached.
+        else:
+            print("%04X            %s" % (address, case("end"))) # Exit if end of file reached.
         break
