@@ -379,7 +379,7 @@ if args.nolist == False:
     if args.format == 1:
         print("%04X            %s     $%04X" % (address, case("org"), address))
     elif args.format == 2:
-        print("%04X            %s     %04Xh" % (address, case("org"), address))
+        print("%04X            %s     %04X%s" % (address, case("org"), address, case("h")))
     elif args.format == 3:
         print("%04X            %s     %04X" % (address, case("org"), address))
     else:
@@ -452,14 +452,14 @@ while True:
                 if args.format == 1:
                     line += "$%s" % formatByte(op1)
                 elif args.format == 2:
-                    line += "%sh" % formatByte(op1)
+                    line += "%s%s" % (formatByte(op1), case("h"))
                 else:
                     line += "%s" % formatByte(op1)
         elif (n == 3):
             if args.format == 1:
                 line += "$%s%s" % (formatByte(op2), formatByte(op1))
             elif args.format == 2:
-                line += "%s%sh" % (formatByte(op2), formatByte(op1))
+                line += "%s%s%s" % (formatByte(op2), formatByte(op1), case("h"))
             else:
                 line += "%s%s" % (formatByte(op2), formatByte(op1))
 
