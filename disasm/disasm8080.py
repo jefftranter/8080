@@ -17,6 +17,13 @@
 #
 # Possible enhancements:
 # - Read Intel HEX file format
+# - binary (front panel) output mode, e.g.
+#
+#       ADDRESS              DATA
+# . ... ... ... ... ...   .. ... ...
+# 0 001 001 000 110 100   11 000 011  JMP
+# 0 001 001 000 110 101   00 110 100  064
+# 0 001 001 000 110 110   00 001 001  011
 
 import sys
 import fileinput
@@ -347,7 +354,7 @@ line = ""
 try:
     f = open(filename, "rb")
 except FileNotFoundError:
-    print("error: input file '" + filename + "' not found.", file=sys.stderr)
+    print("error: input file '%s' not found." % filename, file=sys.stderr)
     sys.exit(1)
 
 # Print initial origin address
@@ -415,7 +422,7 @@ while True:
                 else:
                     line += "%02X %02X %02X  " % (op, op1, op2)
         if args.nolist == True:
-            line + " "
+            line += " "
 
         # If opcode starts with '*' then put in comment that this is an alternative op code (likely an error).
         if mnem[0] =="*":
@@ -458,7 +465,7 @@ while True:
                 line += ";Note: Alternative opcode used".rjust(51 - len(line))
 
         # Update address
-        address = address + n
+        address += n
 
         # Check for address exceeding 0xFFFF, if so wrap around.
         if (address > 0xffff):
