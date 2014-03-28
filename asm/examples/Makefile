@@ -1,13 +1,13 @@
-all: echo.hex echo.bin
+all: jmon.hex jmon.bin
 
-echo.hex: echo.p
-	p2hex -F Intel echo.p
+jmon.hex: jmon.p
+	p2hex -F Intel jmon.p
 
-echo.bin: echo.p
-	p2bin echo.p
+jmon.bin: jmon.p
+	p2bin jmon.p
 
-echo.p: echo.asm
-	asl -L -cpu 8080 echo.asm
+jmon.p: jmon.asm
+	asl -L -cpu 8080 jmon.asm
 
 clean:
 	$(RM) *.lst *.p *.bin *.hex

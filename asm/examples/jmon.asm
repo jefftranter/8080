@@ -1,18 +1,75 @@
-; 8080 Example Programs for the Briel Altair 8800.
 ;
+; JMON - Jeff's Monitor Program
+; ------------------------------
+; 
+; A machine language monitor program for the Briel Altair 8800.
+; Inspired by JMON for the Apple Replica 1 and 6502 processor.
+; I wrote this mostly as an exercise to learn 8080 assembly language.
+; 
 ; Copyright (C) 2014 by Jeff Tranter <tranter@pobox.com>
-;
+; 
 ; Licensed under the Apache License, Version 2.0 (the "License");
 ; you may not use this file except in compliance with the License.
 ; You may obtain a copy of the License at
-;
+; 
 ;   http://www.apache.org/licenses/LICENSE-2.0
-;
+; 
 ; Unless required by applicable law or agreed to in writing, software
-; distributed under the License is distrbuted on an "AS IS" BASIS,
+; distributed under the License is distributed on an "AS IS" BASIS,
 ; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ; See the License for the specific language governing permissions and
 ; limitations under the License.
+; 
+; 
+; DUMP: D <START>
+; GO: G <ADDRESS>
+; CLR SCREEN: L
+; REGISTERS: R
+; Exit: X
+; HELP: ?
+; 
+; JMON Monitor 0.99 by Jeff Tranter
+; ? 
+; 
+; Pseudocode:
+; 
+; call Initialize
+; call ClearScreen
+; Print startup message
+; 
+; while true:
+;   print command prompt
+;   get command (letter)
+;   case D:
+;     call dump
+;   case G:
+;     call go
+;   case L:
+;     call clear screen
+;   case R:
+;     call registers
+;   case X:
+;     call exit
+;   case ?:
+;     call print help
+;   default:
+;     print error message
+; end while
+; 
+; Initialize:
+;   set up stack pointer
+;   initialize any variables
+; 
+; PrintChar
+; 
+; GetChar
+; 
+; PrintString
+; 
+; ClearScreen
+; 
+; GetAddress
+;
 
         cpu     8080
         org     0100H
