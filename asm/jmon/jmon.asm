@@ -20,23 +20,50 @@
 ; See the License for the specific language governing permissions and
 ; limitations under the License.
 ; 
-; 
-; DUMP: D <START>
-; GO: G <ADDRESS>
-; CLR SCREEN: L
-; REGISTERS: R
-; Exit: X
-; HELP: ?
-; 
-; JMON Monitor 0.99 by Jeff Tranter
-; ? 
-; 
-; Pseudocode:
-; 
-; call Initialize
-; call ClearScreen
-; Print startup message
-; 
+; Commands:
+;   DUMP: D <START>
+;   GO: G <ADDRESS>
+;   CLR SCREEN: L
+;   REGISTERS: R
+;   Exit: X
+;   HELP: ?
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Constants
+
+prompt equ '?'          ; prompt character
+
+        cpu     8080
+
+        org     0000H   ; Use 0100H if you want to run under CP/M
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Main program entry point
+ 
+start:
+
+; Initialize:
+;   set up stack pointer
+;   initialize any variables
+;
+
+        call    ClearScreen       ; Clear screen
+
+        lxi     h,strStartup    ; Print startup message
+        call    PrintString
+
+
+        mvi     a,prompt        ; Display command prompt
+        call    PrintChar
+loop:
+        call    GetChar       ; Get a character
+        call    PrintChar     ; Echo it back
+        cpi     'X'           ; Is it X?
+        jnz     loop         ; If not, repeat
+        ret                   ; Otherwise return
+
 ; while true:
 ;   print command prompt
 ;   get command (letter)
@@ -55,24 +82,10 @@
 ;   default:
 ;     print error message
 ; end while
-; 
-; Initialize:
-;   set up stack pointer
-;   initialize any variables
-; 
-; PrintChar
-; 
-; GetChar
-; 
-; PrintString
-; 
-; ClearScreen
-; 
-; GetAddress
-;
 
-        cpu     8080
-        org     0100H
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Utility Routines
 
 ; The Briel Altair 8800 emulates a MITS 88-2SIO serial interface to the
 ; console. The hardware interface is as follows:
@@ -104,25 +117,12 @@ SREG    port    10h
 CREG    port    10h
 DREG    port    11h
 
-; Main program
-;
-; Display a '>" prompt, then get characters from the console and echo
-; them back. Return if an uppercase X is typed.
-
-START:
-        mvi     a,'>'   ; Display prompt character
-loop2:
-        call    CONOUT  ; Get a character
-        call    CONIN   ; Echo it back
-        cpi     'X'     ; Is it X?
-        jnz     loop2   ; If not, repeat
-        ret             ; Otherwise return
-
-; CONOUT
+; PrintChar
 ; Output character in A register to console.
 ; Registers affected: none.
 
-CONOUT: push    psw     ; Save A register
+PrintChar:
+        push    psw     ; Save A register
 loop1:  in      SREG    ; Read status register
         rrc             ; Move TDRE to carry bit
         rrc
@@ -131,15 +131,60 @@ loop1:  in      SREG    ; Read status register
         out     DREG    ; Output it to data register
         ret             ; And return
 
-; CONIN
+; GetChar
 ; Read character from console and return in A register. The character
 ; is not echoed. Waits for character to be entered.
 ; Registers affected: A.
 
-CONIN:  in      SREG    ; Read status register
+GetChar:
+        in      SREG    ; Read status register
         rrc             ; Move RDRF to carry bit
-        jnc     CONIN   ; Repeat until RDRF is set
+        jnc     GetChar ; Repeat until RDRF is set
         in      DREG    ; Read character from data register
         ret             ; And return
+
+; ClearScreen
+; Clear screen. Assumes an VT100/ANSI terminal.
+; Registers affected: HL, A.
+
+ClearScreen:
+        lxi     h,strClearScreen
+        call    PrintString
+        ret
+
+; PrintString
+; Print string pointed to by HL until null found.
+; Registers affected: HL
+
+PrintString:
+        push    psw             ; Save A register
+nextch: mov     a,m             ; Get a character
+        cpi     0               ; Is it a null?
+        jz      eos             ; If so, exit
+        call    PrintChar       ; Print the character
+        inx     h               ; Advance pointer to next character
+        jmp     nextch          ; And repeat
+eos:    pop     psw             ; Restore A register
+        ret                     ; Return
+
+; Strings
+
+strStartup:
+        db      "JMON Monitor 0.1 by Jeff Tranter\r\n",0
+
+strInvalid:
+        db      "Invalid command",0
+
+strHelp:
+        db      "Valid commands:\r\n"
+        db      "D <address>      Dump memory\r\n"
+        db      "G <address>      Go\r\n"
+        db      "L                Clear screen\r\n"
+        db      "R                Show registers\r\n"
+        db      "X                Exit\r\n"
+        db      "?                Help\r\n",0
+
+strClearScreen:
+        db      "\e[2J",0       ; VT100/ANSI clear screen code
 
         end
