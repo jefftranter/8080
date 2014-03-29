@@ -25,63 +25,100 @@
 ;   GO: G <ADDRESS>
 ;   CLR SCREEN: L
 ;   REGISTERS: R
-;   Exit: X
 ;   HELP: ?
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
+        cpu     8080
+        org     0000H   ; Use 0100H if you want to run under CP/M
+
 ; Constants
 
-prompt equ '?'          ; prompt character
-
-        cpu     8080
-
-        org     0000H   ; Use 0100H if you want to run under CP/M
+prompt  equ '?'          ; Prompt character
+CR      equ '\r'         ; Carriage Return
+NL      equ '\n'         ; Newline
+stack   equ 8000h        ; Starting address for stack
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Main program entry point
  
 start:
+        lxi     sp,stack        ; Set up stack pointer
 
-; Initialize:
-;   set up stack pointer
-;   initialize any variables
-;
-
-        call    ClearScreen       ; Clear screen
+        call    ClearScreen     ; Clear screen
 
         lxi     h,strStartup    ; Print startup message
         call    PrintString
 
-
+mainloop:
         mvi     a,prompt        ; Display command prompt
         call    PrintChar
-loop:
-        call    GetChar       ; Get a character
-        call    PrintChar     ; Echo it back
-        cpi     'X'           ; Is it X?
-        jnz     loop         ; If not, repeat
-        ret                   ; Otherwise return
 
-; while true:
-;   print command prompt
-;   get command (letter)
-;   case D:
-;     call dump
-;   case G:
-;     call go
-;   case L:
-;     call clear screen
-;   case R:
-;     call registers
-;   case X:
-;     call exit
-;   case ?:
-;     call print help
-;   default:
-;     print error message
-; end while
+        call    GetChar         ; Get a command (letter)
+
+        cpi     'D'             ; DUMP command?
+        jnz     tryG
+        call    PrintChar       ; Echo it back
+        call    DumpCommand
+        jmp     mainloop
+
+tryG:
+        cpi     'G'             ; GO command?
+        jnz     tryL
+        call    PrintChar       ; Echo it back
+        call    GoCommand
+        jmp     mainloop
+
+tryL:
+        cpi     'L'             ; CLEAR command?
+        jnz     tryR
+        call    PrintChar       ; Echo it back
+        call    ClearCommand
+        jmp     mainloop
+
+tryR:
+        cpi     'R'             ; REGISTERS command?
+        jnz     tryHelp
+        call    PrintChar       ; Echo it back
+        call    RegistersCommand
+        jmp     mainloop
+
+tryHelp:
+        cpi     '?'             ; HELP command?
+        jnz     invalid
+        call    PrintChar       ; Echo it back
+        call    HelpCommand
+        jmp     mainloop
+
+invalid:
+        lxi     h,strInvalid    ; print error message
+        call    PrintString
+
+        jmp   mainloop
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Commands
+
+DumpCommand:
+        call    PrintCR
+        ret
+
+GoCommand:
+        call    PrintCR
+        ret
+
+ClearCommand:
+        call    ClearScreen     ; Clear screen
+        ret
+
+RegistersCommand:
+        call    PrintCR
+        ret
+
+HelpCommand:
+        lxi     h,strHelp
+        call    PrintString
+        ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -143,6 +180,19 @@ GetChar:
         in      DREG    ; Read character from data register
         ret             ; And return
 
+; PrintCR
+; Print carriage return/newline.
+; Registers affected: none
+
+PrintCR:
+        push    psw
+        mvi     a,CR
+        call    PrintChar
+        mvi     a,NL
+        call    PrintChar
+        pop     psw
+        ret
+
 ; ClearScreen
 ; Clear screen. Assumes an VT100/ANSI terminal.
 ; Registers affected: HL, A.
@@ -176,15 +226,15 @@ strInvalid:
         db      "Invalid command",0
 
 strHelp:
+        db      "\r\n"
         db      "Valid commands:\r\n"
         db      "D <address>      Dump memory\r\n"
         db      "G <address>      Go\r\n"
         db      "L                Clear screen\r\n"
         db      "R                Show registers\r\n"
-        db      "X                Exit\r\n"
         db      "?                Help\r\n",0
 
 strClearScreen:
-        db      "\e[2J",0       ; VT100/ANSI clear screen code
+        db      "\e[2J\e[H",0       ; VT100/ANSI clear screen, cursor home
 
         end
