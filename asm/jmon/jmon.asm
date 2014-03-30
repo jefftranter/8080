@@ -54,6 +54,34 @@ stack   equ 7000h        ; Starting address for stack
 ; Main program entry point
  
 start:
+
+; Save registers on entry (for later use by commands like REGISTERS and GO)
+        sta     save_a
+        mov     a,b
+        sta     save_b
+        mov     a,c
+        sta     save_c
+        mov     a,d
+        sta     save_d
+        mov     a,e
+        sta     save_e
+        mov     a,h
+        sta     save_h
+        mov     a,l
+        sta     save_l
+        push    psw             ; Push A and Flags
+        pop     b               ; Pull A and flags to B,C
+        mov     a,c             ; Put flags in A
+        sta     save_f          ; Save flags
+        mvi     a,0             ; Store zero as initial value of PC
+        sta     save_pc
+        sta     save_pc+1
+        lxi     h,stack         ; Set initial value of SP
+        mov     a,h
+        sta     save_sp
+        mov     a,l
+        sta     save_sp+1
+
         lxi     sp,stack        ; Set up stack pointer
         call    ClearScreen     ; Clear screen
         lxi     h,strStartup    ; Print startup message
@@ -159,10 +187,82 @@ z80:
 
 ; REGISTERS command.
 ; Example output:
-; A=01 BC=4E56 DE=0000 HL=021C .Z-.-P-C SP=6FFE PC=00C3
+; A=01 BC=4E56 DE=0000 HL=021C F=10101011 SP=6FFE PC=00C3
 
 RegistersCommand:
         call    PrintChar       ; Echo command back
+        call    PrintCR
+        mvi     a,'A'
+        call    PrintChar
+        call    PrintEquals
+        lda     save_a
+        call    PrintByte
+        call    PrintSpace
+        mvi     a,'B'
+        call    PrintChar
+        mvi     a,'C'
+        call    PrintChar
+        call    PrintEquals
+        lda     save_b
+        call    PrintByte
+        lda     save_c
+        call    PrintByte
+        call    PrintSpace
+        mvi     a,'D'
+        call    PrintChar
+        mvi     a,'E'
+        call    PrintChar
+        call    PrintEquals
+        lda     save_d
+        call    PrintByte
+        lda     save_e
+        call    PrintByte
+        call    PrintSpace
+        mvi     a,'H'
+        call    PrintChar
+        mvi     a,'L'
+        call    PrintChar
+        call    PrintEquals
+        lda     save_h
+        call    PrintByte
+        lda     save_l
+        call    PrintByte
+        call    PrintSpace
+
+; print flags in binary
+
+        mvi     a,'F'
+        call    PrintChar
+        call    PrintEquals
+        lda     save_f          ; Get flags
+        mvi     l,8             ; Want to test 8 bits
+nextbit:
+        ral                     ; Rotate into carry bit
+        cc      PrintOne        ; Print "1" if set
+        cnc     PrintZero       ; Print "0" if cleared
+        dcr     l               ; Decrement counter
+        jnz     nextbit         ; Repeat until all bits done
+
+        call    PrintSpace
+        mvi     a,'S'
+        call    PrintChar
+        mvi     a,'P'
+        call    PrintChar
+        call    PrintEquals
+        lda     save_sp
+        call    PrintByte
+        lda     save_sp+1
+        call    PrintByte
+        call    PrintSpace
+        mvi     a,'P'
+        call    PrintChar
+        mvi     a,'C'
+        call    PrintChar
+        call    PrintEquals
+        lda     save_pc
+        call    PrintByte
+        lda     save_pc+1
+        call    PrintByte
         call    PrintCR
         ret
 
@@ -249,6 +349,37 @@ PrintCR:
         pop     psw             ; Restore A reg
         ret
 
+; PrintEquals
+; Print equals sign.
+; Registers affected: none
+
+PrintEquals:
+        push    psw             ; Save A reg
+        mvi     a,'='           ; Equals character
+        call    PrintChar       
+        pop     psw             ; Restore A reg
+        ret
+
+; Print "0"
+; Registers affected: none
+PrintZero:
+        push    psw
+        mvi     a,'0'
+        call    PrintChar
+        pop     psw
+        ret
+
+
+; Print "1"
+; Registers affected: none
+PrintOne:
+        push    psw
+        mvi     a,'1'
+        call    PrintChar
+        pop     psw
+        ret
+
+
 ; ClearScreen
 ; Clear screen. Assumes an VT100/ANSI terminal.
 ; Registers affected: HL, A.
@@ -295,7 +426,43 @@ ToUpper:
 notUpper:
         ret
 
+; PrintByte
+; Print 8-bit value in A as two ASCII hex characters
+; Registers affected: A
 PrintByte:
+        push    b               ; Save B reg
+        call    bhconv          ; Convert to two hex digits
+        mov     a,b             ; Get first digit
+        call    PrintChar       ; Print it
+        mov     a,c             ; Get second digit
+        call    PrintChar       ; Print it
+        pop     b               ; Restore B reg
+        ret                     ; Return
+
+; Convert byte in A to two hex ASCII digits and return in B,C.
+bhconv:
+        push    h               ; Save HL
+        mov     l,a             ; Save original byte
+        rar                     ; Shift upper nybble into lower nybble
+        rar
+        rar
+        rar
+        call    bin1            ; Convert digit to ASCII
+        mov     b,a             ; Put it in B
+        mov     a,l             ; Get original byte
+        call    bin1            ; Convert digit to ASCII
+        mov     c,a             ; Put it in C
+        pop     h               ; Restore H
+        ret                     ; Return
+
+; Convert bottom nybble of byte on A to ASCII
+bin1:
+        ani     0Fh             ; Mask out lower nybble
+        adi     '0'             ; Convert to ASCII digit, e.g. 0->'0'
+        cpi     '9'+1           ; Is it greater than '9'?
+        rc                      ; If not, we are done
+        adi     'A'-'9'-1       ; Add offset to convert to hex letter A-F
+        ret                     ; Return
 
 PrintAddress:
 
@@ -313,7 +480,7 @@ strStartup:
         db      "JMON Monitor 0.1 by Jeff Tranter\r\n",0
 
 strInvalid:
-        db      "Invalid command. Type ? for help.",0
+        db      "Invalid command. Type ? for help.\r\n",0
 
 strHelp:
         db      "\r\n"
@@ -334,5 +501,20 @@ str8080:
         db      "8080",0
 strZ80:
         db      "Z80",0
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Variables
+
+save_a  db      ?               ; Saved values of registers
+save_f  db      ?
+save_b  db      ?
+save_c  db      ?
+save_d  db      ?
+save_e  db      ?
+save_h  db      ?
+save_l  db      ?
+save_sp dw      ?
+save_pc dw      ?
 
         end
