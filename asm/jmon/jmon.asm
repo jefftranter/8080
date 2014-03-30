@@ -155,6 +155,9 @@ DumpCommand:
         call    PrintChar       ; Echo command back
         call    PrintSpace
         call    GetAddress      ; Prompt for address
+        jnc     startScreen     ; Carry set indicates <ESC> pressed
+        call    PrintCR
+        ret
 startScreen:
         call    PrintCR
         mvi     c,LINES         ; Counts number of lines to be displayed
@@ -210,6 +213,10 @@ GoCommand:
         call    PrintChar       ; Echo command back
         call    PrintSpace
         call    GetAddress      ; Prompt for address
+        jnc     contgo          ; Carry set indicates <ESC> pressed
+        call    PrintCR
+        ret
+contgo:
         shld    save_pc         ; Save it
         call    PrintCR
                                 ; Restore saved registers
