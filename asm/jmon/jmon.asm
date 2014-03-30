@@ -38,6 +38,12 @@
 ; VERIFY: V <START> <END> <DEST>
 ; WRITE: : <ADDRESS> <DATA>...
 ; MATH: = <ADDRESS> +/- <ADDRESS>
+;
+; To Do:
+; Implement DUMP
+; Implement GO
+; Allow changing registers
+; Implement other commands
 
         cpu     8080
         org     0000H   ; Use 0100H if you want to run under CP/M
@@ -146,6 +152,10 @@ DumpCommand:
 
 GoCommand:
         call    PrintChar       ; Echo command back
+        call    PrintSpace
+        call    GetHex          ; Prompt for address
+        call    PrintSpace
+        call    PrintByte
         call    PrintCR
         ret
 
@@ -296,7 +306,7 @@ HelpCommand:
 ; 
 ; Bit Function
 ; 
-; 0   Receive Data Register Full (RDRF) . Set to 1 when data is ready to
+; 0   Receive Data Register Full (RDRF). Set to 1 when data is ready to
 ;     be read. Reading the input data register clears it.
 ; 
 ; 1   Transmit Data Register Empty (TDRE). Set to 1 when output data has
@@ -317,9 +327,9 @@ DREG    port    11h
 PrintChar:
         push    psw             ; Save A register
 loop1:  in      SREG            ; Read status register
-        rrc                     ; Move TDRE to carry bit
-        rrc
-        jnc     loop1           ; Repeat until TDRE is set
+        ani     02h             ; Mask out TDRE bit
+        jz      loop1           ; Repeat until TDRE is set
+        call    Delay           ; Delay seems to be needed to avoid dropped characters
         pop     psw             ; Restore A
         out     DREG            ; Output it to data register
         ret                     ; And return
@@ -331,8 +341,8 @@ loop1:  in      SREG            ; Read status register
 
 GetChar:
         in      SREG            ; Read status register
-        rrc                     ; Move RDRF to carry bit
-        jnc     GetChar         ; Repeat until RDRF is set
+        ani     01H             ; Mask out RDRF bit
+        jz      GetChar         ; Repeat until RDRF is set
         in      DREG            ; Read character from data register
         ret                     ; And return
 
@@ -464,11 +474,79 @@ bin1:
         adi     'A'-'9'-1       ; Add offset to convert to hex letter A-F
         ret                     ; Return
 
+
+; Delay
+; Delay of a few 10s of microseconds. Seems to be needed during
+; serial out to avoid dropped characters. Value determined
+; experimentally.
+; Registers affected: none
+
+Delay:
+        push    psw             ; Save A
+        mvi     a,10            ; Delay constant
+decr:   dcr     a               ; Decrement counter
+        jnz     decr            ; Repeat until A reaches zero
+        pop     psw             ; Restore A
+        ret                     ; Return
+
+
 PrintAddress:
 
+; GetHex
+; Gets a single hex digit from the keyboard, 0-9 or A-F or a-f.
+; Ignores invalid characters. <Esc> cancels and sets carry bit.
+; Returns binary nybble in A.
+; Registers affected: A
+
 GetHex:
+        call    GetChar         ; Get a character
+        cpi     '\e'            ; Is it <Escape> ?
+        jnz     next            ; Branch if not
+        sub     a               ; Set A to zero
+        stc                     ; Otherwise set carry and return.
+        ret
+next:   cpi     '0'             ; Less than '0'?
+        jc      GetHex          ; Yes, ignore and try again
+        cpi     '9'+1           ; Greater than 9?
+        jc      validDigit      ; Branch if not (is 0-9)
+        cpi     'A'             ; Less than 'A'?
+        jc      GetHex          ; Yes, ignore and try again
+        cpi     'F'+1           ; Greater than 'F'?
+        jc      validULetter    ; Branch if not (is A-F)
+        cpi     'a'             ; less that 'a'?
+        jc      GetHex          ; Yes, ignore and try again
+        cpi     'f'+1           ; Greater than 'f'?
+        jc      validLLetter    ; Branch if not (is a-f)
+        jmp     GetHex          ; Invalid, try again
+validDigit:
+        call    PrintChar       ; Echo the character
+        sui     '0'             ; Convert digit to binary
+        jmp     done
+validLLetter:
+        ani     11011111b       ; Convert to lowercase letter to upper case
+validULetter:
+        call    PrintChar       ; Echo the character
+        sui     'A'-10          ; Convert uppercase letter to binary
+        jmp     done
+done:   stc                     ; Weird 8080 way to clear carry
+        cmc                     ; Set it and then complement it
+        ret
+
+
+; GetByte
+; Gets a two character hex number from the keyboard.
+; Ignores invalid characters. <Esc> cancels and sets carry bit.
+; Returns binary byte in A.
+; Registers affected: A
 
 GetByte:
+
+
+; GetAddress
+; Gets a four character hex number from the keyboard.
+; Ignores invalid characters. <Esc> cancels and sets carry bit.
+; Returns binary word in HL.
+; Registers affected: HL
 
 GetAddress:
 
