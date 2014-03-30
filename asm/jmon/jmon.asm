@@ -59,7 +59,7 @@ stack   equ 7000h        ; Starting address for stack
 ;
 ; Main program entry point
  
-start:
+Start:
 
 ; Save registers on entry (for later use by commands like REGISTERS and GO)
         sta     save_a
@@ -79,9 +79,6 @@ start:
         pop     b               ; Pull A and flags to B,C
         mov     a,c             ; Put flags in A
         sta     save_f          ; Save flags
-        mvi     a,0             ; Store zero as initial value of PC
-        sta     save_pc
-        sta     save_pc+1
         lxi     h,stack         ; Set initial value of SP
         mov     a,h
         sta     save_sp
@@ -96,6 +93,7 @@ start:
 mainloop:
         mvi     a,prompt        ; Display command prompt
         call    PrintChar
+        call    PrintSpace
 
         call    GetChar         ; Get a command (letter)
         call    ToUpper         ; Convert to upper case
@@ -147,17 +145,42 @@ invalid:
 
 DumpCommand:
         call    PrintChar       ; Echo command back
+        call    PrintSpace
+        call    GetAddress      ; Prompt for address
         call    PrintCR
         ret
 
 GoCommand:
         call    PrintChar       ; Echo command back
         call    PrintSpace
-        call    GetHex          ; Prompt for address
-        call    PrintSpace
-        call    PrintByte
+        call    GetAddress      ; Prompt for address
+        shld    save_pc         ; Save it
         call    PrintCR
-        ret
+                                ; Restore saved registers
+        lhld    Start           ; Push start address of JMON on stack so that if
+        push    h               ; called code returns, will go back to monitor.
+        lda     save_pc
+        mov     l,a
+        lda     save_pc+1
+        mov     h,a
+        push    h               ; push go address so we can use ret to go to it
+                                ; TODO: Restore stack pointer?
+        lda     save_h
+        mov     h,a
+        lda     save_l
+        mov     l,a
+        lda     save_d
+        mov     d,a
+        lda     save_e
+        mov     e,a
+        lda     save_b
+        mov     b,a
+        lda     save_c
+        mov     c,a
+                                ; TODO: Restore flags?
+        lda     save_a
+        ret                     ; This jumps to go address
+
 
 ; CLEAR command.
 ; Sends code to clear terminal screen.
@@ -269,9 +292,9 @@ nextbit:
         mvi     a,'C'
         call    PrintChar
         call    PrintEquals
-        lda     save_pc
-        call    PrintByte
         lda     save_pc+1
+        call    PrintByte
+        lda     save_pc
         call    PrintByte
         call    PrintCR
         ret
@@ -490,7 +513,16 @@ decr:   dcr     a               ; Decrement counter
         ret                     ; Return
 
 
+; PrintAddress
+; Print a two byte address passed in H,L.
+; Registers affected: A.
 PrintAddress:
+        mov     a,h             ; Get MSB
+        call    PrintByte       ; Print it
+        mov     a,l             ; Get LSB
+        call    PrintByte       ; Print it
+        ret                     ; Return
+
 
 ; GetHex
 ; Gets a single hex digit from the keyboard, 0-9 or A-F or a-f.
@@ -537,18 +569,36 @@ done:   stc                     ; Weird 8080 way to clear carry
 ; Gets a two character hex number from the keyboard.
 ; Ignores invalid characters. <Esc> cancels and sets carry bit.
 ; Returns binary byte in A.
-; Registers affected: A
+; Registers affected: A,B
 
 GetByte:
+        call    GetHex          ; Get most significant nybble
+        rc                      ; Exit if <ESC> pressed
+        rlc                     ; Shift to upper nybble
+        rlc
+        rlc
+        rlc
+        mov     b,a             ; Save result in B register
+        call    GetHex          ; Get least significant nybble
+        rc                      ; Exit if <ESC> pressed
+        add     b               ; Add upper nybble to lower
+        ret                     ; Return
 
 
 ; GetAddress
 ; Gets a four character hex number from the keyboard.
 ; Ignores invalid characters. <Esc> cancels and sets carry bit.
 ; Returns binary word in HL.
-; Registers affected: HL
+; Registers affected: A,B,H,L
 
 GetAddress:
+        call    GetByte         ; Get MSB
+        rc                      ; Exit if <ESC> pressed
+        mov     h,a             ; Save MSB in H
+        call    GetByte         ; Get LSB
+        rc                      ; Exit if <ESC> pressed
+        mov     l,a             ; Save LSB in L
+        ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -593,6 +643,6 @@ save_e  db      ?
 save_h  db      ?
 save_l  db      ?
 save_sp dw      ?
-save_pc dw      ?
+save_pc dw      0000h
 
         end
