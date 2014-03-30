@@ -21,26 +21,27 @@
 ; limitations under the License.
 ; 
 ; Commands:
+;   COPY: C <START> <END> <DEST>
 ;   DUMP: D <START>
+;   FILL: F <START> <END> <DATA>...
 ;   GO: G <ADDRESS>
+;   INFO: I
+;   CHECKSUM: K <START> <END>
 ;   CLR SCREEN: L
-;   INFO: N
 ;   REGISTERS: R
+;   SEARCH: S <START> <END> <DATA>...
+;   TEST: T <START> <END>
+;   VERIFY: V <START> <END> <DEST>
+;   WRITE: : <ADDRESS> <DATA>...
+;   MATH: = <ADDRESS> +/- <ADDRESS>
 ;   HELP: ?
 ;
-; Possible future commands:
-;
-; COPY: C <START> <END> <DEST>
-; FILL: F <START> <END> <DATA>...
-; CHECKSUM: K <START> <END>
-; SEARCH: S <START> <END> <DATA>...
-; TEST: T <START> <END>
-; VERIFY: V <START> <END> <DEST>
-; WRITE: : <ADDRESS> <DATA>...
-; MATH: = <ADDRESS> +/- <ADDRESS>
-;
+; Revision History
+; Version Date         Comments
+; 0.1     27-Mar-2014  First version started.
+; 0.2     30-Mar-2014  Implemented a few commands.
+
 ; To Do:
-; Allow changing registers
 ; Implement other commands
 
         cpu     8080
@@ -96,36 +97,72 @@ mainloop:
         call    GetChar         ; Get a command (letter)
         call    ToUpper         ; Convert to upper case
 
-        cpi     'D'             ; DUMP command?
-        jnz     tryG
+        cpi     'C'
+        jnz     tryD
+        call    CopyCommand
+        jmp     mainloop
+tryD:
+        cpi     'D'
+        jnz     tryF
         call    DumpCommand
         jmp     mainloop
-
+tryF:
+        cpi     'F'
+        jnz     tryG
+        call    FillCommand
+        jmp     mainloop
 tryG:
-        cpi     'G'             ; GO command?
-        jnz     tryL
+        cpi     'G'
+        jnz     tryI
         call    GoCommand
         jmp     mainloop
-
+tryI:
+        cpi     'I'
+        jnz     tryK
+        call    InfoCommand
+        jmp     mainloop
+tryK:
+        cpi     'K'
+        jnz     tryL
+        call    ChecksumCommand
+        jmp     mainloop
 tryL:
-        cpi     'L'             ; CLEAR command?
-        jnz     tryN
+        cpi     'L'
+        jnz     tryR
         call    ClearCommand
         jmp     mainloop
-
-tryN:   cpi     'N'             ; INFO command?
-        jnz     tryR
-        call    InfoCommand
-        jmp     mainLoop
-
 tryR:
-        cpi     'R'             ; REGISTERS command?
-        jnz     tryHelp
+        cpi     'R'
+        jnz     tryS
         call    RegistersCommand
         jmp     mainloop
-
+tryS:
+        cpi     'S'
+        jnz     tryT
+        call    SearchCommand
+        jmp     mainloop
+tryT:
+        cpi     'T'
+        jnz     tryV
+        call    TestCommand
+        jmp     mainloop
+tryV:
+        cpi     'V'
+        jnz     tryColon
+        call    VerifyCommand
+        jmp     mainloop
+tryColon:
+        cpi     ':'
+        jnz     tryEquals
+        call    MemoryCommand
+        jmp     mainloop
+tryEquals:
+        cpi     '='
+        jnz     tryHelp
+        call    MathCommand
+        jmp     mainloop
 tryHelp:
-        cpi     '?'             ; HELP command?
+        cpi     '?'
         jnz     invalid
         call    HelpCommand
         jmp     mainloop
@@ -134,8 +171,8 @@ invalid:
         call    PrintCR
         lxi     h,strInvalid    ; print error message
         call    PrintString
-
         jmp   mainloop
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -373,6 +410,25 @@ HelpCommand:
         lxi     h,strHelp
         call    PrintString
         ret
+
+
+; Unimplemented commands
+
+CopyCommand:
+FillCommand:
+ChecksumCommand:
+SearchCommand:
+TestCommand:
+VerifyCommand:
+MemoryCommand:
+MathCommand:
+        call    PrintChar        ; Echo the command back
+        call    PrintCR
+        lxi     h,strNotImplemented
+        call    PrintString
+        call    PrintCR
+        ret
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -696,12 +752,20 @@ strInvalid:
 strHelp:
         db      "\r\n"
         db      "Valid commands:\r\n"
-        db      "D <address>      Dump memory\r\n"
-        db      "G <address>      Go\r\n"
-        db      "L                Clear screen\r\n"
-        db      "N                Show Info\r\n"
-        db      "R                Show registers\r\n"
-        db      "?                Help\r\n",0
+        db      "C <start> <end> <dest>     Copy memory\r\n"
+        db      "D <address>                Dump memory\r\n"
+        db      "F <start> <end> <data>...  Fill memory\r\n"
+        db      "G <address>                Go\r\n"
+        db      "I                          Show info\r\n"
+        db      "K <start> <end>            Checksum\r\n"
+        db      "L                          Clear screen\r\n"
+        db      "R                          Examine registers\r\n"
+        db      "S <start> <end> <data>...  Search memory\r\n"
+        db      "T <start> <end>            Test memory\r\n"
+        db      "V <start> <end> <dest>     Verify memory\r\n"
+        db      ": <address> <data>...      Write to memory\r\n"
+        db      "= <address> +/- <address>  Hex math calculation\r\n"
+        db      "?                          Help\r\n",0
 
 strClearScreen:
         db      "\e[2J\e[H",0       ; VT100/ANSI clear screen, cursor home
@@ -714,6 +778,8 @@ strZ80:
         db      "Z80",0
 strContinue:
         db      "Press <Space> to continue, <ESC> to stop ",0
+strNotImplemented:
+        db      "Sorry, command not yet implemented",0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
