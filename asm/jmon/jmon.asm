@@ -40,8 +40,6 @@
 ; MATH: = <ADDRESS> +/- <ADDRESS>
 ;
 ; To Do:
-; Implement DUMP
-; Implement GO
 ; Allow changing registers
 ; Implement other commands
 
@@ -143,12 +141,57 @@ invalid:
 ;
 ; Commands
 
+
+; Dump. Dumps memory in hex and ascii, as below:
+;
+; 0000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................
+;
+; Prompts to continue after a page of lines dumped.
+
+BYTES equ 16                    ; Number of bytes to dump per line
+LINES equ 24                    ; Number of lines to dump per page
+
 DumpCommand:
         call    PrintChar       ; Echo command back
         call    PrintSpace
         call    GetAddress      ; Prompt for address
+startScreen:
         call    PrintCR
+        mvi     c,LINES         ; Counts number of lines to be displayed
+startLine:
+        call    PrintAddress    ; Print address
+        mvi     a,':'           ; Print colon
+        call    PrintChar
+        mvi     b,BYTES         ; Counts number of bytes to be displayed
+doline:
+        call    PrintSpace      ; Print space
+        mov     a,m             ; Get data at current address
+        call    PrintByte       ; Print it
+        inx     h               ; Increment current address
+        dcr     b               ; Decrement byte count
+        jnz     doline          ; Continue until full line displayed
+; TODO: Dump in ASCII
+        call    PrintCR
+        dcr     c               ; Decrement count of lines printed
+        jnz     startLine       ; Do the next line
+        push    h               ; Save HL
+        lxi     h,strContinue   ; Prompt whether to continue
+        call    PrintString
+        pop     h               ; Restore HL
+cont:   call    GetChar         ; Get key
+        cpi     '\e'            ; Escape?
+        jnz     trySpace        
+        call    PrintCR         ; If so, return
         ret
+trySpace:
+        cpi     ' '             ; Space?
+        jz      startScreen     ; If so, do next screen
+        jmp     cont            ; Invalid key, try again
+
+
+; Go.
+; Prompts user for address, restores saved registers, and transfers
+; control to address.
 
 GoCommand:
         call    PrintChar       ; Echo command back
@@ -506,7 +549,7 @@ bin1:
 
 Delay:
         push    psw             ; Save A
-        mvi     a,10            ; Delay constant
+        mvi     a,50            ; Delay constant
 decr:   dcr     a               ; Decrement counter
         jnz     decr            ; Repeat until A reaches zero
         pop     psw             ; Restore A
@@ -629,6 +672,8 @@ str8080:
         db      "8080",0
 strZ80:
         db      "Z80",0
+strContinue:
+        db      "Press <Space> to continue, <ESC> to stop ",0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
