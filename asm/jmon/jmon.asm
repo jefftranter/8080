@@ -159,6 +159,7 @@ startScreen:
         call    PrintCR
         mvi     c,LINES         ; Counts number of lines to be displayed
 startLine:
+        push    h               ; Save address in HL
         call    PrintAddress    ; Print address
         mvi     a,':'           ; Print colon
         call    PrintChar
@@ -170,7 +171,19 @@ doline:
         inx     h               ; Increment current address
         dcr     b               ; Decrement byte count
         jnz     doline          ; Continue until full line displayed
-; TODO: Dump in ASCII
+
+; Now dump line of data in ASCII
+
+        call    PrintSpace      ; Print space
+        pop     h               ; Get start address of line
+        mvi     b,BYTES         ; Counts number of bytes to be displayed
+doAscii:
+        mov     a,m             ; Get data at current address
+        call    PrintAscii      ; Print it
+        inx     h               ; Increment current address
+        dcr     b               ; Decrement byte count
+        jnz     doAscii         ; Continue until full line displayed
+
         call    PrintCR
         dcr     c               ; Decrement count of lines printed
         jnz     startLine       ; Do the next line
@@ -306,6 +319,7 @@ RegistersCommand:
         call    PrintSpace
 
 ; print flags in binary
+; TODO: Print flags symbolically
 
         mvi     a,'F'
         call    PrintChar
@@ -340,6 +354,7 @@ nextbit:
         lda     save_pc
         call    PrintByte
         call    PrintCR
+; TODO: Add support for editing registers
         ret
 
 
@@ -456,6 +471,24 @@ PrintOne:
         ret
 
 
+; PrintAscii
+; If character in A is printable ASCII, print it, otherwise print "."
+; Registers affected: none.
+
+PrintAscii:
+        push    psw             ; Save A
+        cpi     ' '             ; Less than <Space> ?
+        jc      notPrintable    ; If so, not printable
+        cpi     '~'+1           ; Greater than tilde?
+        jnc     notPrintable    ; If so, not printable
+ppr:    call    PrintChar       ; Print character
+        pop     psw             ; Restore A
+        ret
+notPrintable:
+        mvi     a,'.'
+        jmp     ppr
+
+
 ; ClearScreen
 ; Clear screen. Assumes an VT100/ANSI terminal.
 ; Registers affected: HL, A.
@@ -506,13 +539,13 @@ notUpper:
 ; Print 8-bit value in A as two ASCII hex characters
 ; Registers affected: A
 PrintByte:
-        push    b               ; Save B reg
+        push    b               ; Save BC reg
         call    bhconv          ; Convert to two hex digits
         mov     a,b             ; Get first digit
         call    PrintChar       ; Print it
         mov     a,c             ; Get second digit
         call    PrintChar       ; Print it
-        pop     b               ; Restore B reg
+        pop     b               ; Restore BC reg
         ret                     ; Return
 
 ; Convert byte in A to two hex ASCII digits and return in B,C.
@@ -528,7 +561,7 @@ bhconv:
         mov     a,l             ; Get original byte
         call    bin1            ; Convert digit to ASCII
         mov     c,a             ; Put it in C
-        pop     h               ; Restore H
+        pop     h               ; Restore HL
         ret                     ; Return
 
 ; Convert bottom nybble of byte on A to ASCII
