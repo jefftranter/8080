@@ -412,10 +412,41 @@ HelpCommand:
         ret
 
 
+; Fill command.
+; Fill memory with bytes over a range of addresses.
+FillCommand:
+        call    PrintChar       ; Echo command back
+        call    PrintSpace
+        call    GetAddress      ; Prompt for start address
+        jc      abort           ; Carry set indicates <ESC> pressed
+        xchg                    ; Put HL (start address) in DE
+        call    PrintSpace
+        call    GetAddress      ; Prompt for end address
+        jc      abort           ; Carry set indicates <ESC> pressed
+        call    PrintSpace
+        xchg                    ; Put HL (end address) in DE, start address goes back in HL
+        call    GetByte         ; Prompt for fill byte
+        jc      abort           ; Carry set indicates <ESC> pressed
+        mov     b,a             ; Store fill byte in B
+fill:
+        mov     m,b             ; Fill address with byte
+        inx     h               ; Increment current address in HL
+        mov     a,h             ; Get H
+        cmp     d               ; Compare to D
+        jnz     fill            ; If no match, continue filling
+        mov     a,l             ; Get L
+        cmp     e               ; Compare to E
+        jnz     fill            ; If no match, continue filling
+        mov     m,b             ; We are at last address, write byte to it
+        call    PrintCR         ; Now done, print CR
+        ret                     ; And return
+abort:
+        call    PrintCR
+        ret
+
 ; Unimplemented commands
 
 CopyCommand:
-FillCommand:
 ChecksumCommand:
 SearchCommand:
 TestCommand:
@@ -754,13 +785,13 @@ strHelp:
         db      "Valid commands:\r\n"
         db      "C <start> <end> <dest>     Copy memory\r\n"
         db      "D <address>                Dump memory\r\n"
-        db      "F <start> <end> <data>...  Fill memory\r\n"
+        db      "F <start> <end> <data>     Fill memory\r\n"
         db      "G <address>                Go\r\n"
         db      "I                          Show info\r\n"
         db      "K <start> <end>            Checksum\r\n"
         db      "L                          Clear screen\r\n"
         db      "R                          Examine registers\r\n"
-        db      "S <start> <end> <data>...  Search memory\r\n"
+        db      "S <start> <end> <data>     Search memory\r\n"
         db      "T <start> <end>            Test memory\r\n"
         db      "V <start> <end> <dest>     Verify memory\r\n"
         db      ": <address> <data>...      Write to memory\r\n"
