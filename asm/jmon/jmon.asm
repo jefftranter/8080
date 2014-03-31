@@ -737,7 +737,7 @@ GetAddress:
         call    GetByte         ; Get LSB
         rc                      ; Exit if <ESC> pressed
         mov     l,a             ; Save LSB in L
-        ret
+        ret                     ; Return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;

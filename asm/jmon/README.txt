@@ -9,7 +9,7 @@ it for your environment.
 
 The program can be loaded in several ways:
 
-1. Toggle in the binary code using the font panel.
+1. Toggle in the binary code using the front panel.
 2. Load the .BIN file from the SD card.
 3. Copy the .HEX file to CP/M, run LOAD on it to generate a .COM file.
    and run the COM file.
