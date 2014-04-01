@@ -445,51 +445,53 @@ finish:
 
 ; Copy Command
 ; Copy a block of memory from one location to another.
+; TODO: Change command options to C <start> <end> <dest> 
+; TODO: Try to minimize
 
 CopyCommand:
         call    PrintChar       ; Echo command back
         call    PrintSpace
         call    GetAddress      ; Prompt for start address
         jc      finish          ; Carry set indicates <ESC> pressed
-        mov     a,l
+        mov     a,l             ; Save source address in src (low,high)
         sta     src
         mov     a,h
         sta     src+1
         call    PrintSpace
         call    GetAddress      ; Prompt for end address
         jc      finish          ; Carry set indicates <ESC> pressed
-        mov     a,l
+        mov     a,l             ; Save destination address in dst (low,high)
         sta     dst
         mov     a,h
         sta     dst+1
         call    PrintSpace
         call    GetAddress      ; Prompt for number of bytes
         jc      finish          ; Carry set indicates <ESC> pressed
-        mov     a,l
+        mov     a,l             ; Save length in size (low,high)
         sta     size
         mov     a,h
         sta     size+1
-        lda     size
+        lda     size            ; Put size in BC
         mov     c,a
         lda     size+1
         mov     b,a
-        lda     dst
+        lda     dst             ; Put destination in HL
         mov     l,a
         lda     dst+1
         mov     h,a
-        lda     src
+        lda     src             ; Put source in DE
         mov     e,a
         lda     src+1
         mov     d,a
-copy:   mov     a,b             ; Test BC,
-        ora     c               ; If BC = 0,
-        jz      finish          ; Return
-        ldax    d               ; Load A from (DE)
-        mov     m,a             ; Store A into (HL)
-        inx     d               ; Increment DE
-        inx     h               ; Increment HL
-        dcx     b               ; Decrement BC
-        jmp     copy            ; Repeat the loop
+copy:   mov     a,b             ; Get B (remaining bytes)
+        ora     c               ; Also get C
+        jz      finish          ; If BC is zero, we are done, so return
+        ldax    d               ; Get byte from source address (DE)
+        mov     m,a             ; Store byte in destination address (HL)
+        inx     d               ; Increment source address
+        inx     h               ; Increment destination address
+        dcx     b               ; Decrement count of bytes
+        jmp     copy            ; Repeat
 
 
 ; Unimplemented commands
