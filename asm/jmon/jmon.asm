@@ -418,15 +418,15 @@ FillCommand:
         call    PrintChar       ; Echo command back
         call    PrintSpace
         call    GetAddress      ; Prompt for start address
-        jc      abort           ; Carry set indicates <ESC> pressed
+        jc      finish          ; Carry set indicates <ESC> pressed
         xchg                    ; Put HL (start address) in DE
         call    PrintSpace
         call    GetAddress      ; Prompt for end address
-        jc      abort           ; Carry set indicates <ESC> pressed
+        jc      finish          ; Carry set indicates <ESC> pressed
         call    PrintSpace
         xchg                    ; Put HL (end address) in DE, start address goes back in HL
         call    GetByte         ; Prompt for fill byte
-        jc      abort           ; Carry set indicates <ESC> pressed
+        jc      finish          ; Carry set indicates <ESC> pressed
         mov     b,a             ; Store fill byte in B
 fill:
         mov     m,b             ; Fill address with byte
@@ -438,15 +438,62 @@ fill:
         cmp     e               ; Compare to E
         jnz     fill            ; If no match, continue filling
         mov     m,b             ; We are at last address, write byte to it
-        call    PrintCR         ; Now done, print CR
-        ret                     ; And return
-abort:
+finish:
         call    PrintCR
         ret
 
-; Unimplemented commands
+
+; Copy Command
+; Copy a block of memory from one location to another.
 
 CopyCommand:
+        call    PrintChar       ; Echo command back
+        call    PrintSpace
+        call    GetAddress      ; Prompt for start address
+        jc      finish          ; Carry set indicates <ESC> pressed
+        mov     a,l
+        sta     src
+        mov     a,h
+        sta     src+1
+        call    PrintSpace
+        call    GetAddress      ; Prompt for end address
+        jc      finish          ; Carry set indicates <ESC> pressed
+        mov     a,l
+        sta     dst
+        mov     a,h
+        sta     dst+1
+        call    PrintSpace
+        call    GetAddress      ; Prompt for number of bytes
+        jc      finish          ; Carry set indicates <ESC> pressed
+        mov     a,l
+        sta     size
+        mov     a,h
+        sta     size+1
+        lda     size
+        mov     c,a
+        lda     size+1
+        mov     b,a
+        lda     dst
+        mov     l,a
+        lda     dst+1
+        mov     h,a
+        lda     src
+        mov     e,a
+        lda     src+1
+        mov     d,a
+copy:   mov     a,b             ; Test BC,
+        ora     c               ; If BC = 0,
+        jz      finish          ; Return
+        ldax    d               ; Load A from (DE)
+        mov     m,a             ; Store A into (HL)
+        inx     d               ; Increment DE
+        inx     h               ; Increment HL
+        dcx     b               ; Decrement BC
+        jmp     copy            ; Repeat the loop
+
+
+; Unimplemented commands
+
 ChecksumCommand:
 SearchCommand:
 TestCommand:
@@ -783,7 +830,7 @@ strInvalid:
 strHelp:
         db      "\r\n"
         db      "Valid commands:\r\n"
-        db      "C <start> <end> <dest>     Copy memory\r\n"
+        db      "C <src> <dest> <num bytes> Copy memory\r\n"
         db      "D <address>                Dump memory\r\n"
         db      "F <start> <end> <data>     Fill memory\r\n"
         db      "G <address>                Go\r\n"
@@ -826,5 +873,9 @@ save_h  db      ?
 save_l  db      ?
 save_sp dw      ?
 save_pc dw      0000h
+src     dw      ?               ; Used for commands like Copy
+dst     dw      ?
+size    dw      ?
+
 
         end
