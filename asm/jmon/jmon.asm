@@ -514,6 +514,8 @@ ChecksumCommand:
                                 ; BC will hold checksum
         lxi     b,0000h         ; Clear checksum total
 checkloop:
+        stc                     ; Clear carry
+        cmc
         mov     a,c             ; Get LSB of checksum
         adc     m               ; Add next date byte of memory
         mov     c,a             ; Store LSB of checksum
