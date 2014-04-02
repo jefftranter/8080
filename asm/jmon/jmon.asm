@@ -414,6 +414,7 @@ HelpCommand:
 
 ; Fill command.
 ; Fill memory with bytes over a range of addresses.
+; TODO: Check that start < end.
 FillCommand:
         call    PrintChar       ; Echo command back
         call    PrintSpace
@@ -445,8 +446,9 @@ finish:
 
 ; Copy Command
 ; Copy a block of memory from one location to another.
-; TODO: Change command options to C <start> <end> <dest> 
-; TODO: Try to minimize
+; TODO: Change command options to C <start> <end> <dest>
+; TODO: Try to minimize copying between registers and memory
+; TODO: Check that start < end and handle overlap.
 
 CopyCommand:
         call    PrintChar       ; Echo command back
@@ -494,9 +496,47 @@ copy:   mov     a,b             ; Get B (remaining bytes)
         jmp     copy            ; Repeat
 
 
-; Unimplemented commands
+; Checksum Command
+; Calculate 16-bit checksum of a block of memory.
 
 ChecksumCommand:
+        call    PrintChar       ; Echo command back
+        call    PrintSpace
+        call    GetAddress      ; Prompt for start address
+        jc      finish          ; Carry set indicates <ESC> pressed
+        xchg                    ; Swap HL and DE (put start in DE)
+        call    PrintSpace
+        call    GetAddress      ; Prompt for end address
+        jc      finish          ; Carry set indicates <ESC> pressed
+        xchg                    ; Swap HL and DE
+                                ; HL holds start/current address
+                                ; DE holds end address
+                                ; BC will hold checksum
+        lxi     b,0000h         ; Clear checksum total
+checkloop:
+        mov     a,c             ; Get LSB of checksum
+        adc     m               ; Add next date byte of memory
+        mov     c,a             ; Store LSB of checksum
+        mov     a,b             ; Get MSB of checksum
+        aci     0               ; Add possible carry from LSB
+        mov     b,a             ; Store MSB of checksum
+        mov     a,h             ; See if MSB of pointer has reached end address yet
+        cmp     d               ; e.g. H = D
+        jnz     inc
+        mov     a,l             ; See if MSB of pointer has reached end address yet
+        cmp     e               ; e.g. L = E
+        jnz     inc
+        call    PrintSpace      ; Done, print checksum value
+        mov     h,b             ; Put value in HL
+        mov     l,c
+        call    PrintAddress
+        call    PrintCR
+        ret
+inc:    inx     h               ; Increment address pointer
+        jmp     checkloop
+
+
+; Unimplemented commands
 SearchCommand:
 TestCommand:
 VerifyCommand:
