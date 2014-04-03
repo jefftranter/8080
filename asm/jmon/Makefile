@@ -7,7 +7,7 @@ jmon.bin: jmon.p
 	p2bin -r '$$-$$' jmon.p
 
 jmon.p: jmon.asm
-	asl -L -cpu 8080 jmon.asm
+	asl -L jmon.asm
 
 clean:
 	$(RM) *.lst *.p *.bin *.hex

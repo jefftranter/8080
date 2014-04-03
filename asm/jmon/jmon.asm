@@ -44,8 +44,17 @@
 ; To Do:
 ; Implement other commands
 
+; Set CPM to TRUE if you want to run under CP/M. Set to FALSE if you
+; want to run as a standalone program.
+CPM = FALSE
+
         cpu     8080
-        org     0000H   ; Use 0100H if you want to run under CP/M
+
+        if      CPM
+        org     0100H    ; Standard CP/M start address
+        else
+        org     0000H    ; Start at address 0 if running standalone
+        endif
 
 ; Constants
 
