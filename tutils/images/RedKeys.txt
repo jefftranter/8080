@@ -1,0 +1,80 @@
+RED editor keys
+------------------+------+---------+-------------------+------+---------+
+Function          | Ctrl | Decimal | Function          | Ctrl | Decimal |
+------------------+------+---------+-------------------+------+---------+
+Insert line above |  ^J  |   10    | Insert line below |  ^M  |   13    |
+Cursor up         |  ^E  |    5    | Cursor down       |  ^X  |   24    |
+Cursor left       |  ^S  |   19    | Cursor right      |  ^D  |    4    |
+Insert mode       |  ^N  |   22    | Overtype mode     |  ^V  |   20    |
+Edit mode         |  ^T  |   14    | Begin command     |  ^C  |    3    |
+Begin escape      |  ^[  |   27    | Backspace         |  ^H  |    8    |
+Delete character  |  ^?  |   31    | Delete Line       |  ^Y  |   25    |
+Undo edit         |  ^U  |   21    | Page up           |  ^Q  |   17    |
+Page down         |  ^P  |   16    | Scroll up         |  ^W  |   23    |
+Scroll down       |  ^O  |   15    | Word left         |  ^A  |    1    |
+Word right        |  ^F  |    6    | Split line        |  ^L  |   26    |
+Glue (join) line  |  ^G  |    7    | Verbatim          |  ^B  |    2    |
+Repeat last       |  ^R  |   18    |                   |      |         |
+------------------+------+---------+-------------------+------+---------+
+
+Edit mode Keys
+-------------------------------------------------------------------------
+Key   | Action
+-------------------------------------------------------------------------
+space | Move cursor right one column.
++     | Move cursor down 1/2 page.
+b     | Move cursor to beginning of line.
+d     | Cursor down rapid. Type any key to stop scrolling.
+e     | Cursor to right end of line.
+g     | Moves cursor to another line. Typing g presents "goto" command.
+h     | Homes the cursor to top left corner of screen. Amplified by
+      | repeat into the page up function.
+k     | Delete all characters up to but not including the word that
+      | starts with a search character. Entire line deleted if no
+      | word starts with a search character.
+m     | Move cursor to start of the line at the middle of the screen.
+p     | Move the cursor down one page.
+q     | Move the cursor up one page.
+s     | Move the cursor to the next word that starts with a search
+      | character. If no word starts with the search character the cursor
+      | is moved to the end of the current line.
+u     | Cursor up rapid. Type any key to stop scrolling.
+x     | Replace character under cursor. Prompt line displays "eXchange".
+      | Now type the new character. If you hit a control character no
+      | change is mande.
+z     | Move cursor to the start of the last line on the screen.
+      | Amplified by repeat into the screen down function.
+
+Commands
+-------------------------------------------------------------------------
+name:    Name a file.
+save:    Save a new file.
+resave:  Re-write an existing file.
+load:    Load a file. The command "red" does the same.
+exit:    End the RED session and exit.
+find:    Pattern search ? (char match), ^ (line beginning), $ (line end).
+         An optional line number for find start may be provided.
+findr:   Backwards (up) pattern search. An option line number for findr
+         start may be provided.
+search:  Pattern search with continue if pattern found (next, exit).
+change:  Pattern search with substitution.
+move:    Move block of text (StartLine, EndLine, LineAfter). Use 9999
+         to move to end of buffer.
+copy:    Copy block of text (same args as move).
+extract: Copy block of text to file (filename StartLine EndLine).
+inject:  Adds file to buffer (filename LineAfter). If LineAfter is not
+         given the insert point is line below the current line. A
+         LineAfter of 0 inserts at beginning of buffer.
+tabs:    Change tab stop width. Using tabs with no width parameter sets
+         tab stops every 8 columns.
+nowrap:  Disable line wrap.
+wrap:    Enable line wrap.
+list:    Send buffer to printer.
+clear:   Erases entire buffer.
+delete:  Delete one or more lines (FromLine ToLine). Delete with no
+         parameters deletes the current line.
+def():   Define when edit, insert and overtype modes will be entered. Use
+         def(n)edit, def(n)ins and def(n)over, with (n) as follows:
+           0 - after every command.
+           1 - after inserting new lines.
+           2 - whenever the cursor moves up or down one line.

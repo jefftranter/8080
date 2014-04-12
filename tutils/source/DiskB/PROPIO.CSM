@@ -1,0 +1,362 @@
+;
+;	BD Software C Compiler v1.6
+;	Standard Library Machine Language Functions (part A)
+;	Copyright (c) 1982, 1986 by BD Software, Inc.
+;
+; This file is in "CSM" format; to convert to CRL format,
+; use CASM.SUB in conjunction with CASM.COM, ASM.COM and CLOAD.COM.
+; 
+; Functions appearing in this file:
+;
+;	pputchar	pgetchar	pfiletosd
+;	psdtofile	psdtomem	altsleep
+
+	INCLUDE	"bds.lib"
+
+secsiz	equ	128		;Block size for data rx/tx
+reads	equ	14h		;BDOS read sequential function
+writes	equ	15h		;BDOS write sequential function
+serstat	equ	16		;Serial port status register
+serdata	equ	17		;Serial port data register
+txrdy	equ	02h		;Bit1 set if tx port ready for character
+ack	equ	06h
+nak	equ	15h
+can	equ	18h
+ctrlz	equ	1ah		;Text EOF
+
+;
+; Return the contents of the serial port status register.
+;
+	FUNCTION	pconstat
+	in	serstat		;Fetch serial status byte
+	mvi	h,0		;and return it
+	mov	l,a
+	ret
+	ENDFUNC	
+;
+; Wait until serial tx port ready, then send one byte. Byte is sent
+; as received to allow for binary file transfers over what normally
+; does console I/O.
+;
+	FUNCTION	pputchar
+	call	ma1toh		;Get char to send
+txw0:
+	in 	serstat		;Fetch serial status byte
+	ani	txrdy		;Bit1 set if tx data register ready for char
+	jz	txw0		;Wait if not ready
+	mov	a,l
+	out	serdata		;Send the character
+	ret
+	ENDFUNC
+;
+; Wait until serial rx port ready, then fetch and return one byte.
+; Byte is returned unaltered.
+;
+	FUNCTION	pgetchar
+rxw0:
+	in	serstat		;Fetch serial status byte
+	rar			;Bit0 set if rx port has waiting byte
+	jnc	rxw0
+	in	serdata		;Fetch byte from serial data register
+	mvi	h,0
+	mov	l,a		;To HL as return
+	ret
+	ENDFUNC
+;
+; int pfiletosd(dmaaddr, fcbaddr, nsecs)
+; char     *dmaaddr;
+; char     *fcbaddr;
+; unsigned nsecs;
+;
+; Read data from the CP/M disk file identified by fcbaddr and send
+; it to the Propeller SDCard via the console serial port. It is
+; assumed upon entry that dmaaddr is set as the current DMA address.
+; Return:
+;     0 - No error.
+;   CAN - Ctrl-C signal received from terminal to cancel copy.
+;    -1 - BDOS read from disk failed.
+;
+	FUNCTION	pfiletosd
+	call	ma1toh		;Store parameter list
+	shld	rddma
+	call	ma2toh
+	shld	rdfcb
+	xchg			;FCB address to DE
+	call	ma3toh
+	shld	nsecs		;Enter r/w loop with nsecs in HL
+	push	b
+nxtrdsec:
+	mov	a,h		;Sectors yet to read?
+	ora	l
+	jz	rdok
+	mvi	c,reads		;Ask BDOS for next sector
+	call	bdos
+	ora	a
+	jnz	rderr
+	mov	c,a
+	call	rdout		;Tell terminal sector is coming
+	lhld	rddma		;Rewind to start of DMA buffer
+	mvi	b,secsiz
+rdsec:
+	mov	c,m
+	call	rdout		;Send byte to terminal
+	inx	h
+	dcr	b
+	jnz	rdsec
+; After complete sector sent, terminal does a Ctrl-C check
+	call	rdin
+	cpi	ack
+	jnz	rdend		;Terminal Ctrl-C, error or text EOF
+; Set up to read and send next sector
+	lhld	rdfcb
+	xchg			;FCB address to DE
+	lhld	nsecs
+	dcx	h
+	shld	nsecs		;Update sector count
+	mvi	c,ack
+	call	rdout		;Send ACK to confirm sector send
+	jmp	nxtrdsec
+rdend:
+	cpi	ctrlz
+	jnz	rdset		;Done if CAN or SDCard read error
+	mov	c,a		;Save Ctrl-Z char
+	lhld	nsecs
+	mov	a,h		;See if Ctrl-Z char was read in last sector
+	add	l
+	dcr	a
+	mov	a,c
+	jz	rdset
+	ori	80h		;Bit7 set warns Ctrl-Z not in last sector
+rdset:
+	mov	l,a		;Terminal read exit code to HL for return
+	mvi	h,0
+	jmp	rdres
+rderr:
+	lxi	h,-1		;BDOS disk read error
+rdres:
+	mov	c,l
+	call	rdout		;Read cut short, so notify terminal
+rdok:
+	pop	b
+	ret
+;
+; Local storage
+;
+rddma	ds	2		;DMA address
+rdfcb	ds	2		;Source file FCB address
+nsecs	ds	2		;Count of sectors to read/write
+;
+; Private tx for speed
+; On entry C has byte to send
+;
+rdout:
+	in	serstat		;Fetch serial status byte
+	ani	txrdy		;Bit1 set if tx data register ready for char
+	jz	rdout		;Wait if not ready
+	mov	a,c
+	out	serdata
+	ret
+;
+; Private rx for speed
+;
+rdin:
+	in	serstat		;Fetch serial status byte
+	rar			;Bit0 set if rx port has waiting byte
+	jnc	rdin
+	in	serdata		;Fetch byte from serial data register
+	ret
+	ENDFUNC
+;
+; int psdtofile(dmaaddr, fcbaddr, nsecs)
+; char     *dmaaddr;
+; char     *fcbaddr;
+; unsigned nsecs;
+;
+; Receive binary file data from the Propeller SDCard via the
+; console serial port and write the data to the CP/M file
+; identified by fcbaddr.
+; Return:
+;     0 - No error.
+;   CAN - Ctrl-C signal received from terminal to cancel copy.
+;    -1 - BDOS write to disk failed (most likely disk full).
+;
+	FUNCTION	psdtofile
+	call	ma1toh		;Store parameter list
+	shld	rwdma
+	call	ma2toh
+	shld	rwfcb
+	call	ma3toh
+	shld	nsecs		;Enter r/w loop with nsecs in HL
+	push	b
+	mvi	c,ack
+	call	awout		;Signal terminal we're ready to receive
+nxtwsec:
+	mov	a,h		;Sectors yet to write?
+	ora	l
+	jz	wrok
+	mvi	c,secsiz
+	lhld	rwdma		;DMA base address
+; Read a full sector from rx port
+rxsec:
+	call	awin
+	mov	m,a
+	inx	h
+	dcr	c
+	jnz	rxsec
+; After complete sector received terminal does a Ctrl-C check
+	call	awin
+	cpi	ack
+	mov	c,a
+	jnz	wrctrlc
+; Sector read OK, so write to disk
+	mvi	c,writes
+	lhld	rwfcb
+	xchg
+	call	bdos		;Attempt sector write
+	ora	a
+	jnz	wrerr
+; Sector written OK, so set up to read next sector
+	lhld	nsecs
+	dcx	h
+	shld	nsecs		;Update sector count
+	mvi	c,ack
+	call	awout		;Send ACK for next sector
+	jmp	nxtwsec
+wrctrlc:
+	lxi	h,can		;Ctrl-C CAN to HL for return
+	jmp	txres
+wrerr:
+	lxi	h,-1		;Disk full error to HL for return
+txres:
+	mov	c,l
+	call	awout		;Write cut short, so notify terminal
+wrok:
+	pop	b
+	ret
+;
+; Local storage
+;
+rwdma	ds	2		;DMA address
+rwfcb	ds	2		;Destination FCB address
+nsecs	ds	2		;Count of sectors to read/write
+;
+; Private tx for speed
+; On entry C has byte to send
+;
+awout:
+	in 	serstat		;Fetch serial status byte
+	ani	txrdy		;Bit1 set if tx data register ready for char
+	jz	awout		;Wait if not ready
+	mov	a,c
+	out	serdata
+	ret
+;
+; Private rx for speed
+;
+awin:
+	in	serstat		;Fetch serial status byte
+	rar			;Bit0 set if rx port has waiting byte
+	jnc	awin
+	in	serdata		;Fetch byte from serial data register
+	ret
+	ENDFUNC
+;
+; int psdtomem(buff, nsecs)
+; char     *buff;
+; unsigned nsecs;
+;
+; Receive binary file data from the Propeller SDCard via the
+; console serial port and write the data to the buffer pointed
+; to by buff. The buffer is expected to be nsecs in size.
+; Return:
+;     0 - No error.
+;   CAN - Ctrl-C signal received from the terminal to cancel transfer.
+;    -1 - Transfer failed.
+;
+	FUNCTION	psdtomem
+	call	ma2toh		;Store the parameter list
+	xchg			;Start loop with nsecs in DE
+	call	ma1toh		;and buffer base address in HL
+	push	b
+	mvi	c,ack
+	call	pout		;Signal terminal we're ready to receive
+nxtsec:
+	mov	a,d		;Sectors yet to write?
+	ora	e
+	jz	rxok		;Zero is "OK" result code
+	mvi	b,secsiz
+; Read a full sector from rx port
+rxsec:
+	call	pin
+	mov	m,a
+	inx	h
+	dcr	b
+	jnz	rxsec
+; After complete sector received terminal does a Ctrl-C check
+	call	pin
+	cpi	ack
+	mov	c,a
+	jnz	isctrlc
+; Set up to read next sector
+	dcx	d
+	mvi	c,ack
+	call	pout
+	jmp	nxtsec
+isctrlc:
+	lxi	d,can
+	mov	c,e
+	call	pout		;Echo CAN to terminal
+rxok:
+	xchg			;Return code to HL
+	pop	b
+	ret
+;
+; Private tx for speed
+; On entry C has byte to send
+;
+pout:
+	in 	serstat		;Fetch serial status byte
+	ani	txrdy		;Bit1 set if tx data register ready for char
+	jz	pout		;Wait if not ready
+	mov	a,c
+	out	serdata
+	ret
+;
+; Private rx for speed
+;
+pin:
+	in	serstat		;Fetch serial status byte
+	rar			;Bit0 set if rx port has waiting byte
+	jnc	pin
+	in	serdata		;Fetch byte from serial data register
+	ret
+	ENDFUNC
+;
+; void altsleep(n)
+;
+; Clone of the BSD C sleep function without Ctrl-C interrupt polling.
+; The spin loop is tweaked to make it more accurate for the 8800micro.
+; Each call sleeps for n/10 seconds.
+;
+	FUNCTION	altsleep
+	call	ma1toh
+	push	b
+	inx	h
+asl1:
+	dcx	h
+	mov	a,h
+	ora	l
+	jnz	asl1a
+	pop	b
+	ret
+	
+asl1a:
+	lxi	d,6800
+asl2:
+	dcx	d
+	mov	a,d
+	ora	e
+	jnz	asl2
+	jmp	asl1
+	ENDFUNC
+

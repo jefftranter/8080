@@ -1,0 +1,13 @@
+;Build all T* link libraries.
+submit bldtlibs
+;Build all T* utility programs.
+submit c tdel
+submit c tdir
+submit c tdskdir
+submit c tread
+submit c twrite
+it bldtlibs
+;Build all T* utility programs.
+submit c tdel
+submit c tdir
+submit c tdskdir

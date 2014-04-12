@@ -1,0 +1,4 @@
+;Build all test programs.
+submit c dirent
+submit c dskparms
+c direntsubmit c dskparmssubmit c tdelsubmit c tdirsubmit c tdsk
