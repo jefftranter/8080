@@ -9,7 +9,3 @@ whg tdskdir.c
 whg tread.c
 whg tutils.h
 whg twrite.c
-whg dskparms.c
-whg propio.csm
-whg tcommon.c
-w

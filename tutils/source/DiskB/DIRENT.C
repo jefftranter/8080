@@ -122,13 +122,3 @@ bail:
 	bdos(SELDSK, curdsk);
 	exit();
 }
-
-	}
-
-	putchar('\n');
-
-	if(255 != (i = bdos(SRCHNEXT, fcb)))
-		goto again;
-
-bail:
-	bdos(SELDSK, curdsk);

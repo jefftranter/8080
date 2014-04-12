@@ -292,7 +292,3 @@ char *str;
 	else
 		return FALSE;
 }
-		return TRUE;
-
-	if (isdigit(*str++))
-		return (*str == '/' || isdig

@@ -213,7 +213,10 @@ char **argv;
 		tmp++;
 	}
 
-	printf("%d file(s) copied\n", tmp);
+        if (tmp == 1)
+            printf("1 file copied\n");
+        else
+            printf("%d files copied\n", tmp);
 	exit();
 }
 
@@ -384,4 +387,3 @@ VOID usage(showall)
 
 	exit();
 }
- drive. All destinati

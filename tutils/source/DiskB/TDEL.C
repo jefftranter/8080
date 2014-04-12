@@ -128,7 +128,10 @@ char **argv;
 		nfiles += tdelete(fspecv[i], argv[i + 1]);
 	}
 
-	printf("%d file(s) deleted.\n", nfiles);	
+        if (nfiles == 1)
+            printf("1 file deleted.\n");
+        else
+            printf("%d files deleted.\n", nfiles);
 	exit();
 }
 
@@ -216,5 +219,3 @@ void usage(showall)
 	puts("  wildcarded filespecs.\n");
 	exit();
 }
-uts(
-"  Expand and delete all files without confirmation pr

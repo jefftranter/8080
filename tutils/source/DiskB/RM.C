@@ -48,7 +48,3 @@ char **argv;
 		putchar('\n');
 	}
 }
-		puts("Removing "); puts(argv[i]);
-
-		if(unlink(argv[i]))
-			p

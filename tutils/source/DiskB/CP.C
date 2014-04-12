@@ -219,11 +219,3 @@ usages:		printf("Usages: cp [u/][d:]filename [u/][d:]newname [-vb]\n");
 			unlink(argv[loop]);
 	}
 }
-	printf("\nCan't close the output file.\n");;
-			exit();
-		}
-		fabort(fd1);
-		if (backupf)
-			unlink(argv[loop]);
-	}
-}

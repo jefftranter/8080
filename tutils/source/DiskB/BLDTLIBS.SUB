@@ -3,7 +3,3 @@ cc tcommon.c -w -x
 cc wildexp.c -w -x
 ;Use CASM to build the PROPIO assembler link library.
 submit csm propio
- libraries.
-cc tcommon.c -w -x
-cc wildexp.c -w -x
-;Use CASM to build the PROPIO assembler 

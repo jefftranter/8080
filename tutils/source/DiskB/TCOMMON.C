@@ -698,8 +698,3 @@ int  n;
 
 	return tmp;
 }
-tmp;
-
-	if(n <= 0)
-		return s1;
-

@@ -184,5 +184,3 @@ DSKPARMS
 	unsigned cks;
 	unsigned off;
 };
- bsh;
-	char	 blm

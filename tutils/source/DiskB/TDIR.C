@@ -147,7 +147,10 @@ char **argv;
 	}
 
 	printf("%s--------------------------\n", tmp ? "\n" : "");
-	printf("%d KBytes in %d file(s)\n", secstokb(sumsecs), count);
+        if (count == 1)
+            printf("%d KBytes in 1 file\n", secstokb(sumsecs));
+        else
+            printf("%d KBytes in %d files\n", secstokb(sumsecs), count);
 	exit();
 }
 
@@ -295,5 +298,3 @@ void usage(showall)
 	puts("  order by size.\n");
 	exit();
 }
-uts(
-"  Display a FULL listing of files with a .COM extension, i

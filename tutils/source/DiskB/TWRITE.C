@@ -116,7 +116,7 @@ char **argv;
 	/* Validate "copy with rename" */
 	if(argc != 3 && rename)
 	{
-		puts("Only two unabiguous filenames allowed with \"-r\" switch.\n");
+		puts("Only two unambiguous filenames allowed with \"-r\" switch.\n");
 		exit();
 	}
 
@@ -181,7 +181,10 @@ char **argv;
 		nfiles++;
 	}
 
-	printf("%d file(s) copied\n", nfiles);
+        if (nfiles == 1)
+            printf("1 file copied\n");
+        else
+            printf("%d files copied\n", nfiles);
 	exit();
 }
 
@@ -298,6 +301,3 @@ VOID usage(showall)
 
 	exit();
 }
-iles that exist on the SDCard\n");
-	puts(
-"  with m

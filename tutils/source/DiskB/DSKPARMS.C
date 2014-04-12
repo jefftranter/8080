@@ -114,5 +114,3 @@ snext:
 	bdos(SELDSK, cur_drive);
 	exit();
 }
- %3d KBytes\n", dsizkb - dirkb);
-	printf("Disk

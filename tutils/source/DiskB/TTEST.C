@@ -70,6 +70,3 @@ char **argv;
 
 	exit();
 }
-
-RV? "TRUE" : "FALSE");
-		printf("Filename:    %s\n", f

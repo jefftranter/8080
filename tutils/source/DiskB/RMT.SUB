@@ -1,4 +1,4 @@
 ;Remove T* utility binaries and link files from sources disk.
 rm b:tdel.com b:tdir.com b:tread.com b:twrite.com b:tdskdir.com
 rm b:tdel.crl b:tdir.crl b:tread.crl b:twrite.crl b:tdskdir.crl
-b:tdel.com b:tdir.com b:tread.com b:twrite.com b:tdskdir.com
+

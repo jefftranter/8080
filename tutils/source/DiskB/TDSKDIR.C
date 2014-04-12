@@ -275,7 +275,10 @@ char **argv;
 		putchar('\n');
 
 	puts("----------------------------\n");
-	printf("%d file(s), %uk used on disk\n", tent, sumkb);
+        if (tent == 1)
+            printf("1 file, %uk used on disk\n", sumkb);
+        else
+            printf("%d files, %uk used on disk\n", tent, sumkb);
 	exit();
 }
 
@@ -499,13 +502,9 @@ VOID usage(showall)
 "\t128-byte records, and attributes of the files.\n");
 #ifdef DEBUG
 	puts("-r\tRead a directory image from a CP/M disk, where image_name is\n");
-	puts("\ta file that was previosly saved with the \"-s\" switch.\n");
+	puts("\ta file that was previously saved with the \"-s\" switch.\n");
 	puts("-s\tSave the in-memory directory image to a CP/M disk.\n");
 	puts("NOTE: The -r and -s switches are mutually exclusive.\n");
 #endif
 	exit();
 }
-y directory image to a CP/M disk.\n");
-	puts("NOTE: The -r and -s switches are mutually exclusive.\n");
-#endif
-	

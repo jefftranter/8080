@@ -4,9 +4,3 @@ era progerrs.$$$$$$
 era $1.log
 cc $1.c -w -x
 l2 $1 -n -l tcommon propio wildexp
-arget file with the TUTIL libraries.
-;b:
-era progerrs.$$$$$$
-era $1.log
-cc $1.c -w -x
-l2 $1 -n 
