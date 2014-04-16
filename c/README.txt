@@ -4,7 +4,7 @@ binaries are included.
 
 Porting notes:
 
-YUM:
+Yum:
 
 Includes changed (BDSC C has everything in stdio.h).
 sizeof does not work for arrays, so used a constant.
@@ -17,3 +17,17 @@ Variables cannot be initialized when declared.
 No strtol() so use atoi().
 Remove const qualifiers.
 Clear screen using ANSI escape sequence.
+
+Adventure:
+
+Includes changed (BDSC C has everything in stdio.h).
+sizeof does not work for arrays, so used a constant.
+Arrays cannot be initialized, but can use initptr() function instead.
+Function declarations have to use old K&R format.
+Text supports lowercase (original Apple 1 version had to be uppercase only).
+Some lines (like help) made wider due to 80 column screen.
+Variables cannot be initialized when declared.
+Remove const qualifiers.
+Clear screen using ANSI escape sequence.
+No support for enums so use #define instead.
+Changes to some string functions.
