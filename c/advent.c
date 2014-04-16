@@ -270,7 +270,7 @@ void doQuit()
 {
     printf("%s", "Are you sure you want to quit (y/n)? ");
     fgets(buffer, SIZEOFBUFFER-1, stdin);
-    if (toupper(buffer[0]) == 'Y') {
+    if (tolower(buffer[0]) == 'y') {
         gameOver = 1;
     }
 }
@@ -279,17 +279,17 @@ void doQuit()
 void doDrop()
 {
     int i;
-    char *sp;
+    int sp;
     char *item;
 
     /* Command line should be like "D[ROP] ITEM" Item name will be after after first space. */
-    sp = index(buffer, ' ');
-    if (sp == NULL) {
+    sp = index(buffer, " ");
+    if (sp == -1) {
         printf("Drop what?\n");
         return;
     }
 
-    item = sp + 1;
+    item = buffer + sp + 1;
 
     /* See if we have this item */
     for (i = 0; i < MAXITEMS; i++) {
@@ -311,17 +311,17 @@ void doDrop()
 void doTake()
 {
     int i, j;
-    char *sp;
+    int sp;
     char *item;
 
     /* Command line should be like "T[AKE] ITEM" Item name will be after after first space. */
-    sp = index(buffer, ' ');
-    if (sp == NULL) {
+    sp = index(buffer, " ");
+    if (sp == -1) {
         printf("Take what?\n");
         return;
     }
 
-    item = sp + 1;
+    item = buffer + sp + 1;
 
     /* Find number of the item. */
     for (i = 1; i <= LastItem; i++) {
@@ -354,32 +354,32 @@ void doTake()
 /* Go command */
 void doGo()
 {
-    char *sp;
+    int  sp;
     char dirChar;
-    int dir;
+    int  dir;
 
     /* Command line should be like "G[O] N[ORTH]" Direction will be
        the first letter after a space. Or just a single letter
        direction N S E W U D or full directon NORTH etc. */
 
-    sp = index(buffer, ' ');
-    if (sp != NULL) {
-        dirChar = *(sp+1);
+    sp = index(buffer, " ");
+    if (sp != -1) {
+        dirChar = *(buffer + sp + 1);
     } else {
-        dirChar = toupper(buffer[0]);
+        dirChar = tolower(buffer[0]);
     }
 
-    if (dirChar == 'N') {
+    if (dirChar == 'n') {
         dir = North;
-    } else if (dirChar == 'S') {
+    } else if (dirChar == 's') {
         dir = South;
-    } else if (dirChar == 'E') {
+    } else if (dirChar == 'e') {
         dir = East;
-    } else if (dirChar == 'W') {
+    } else if (dirChar == 'w') {
         dir = West;
-    } else if (dirChar == 'U') {
+    } else if (dirChar == 'u') {
         dir = Up;
-    } else if (dirChar == 'D') {
+    } else if (dirChar == 'd') {
         dir = Down;
     } else {
         printf("Go where?\n");
@@ -400,22 +400,22 @@ void doGo()
 /* Examine command */
 void doExamine()
 {
-    char *sp;
+    int  sp;
     char *item;
 
     /* Command line should be like "E[XAMINE] ITEM" Item name will be after after first space. */
-    sp = index(buffer, ' ');
-    if (sp == NULL) {
+    sp = index(buffer, " ");
+    if (sp == -1) {
         printf("Examine what?\n");
         return;
     }
 
-    item = sp + 1;
+    item = buffer + sp + 1;
     ++turnsPlayed;
 
     /* Examine bookcase - not an object */
     if (!strcmp(item, "bookcase")) {
-        printf("You pull back a book and the bookcase\nopens up to reveal a secret room.\n");
+        printf("You pull back a book and the bookcase opens up to reveal a secret room.\n");
         Move[17][North] = 18;
         return;
     }
@@ -440,7 +440,7 @@ void doExamine()
 
     /* Examine toy car */
     if (!strcmp(item, "toy car")) {
-        printf("It is a nice toy car. Your grandson matthew would like it.\n");
+        printf("It is a nice toy car. Your grandson Matthew would like it.\n");
         return;
     }
 
@@ -457,17 +457,17 @@ void doExamine()
 /* Use command */
 void doUse()
 {
-    char *sp;
+    int  sp;
     char *item;
 
     /* Command line should be like "U[SE] ITEM" Item name will be after after first space. */
-    sp = index(buffer, ' ');
-    if (sp == NULL) {
+    sp = index(buffer, " ");
+    if (sp == -1) {
         printf("Use what?\n");
         return;
     }
 
-    item = sp + 1;
+    item = buffer + sp + 1;
 
     /* Make sure item is being carried or is in the current location */
     if (!carryingItem(item) && !itemIsHere(item)) {
@@ -478,7 +478,7 @@ void doUse()
     ++turnsPlayed;
 
     /* Use key */
-    if (!strcmp(item, "Key") && (currentLocation == VacantRoom)) { /*  */
+    if (!strcmp(item, "key") && (currentLocation == VacantRoom)) { /*  */
         printf("You insert the key in the door and it opens, revealing a tunnel.\n");
         Move[21][North] = 23;
         return;
@@ -567,9 +567,9 @@ void prompt()
     /* Remove trailing newline */
     buffer[strlen(buffer)-1] = '\0';
 
-    /* Convert buffer to uppercase */
+    /* Convert buffer to lower case */
     for (i = 0; i < strlen(buffer); i++) 
-        buffer[i] = toupper(buffer[i]);
+        buffer[i] = tolower(buffer[i]);
 }
 
 /* Do special things unrelated to command typed. */
@@ -624,13 +624,13 @@ void doActions()
     if (currentLocation == WolfTree) {
         switch (wolfState) {
             case 0:
-                printf("A wolf is circling around the tree. Matthew is up in the tree. You have to save him! If only you had some kind of weapon!\n");
+                printf("A wolf is circling around the tree. Matthew is up in the tree.\nYou have to save him! If only you had some kind of weapon!\n");
                 break;
             case 1:
-                printf("Matthew is afraid to come down from the tree. If only you had something to coax him with.\n");
+                printf("Matthew is afraid to come down from the tree. If only you had something to\ncoax him with.\n");
                 break;
             case 2:
-                printf("Congratulations! You succeeded and won the game. I hope you had as much fun playing the game as i did creating it.\n- Jeff Tranter <tranter@pobox.com>\n");
+                printf("Congratulations! You succeeded and won the game. I hope you had as much fun\nplaying the game as i did creating it.\n- Jeff Tranter <tranter@pobox.com>\n");
                 gameOver = 1;
                 return;
                 break;
@@ -660,7 +660,7 @@ void initialize()
 
     initptr(DescOfItem, "", "key", "pitchfork", "flashlight", "lamp", "oil", "candybar", "bottle", "doll", "toy car", "matches", "gold coin", "silver coin", "stale meat", "book", "cheese", "old radio", NULL);
 
-    initptr(DescOfLocation, "", "In the driveway near your car", "In the driveway", "In front of the garage", "In front of the barn", "At the door to the house", "In the garage", "In the workroom of the barn", "In the hayloft of the barn", "In the kitchen", "In the dining room", "At the bottom of the stairs", "In the drawing room", "In the study", "At the top of the stairs", "In a boy's bedroom", "In a girl's bedroom", "In the master bedroom next to\na bookcase", "In the servant's quarters", "In the basement laundry room", "In the furnace room", "In a vacant room next to a\nlocked door", "In the cistern", "In an underground tunnel. there are rats here", "In the woods near a trapdoor", "In the woods", "In the woods", "In the woods next to a tree", "In the woods", "In the woods", "In the woods", "In the woods", NULL);
+    initptr(DescOfLocation, "", "in the driveway near your car", "in the driveway", "in front of the garage", "in front of the barn", "at the door to the house", "in the garage", "in the workroom of the barn", "in the hayloft of the barn", "in the kitchen", "in the dining room", "at the bottom of the stairs", "in the drawing room", "in the study", "at the top of the stairs", "in a boy's bedroom", "in a girl's bedroom", "in the master bedroom next to a bookcase", "in the servant's quarters", "in the basement laundry room", "in the furnace room", "in a vacant room next to a locked door", "in the cistern", "in an underground tunnel. there are rats here", "in the woods near a trap door", "in the woods", "in the woods", "in the woods next to a tree", "in the woods", "in the woods", "in the woods", "in the woods", NULL);
 
     /* TODO: FIXME
     initw(Move "0,0,0,0,0,0,2,0,0,0,0,0,4,1,3,5,0,0,0,0,6,2,0,0,7,2,0,0,0,0,0,0,2,9,0,0,0,0,0,3,0,0,0,4,0,0,8,0,0,0,0,0,0,7,0,10,5,0,0,19,9,0,0,11,0,0,0,0,10,12,14,0,13,0,11,0,0,0,0,12,0,0,0,0,16,0,15,17,0,11,0,0,0,14,0,0,0,14,0,0,0,0,0,0,14,0,0,0,0,0,0,0,0,13,0,0,0,20,9,0,21,0,19,0,0,0,0,20,0,22,0,0,0,0,21,0,0,0, 24,21,0,0,0,0,29,23,0,26,0,0,26,0,24,0,0,0,27,25,29,0,0,0,0,26,28,0,0,0,0,29,31,27,0,0,28,24,30,26,0,0,31,0,0,29,0,0,0,30,0,29,0,0");
@@ -706,6 +706,7 @@ int main()
         while (!gameOver) {
             prompt();
             if (buffer[0] == '\0') {
+                ; /* do nothing for empty command line */
             } else if (buffer[0] == 'h') {
                 doHelp();
             } else if (buffer[0] == 'i') {
@@ -743,7 +744,7 @@ int main()
         printf("Game over after %d turns.\n", turnsPlayed);
         printf("%s", "Do you want to play again (y/n)? ");
         fgets(buffer, SIZEOFBUFFER-1, stdin);
-        if (toupper(buffer[0]) == 'N') {
+        if (tolower(buffer[0]) == 'n') {
             break;
         }
     }
