@@ -446,7 +446,7 @@ void doExamine()
 
     /* Examine old radio */
     if (!strcmp(item, "old radio")) {
-        printf("It is a 1940 Zenith 8-S-563 console with an 8A02 chassis. You'd turn it on but the electricity is off.\n");
+        printf("It is a 1940 Zenith 8-S-563 console with an 8A02 chassis.\nYou'd turn it on but the electricity is off.\n");
         return;
     }
 
@@ -493,7 +493,7 @@ void doUse()
 
     /* Use toy car */
     if (!strcmp(item, "toy car") && (currentLocation == WolfTree && wolfState == 1)) {
-        printf("You show Matthew the toy car and he comes down to take it. You take Matthew in your arms and carry him home.\n");
+        printf("You show Matthew the toy car and he comes down to take it.\nYou take Matthew in your arms and carry him home.\n");
         wolfState = 2;
         return;
     }
@@ -536,11 +536,11 @@ void doUse()
     /* Use bottle */
     if (!strcmp(item, "bottle")) {
         if (currentLocation == Cistern) {
-            printf("You fill the bottle with water from the cistern and take a drink. You no longer feel thirsty.\n");
+            printf("You fill the bottle with water from the cistern and take a drink.\nYou no longer feel thirsty.\n");
             drankWater = 1;
             return;
         } else {
-            printf("The bottle is empty. if only you had some water to fill it!\n");
+            printf("The bottle is empty. If only you had some water to fill it!\n");
             return;
         }
     }
@@ -576,11 +576,11 @@ void prompt()
 void doActions()
 {
     if ((turnsPlayed == 10) && !lampLit) {
-        printf("It will be getting dark soon. You need some kind of light or soon you won't be able to see.\n");
+        printf("It will be getting dark soon. You need some kind of light or soon you won't\nbe able to see.\n");
     }
 
     if ((turnsPlayed >= 60) && (!lampLit || (!itemIsHere("Lamp") && !carryingItem("Lamp")))) {
-        printf("It is dark out and you have no light. You stumble around for a while and then fall, hit your head, and pass out.\n");
+        printf("It is dark out and you have no light. You stumble around for a while and then\nfall, hit your head, and pass out.\n");
         gameOver = 1;
         return;
     }
@@ -660,11 +660,12 @@ void initialize()
 
     initptr(DescOfItem, "", "key", "pitchfork", "flashlight", "lamp", "oil", "candybar", "bottle", "doll", "toy car", "matches", "gold coin", "silver coin", "stale meat", "book", "cheese", "old radio", NULL);
 
-    initptr(DescOfLocation, "", "in the driveway near your car", "in the driveway", "in front of the garage", "in front of the barn", "at the door to the house", "in the garage", "in the workroom of the barn", "in the hayloft of the barn", "in the kitchen", "in the dining room", "at the bottom of the stairs", "in the drawing room", "in the study", "at the top of the stairs", "in a boy's bedroom", "in a girl's bedroom", "in the master bedroom next to a bookcase", "in the servant's quarters", "in the basement laundry room", "in the furnace room", "in a vacant room next to a locked door", "in the cistern", "in an underground tunnel. there are rats here", "in the woods near a trap door", "in the woods", "in the woods", "in the woods next to a tree", "in the woods", "in the woods", "in the woods", "in the woods", NULL);
+    initptr(DescOfLocation, "", "in the driveway near your car", "in the driveway", "in front of the garage", "in front of the barn", "at the door to the house", "in the garage", "in the workroom of the barn", "in the hayloft of the barn", "in the kitchen", "in the dining room", "at the bottom of the stairs", "in the drawing room", "in the study", "at the top of the stairs", "in a boy's bedroom", "in a girl's bedroom", "in the master bedroom next to a bookcase", "in the servant's quarters", "in the basement laundry room", "in the furnace room", "in a vacant room next to a locked door", "in the cistern", "in an underground tunnel. There are rats here", "in the woods near a trap door", "in the woods", "in the woods", "in the woods next to a tree", "in the woods", "in the woods", "in the woods", "in the woods", NULL);
 
-    /* TODO: FIXME
-    initw(Move "0,0,0,0,0,0,2,0,0,0,0,0,4,1,3,5,0,0,0,0,6,2,0,0,7,2,0,0,0,0,0,0,2,9,0,0,0,0,0,3,0,0,0,4,0,0,8,0,0,0,0,0,0,7,0,10,5,0,0,19,9,0,0,11,0,0,0,0,10,12,14,0,13,0,11,0,0,0,0,12,0,0,0,0,16,0,15,17,0,11,0,0,0,14,0,0,0,14,0,0,0,0,0,0,14,0,0,0,0,0,0,0,0,13,0,0,0,20,9,0,21,0,19,0,0,0,0,20,0,22,0,0,0,0,21,0,0,0, 24,21,0,0,0,0,29,23,0,26,0,0,26,0,24,0,0,0,27,25,29,0,0,0,0,26,28,0,0,0,0,29,31,27,0,0,28,24,30,26,0,0,31,0,0,29,0,0,0,30,0,29,0,0");
-    */
+    /* Need to do this in two parts because the string exceeds the BDS C 255 character limit. */
+    initw(Move, "0,0,0,0,0,0,2,0,0,0,0,0,4,1,3,5,0,0,0,0,6,2,0,0,7,2,0,0,0,0,0,0,2,9,0,0,0,0,0,3,0,0,0,4,0,0,8,0,0,0,0,0,0,7,0,10,5,0,0,19,9,0,0,11,0,0,0,0,10,12,14,0,13,0,11,0,0,0,0,12,0,0,0,0,16,0,15,17,0,11,0,0,0,14,0,0");
+
+    initw(Move[16], "0,14,0,0,0,0,0,0,14,0,0,0,0,0,0,0,0,13,0,0,0,20,9,0,21,0,19,0,0,0,0,20,0,22,0,0,0,0,21,0,0,0,24,21,0,0,0,0,29,23,0,26,0,0,26,0,24,0,0,0,27,25,29,0,0,0,0,26,28,0,0,0,0,29,31,27,0,0,28,24,30,26,0,0,31,0,0,29,0,0,0,30,0,29,0,0");
 
     /* Set inventory to default */
     setmem(Inventory, sizeof(Inventory[0])*MAXITEMS, 0);
