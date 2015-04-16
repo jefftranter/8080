@@ -22,8 +22,8 @@ import signal
 
 # Avoids an error when output piped, e.g. to "less"
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-# Addressing modes. Used as indices into opcode table.
 
+# Addressing modes. Used as indices into opcode table.
 implicit    = 0  # e.g. rts
 absolute    = 1  # e.g. lda $1234
 absoluteX   = 2  # e.g. lda $1234,x
@@ -93,242 +93,242 @@ opcodeTable = [
   [ "???", implicit ],    # 1F
 
   [ "jsr", absolute ],    # 20
-  [ "???", implicit ],    # 21
-  [ "???", implicit ],    # 22
-  [ "???", implicit ],    # 23
-  [ "???", implicit ],    # 24
-  [ "???", implicit ],    # 25
-  [ "???", implicit ],    # 26
-  [ "???", implicit ],    # 27
-  [ "???", implicit ],    # 28
-  [ "???", implicit ],    # 29
-  [ "???", implicit ],    # 2A
-  [ "???", implicit ],    # 2B
-  [ "???", implicit ],    # 2C
-  [ "???", implicit ],    # 2D
-  [ "???", implicit ],    # 2E
-  [ "???", implicit ],    # 2F
+  [ "XXX", implicit ],    # 21
+  [ "XXX", implicit ],    # 22
+  [ "XXX", implicit ],    # 23
+  [ "XXX", implicit ],    # 24
+  [ "XXX", implicit ],    # 25
+  [ "XXX", implicit ],    # 26
+  [ "XXX", implicit ],    # 27
+  [ "XXX", implicit ],    # 28
+  [ "XXX", implicit ],    # 29
+  [ "XXX", implicit ],    # 2A
+  [ "XXX", implicit ],    # 2B
+  [ "XXX", implicit ],    # 2C
+  [ "XXX", implicit ],    # 2D
+  [ "XXX", implicit ],    # 2E
+  [ "XXX", implicit ],    # 2F
 
-  [ "???", implicit ],    # 30
-  [ "???", implicit ],    # 31
-  [ "???", implicit ],    # 32
-  [ "???", implicit ],    # 33
-  [ "???", implicit ],    # 34
-  [ "???", implicit ],    # 35
-  [ "???", implicit ],    # 36
-  [ "???", implicit ],    # 37
-  [ "???", implicit ],    # 38
-  [ "???", implicit ],    # 39
-  [ "???", implicit ],    # 3A
-  [ "???", implicit ],    # 3B
-  [ "???", implicit ],    # 3C
-  [ "???", implicit ],    # 3D
-  [ "???", implicit ],    # 3E
-  [ "???", implicit ],    # 3F
+  [ "XXX", implicit ],    # 30
+  [ "XXX", implicit ],    # 31
+  [ "XXX", implicit ],    # 32
+  [ "XXX", implicit ],    # 33
+  [ "XXX", implicit ],    # 34
+  [ "XXX", implicit ],    # 35
+  [ "XXX", implicit ],    # 36
+  [ "XXX", implicit ],    # 37
+  [ "XXX", implicit ],    # 38
+  [ "XXX", implicit ],    # 39
+  [ "XXX", implicit ],    # 3A
+  [ "XXX", implicit ],    # 3B
+  [ "XXX", implicit ],    # 3C
+  [ "XXX", implicit ],    # 3D
+  [ "XXX", implicit ],    # 3E
+  [ "XXX", implicit ],    # 3F
 
-  [ "???", implicit ],    # 40
-  [ "???", implicit ],    # 41
-  [ "???", implicit ],    # 42
-  [ "???", implicit ],    # 43
-  [ "???", implicit ],    # 44
-  [ "???", implicit ],    # 45
-  [ "???", implicit ],    # 46
-  [ "???", implicit ],    # 47
-  [ "???", implicit ],    # 48
-  [ "???", implicit ],    # 49
-  [ "???", implicit ],    # 4A
-  [ "???", implicit ],    # 4B
-  [ "???", implicit ],    # 4C
-  [ "???", implicit ],    # 4D
-  [ "???", implicit ],    # 4E
-  [ "???", implicit ],    # 4F
+  [ "XXX", implicit ],    # 40
+  [ "XXX", implicit ],    # 41
+  [ "XXX", implicit ],    # 42
+  [ "XXX", implicit ],    # 43
+  [ "XXX", implicit ],    # 44
+  [ "XXX", implicit ],    # 45
+  [ "XXX", implicit ],    # 46
+  [ "XXX", implicit ],    # 47
+  [ "pha", implicit ],    # 48
+  [ "XXX", implicit ],    # 49
+  [ "XXX", implicit ],    # 4A
+  [ "XXX", implicit ],    # 4B
+  [ "jmp", absolute ],    # 4C
+  [ "XXX", implicit ],    # 4D
+  [ "XXX", implicit ],    # 4E
+  [ "XXX", implicit ],    # 4F
 
-  [ "???", implicit ],    # 50
-  [ "???", implicit ],    # 51
-  [ "???", implicit ],    # 52
-  [ "???", implicit ],    # 53
-  [ "???", implicit ],    # 54
-  [ "???", implicit ],    # 55
-  [ "???", implicit ],    # 56
-  [ "???", implicit ],    # 57
-  [ "???", implicit ],    # 58
-  [ "???", implicit ],    # 59
-  [ "???", implicit ],    # 5A
-  [ "???", implicit ],    # 5B
-  [ "???", implicit ],    # 5C
-  [ "???", implicit ],    # 5D
-  [ "???", implicit ],    # 5E
-  [ "???", implicit ],    # 5F
+  [ "XXX", implicit ],    # 50
+  [ "XXX", implicit ],    # 51
+  [ "XXX", implicit ],    # 52
+  [ "XXX", implicit ],    # 53
+  [ "XXX", implicit ],    # 54
+  [ "XXX", implicit ],    # 55
+  [ "XXX", implicit ],    # 56
+  [ "XXX", implicit ],    # 57
+  [ "XXX", implicit ],    # 58
+  [ "XXX", implicit ],    # 59
+  [ "XXX", implicit ],    # 5A
+  [ "XXX", implicit ],    # 5B
+  [ "XXX", implicit ],    # 5C
+  [ "XXX", implicit ],    # 5D
+  [ "XXX", implicit ],    # 5E
+  [ "XXX", implicit ],    # 5F
 
-  [ "???", implicit ],    # 60
-  [ "???", implicit ],    # 61
-  [ "???", implicit ],    # 62
-  [ "???", implicit ],    # 63
-  [ "???", implicit ],    # 64
-  [ "???", implicit ],    # 65
-  [ "???", implicit ],    # 66
-  [ "???", implicit ],    # 67
-  [ "???", implicit ],    # 68
-  [ "???", implicit ],    # 69
-  [ "???", implicit ],    # 6A
-  [ "???", implicit ],    # 6B
-  [ "???", implicit ],    # 6C
-  [ "???", implicit ],    # 6D
-  [ "???", implicit ],    # 6E
-  [ "???", implicit ],    # 6F
+  [ "rts", implicit ],    # 60
+  [ "XXX", implicit ],    # 61
+  [ "XXX", implicit ],    # 62
+  [ "XXX", implicit ],    # 63
+  [ "XXX", implicit ],    # 64
+  [ "XXX", implicit ],    # 65
+  [ "XXX", implicit ],    # 66
+  [ "XXX", implicit ],    # 67
+  [ "pla", implicit ],    # 68
+  [ "adc", immediate ],   # 69
+  [ "XXX", implicit ],    # 6A
+  [ "XXX", implicit ],    # 6B
+  [ "XXX", implicit ],    # 6C
+  [ "XXX", implicit ],    # 6D
+  [ "XXX", implicit ],    # 6E
+  [ "XXX", implicit ],    # 6F
 
-  [ "???", implicit ],    # 70
-  [ "???", implicit ],    # 71
-  [ "???", implicit ],    # 72
-  [ "???", implicit ],    # 73
-  [ "???", implicit ],    # 74
-  [ "???", implicit ],    # 75
-  [ "???", implicit ],    # 76
-  [ "???", implicit ],    # 77
-  [ "???", implicit ],    # 78
-  [ "???", implicit ],    # 79
-  [ "???", implicit ],    # 7A
-  [ "???", implicit ],    # 7B
-  [ "???", implicit ],    # 7C
-  [ "???", implicit ],    # 7D
-  [ "???", implicit ],    # 7E
-  [ "???", implicit ],    # 7F
+  [ "XXX", implicit ],    # 70
+  [ "XXX", implicit ],    # 71
+  [ "XXX", implicit ],    # 72
+  [ "XXX", implicit ],    # 73
+  [ "XXX", implicit ],    # 74
+  [ "XXX", implicit ],    # 75
+  [ "XXX", implicit ],    # 76
+  [ "XXX", implicit ],    # 77
+  [ "XXX", implicit ],    # 78
+  [ "XXX", implicit ],    # 79
+  [ "XXX", implicit ],    # 7A
+  [ "XXX", implicit ],    # 7B
+  [ "XXX", implicit ],    # 7C
+  [ "XXX", implicit ],    # 7D
+  [ "XXX", implicit ],    # 7E
+  [ "XXX", implicit ],    # 7F
 
-  [ "???", implicit ],    # 80
-  [ "???", implicit ],    # 81
-  [ "???", implicit ],    # 82
-  [ "???", implicit ],    # 83
-  [ "???", implicit ],    # 84
-  [ "???", implicit ],    # 85
-  [ "???", implicit ],    # 86
-  [ "???", implicit ],    # 87
-  [ "???", implicit ],    # 88
-  [ "???", implicit ],    # 89
-  [ "???", implicit ],    # 8A
-  [ "???", implicit ],    # 8B
-  [ "???", implicit ],    # 8C
+  [ "XXX", implicit ],    # 80
+  [ "XXX", implicit ],    # 81
+  [ "XXX", implicit ],    # 82
+  [ "XXX", implicit ],    # 83
+  [ "sty", zeroPage ],    # 84
+  [ "sta", zeroPage ],    # 85
+  [ "stx", zeroPage ],    # 86
+  [ "XXX", implicit ],    # 87
+  [ "XXX", implicit ],    # 88
+  [ "XXX", implicit ],    # 89
+  [ "XXX", implicit ],    # 8A
+  [ "XXX", implicit ],    # 8B
+  [ "XXX", implicit ],    # 8C
   [ "sta", absolute ],    # 8D
-  [ "???", implicit ],    # 8E
-  [ "???", implicit ],    # 8F
+  [ "XXX", implicit ],    # 8E
+  [ "XXX", implicit ],    # 8F
 
-  [ "???", implicit ],    # 90
-  [ "???", implicit ],    # 91
-  [ "???", implicit ],    # 92
-  [ "???", implicit ],    # 93
-  [ "???", implicit ],    # 94
-  [ "???", implicit ],    # 95
-  [ "???", implicit ],    # 96
-  [ "???", implicit ],    # 97
-  [ "???", implicit ],    # 98
-  [ "???", implicit ],    # 99
+  [ "bcc", relative ],    # 90
+  [ "XXX", implicit ],    # 91
+  [ "XXX", implicit ],    # 92
+  [ "XXX", implicit ],    # 93
+  [ "XXX", implicit ],    # 94
+  [ "XXX", implicit ],    # 95
+  [ "XXX", implicit ],    # 96
+  [ "XXX", implicit ],    # 97
+  [ "tya", implicit ],    # 98
+  [ "XXX", implicit ],    # 99
   [ "txs", implicit ],    # 9A
-  [ "???", implicit ],    # 9B
-  [ "???", implicit ],    # 9C
-  [ "???", implicit ],    # 9D
-  [ "???", implicit ],    # 9E
-  [ "???", implicit ],    # 9F
+  [ "XXX", implicit ],    # 9B
+  [ "XXX", implicit ],    # 9C
+  [ "XXX", implicit ],    # 9D
+  [ "XXX", implicit ],    # 9E
+  [ "XXX", implicit ],    # 9F
 
   [ "ldy", immediate ],   # A0
-  [ "???", implicit ],    # A1
+  [ "XXX", implicit ],    # A1
   [ "ldx", immediate ],   # A2
-  [ "???", implicit ],    # A3
-  [ "???", implicit ],    # A4
-  [ "???", implicit ],    # A5
-  [ "???", implicit ],    # A6
-  [ "???", implicit ],    # A7
-  [ "???", implicit ],    # A8
+  [ "XXX", implicit ],    # A3
+  [ "ldy", zeroPage ],    # A4
+  [ "lda", zeroPage ],    # A5
+  [ "ldx", zeroPage ],    # A6
+  [ "XXX", implicit ],    # A7
+  [ "tay", implicit ],    # A8
   [ "lda", immediate ],   # A9
-  [ "???", implicit ],    # AA
-  [ "???", implicit ],    # AB
-  [ "???", implicit ],    # AC
-  [ "???", implicit ],    # AD
-  [ "???", implicit ],    # AE
-  [ "???", implicit ],    # AF
+  [ "XXX", implicit ],    # AA
+  [ "XXX", implicit ],    # AB
+  [ "XXX", implicit ],    # AC
+  [ "XXX", implicit ],    # AD
+  [ "XXX", implicit ],    # AE
+  [ "XXX", implicit ],    # AF
 
-  [ "???", implicit ],    # B0
-  [ "???", implicit ],    # B1
-  [ "???", implicit ],    # B2
-  [ "???", implicit ],    # B3
-  [ "???", implicit ],    # B4
-  [ "???", implicit ],    # B5
-  [ "???", implicit ],    # B6
-  [ "???", implicit ],    # B7
-  [ "???", implicit ],    # B8
-  [ "???", implicit ],    # B9
-  [ "???", implicit ],    # BA
-  [ "???", implicit ],    # BB
-  [ "???", implicit ],    # BC
-  [ "???", implicit ],    # BD
-  [ "???", implicit ],    # BE
-  [ "???", implicit ],    # BF
+  [ "XXX", implicit ],    # B0
+  [ "lda", indirectY ],   # B1
+  [ "XXX", implicit ],    # B2
+  [ "XXX", implicit ],    # B3
+  [ "XXX", implicit ],    # B4
+  [ "XXX", implicit ],    # B5
+  [ "XXX", implicit ],    # B6
+  [ "XXX", implicit ],    # B7
+  [ "XXX", implicit ],    # B8
+  [ "XXX", implicit ],    # B9
+  [ "XXX", implicit ],    # BA
+  [ "XXX", implicit ],    # BB
+  [ "XXX", implicit ],    # BC
+  [ "XXX", implicit ],    # BD
+  [ "XXX", implicit ],    # BE
+  [ "XXX", implicit ],    # BF
 
-  [ "???", implicit ],    # C0
-  [ "???", implicit ],    # C1
-  [ "???", implicit ],    # C2
-  [ "???", implicit ],    # C3
-  [ "???", implicit ],    # C4
-  [ "???", implicit ],    # C5
-  [ "???", implicit ],    # C6
-  [ "???", implicit ],    # C7
-  [ "???", implicit ],    # C8
-  [ "???", implicit ],    # C9
-  [ "???", implicit ],    # CA
-  [ "???", implicit ],    # CB
-  [ "???", implicit ],    # CC
-  [ "???", implicit ],    # CD
-  [ "???", implicit ],    # CE
-  [ "???", implicit ],    # CF
+  [ "cpy", immediate ],   # C0
+  [ "XXX", implicit ],    # C1
+  [ "XXX", implicit ],    # C2
+  [ "XXX", implicit ],    # C3
+  [ "XXX", implicit ],    # C4
+  [ "XXX", implicit ],    # C5
+  [ "XXX", implicit ],    # C6
+  [ "XXX", implicit ],    # C7
+  [ "iny", implicit ],    # C8
+  [ "cmp", immediate ],   # C9
+  [ "XXX", implicit ],    # CA
+  [ "XXX", implicit ],    # CB
+  [ "XXX", implicit ],    # CC
+  [ "XXX", implicit ],    # CD
+  [ "XXX", implicit ],    # CE
+  [ "XXX", implicit ],    # CF
 
-  [ "???", implicit ],    # D0
-  [ "???", implicit ],    # D1
-  [ "???", implicit ],    # D2
-  [ "???", implicit ],    # D3
-  [ "???", implicit ],    # D4
-  [ "???", implicit ],    # D5
-  [ "???", implicit ],    # D6
-  [ "???", implicit ],    # D7
+  [ "bne", relative ],    # D0
+  [ "XXX", implicit ],    # D1
+  [ "XXX", implicit ],    # D2
+  [ "XXX", implicit ],    # D3
+  [ "XXX", implicit ],    # D4
+  [ "XXX", implicit ],    # D5
+  [ "XXX", implicit ],    # D6
+  [ "XXX", implicit ],    # D7
   [ "cld", implicit ],    # D8
-  [ "???", implicit ],    # D9
-  [ "???", implicit ],    # DA
-  [ "???", implicit ],    # DB
-  [ "???", implicit ],    # DC
-  [ "???", implicit ],    # DD
-  [ "???", implicit ],    # DE
-  [ "???", implicit ],    # DF
+  [ "XXX", implicit ],    # D9
+  [ "XXX", implicit ],    # DA
+  [ "XXX", implicit ],    # DB
+  [ "XXX", implicit ],    # DC
+  [ "XXX", implicit ],    # DD
+  [ "XXX", implicit ],    # DE
+  [ "XXX", implicit ],    # DF
 
-  [ "???", implicit ],    # E0
-  [ "???", implicit ],    # E1
-  [ "???", implicit ],    # E2
-  [ "???", implicit ],    # E3
-  [ "???", implicit ],    # E4
-  [ "???", implicit ],    # E5
-  [ "???", implicit ],    # E6
-  [ "???", implicit ],    # E7
-  [ "???", implicit ],    # E8
-  [ "???", implicit ],    # E9
-  [ "???", implicit ],    # EA
-  [ "???", implicit ],    # EB
-  [ "???", implicit ],    # EC
-  [ "???", implicit ],    # ED
-  [ "???", implicit ],    # EE
-  [ "???", implicit ],    # EF
+  [ "XXX", implicit ],    # E0
+  [ "XXX", implicit ],    # E1
+  [ "XXX", implicit ],    # E2
+  [ "XXX", implicit ],    # E3
+  [ "XXX", implicit ],    # E4
+  [ "XXX", implicit ],    # E5
+  [ "inc", zeroPage ],    # E6
+  [ "XXX", implicit ],    # E7
+  [ "XXX", implicit ],    # E8
+  [ "XXX", implicit ],    # E9
+  [ "nop", implicit ],    # EA
+  [ "XXX", implicit ],    # EB
+  [ "XXX", implicit ],    # EC
+  [ "XXX", implicit ],    # ED
+  [ "XXX", implicit ],    # EE
+  [ "XXX", implicit ],    # EF
 
-  [ "???", implicit ],    # F0
-  [ "???", implicit ],    # F1
-  [ "???", implicit ],    # F2
-  [ "???", implicit ],    # F3
-  [ "???", implicit ],    # F4
-  [ "???", implicit ],    # F5
-  [ "???", implicit ],    # F6
-  [ "???", implicit ],    # F7
-  [ "???", implicit ],    # F8
-  [ "???", implicit ],    # F9
-  [ "???", implicit ],    # FA
-  [ "???", implicit ],    # FB
-  [ "???", implicit ],    # FC
-  [ "???", implicit ],    # FD
-  [ "???", implicit ],    # FE
-  [ "???", implicit ],    # FF
+  [ "beq", relative ],    # F0
+  [ "XXX", implicit ],    # F1
+  [ "XXX", implicit ],    # F2
+  [ "XXX", implicit ],    # F3
+  [ "XXX", implicit ],    # F4
+  [ "XXX", implicit ],    # F5
+  [ "XXX", implicit ],    # F6
+  [ "XXX", implicit ],    # F7
+  [ "XXX", implicit ],    # F8
+  [ "XXX", implicit ],    # F9
+  [ "XXX", implicit ],    # FA
+  [ "XXX", implicit ],    # FB
+  [ "XXX", implicit ],    # FC
+  [ "XXX", implicit ],    # FD
+  [ "XXX", implicit ],    # FE
+  [ "XXX", implicit ],    # FF
 
 ]
 
@@ -527,12 +527,16 @@ while True:
                 line += "    (%s%s)" % (formatByte(op2), formatByte(op1))
 
         elif (mode == relative):
-            if args.format == 1:
-                line += "FIXME    $%s%s" % (formatByte(op2), formatByte(op1))
-            elif args.format == 2:
-                line += "    %s%s%s" % (formatByte(op2), formatByte(op1), case("h"))
+            if (op1 < 128):
+                dest = address + op1 + 2
             else:
-                line += "    %s%s" % (formatByte(op2), formatByte(op1))
+                dest = address - (256 - op1) + 2
+            if args.format == 1:
+                line += "    $%s" % formatAddress(dest)
+            elif args.format == 2:
+                line += "    %s%s" % (formatAddress(desdt), case("h"))
+            else:
+                line += "    %s%s" % (formatAddress(dest), formatByte(op1))
 
         elif (mode == zeroPage):
             if args.format == 1:
