@@ -80,8 +80,8 @@ opcodeTable = [
   [ "???", implicit ],    # 12
   [ "???", implicit ],    # 13
   [ "???", implicit ],    # 14
-  [ "ora", zeroPageX ],    # 15
-  [ "asl", zeroPageX ],    # 16
+  [ "ora", zeroPageX ],   # 15
+  [ "asl", zeroPageX ],   # 16
   [ "???", implicit ],    # 17
   [ "clc", implicit ],    # 18
   [ "ora", absoluteY ],   # 19
@@ -93,123 +93,123 @@ opcodeTable = [
   [ "???", implicit ],    # 1F
 
   [ "jsr", absolute ],    # 20
-  [ "XXX", implicit ],    # 21
-  [ "XXX", implicit ],    # 22
-  [ "XXX", implicit ],    # 23
-  [ "XXX", implicit ],    # 24
-  [ "XXX", implicit ],    # 25
-  [ "XXX", implicit ],    # 26
-  [ "XXX", implicit ],    # 27
-  [ "XXX", implicit ],    # 28
-  [ "XXX", implicit ],    # 29
-  [ "XXX", implicit ],    # 2A
-  [ "XXX", implicit ],    # 2B
-  [ "XXX", implicit ],    # 2C
-  [ "XXX", implicit ],    # 2D
-  [ "XXX", implicit ],    # 2E
-  [ "XXX", implicit ],    # 2F
+  [ "and", indirectX ],   # 21
+  [ "???", implicit ],    # 22
+  [ "???", implicit ],    # 23
+  [ "bit", zeroPage ],    # 24
+  [ "and", zeroPage ],    # 25
+  [ "rol", zeroPage ],    # 26
+  [ "???", implicit ],    # 27
+  [ "plp", implicit ],    # 28
+  [ "and", immediate ],   # 29
+  [ "rol", accumulator ], # 2A
+  [ "???", implicit ],    # 2B
+  [ "bit", absolute ],    # 2C
+  [ "and", absolute ],    # 2D
+  [ "rol", absolute ],    # 2E
+  [ "???", implicit ],    # 2F
 
-  [ "XXX", implicit ],    # 30
-  [ "XXX", implicit ],    # 31
-  [ "XXX", implicit ],    # 32
-  [ "XXX", implicit ],    # 33
-  [ "XXX", implicit ],    # 34
-  [ "XXX", implicit ],    # 35
-  [ "XXX", implicit ],    # 36
-  [ "XXX", implicit ],    # 37
-  [ "XXX", implicit ],    # 38
-  [ "XXX", implicit ],    # 39
-  [ "XXX", implicit ],    # 3A
-  [ "XXX", implicit ],    # 3B
-  [ "XXX", implicit ],    # 3C
-  [ "XXX", implicit ],    # 3D
-  [ "XXX", implicit ],    # 3E
-  [ "XXX", implicit ],    # 3F
+  [ "bmi", relative ],    # 30
+  [ "and", indirectY ],   # 31
+  [ "???", implicit ],    # 32
+  [ "???", implicit ],    # 33
+  [ "???", implicit ],    # 34
+  [ "and", indirectX ],   # 35
+  [ "rol", indirectX ],   # 36
+  [ "???", implicit ],    # 37
+  [ "sec", implicit ],    # 38
+  [ "and", absoluteY ],   # 39
+  [ "???", implicit ],    # 3A
+  [ "???", implicit ],    # 3B
+  [ "???", implicit ],    # 3C
+  [ "and", absoluteX ],   # 3D
+  [ "rol", absoluteX ],   # 3E
+  [ "???", implicit ],    # 3F
 
-  [ "XXX", implicit ],    # 40
-  [ "XXX", implicit ],    # 41
-  [ "XXX", implicit ],    # 42
-  [ "XXX", implicit ],    # 43
-  [ "XXX", implicit ],    # 44
-  [ "XXX", implicit ],    # 45
-  [ "XXX", implicit ],    # 46
-  [ "XXX", implicit ],    # 47
+  [ "rti", implicit ],    # 40
+  [ "eor", indirectX ],   # 41
+  [ "???", implicit ],    # 42
+  [ "???", implicit ],    # 43
+  [ "???", implicit ],    # 44
+  [ "eor", zeroPage ],    # 45
+  [ "lsr", zeroPage ],    # 46
+  [ "???", implicit ],    # 47
   [ "pha", implicit ],    # 48
-  [ "XXX", implicit ],    # 49
-  [ "XXX", implicit ],    # 4A
-  [ "XXX", implicit ],    # 4B
+  [ "eor", immediate ],   # 49
+  [ "lsr", accumulator ], # 4A
+  [ "???", implicit ],    # 4B
   [ "jmp", absolute ],    # 4C
-  [ "XXX", implicit ],    # 4D
-  [ "XXX", implicit ],    # 4E
-  [ "XXX", implicit ],    # 4F
+  [ "eor", absolute ],    # 4D
+  [ "lsr", absolute ],    # 4E
+  [ "???", implicit ],    # 4F
 
-  [ "XXX", implicit ],    # 50
-  [ "XXX", implicit ],    # 51
-  [ "XXX", implicit ],    # 52
-  [ "XXX", implicit ],    # 53
-  [ "XXX", implicit ],    # 54
-  [ "XXX", implicit ],    # 55
-  [ "XXX", implicit ],    # 56
-  [ "XXX", implicit ],    # 57
-  [ "XXX", implicit ],    # 58
-  [ "XXX", implicit ],    # 59
-  [ "XXX", implicit ],    # 5A
-  [ "XXX", implicit ],    # 5B
-  [ "XXX", implicit ],    # 5C
-  [ "XXX", implicit ],    # 5D
-  [ "XXX", implicit ],    # 5E
-  [ "XXX", implicit ],    # 5F
+  [ "bvc", relative ],    # 50
+  [ "eor", indirectY ],   # 51
+  [ "???", implicit ],    # 52
+  [ "???", implicit ],    # 53
+  [ "???", implicit ],    # 54
+  [ "eor", indirectX ],   # 55
+  [ "lsr", indirectX ],   # 56
+  [ "???", implicit ],    # 57
+  [ "cli", implicit ],    # 58
+  [ "eor", absoluteY ],   # 59
+  [ "???", implicit ],    # 5A
+  [ "???", implicit ],    # 5B
+  [ "???", implicit ],    # 5C
+  [ "eor", absoluteX ],   # 5D
+  [ "lsr", absoluteX ],   # 5E
+  [ "???", implicit ],    # 5F
 
   [ "rts", implicit ],    # 60
-  [ "XXX", implicit ],    # 61
-  [ "XXX", implicit ],    # 62
-  [ "XXX", implicit ],    # 63
-  [ "XXX", implicit ],    # 64
-  [ "XXX", implicit ],    # 65
-  [ "XXX", implicit ],    # 66
-  [ "XXX", implicit ],    # 67
+  [ "adc", indirectX ],   # 61
+  [ "???", implicit ],    # 62
+  [ "???", implicit ],    # 63
+  [ "???", implicit ],    # 64
+  [ "adc", zeroPage ],    # 65
+  [ "ror", zeroPage ],    # 66
+  [ "???", implicit ],    # 67
   [ "pla", implicit ],    # 68
   [ "adc", immediate ],   # 69
-  [ "XXX", implicit ],    # 6A
-  [ "XXX", implicit ],    # 6B
-  [ "XXX", implicit ],    # 6C
-  [ "XXX", implicit ],    # 6D
-  [ "XXX", implicit ],    # 6E
-  [ "XXX", implicit ],    # 6F
+  [ "ror", accumulator ], # 6A
+  [ "???", implicit ],    # 6B
+  [ "jmp", indirect ],    # 6C
+  [ "adc", absolute ],    # 6D
+  [ "ror", absolute ],    # 6E
+  [ "???", implicit ],    # 6F
 
-  [ "XXX", implicit ],    # 70
-  [ "XXX", implicit ],    # 71
-  [ "XXX", implicit ],    # 72
-  [ "XXX", implicit ],    # 73
-  [ "XXX", implicit ],    # 74
-  [ "XXX", implicit ],    # 75
-  [ "XXX", implicit ],    # 76
-  [ "XXX", implicit ],    # 77
-  [ "XXX", implicit ],    # 78
-  [ "XXX", implicit ],    # 79
-  [ "XXX", implicit ],    # 7A
-  [ "XXX", implicit ],    # 7B
-  [ "XXX", implicit ],    # 7C
-  [ "XXX", implicit ],    # 7D
-  [ "XXX", implicit ],    # 7E
-  [ "XXX", implicit ],    # 7F
+  [ "bvs", relative ],    # 70
+  [ "adc", indirectY ],   # 71
+  [ "???", implicit ],    # 72
+  [ "???", implicit ],    # 73
+  [ "???", implicit ],    # 74
+  [ "adc", zeroPageX ],   # 75
+  [ "ror", zeroPageX ],   # 76
+  [ "???", implicit ],    # 77
+  [ "sei", implicit ],    # 78
+  [ "adc", absoluteY ],   # 79
+  [ "???", implicit ],    # 7A
+  [ "???", implicit ],    # 7B
+  [ "???", implicit ],    # 7C
+  [ "adc", absoluteX ],   # 7D
+  [ "ror", absoluteX ],   # 7E
+  [ "???", implicit ],    # 7F
 
-  [ "XXX", implicit ],    # 80
-  [ "XXX", implicit ],    # 81
-  [ "XXX", implicit ],    # 82
-  [ "XXX", implicit ],    # 83
+  [ "???", implicit ],    # 80
+  [ "sta", indirectX ],   # 81
+  [ "???", implicit ],    # 82
+  [ "???", implicit ],    # 83
   [ "sty", zeroPage ],    # 84
   [ "sta", zeroPage ],    # 85
   [ "stx", zeroPage ],    # 86
-  [ "XXX", implicit ],    # 87
-  [ "XXX", implicit ],    # 88
-  [ "XXX", implicit ],    # 89
-  [ "XXX", implicit ],    # 8A
-  [ "XXX", implicit ],    # 8B
-  [ "XXX", implicit ],    # 8C
+  [ "???", implicit ],    # 87
+  [ "dey", implicit ],    # 88
+  [ "???", implicit ],    # 89
+  [ "txa", implicit ],    # 8A
+  [ "???", implicit ],    # 8B
+  [ "sty", absolute ],    # 8C
   [ "sta", absolute ],    # 8D
-  [ "XXX", implicit ],    # 8E
-  [ "XXX", implicit ],    # 8F
+  [ "stx", absolute ],    # 8E
+  [ "???", implicit ],    # 8F
 
   [ "bcc", relative ],    # 90
   [ "XXX", implicit ],    # 91
@@ -314,21 +314,21 @@ opcodeTable = [
   [ "XXX", implicit ],    # EF
 
   [ "beq", relative ],    # F0
-  [ "XXX", implicit ],    # F1
+  [ "sbc", indirectY ],   # F1
   [ "XXX", implicit ],    # F2
   [ "XXX", implicit ],    # F3
   [ "XXX", implicit ],    # F4
-  [ "XXX", implicit ],    # F5
-  [ "XXX", implicit ],    # F6
+  [ "sbc", zeroPageX ],   # F5
+  [ "inc", zeroPageX ],   # F6
   [ "XXX", implicit ],    # F7
-  [ "XXX", implicit ],    # F8
-  [ "XXX", implicit ],    # F9
+  [ "sed", implicit ],    # F8
+  [ "sbc", absoluteY ],   # F9
   [ "XXX", implicit ],    # FA
   [ "XXX", implicit ],    # FB
   [ "XXX", implicit ],    # FC
-  [ "XXX", implicit ],    # FD
-  [ "XXX", implicit ],    # FE
-  [ "XXX", implicit ],    # FF
+  [ "sbc", absoluteX ],   # FD
+  [ "inc", absoluteX ],   # FE
+  [ "???", implicit ],    # FF
 
 ]
 
@@ -400,13 +400,13 @@ except FileNotFoundError:
 # Print initial origin address
 if args.nolist == False:
     if args.format == 1:
-        print("%04X            %s     $%04X" % (address, case("org"), address))
+        print("%04X            %s    $%04X" % (address, case("org"), address))
     elif args.format == 2:
-        print("%04X            %s     %04X%s" % (address, case("org"), address, case("h")))
+        print("%04X            %s    %04X%s" % (address, case("org"), address, case("h")))
     elif args.format == 3:
-        print("%04X            %s     %04X" % (address, case("org"), address))
+        print("%04X            %s    %04X" % (address, case("org"), address))
     else:
-        print("%06o               %s     %06o" % (address, case("org"), address))
+        print("%06o               %s    %06o" % (address, case("org"), address))
 
 while True:
     try:
@@ -430,8 +430,6 @@ while True:
         mode = opcodeTable[op][1] # Get addressing mode
 
         n = lengthTable[mode] # Look up number of instruction bytes
-
-#       print("*** mnem =", mnem, "mode =", mode, "len =", n)
 
         # Print instruction bytes
         if (n == 1):
