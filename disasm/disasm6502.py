@@ -460,7 +460,19 @@ while True:
         if args.nolist == True:
             line += " "
 
-        line += mnem
+        # Special check for invalid op code.
+        if (mode == implicit and mnem == "???"):
+            if isprint(chr(op)):
+                line += ".byte  '%c'" % op
+            else:
+                if args.format == 1:
+                    line += ".byte  $%s" % formatByte(op)
+                elif args.format == 2:
+                    line += ".byte  %s%s" % (formatByte(op), case("h"))
+                else:
+                    line += ".byte  %s" % formatByte(op)
+        else:
+            line += mnem
 
         if (mode == absolute):
             if args.format == 1:
