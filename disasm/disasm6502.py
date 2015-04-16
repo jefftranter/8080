@@ -212,120 +212,120 @@ opcodeTable = [
   [ "???", implicit ],    # 8F
 
   [ "bcc", relative ],    # 90
-  [ "XXX", implicit ],    # 91
-  [ "XXX", implicit ],    # 92
-  [ "XXX", implicit ],    # 93
-  [ "XXX", implicit ],    # 94
-  [ "XXX", implicit ],    # 95
-  [ "XXX", implicit ],    # 96
-  [ "XXX", implicit ],    # 97
+  [ "sta", indirectY ],   # 91
+  [ "???", implicit ],    # 92
+  [ "???", implicit ],    # 93
+  [ "sty", zeroPageX ],   # 94
+  [ "sta", zeroPageX ],   # 95
+  [ "sty", zeroPageY ],   # 96
+  [ "???", implicit ],    # 97
   [ "tya", implicit ],    # 98
-  [ "XXX", implicit ],    # 99
+  [ "sta", absoluteY ],   # 99
   [ "txs", implicit ],    # 9A
-  [ "XXX", implicit ],    # 9B
-  [ "XXX", implicit ],    # 9C
-  [ "XXX", implicit ],    # 9D
-  [ "XXX", implicit ],    # 9E
-  [ "XXX", implicit ],    # 9F
+  [ "???", implicit ],    # 9B
+  [ "???", implicit ],    # 9C
+  [ "sta", absoluteX ],   # 9D
+  [ "???", implicit ],    # 9E
+  [ "???", implicit ],    # 9F
 
   [ "ldy", immediate ],   # A0
-  [ "XXX", implicit ],    # A1
+  [ "lda", indirectX ],   # A1
   [ "ldx", immediate ],   # A2
-  [ "XXX", implicit ],    # A3
+  [ "???", implicit ],    # A3
   [ "ldy", zeroPage ],    # A4
   [ "lda", zeroPage ],    # A5
   [ "ldx", zeroPage ],    # A6
-  [ "XXX", implicit ],    # A7
+  [ "???", implicit ],    # A7
   [ "tay", implicit ],    # A8
   [ "lda", immediate ],   # A9
-  [ "XXX", implicit ],    # AA
-  [ "XXX", implicit ],    # AB
-  [ "XXX", implicit ],    # AC
-  [ "XXX", implicit ],    # AD
-  [ "XXX", implicit ],    # AE
-  [ "XXX", implicit ],    # AF
+  [ "tax", implicit ],    # AA
+  [ "???", implicit ],    # AB
+  [ "ldy", absolute ],    # AC
+  [ "lda", absolute ],    # AD
+  [ "ldx", absolute ],    # AE
+  [ "???", implicit ],    # AF
 
-  [ "XXX", implicit ],    # B0
+  [ "bcs", relative ],    # B0
   [ "lda", indirectY ],   # B1
-  [ "XXX", implicit ],    # B2
-  [ "XXX", implicit ],    # B3
-  [ "XXX", implicit ],    # B4
-  [ "XXX", implicit ],    # B5
-  [ "XXX", implicit ],    # B6
-  [ "XXX", implicit ],    # B7
-  [ "XXX", implicit ],    # B8
-  [ "XXX", implicit ],    # B9
-  [ "XXX", implicit ],    # BA
-  [ "XXX", implicit ],    # BB
-  [ "XXX", implicit ],    # BC
-  [ "XXX", implicit ],    # BD
-  [ "XXX", implicit ],    # BE
-  [ "XXX", implicit ],    # BF
+  [ "???", implicit ],    # B2
+  [ "???", implicit ],    # B3
+  [ "ldy", zeroPageX ],   # B4
+  [ "lda", zeroPageX ],   # B5
+  [ "ldx", zeroPageY ],   # B6
+  [ "???", implicit ],    # B7
+  [ "clv", implicit ],    # B8
+  [ "lda", absoluteY ],   # B9
+  [ "tsx", implicit ],    # BA
+  [ "???", implicit ],    # BB
+  [ "ldy", absoluteX ],   # BC
+  [ "lda", absoluteX ],   # BD
+  [ "ldx", absoluteY],    # BE
+  [ "???", implicit ],    # BF
 
   [ "cpy", immediate ],   # C0
-  [ "XXX", implicit ],    # C1
-  [ "XXX", implicit ],    # C2
-  [ "XXX", implicit ],    # C3
-  [ "XXX", implicit ],    # C4
-  [ "XXX", implicit ],    # C5
-  [ "XXX", implicit ],    # C6
-  [ "XXX", implicit ],    # C7
+  [ "cmp", indirectX ],   # C1
+  [ "???", implicit ],    # C2
+  [ "???", implicit ],    # C3
+  [ "cpy", zeroPage ],    # C4
+  [ "cmp", zeroPage ],    # C5
+  [ "dec", zeroPage ],    # C6
+  [ "???", implicit ],    # C7
   [ "iny", implicit ],    # C8
   [ "cmp", immediate ],   # C9
-  [ "XXX", implicit ],    # CA
-  [ "XXX", implicit ],    # CB
-  [ "XXX", implicit ],    # CC
-  [ "XXX", implicit ],    # CD
-  [ "XXX", implicit ],    # CE
-  [ "XXX", implicit ],    # CF
+  [ "dex", implicit ],    # CA
+  [ "???", implicit ],    # CB
+  [ "cpy", absolute ],    # CC
+  [ "cmp", absolute ],    # CD
+  [ "dec", absolute ],    # CE
+  [ "???", implicit ],    # CF
 
   [ "bne", relative ],    # D0
-  [ "XXX", implicit ],    # D1
-  [ "XXX", implicit ],    # D2
-  [ "XXX", implicit ],    # D3
-  [ "XXX", implicit ],    # D4
-  [ "XXX", implicit ],    # D5
-  [ "XXX", implicit ],    # D6
-  [ "XXX", implicit ],    # D7
+  [ "cmp", indirectY ],   # D1
+  [ "???", implicit ],    # D2
+  [ "???", implicit ],    # D3
+  [ "???", implicit ],    # D4
+  [ "cmp", zeroPageX ],   # D5
+  [ "dec", zeroPageX ],   # D6
+  [ "???", implicit ],    # D7
   [ "cld", implicit ],    # D8
-  [ "XXX", implicit ],    # D9
-  [ "XXX", implicit ],    # DA
-  [ "XXX", implicit ],    # DB
-  [ "XXX", implicit ],    # DC
-  [ "XXX", implicit ],    # DD
-  [ "XXX", implicit ],    # DE
-  [ "XXX", implicit ],    # DF
+  [ "cmp", absoluteY ],   # D9
+  [ "???", implicit ],    # DA
+  [ "???", implicit ],    # DB
+  [ "???", implicit ],    # DC
+  [ "cmp", absoluteX ],   # DD
+  [ "dec", absoluteX ],   # DE
+  [ "???", implicit ],    # DF
 
-  [ "XXX", implicit ],    # E0
-  [ "XXX", implicit ],    # E1
-  [ "XXX", implicit ],    # E2
-  [ "XXX", implicit ],    # E3
-  [ "XXX", implicit ],    # E4
-  [ "XXX", implicit ],    # E5
+  [ "cmp", immediate ],   # E0
+  [ "sbc", indirectX ],   # E1
+  [ "???", implicit ],    # E2
+  [ "???", implicit ],    # E3
+  [ "cpx", zeroPage ],    # E4
+  [ "sbc", zeroPage ],    # E5
   [ "inc", zeroPage ],    # E6
-  [ "XXX", implicit ],    # E7
-  [ "XXX", implicit ],    # E8
-  [ "XXX", implicit ],    # E9
+  [ "???", implicit ],    # E7
+  [ "inx", implicit ],    # E8
+  [ "sbc", immediate ],   # E9
   [ "nop", implicit ],    # EA
-  [ "XXX", implicit ],    # EB
-  [ "XXX", implicit ],    # EC
-  [ "XXX", implicit ],    # ED
-  [ "XXX", implicit ],    # EE
-  [ "XXX", implicit ],    # EF
+  [ "???", implicit ],    # EB
+  [ "cpx", absolute ],    # EC
+  [ "sbc", absolute ],    # ED
+  [ "inc", absolute ],    # EE
+  [ "???", implicit ],    # EF
 
   [ "beq", relative ],    # F0
   [ "sbc", indirectY ],   # F1
-  [ "XXX", implicit ],    # F2
-  [ "XXX", implicit ],    # F3
-  [ "XXX", implicit ],    # F4
+  [ "???", implicit ],    # F2
+  [ "???", implicit ],    # F3
+  [ "???", implicit ],    # F4
   [ "sbc", zeroPageX ],   # F5
   [ "inc", zeroPageX ],   # F6
-  [ "XXX", implicit ],    # F7
+  [ "inc", zeroPageX ],   # F7
   [ "sed", implicit ],    # F8
   [ "sbc", absoluteY ],   # F9
-  [ "XXX", implicit ],    # FA
-  [ "XXX", implicit ],    # FB
-  [ "XXX", implicit ],    # FC
+  [ "???", implicit ],    # FA
+  [ "???", implicit ],    # FB
+  [ "???", implicit ],    # FC
   [ "sbc", absoluteX ],   # FD
   [ "inc", absoluteX ],   # FE
   [ "???", implicit ],    # FF
