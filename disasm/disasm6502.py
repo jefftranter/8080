@@ -375,6 +375,7 @@ parser.add_argument("-n", "--nolist", help="Don't list  instruction bytes (make 
 parser.add_argument("-u", "--uppercase", help="Use uppercase for mnemonics", action="store_true")
 parser.add_argument("-a", "--address", help="Specify decimal starting address (defaults to 0)", default=0, type=int)
 parser.add_argument("-f", "--format", help="Use number format: 1=$1234 2=1234h 3=1234 4=177777 (default 1)", default=1, type=int, choices=range(1, 5))
+parser.add_argument("-i", "--invalid", help="Show invalid opcodes as ??? rather than constants", action="store_true")
 args = parser.parse_args()
 
 # Get filename from command line arguments.
@@ -461,7 +462,7 @@ while True:
             line += " "
 
         # Special check for invalid op code.
-        if (mode == implicit and mnem == "???"):
+        if (mode == implicit and mnem == "???" and not args.invalid):
             if isprint(chr(op)):
                 line += ".byte  '%c'" % op
             else:
