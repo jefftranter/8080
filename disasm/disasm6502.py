@@ -401,13 +401,22 @@ except FileNotFoundError:
 # Print initial origin address
 if args.nolist == False:
     if args.format == 1:
-        print("%04X            %s    $%04X" % (address, case("org"), address))
+        print("%04X            %s   $%04X" % (address, case(".org"), address))
     elif args.format == 2:
-        print("%04X            %s    %04X%s" % (address, case("org"), address, case("h")))
+        print("%04X            %s   %04X%s" % (address, case(".org"), address, case("h")))
     elif args.format == 3:
-        print("%04X            %s    %04X" % (address, case("org"), address))
+        print("%04X            %s   %04X" % (address, case(".org"), address))
     else:
-        print("%06o               %s    %06o" % (address, case("org"), address))
+        print("%06o               %s   %06o" % (address, case(".org"), address))
+else:
+    if args.format == 1:
+        print(" %s   $%04X" % (case(".org"), address))
+    elif args.format == 2:
+        print(" %s   %04X%s" % (case(".org"), address, case("h")))
+    elif args.format == 3:
+        print(" %s   %04X" % (case(".org"), address))
+    else:
+        print(" %s   %06o" % (case(".org"), address))
 
 while True:
     try:
@@ -542,10 +551,12 @@ while True:
                 dest = address + op1 + 2
             else:
                 dest = address - (256 - op1) + 2
+            if (dest < 0):
+                dest = 65535 + dest
             if args.format == 1:
                 line += "    $%s" % formatAddress(dest)
             elif args.format == 2:
-                line += "    %s%s" % (formatAddress(desdt), case("h"))
+                line += "    %s%s" % (formatAddress(dest), case("h"))
             else:
                 line += "    %s%s" % (formatAddress(dest), formatByte(op1))
 
