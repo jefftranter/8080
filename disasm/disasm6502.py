@@ -552,7 +552,7 @@ while True:
             else:
                 dest = address - (256 - op1) + 2
             if (dest < 0):
-                dest = 65535 + dest
+                dest = 65536 + dest
             if args.format == 1:
                 line += "    $%s" % formatAddress(dest)
             elif args.format == 2:
