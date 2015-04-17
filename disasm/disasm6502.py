@@ -114,8 +114,8 @@ opcodeTable = [
   [ "???", implicit ],    # 32
   [ "???", implicit ],    # 33
   [ "???", implicit ],    # 34
-  [ "and", indirectX ],   # 35
-  [ "rol", indirectX ],   # 36
+  [ "and", zeroPageX ],   # 35
+  [ "rol", zeroPageX ],   # 36
   [ "???", implicit ],    # 37
   [ "sec", implicit ],    # 38
   [ "and", absoluteY ],   # 39
@@ -148,8 +148,8 @@ opcodeTable = [
   [ "???", implicit ],    # 52
   [ "???", implicit ],    # 53
   [ "???", implicit ],    # 54
-  [ "eor", indirectX ],   # 55
-  [ "lsr", indirectX ],   # 56
+  [ "eor", zeroPageX ],   # 55
+  [ "lsr", zeroPageX ],   # 56
   [ "???", implicit ],    # 57
   [ "cli", implicit ],    # 58
   [ "eor", absoluteY ],   # 59
@@ -217,7 +217,7 @@ opcodeTable = [
   [ "???", implicit ],    # 93
   [ "sty", zeroPageX ],   # 94
   [ "sta", zeroPageX ],   # 95
-  [ "sty", zeroPageY ],   # 96
+  [ "stx", zeroPageY ],   # 96
   [ "???", implicit ],    # 97
   [ "tya", implicit ],    # 98
   [ "sta", absoluteY ],   # 99
@@ -296,7 +296,7 @@ opcodeTable = [
   [ "dec", absoluteX ],   # DE
   [ "???", implicit ],    # DF
 
-  [ "cmp", immediate ],   # E0
+  [ "cpx", immediate ],   # E0
   [ "sbc", indirectX ],   # E1
   [ "???", implicit ],    # E2
   [ "???", implicit ],    # E3
@@ -320,7 +320,7 @@ opcodeTable = [
   [ "???", implicit ],    # F4
   [ "sbc", zeroPageX ],   # F5
   [ "inc", zeroPageX ],   # F6
-  [ "inc", zeroPageX ],   # F7
+  [ "???", implicit ],    # F7
   [ "sed", implicit ],    # F8
   [ "sbc", absoluteY ],   # F9
   [ "???", implicit ],    # FA
