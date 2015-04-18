@@ -473,14 +473,14 @@ while True:
         # Special check for invalid op code.
         if (mode == implicit and mnem == "???" and not args.invalid):
             if isprint(chr(op)):
-                line += ".byte  '%c'" % op
+                line += "%s  '%c'" % (case(".byte"), op)
             else:
                 if args.format == 1:
-                    line += ".byte  $%s" % formatByte(op)
+                    line += "%s  $%s" % (case(".byte"), formatByte(op))
                 elif args.format == 2:
-                    line += ".byte  %s%s" % (formatByte(op), case("h"))
+                    line += "%s  %s%s" % (case(".byte"), formatByte(op), case("h"))
                 else:
-                    line += ".byte  %s" % formatByte(op)
+                    line += "%s  %s" % (case(".byte"), formatByte(op))
         else:
             line += mnem
 
@@ -496,7 +496,7 @@ while True:
             if args.format == 1:
                 line += "    $%s%s,%s" % (formatByte(op2), formatByte(op1), case("x"))
             elif args.format == 2:
-                line += "    %s%s%s,%s" % (formatByte(op2), formatByte(op1), case("x"))
+                line += "    %s%s,%s" % (formatByte(op2), formatByte(op1), case("x"))
             else:
                 line += "    %s%s,%s" % (formatByte(op2), formatByte(op1), case("x"))
 
@@ -504,7 +504,7 @@ while True:
             if args.format == 1:
                 line += "    $%s%s,%s" % (formatByte(op2), formatByte(op1), case("y"))
             elif args.format == 2:
-                line += "    %s%s%s,%s" % (formatByte(op2), formatByte(op1), case("y"))
+                line += "    %s%s,%s" % (formatByte(op2), formatByte(op1), case("y"))
             else:
                 line += "    %s%s,%s" % (formatByte(op2), formatByte(op1), case("y"))
 
