@@ -7,8 +7,6 @@ for more details.
 Also available is a version that disassembles code for the Z80
 microprocessor. It is not yet complete.
 
-Finally, there is a version for the 6502 microprocessor.
-
 The files ex1.bin, ex2.bin, and ex3.bin are some example binary files
 that can be used to test the disassembler.
 
