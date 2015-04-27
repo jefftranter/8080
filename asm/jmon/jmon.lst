@@ -1,0 +1,1195 @@
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 1 - 2015-4-27 19:42:39
+
+
+       1/       0 :                     ;
+       2/       0 :                     ; JMON - Jeff's Monitor Program
+       3/       0 :                     ; ------------------------------
+       4/       0 :                     ; 
+       5/       0 :                     ; A machine language monitor program for the Briel Altair 8800.
+       6/       0 :                     ; Inspired by JMON for the Apple Replica 1 and 6502 processor.
+       7/       0 :                     ; I wrote this mostly as an exercise to learn 8080 assembly language.
+       8/       0 :                     ; 
+       9/       0 :                     ; Copyright (C) 2014 by Jeff Tranter <tranter@pobox.com>
+      10/       0 :                     ; 
+      11/       0 :                     ; Licensed under the Apache License, Version 2.0 (the "License");
+      12/       0 :                     ; you may not use this file except in compliance with the License.
+      13/       0 :                     ; You may obtain a copy of the License at
+      14/       0 :                     ; 
+      15/       0 :                     ;   http://www.apache.org/licenses/LICENSE-2.0
+      16/       0 :                     ; 
+      17/       0 :                     ; Unless required by applicable law or agreed to in writing, software
+      18/       0 :                     ; distributed under the License is distributed on an "AS IS" BASIS,
+      19/       0 :                     ; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      20/       0 :                     ; See the License for the specific language governing permissions and
+      21/       0 :                     ; limitations under the License.
+      22/       0 :                     ; 
+      23/       0 :                     ; Commands:
+      24/       0 :                     ;   COPY: C <START> <END> <DEST>
+      25/       0 :                     ;   DUMP: D <START>
+      26/       0 :                     ;   FILL: F <START> <END> <DATA>...
+      27/       0 :                     ;   GO: G <ADDRESS>
+      28/       0 :                     ;   INFO: I
+      29/       0 :                     ;   CHECKSUM: K <START> <END>
+      30/       0 :                     ;   CLR SCREEN: L
+      31/       0 :                     ;   REGISTERS: R
+      32/       0 :                     ;   SEARCH: S <START> <END> <DATA>...
+      33/       0 :                     ;   TEST: T <START> <END>
+      34/       0 :                     ;   VERIFY: V <START> <END> <DEST>
+      35/       0 :                     ;   WRITE: : <ADDRESS> <DATA>...
+      36/       0 :                     ;   MATH: = <ADDRESS> +/- <ADDRESS>
+      37/       0 :                     ;   HELP: ?
+      38/       0 :                     ;
+      39/       0 :                     ; Revision History
+      40/       0 :                     ; Version Date         Comments
+      41/       0 :                     ; 0.1     27-Mar-2014  First version started.
+      42/       0 :                     ; 0.2     30-Mar-2014  Implemented a few commands.
+      43/       0 :                     
+      44/       0 :                     ; To Do:
+      45/       0 :                     ; Implement other commands
+      46/       0 :                     
+      47/       0 :                     ; Set CPM to TRUE if you want to run under CP/M. Set to FALSE if you
+      48/       0 :                     ; want to run as a standalone program.
+      49/       0 : =$0                 CPM = FALSE
+      50/       0 :                     
+      51/       0 :                             cpu     8080
+      52/       0 :                     
+      53/       0 : =>FALSE                     if      CPM
+      54/       0 :                             org     0100H    ; Standard CP/M start address
+      55/       0 : =>TRUE                      else
+      56/       0 :                             org     0000H    ; Start at address 0 if running standalone
+      57/       0 : [53]                        endif
+      58/       0 :                     
+      59/       0 :                     ; Constants
+      60/       0 :                     
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 2 - 2015-4-27 19:42:39
+
+
+      61/       0 : =3FH                prompt  equ '?'          ; Prompt character
+      62/       0 : =DH                 CR      equ '\r'         ; Carriage Return
+      63/       0 : =AH                 NL      equ '\n'         ; Newline
+      64/       0 : =7000H              stack   equ 7000h        ; Starting address for stack
+      65/       0 :                     
+      66/       0 :                     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      67/       0 :                     ;
+      68/       0 :                     ; Main program entry point
+      69/       0 :                      
+      70/       0 :                     Start:
+      71/       0 :                     
+      72/       0 :                     ; Save registers on entry (for later use by commands like REGISTERS and GO)
+      73/       0 : 32 6B 07                    sta     save_a
+      74/       3 : 78                          mov     a,b
+      75/       4 : 32 6D 07                    sta     save_b
+      76/       7 : 79                          mov     a,c
+      77/       8 : 32 6E 07                    sta     save_c
+      78/       B : 7A                          mov     a,d
+      79/       C : 32 6F 07                    sta     save_d
+      80/       F : 7B                          mov     a,e
+      81/      10 : 32 70 07                    sta     save_e
+      82/      13 : 7C                          mov     a,h
+      83/      14 : 32 71 07                    sta     save_h
+      84/      17 : 7D                          mov     a,l
+      85/      18 : 32 72 07                    sta     save_l
+      86/      1B : F5                          push    psw             ; Push A and Flags
+      87/      1C : C1                          pop     b               ; Pull A and flags to B,C
+      88/      1D : 79                          mov     a,c             ; Put flags in A
+      89/      1E : 32 6C 07                    sta     save_f          ; Save flags
+      90/      21 : 21 00 70                    lxi     h,stack         ; Set initial value of SP
+      91/      24 : 7C                          mov     a,h
+      92/      25 : 32 73 07                    sta     save_sp
+      93/      28 : 7D                          mov     a,l
+      94/      29 : 32 74 07                    sta     save_sp+1
+      95/      2C :                     
+      96/      2C : 31 00 70                    lxi     sp,stack        ; Set up stack pointer
+      97/      2F : CD B2 03                    call    ClearScreen     ; Clear screen
+      98/      32 : 21 74 04                    lxi     h,strStartup    ; Print startup message
+      99/      35 : CD B9 03                    call    PrintString
+     100/      38 :                     
+     101/      38 :                     mainloop:
+     102/      38 : 3E 3F                       mvi     a,prompt        ; Display command prompt
+     103/      3A : CD 5F 03                    call    PrintChar
+     104/      3D : CD C9 03                    call    PrintSpace
+     105/      40 :                     
+     106/      40 : CD 6E 03                    call    GetChar         ; Get a command (letter)
+     107/      43 : CD D1 03                    call    ToUpper         ; Convert to upper case
+     108/      46 :                     
+     109/      46 : FE 43                       cpi     'C'
+     110/      48 : C2 51 00                    jnz     tryD
+     111/      4B : CD B7 02                    call    CopyCommand
+     112/      4E : C3 38 00                    jmp     mainloop
+     113/      51 :                     tryD:
+     114/      51 : FE 44                       cpi     'D'
+     115/      53 : C2 5C 00                    jnz     tryF
+     116/      56 : CD EC 00                    call    DumpCommand
+     117/      59 : C3 38 00                    jmp     mainloop
+     118/      5C :                     tryF:
+     119/      5C : FE 46                       cpi     'F'
+     120/      5E : C2 67 00                    jnz     tryG
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 3 - 2015-4-27 19:42:39
+
+
+     121/      61 : CD 85 02                    call    FillCommand
+     122/      64 : C3 38 00                    jmp     mainloop
+     123/      67 :                     tryG:
+     124/      67 : FE 47                       cpi     'G'
+     125/      69 : C2 72 00                    jnz     tryI
+     126/      6C : CD 4A 01                    call    GoCommand
+     127/      6F : C3 38 00                    jmp     mainloop
+     128/      72 :                     tryI:
+     129/      72 : FE 49                       cpi     'I'
+     130/      74 : C2 7D 00                    jnz     tryK
+     131/      77 : CD 90 01                    call    InfoCommand
+     132/      7A : C3 38 00                    jmp     mainloop
+     133/      7D :                     tryK:
+     134/      7D : FE 4B                       cpi     'K'
+     135/      7F : C2 88 00                    jnz     tryL
+     136/      82 : CD 12 03                    call    ChecksumCommand
+     137/      85 : C3 38 00                    jmp     mainloop
+     138/      88 :                     tryL:
+     139/      88 : FE 4C                       cpi     'L'
+     140/      8A : C2 93 00                    jnz     tryR
+     141/      8D : CD 89 01                    call    ClearCommand
+     142/      90 : C3 38 00                    jmp     mainloop
+     143/      93 :                     tryR:
+     144/      93 : FE 52                       cpi     'R'
+     145/      95 : C2 9E 00                    jnz     tryS
+     146/      98 : CD BC 01                    call    RegistersCommand
+     147/      9B : C3 38 00                    jmp     mainloop
+     148/      9E :                     tryS:
+     149/      9E : FE 53                       cpi     'S'
+     150/      A0 : C2 A9 00                    jnz     tryT
+     151/      A3 : CD 4F 03                    call    SearchCommand
+     152/      A6 : C3 38 00                    jmp     mainloop
+     153/      A9 :                     tryT:
+     154/      A9 : FE 54                       cpi     'T'
+     155/      AB : C2 B4 00                    jnz     tryV
+     156/      AE : CD 4F 03                    call    TestCommand
+     157/      B1 : C3 38 00                    jmp     mainloop
+     158/      B4 :                     tryV:
+     159/      B4 : FE 56                       cpi     'V'
+     160/      B6 : C2 BF 00                    jnz     tryColon
+     161/      B9 : CD 4F 03                    call    VerifyCommand
+     162/      BC : C3 38 00                    jmp     mainloop
+     163/      BF :                     tryColon:
+     164/      BF : FE 3A                       cpi     ':'
+     165/      C1 : C2 CA 00                    jnz     tryEquals
+     166/      C4 : CD 4F 03                    call    MemoryCommand
+     167/      C7 : C3 38 00                    jmp     mainloop
+     168/      CA :                     tryEquals:
+     169/      CA : FE 3D                       cpi     '='
+     170/      CC : C2 D5 00                    jnz     tryHelp
+     171/      CF : CD 4F 03                    call    MathCommand
+     172/      D2 : C3 38 00                    jmp     mainloop
+     173/      D5 :                     tryHelp:
+     174/      D5 : FE 3F                       cpi     '?'
+     175/      D7 : C2 E0 00                    jnz     invalid
+     176/      DA : CD 7B 02                    call    HelpCommand
+     177/      DD : C3 38 00                    jmp     mainloop
+     178/      E0 :                     
+     179/      E0 :                     invalid:
+     180/      E0 : CD 78 03                    call    PrintCR
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 4 - 2015-4-27 19:42:39
+
+
+     181/      E3 : 21 97 04                    lxi     h,strInvalid    ; print error message
+     182/      E6 : CD B9 03                    call    PrintString
+     183/      E9 : C3 38 00                    jmp   mainloop
+     184/      EC :                     
+     185/      EC :                     
+     186/      EC :                     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     187/      EC :                     ;
+     188/      EC :                     ; Commands
+     189/      EC :                     
+     190/      EC :                     
+     191/      EC :                     ; Dump. Dumps memory in hex and ascii, as below:
+     192/      EC :                     ;
+     193/      EC :                     ; 0000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................
+     194/      EC :                     ;
+     195/      EC :                     ; Prompts to continue after a page of lines dumped.
+     196/      EC :                     
+     197/      EC : =10H                BYTES equ 16                    ; Number of bytes to dump per line
+     198/      EC : =18H                LINES equ 24                    ; Number of lines to dump per page
+     199/      EC :                     
+     200/      EC :                     DumpCommand:
+     201/      EC : CD 5F 03                    call    PrintChar       ; Echo command back
+     202/      EF : CD C9 03                    call    PrintSpace
+     203/      F2 : CD 69 04                    call    GetAddress      ; Prompt for address
+     204/      F5 : D2 FC 00                    jnc     startScreen     ; Carry set indicates <ESC> pressed
+     205/      F8 : CD 78 03                    call    PrintCR
+     206/      FB : C9                          ret
+     207/      FC :                     startScreen:
+     208/      FC : CD 78 03                    call    PrintCR
+     209/      FF : 0E 18                       mvi     c,LINES         ; Counts number of lines to be displayed
+     210/     101 :                     startLine:
+     211/     101 : E5                          push    h               ; Save address in HL
+     212/     102 : CD 10 04                    call    PrintAddress    ; Print address
+     213/     105 : 3E 3A                       mvi     a,':'           ; Print colon
+     214/     107 : CD 5F 03                    call    PrintChar
+     215/     10A : 06 10                       mvi     b,BYTES         ; Counts number of bytes to be displayed
+     216/     10C :                     doline:
+     217/     10C : CD C9 03                    call    PrintSpace      ; Print space
+     218/     10F : 7E                          mov     a,m             ; Get data at current address
+     219/     110 : CD DE 03                    call    PrintByte       ; Print it
+     220/     113 : 23                          inx     h               ; Increment current address
+     221/     114 : 05                          dcr     b               ; Decrement byte count
+     222/     115 : C2 0C 01                    jnz     doline          ; Continue until full line displayed
+     223/     118 :                     
+     224/     118 :                     ; Now dump line of data in ASCII
+     225/     118 :                     
+     226/     118 : CD C9 03                    call    PrintSpace      ; Print space
+     227/     11B : E1                          pop     h               ; Get start address of line
+     228/     11C : 06 10                       mvi     b,BYTES         ; Counts number of bytes to be displayed
+     229/     11E :                     doAscii:
+     230/     11E : 7E                          mov     a,m             ; Get data at current address
+     231/     11F : CD 9D 03                    call    PrintAscii      ; Print it
+     232/     122 : 23                          inx     h               ; Increment current address
+     233/     123 : 05                          dcr     b               ; Decrement byte count
+     234/     124 : C2 1E 01                    jnz     doAscii         ; Continue until full line displayed
+     235/     127 :                     
+     236/     127 : CD 78 03                    call    PrintCR
+     237/     12A : 0D                          dcr     c               ; Decrement count of lines printed
+     238/     12B : C2 01 01                    jnz     startLine       ; Do the next line
+     239/     12E : E5                          push    h               ; Save HL
+     240/     12F : 21 1E 07                    lxi     h,strContinue   ; Prompt whether to continue
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 5 - 2015-4-27 19:42:39
+
+
+     241/     132 : CD B9 03                    call    PrintString
+     242/     135 : E1                          pop     h               ; Restore HL
+     243/     136 : CD 6E 03            cont:   call    GetChar         ; Get key
+     244/     139 : FE 1B                       cpi     '\e'            ; Escape?
+     245/     13B : C2 42 01                    jnz     trySpace        
+     246/     13E : CD 78 03                    call    PrintCR         ; If so, return
+     247/     141 : C9                          ret
+     248/     142 :                     trySpace:
+     249/     142 : FE 20                       cpi     ' '             ; Space?
+     250/     144 : CA FC 00                    jz      startScreen     ; If so, do next screen
+     251/     147 : C3 36 01                    jmp     cont            ; Invalid key, try again
+     252/     14A :                     
+     253/     14A :                     
+     254/     14A :                     ; Go.
+     255/     14A :                     ; Prompts user for address, restores saved registers, and transfers
+     256/     14A :                     ; control to address.
+     257/     14A :                     
+     258/     14A :                     GoCommand:
+     259/     14A : CD 5F 03                    call    PrintChar       ; Echo command back
+     260/     14D : CD C9 03                    call    PrintSpace
+     261/     150 : CD 69 04                    call    GetAddress      ; Prompt for address
+     262/     153 : D2 5A 01                    jnc     contgo          ; Carry set indicates <ESC> pressed
+     263/     156 : CD 78 03                    call    PrintCR
+     264/     159 : C9                          ret
+     265/     15A :                     contgo:
+     266/     15A : 22 75 07                    shld    save_pc         ; Save it
+     267/     15D : CD 78 03                    call    PrintCR
+     268/     160 :                                                     ; Restore saved registers
+     269/     160 : 2A 00 00                    lhld    Start           ; Push start address of JMON on stack so that if
+     270/     163 : E5                          push    h               ; called code returns, will go back to monitor.
+     271/     164 : 3A 75 07                    lda     save_pc
+     272/     167 : 6F                          mov     l,a
+     273/     168 : 3A 76 07                    lda     save_pc+1
+     274/     16B : 67                          mov     h,a
+     275/     16C : E5                          push    h               ; push go address so we can use ret to go to it
+     276/     16D :                                                     ; TODO: Restore stack pointer?
+     277/     16D : 3A 71 07                    lda     save_h
+     278/     170 : 67                          mov     h,a
+     279/     171 : 3A 72 07                    lda     save_l
+     280/     174 : 6F                          mov     l,a
+     281/     175 : 3A 6F 07                    lda     save_d
+     282/     178 : 57                          mov     d,a
+     283/     179 : 3A 70 07                    lda     save_e
+     284/     17C : 5F                          mov     e,a
+     285/     17D : 3A 6D 07                    lda     save_b
+     286/     180 : 47                          mov     b,a
+     287/     181 : 3A 6E 07                    lda     save_c
+     288/     184 : 4F                          mov     c,a
+     289/     185 :                                                     ; TODO: Restore flags?
+     290/     185 : 3A 6B 07                    lda     save_a
+     291/     188 : C9                          ret                     ; This jumps to go address
+     292/     189 :                     
+     293/     189 :                     
+     294/     189 :                     ; CLEAR command.
+     295/     189 :                     ; Sends code to clear terminal screen.
+     296/     189 :                     
+     297/     189 :                     ClearCommand:
+     298/     189 : CD 5F 03                    call    PrintChar       ; Echo command back
+     299/     18C : CD B2 03                    call    ClearScreen     ; Clear screen
+     300/     18F : C9                          ret
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 6 - 2015-4-27 19:42:39
+
+
+     301/     190 :                     
+     302/     190 :                     
+     303/     190 :                     ; INFO command.
+     304/     190 :                     InfoCommand:
+     305/     190 : CD 5F 03                    call    PrintChar       ; Echo command back
+     306/     193 : CD 78 03                    call    PrintCR
+     307/     196 : 21 74 04                    lxi     h,strStartup    ; Print startup message
+     308/     199 : CD B9 03                    call    PrintString
+     309/     19C :                     
+     310/     19C :                     ; Detect CPU type. 8080 flags have XX0X0X1X. If different, then assume Z80.
+     311/     19C :                     
+     312/     19C : 21 0A 07                    lxi     h,strCpuType
+     313/     19F : CD B9 03                    call    PrintString
+     314/     1A2 :                     
+     315/     1A2 : F5                          push    psw             ; Push A and flags
+     316/     1A3 : C1                          pop     b               ; Pop B and C, flags now in C
+     317/     1A4 : 79                          mov     a,c             ; Move flags to A
+     318/     1A5 : E6 2A                       ani     00101010b       ; Mask out bit we don't care about
+     319/     1A7 : FE 02                       cpi     00000010b       ; Should have this value for 8080
+     320/     1A9 : C2 B6 01                    jnz     z80             ; If not, assume Z80 CPU
+     321/     1AC : 21 15 07                    lxi     h,str8080       ; It is an 8080
+     322/     1AF : CD B9 03            prnt:   call    PrintString     ; Print CPU type
+     323/     1B2 : CD 78 03                    call    PrintCR
+     324/     1B5 : C9                          ret                     ; Return
+     325/     1B6 :                     z80:    
+     326/     1B6 : 21 1A 07                    lxi     h,strZ80        ; It is a Z80
+     327/     1B9 : C3 AF 01                    jmp     prnt
+     328/     1BC :                     
+     329/     1BC :                     
+     330/     1BC :                     ; REGISTERS command.
+     331/     1BC :                     ; Example output:
+     332/     1BC :                     ; A=01 BC=4E56 DE=0000 HL=021C F=10101011 SP=6FFE PC=00C3
+     333/     1BC :                     
+     334/     1BC :                     RegistersCommand:
+     335/     1BC : CD 5F 03                    call    PrintChar       ; Echo command back
+     336/     1BF : CD 78 03                    call    PrintCR
+     337/     1C2 : 3E 41                       mvi     a,'A'
+     338/     1C4 : CD 5F 03                    call    PrintChar
+     339/     1C7 : CD 85 03                    call    PrintEquals
+     340/     1CA : 3A 6B 07                    lda     save_a
+     341/     1CD : CD DE 03                    call    PrintByte
+     342/     1D0 : CD C9 03                    call    PrintSpace
+     343/     1D3 : 3E 42                       mvi     a,'B'
+     344/     1D5 : CD 5F 03                    call    PrintChar
+     345/     1D8 : 3E 43                       mvi     a,'C'
+     346/     1DA : CD 5F 03                    call    PrintChar
+     347/     1DD : CD 85 03                    call    PrintEquals
+     348/     1E0 : 3A 6D 07                    lda     save_b
+     349/     1E3 : CD DE 03                    call    PrintByte
+     350/     1E6 : 3A 6E 07                    lda     save_c
+     351/     1E9 : CD DE 03                    call    PrintByte
+     352/     1EC : CD C9 03                    call    PrintSpace
+     353/     1EF : 3E 44                       mvi     a,'D'
+     354/     1F1 : CD 5F 03                    call    PrintChar
+     355/     1F4 : 3E 45                       mvi     a,'E'
+     356/     1F6 : CD 5F 03                    call    PrintChar
+     357/     1F9 : CD 85 03                    call    PrintEquals
+     358/     1FC : 3A 6F 07                    lda     save_d
+     359/     1FF : CD DE 03                    call    PrintByte
+     360/     202 : 3A 70 07                    lda     save_e
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 7 - 2015-4-27 19:42:39
+
+
+     361/     205 : CD DE 03                    call    PrintByte
+     362/     208 : CD C9 03                    call    PrintSpace
+     363/     20B : 3E 48                       mvi     a,'H'
+     364/     20D : CD 5F 03                    call    PrintChar
+     365/     210 : 3E 4C                       mvi     a,'L'
+     366/     212 : CD 5F 03                    call    PrintChar
+     367/     215 : CD 85 03                    call    PrintEquals
+     368/     218 : 3A 71 07                    lda     save_h
+     369/     21B : CD DE 03                    call    PrintByte
+     370/     21E : 3A 72 07                    lda     save_l
+     371/     221 : CD DE 03                    call    PrintByte
+     372/     224 : CD C9 03                    call    PrintSpace
+     373/     227 :                     
+     374/     227 :                     ; print flags in binary
+     375/     227 :                     ; TODO: Print flags symbolically
+     376/     227 :                     
+     377/     227 : 3E 46                       mvi     a,'F'
+     378/     229 : CD 5F 03                    call    PrintChar
+     379/     22C : CD 85 03                    call    PrintEquals
+     380/     22F : 3A 6C 07                    lda     save_f          ; Get flags
+     381/     232 : 2E 08                       mvi     l,8             ; Want to test 8 bits
+     382/     234 :                     nextbit:
+     383/     234 : 17                          ral                     ; Rotate into carry bit
+     384/     235 : DC 95 03                    cc      PrintOne        ; Print "1" if set
+     385/     238 : D4 8D 03                    cnc     PrintZero       ; Print "0" if cleared
+     386/     23B : 2D                          dcr     l               ; Decrement counter
+     387/     23C : C2 34 02                    jnz     nextbit         ; Repeat until all bits done
+     388/     23F :                     
+     389/     23F : CD C9 03                    call    PrintSpace
+     390/     242 : 3E 53                       mvi     a,'S'
+     391/     244 : CD 5F 03                    call    PrintChar
+     392/     247 : 3E 50                       mvi     a,'P'
+     393/     249 : CD 5F 03                    call    PrintChar
+     394/     24C : CD 85 03                    call    PrintEquals
+     395/     24F : 3A 73 07                    lda     save_sp
+     396/     252 : CD DE 03                    call    PrintByte
+     397/     255 : 3A 74 07                    lda     save_sp+1
+     398/     258 : CD DE 03                    call    PrintByte
+     399/     25B : CD C9 03                    call    PrintSpace
+     400/     25E : 3E 50                       mvi     a,'P'
+     401/     260 : CD 5F 03                    call    PrintChar
+     402/     263 : 3E 43                       mvi     a,'C'
+     403/     265 : CD 5F 03                    call    PrintChar
+     404/     268 : CD 85 03                    call    PrintEquals
+     405/     26B : 3A 76 07                    lda     save_pc+1
+     406/     26E : CD DE 03                    call    PrintByte
+     407/     271 : 3A 75 07                    lda     save_pc
+     408/     274 : CD DE 03                    call    PrintByte
+     409/     277 : CD 78 03                    call    PrintCR
+     410/     27A :                     ; TODO: Add support for editing registers
+     411/     27A : C9                          ret
+     412/     27B :                     
+     413/     27B :                     
+     414/     27B :                     ; HELP command.
+     415/     27B :                     ; Displays list of valid commands.
+     416/     27B :                     
+     417/     27B :                     HelpCommand:
+     418/     27B : CD 5F 03                    call    PrintChar       ; Echo command back
+     419/     27E : 21 BB 04                    lxi     h,strHelp
+     420/     281 : CD B9 03                    call    PrintString
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 8 - 2015-4-27 19:42:39
+
+
+     421/     284 : C9                          ret
+     422/     285 :                     
+     423/     285 :                     
+     424/     285 :                     ; Fill command.
+     425/     285 :                     ; Fill memory with bytes over a range of addresses.
+     426/     285 :                     ; TODO: Check that start < end.
+     427/     285 :                     FillCommand:
+     428/     285 : CD 5F 03                    call    PrintChar       ; Echo command back
+     429/     288 : CD C9 03                    call    PrintSpace
+     430/     28B : CD 69 04                    call    GetAddress      ; Prompt for start address
+     431/     28E : DA B3 02                    jc      finish          ; Carry set indicates <ESC> pressed
+     432/     291 : EB                          xchg                    ; Put HL (start address) in DE
+     433/     292 : CD C9 03                    call    PrintSpace
+     434/     295 : CD 69 04                    call    GetAddress      ; Prompt for end address
+     435/     298 : DA B3 02                    jc      finish          ; Carry set indicates <ESC> pressed
+     436/     29B : CD C9 03                    call    PrintSpace
+     437/     29E : EB                          xchg                    ; Put HL (end address) in DE, start address goes back in HL
+     438/     29F : CD 5A 04                    call    GetByte         ; Prompt for fill byte
+     439/     2A2 : DA B3 02                    jc      finish          ; Carry set indicates <ESC> pressed
+     440/     2A5 : 47                          mov     b,a             ; Store fill byte in B
+     441/     2A6 :                     fill:
+     442/     2A6 : 70                          mov     m,b             ; Fill address with byte
+     443/     2A7 : 23                          inx     h               ; Increment current address in HL
+     444/     2A8 : 7C                          mov     a,h             ; Get H
+     445/     2A9 : BA                          cmp     d               ; Compare to D
+     446/     2AA : C2 A6 02                    jnz     fill            ; If no match, continue filling
+     447/     2AD : 7D                          mov     a,l             ; Get L
+     448/     2AE : BB                          cmp     e               ; Compare to E
+     449/     2AF : C2 A6 02                    jnz     fill            ; If no match, continue filling
+     450/     2B2 : 70                          mov     m,b             ; We are at last address, write byte to it
+     451/     2B3 :                     finish:
+     452/     2B3 : CD 78 03                    call    PrintCR
+     453/     2B6 : C9                          ret
+     454/     2B7 :                     
+     455/     2B7 :                     
+     456/     2B7 :                     ; Copy Command
+     457/     2B7 :                     ; Copy a block of memory from one location to another.
+     458/     2B7 :                     ; TODO: Change command options to C <start> <end> <dest>
+     459/     2B7 :                     ; TODO: Try to minimize copying between registers and memory
+     460/     2B7 :                     ; TODO: Check that start < end and handle overlap.
+     461/     2B7 :                     
+     462/     2B7 :                     CopyCommand:
+     463/     2B7 : CD 5F 03                    call    PrintChar       ; Echo command back
+     464/     2BA : CD C9 03                    call    PrintSpace
+     465/     2BD : CD 69 04                    call    GetAddress      ; Prompt for start address
+     466/     2C0 : DA B3 02                    jc      finish          ; Carry set indicates <ESC> pressed
+     467/     2C3 : 7D                          mov     a,l             ; Save source address in src (low,high)
+     468/     2C4 : 32 77 07                    sta     src
+     469/     2C7 : 7C                          mov     a,h
+     470/     2C8 : 32 78 07                    sta     src+1
+     471/     2CB : CD C9 03                    call    PrintSpace
+     472/     2CE : CD 69 04                    call    GetAddress      ; Prompt for end address
+     473/     2D1 : DA B3 02                    jc      finish          ; Carry set indicates <ESC> pressed
+     474/     2D4 : 7D                          mov     a,l             ; Save destination address in dst (low,high)
+     475/     2D5 : 32 79 07                    sta     dst
+     476/     2D8 : 7C                          mov     a,h
+     477/     2D9 : 32 7A 07                    sta     dst+1
+     478/     2DC : CD C9 03                    call    PrintSpace
+     479/     2DF : CD 69 04                    call    GetAddress      ; Prompt for number of bytes
+     480/     2E2 : DA B3 02                    jc      finish          ; Carry set indicates <ESC> pressed
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 9 - 2015-4-27 19:42:39
+
+
+     481/     2E5 : 7D                          mov     a,l             ; Save length in size (low,high)
+     482/     2E6 : 32 7B 07                    sta     size
+     483/     2E9 : 7C                          mov     a,h
+     484/     2EA : 32 7C 07                    sta     size+1
+     485/     2ED : 3A 7B 07                    lda     size            ; Put size in BC
+     486/     2F0 : 4F                          mov     c,a
+     487/     2F1 : 3A 7C 07                    lda     size+1
+     488/     2F4 : 47                          mov     b,a
+     489/     2F5 : 3A 79 07                    lda     dst             ; Put destination in HL
+     490/     2F8 : 6F                          mov     l,a
+     491/     2F9 : 3A 7A 07                    lda     dst+1
+     492/     2FC : 67                          mov     h,a
+     493/     2FD : 3A 77 07                    lda     src             ; Put source in DE
+     494/     300 : 5F                          mov     e,a
+     495/     301 : 3A 78 07                    lda     src+1
+     496/     304 : 57                          mov     d,a
+     497/     305 : 78                  copy:   mov     a,b             ; Get B (remaining bytes)
+     498/     306 : B1                          ora     c               ; Also get C
+     499/     307 : CA B3 02                    jz      finish          ; If BC is zero, we are done, so return
+     500/     30A : 1A                          ldax    d               ; Get byte from source address (DE)
+     501/     30B : 77                          mov     m,a             ; Store byte in destination address (HL)
+     502/     30C : 13                          inx     d               ; Increment source address
+     503/     30D : 23                          inx     h               ; Increment destination address
+     504/     30E : 0B                          dcx     b               ; Decrement count of bytes
+     505/     30F : C3 05 03                    jmp     copy            ; Repeat
+     506/     312 :                     
+     507/     312 :                     
+     508/     312 :                     ; Checksum Command
+     509/     312 :                     ; Calculate 16-bit checksum of a block of memory.
+     510/     312 :                     
+     511/     312 :                     ChecksumCommand:
+     512/     312 : CD 5F 03                    call    PrintChar       ; Echo command back
+     513/     315 : CD C9 03                    call    PrintSpace
+     514/     318 : CD 69 04                    call    GetAddress      ; Prompt for start address
+     515/     31B : DA B3 02                    jc      finish          ; Carry set indicates <ESC> pressed
+     516/     31E : EB                          xchg                    ; Swap HL and DE (put start in DE)
+     517/     31F : CD C9 03                    call    PrintSpace
+     518/     322 : CD 69 04                    call    GetAddress      ; Prompt for end address
+     519/     325 : DA B3 02                    jc      finish          ; Carry set indicates <ESC> pressed
+     520/     328 : EB                          xchg                    ; Swap HL and DE
+     521/     329 :                                                     ; HL holds start/current address
+     522/     329 :                                                     ; DE holds end address
+     523/     329 :                                                     ; BC will hold checksum
+     524/     329 : 01 00 00                    lxi     b,0000h         ; Clear checksum total
+     525/     32C :                     checkloop:
+     526/     32C : 37                          stc                     ; Clear carry
+     527/     32D : 3F                          cmc
+     528/     32E : 79                          mov     a,c             ; Get LSB of checksum
+     529/     32F : 8E                          adc     m               ; Add next date byte of memory
+     530/     330 : 4F                          mov     c,a             ; Store LSB of checksum
+     531/     331 : 78                          mov     a,b             ; Get MSB of checksum
+     532/     332 : CE 00                       aci     0               ; Add possible carry from LSB
+     533/     334 : 47                          mov     b,a             ; Store MSB of checksum
+     534/     335 : 7C                          mov     a,h             ; See if MSB of pointer has reached end address yet
+     535/     336 : BA                          cmp     d               ; e.g. H = D
+     536/     337 : C2 4B 03                    jnz     inc
+     537/     33A : 7D                          mov     a,l             ; See if MSB of pointer has reached end address yet
+     538/     33B : BB                          cmp     e               ; e.g. L = E
+     539/     33C : C2 4B 03                    jnz     inc
+     540/     33F : CD C9 03                    call    PrintSpace      ; Done, print checksum value
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 10 - 2015-4-27 19:42:39
+
+
+     541/     342 : 60                          mov     h,b             ; Put value in HL
+     542/     343 : 69                          mov     l,c
+     543/     344 : CD 10 04                    call    PrintAddress
+     544/     347 : CD 78 03                    call    PrintCR
+     545/     34A : C9                          ret
+     546/     34B : 23                  inc:    inx     h               ; Increment address pointer
+     547/     34C : C3 2C 03                    jmp     checkloop
+     548/     34F :                     
+     549/     34F :                     
+     550/     34F :                     ; Unimplemented commands
+     551/     34F :                     SearchCommand:
+     552/     34F :                     TestCommand:
+     553/     34F :                     VerifyCommand:
+     554/     34F :                     MemoryCommand:
+     555/     34F :                     MathCommand:
+     556/     34F : CD 5F 03                    call    PrintChar        ; Echo the command back
+     557/     352 : CD 78 03                    call    PrintCR
+     558/     355 : 21 48 07                    lxi     h,strNotImplemented
+     559/     358 : CD B9 03                    call    PrintString
+     560/     35B : CD 78 03                    call    PrintCR
+     561/     35E : C9                          ret
+     562/     35F :                     
+     563/     35F :                     
+     564/     35F :                     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     565/     35F :                     ;
+     566/     35F :                     ; Utility Routines
+     567/     35F :                     
+     568/     35F :                     ; The Briel Altair 8800 emulates a MITS 88-2SIO serial interface to the
+     569/     35F :                     ; console. The hardware interface is as follows:
+     570/     35F :                     ; 
+     571/     35F :                     ; I/O Port  Read             Write
+     572/     35F :                     ; --------  ---------------  ----------------
+     573/     35F :                     ; 10h       Status Register  Control Register
+     574/     35F :                     ; 11h       Input Data       Output Data
+     575/     35F :                     ; 
+     576/     35F :                     ; The control register can set parameters such as bit rate. It does not
+     577/     35F :                     ; need to be initialized on the Briel Altair.
+     578/     35F :                     ; 
+     579/     35F :                     ; The status register has a number of bits. Not all are emulated. The
+     580/     35F :                     ; following are the ones of interest for console serial input/output:
+     581/     35F :                     ; 
+     582/     35F :                     ; Bit Function
+     583/     35F :                     ; 
+     584/     35F :                     ; 0   Receive Data Register Full (RDRF). Set to 1 when data is ready to
+     585/     35F :                     ;     be read. Reading the input data register clears it.
+     586/     35F :                     ; 
+     587/     35F :                     ; 1   Transmit Data Register Empty (TDRE). Set to 1 when output data has
+     588/     35F :                     ;     been transferred out and new data may be entered.
+     589/     35F :                     ; 
+     590/     35F :                     ; References:
+     591/     35F :                     ; 1. MITS 88-2 Serial Input/Output Board Theory of Operation
+     592/     35F :                     ; 
+     593/     35F :                     
+     594/     35F : =10H                SREG    port    10h
+     595/     35F : =10H                CREG    port    10h
+     596/     35F : =11H                DREG    port    11h
+     597/     35F :                     
+     598/     35F :                     ; PrintChar
+     599/     35F :                     ; Output character in A register to console.
+     600/     35F :                     ; Registers affected: none.
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 11 - 2015-4-27 19:42:39
+
+
+     601/     35F :                     
+     602/     35F :                     PrintChar:
+     603/     35F : F5                          push    psw             ; Save A register
+     604/     360 : DB 10               loop1:  in      SREG            ; Read status register
+     605/     362 : E6 02                       ani     02h             ; Mask out TDRE bit
+     606/     364 : CA 60 03                    jz      loop1           ; Repeat until TDRE is set
+     607/     367 : CD 07 04                    call    Delay           ; Delay seems to be needed to avoid dropped characters
+     608/     36A : F1                          pop     psw             ; Restore A
+     609/     36B : D3 11                       out     DREG            ; Output it to data register
+     610/     36D : C9                          ret                     ; And return
+     611/     36E :                     
+     612/     36E :                     ; GetChar
+     613/     36E :                     ; Read character from console and return in A register. The character
+     614/     36E :                     ; is not echoed. Waits for character to be entered.
+     615/     36E :                     ; Registers affected: A.
+     616/     36E :                     
+     617/     36E :                     GetChar:
+     618/     36E : DB 10                       in      SREG            ; Read status register
+     619/     370 : E6 01                       ani     01H             ; Mask out RDRF bit
+     620/     372 : CA 6E 03                    jz      GetChar         ; Repeat until RDRF is set
+     621/     375 : DB 11                       in      DREG            ; Read character from data register
+     622/     377 : C9                          ret                     ; And return
+     623/     378 :                     
+     624/     378 :                     ; PrintCR
+     625/     378 :                     ; Print carriage return/newline.
+     626/     378 :                     ; Registers affected: none
+     627/     378 :                     
+     628/     378 :                     PrintCR:
+     629/     378 : F5                          push    psw             ; Save A reg
+     630/     379 : 3E 0D                       mvi     a,CR            ; Carriage Return character
+     631/     37B : CD 5F 03                    call    PrintChar       
+     632/     37E : 3E 0A                       mvi     a,NL            ; Newline character
+     633/     380 : CD 5F 03                    call    PrintChar
+     634/     383 : F1                          pop     psw             ; Restore A reg
+     635/     384 : C9                          ret
+     636/     385 :                     
+     637/     385 :                     ; PrintEquals
+     638/     385 :                     ; Print equals sign.
+     639/     385 :                     ; Registers affected: none
+     640/     385 :                     
+     641/     385 :                     PrintEquals:
+     642/     385 : F5                          push    psw             ; Save A reg
+     643/     386 : 3E 3D                       mvi     a,'='           ; Equals character
+     644/     388 : CD 5F 03                    call    PrintChar       
+     645/     38B : F1                          pop     psw             ; Restore A reg
+     646/     38C : C9                          ret
+     647/     38D :                     
+     648/     38D :                     ; Print "0"
+     649/     38D :                     ; Registers affected: none
+     650/     38D :                     PrintZero:
+     651/     38D : F5                          push    psw
+     652/     38E : 3E 30                       mvi     a,'0'
+     653/     390 : CD 5F 03                    call    PrintChar
+     654/     393 : F1                          pop     psw
+     655/     394 : C9                          ret
+     656/     395 :                     
+     657/     395 :                     
+     658/     395 :                     ; Print "1"
+     659/     395 :                     ; Registers affected: none
+     660/     395 :                     PrintOne:
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 12 - 2015-4-27 19:42:39
+
+
+     661/     395 : F5                          push    psw
+     662/     396 : 3E 31                       mvi     a,'1'
+     663/     398 : CD 5F 03                    call    PrintChar
+     664/     39B : F1                          pop     psw
+     665/     39C : C9                          ret
+     666/     39D :                     
+     667/     39D :                     
+     668/     39D :                     ; PrintAscii
+     669/     39D :                     ; If character in A is printable ASCII, print it, otherwise print "."
+     670/     39D :                     ; Registers affected: none.
+     671/     39D :                     
+     672/     39D :                     PrintAscii:
+     673/     39D : F5                          push    psw             ; Save A
+     674/     39E : FE 20                       cpi     ' '             ; Less than <Space> ?
+     675/     3A0 : DA AD 03                    jc      notPrintable    ; If so, not printable
+     676/     3A3 : FE 7F                       cpi     '~'+1           ; Greater than tilde?
+     677/     3A5 : D2 AD 03                    jnc     notPrintable    ; If so, not printable
+     678/     3A8 : CD 5F 03            ppr:    call    PrintChar       ; Print character
+     679/     3AB : F1                          pop     psw             ; Restore A
+     680/     3AC : C9                          ret
+     681/     3AD :                     notPrintable:
+     682/     3AD : 3E 2E                       mvi     a,'.'
+     683/     3AF : C3 A8 03                    jmp     ppr
+     684/     3B2 :                     
+     685/     3B2 :                     
+     686/     3B2 :                     ; ClearScreen
+     687/     3B2 :                     ; Clear screen. Assumes an VT100/ANSI terminal.
+     688/     3B2 :                     ; Registers affected: HL, A.
+     689/     3B2 :                     
+     690/     3B2 :                     ClearScreen:
+     691/     3B2 : 21 02 07                    lxi     h,strClearScreen
+     692/     3B5 : CD B9 03                    call    PrintString
+     693/     3B8 : C9                          ret
+     694/     3B9 :                     
+     695/     3B9 :                     ; PrintString
+     696/     3B9 :                     ; Print string pointed to by HL until null found.
+     697/     3B9 :                     ; Registers affected: HL
+     698/     3B9 :                     
+     699/     3B9 :                     PrintString:
+     700/     3B9 : F5                          push    psw             ; Save A register
+     701/     3BA : 7E                  nextch: mov     a,m             ; Get a character
+     702/     3BB : FE 00                       cpi     0               ; Is it a null?
+     703/     3BD : CA C7 03                    jz      eos             ; If so, exit
+     704/     3C0 : CD 5F 03                    call    PrintChar       ; Print the character
+     705/     3C3 : 23                          inx     h               ; Advance pointer to next character
+     706/     3C4 : C3 BA 03                    jmp     nextch          ; And repeat
+     707/     3C7 : F1                  eos:    pop     psw             ; Restore A register
+     708/     3C8 : C9                          ret                     ; Return
+     709/     3C9 :                     
+     710/     3C9 :                     ; PrintSpace
+     711/     3C9 :                     ; Print space character.
+     712/     3C9 :                     ; Registers affected: none
+     713/     3C9 :                     PrintSpace:
+     714/     3C9 : F5                          push    psw             ; Save A reg
+     715/     3CA : 3E 20                       mvi     a,' '           ; Space character
+     716/     3CC : CD 5F 03                    call    PrintChar       
+     717/     3CF : F1                          pop     psw             ; Restore A reg
+     718/     3D0 : C9                          ret
+     719/     3D1 :                     
+     720/     3D1 :                     ; ToUpper
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 13 - 2015-4-27 19:42:39
+
+
+     721/     3D1 :                     ; Convert character in A to uppercase if it is a letter.
+     722/     3D1 :                     ; Registers affected: A
+     723/     3D1 :                     ToUpper:
+     724/     3D1 : FE 61                       cpi     'a'             ; Less than 'a' ?
+     725/     3D3 : DA DD 03                    jc      notUpper        ; If so, branch
+     726/     3D6 : FE 7B                       cpi     'z'+1           ; Greater than 'z'?
+     727/     3D8 : D2 DD 03                    jnc     notUpper
+     728/     3DB : E6 DF                       ani     11011111b       ; Convert to upper case
+     729/     3DD :                     notUpper:
+     730/     3DD : C9                          ret
+     731/     3DE :                     
+     732/     3DE :                     ; PrintByte
+     733/     3DE :                     ; Print 8-bit value in A as two ASCII hex characters
+     734/     3DE :                     ; Registers affected: A
+     735/     3DE :                     PrintByte:
+     736/     3DE : C5                          push    b               ; Save BC reg
+     737/     3DF : CD EC 03                    call    bhconv          ; Convert to two hex digits
+     738/     3E2 : 78                          mov     a,b             ; Get first digit
+     739/     3E3 : CD 5F 03                    call    PrintChar       ; Print it
+     740/     3E6 : 79                          mov     a,c             ; Get second digit
+     741/     3E7 : CD 5F 03                    call    PrintChar       ; Print it
+     742/     3EA : C1                          pop     b               ; Restore BC reg
+     743/     3EB : C9                          ret                     ; Return
+     744/     3EC :                     
+     745/     3EC :                     ; Convert byte in A to two hex ASCII digits and return in B,C.
+     746/     3EC :                     bhconv:
+     747/     3EC : E5                          push    h               ; Save HL
+     748/     3ED : 6F                          mov     l,a             ; Save original byte
+     749/     3EE : 1F                          rar                     ; Shift upper nybble into lower nybble
+     750/     3EF : 1F                          rar
+     751/     3F0 : 1F                          rar
+     752/     3F1 : 1F                          rar
+     753/     3F2 : CD FD 03                    call    bin1            ; Convert digit to ASCII
+     754/     3F5 : 47                          mov     b,a             ; Put it in B
+     755/     3F6 : 7D                          mov     a,l             ; Get original byte
+     756/     3F7 : CD FD 03                    call    bin1            ; Convert digit to ASCII
+     757/     3FA : 4F                          mov     c,a             ; Put it in C
+     758/     3FB : E1                          pop     h               ; Restore HL
+     759/     3FC : C9                          ret                     ; Return
+     760/     3FD :                     
+     761/     3FD :                     ; Convert bottom nybble of byte on A to ASCII
+     762/     3FD :                     bin1:
+     763/     3FD : E6 0F                       ani     0Fh             ; Mask out lower nybble
+     764/     3FF : C6 30                       adi     '0'             ; Convert to ASCII digit, e.g. 0->'0'
+     765/     401 : FE 3A                       cpi     '9'+1           ; Is it greater than '9'?
+     766/     403 : D8                          rc                      ; If not, we are done
+     767/     404 : C6 07                       adi     'A'-'9'-1       ; Add offset to convert to hex letter A-F
+     768/     406 : C9                          ret                     ; Return
+     769/     407 :                     
+     770/     407 :                     
+     771/     407 :                     ; Delay
+     772/     407 :                     ; Delay of a few 10s of microseconds. Seems to be needed during
+     773/     407 :                     ; serial out to avoid dropped characters. Value determined
+     774/     407 :                     ; experimentally.
+     775/     407 :                     ; Registers affected: none
+     776/     407 :                     
+     777/     407 :                     Delay:
+     778/     407 : F5                          push    psw             ; Save A
+     779/     408 : 3E 32                       mvi     a,50            ; Delay constant
+     780/     40A : 3D                  decr:   dcr     a               ; Decrement counter
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 14 - 2015-4-27 19:42:39
+
+
+     781/     40B : C2 0A 04                    jnz     decr            ; Repeat until A reaches zero
+     782/     40E : F1                          pop     psw             ; Restore A
+     783/     40F : C9                          ret                     ; Return
+     784/     410 :                     
+     785/     410 :                     
+     786/     410 :                     ; PrintAddress
+     787/     410 :                     ; Print a two byte address passed in H,L.
+     788/     410 :                     ; Registers affected: A.
+     789/     410 :                     PrintAddress:
+     790/     410 : 7C                          mov     a,h             ; Get MSB
+     791/     411 : CD DE 03                    call    PrintByte       ; Print it
+     792/     414 : 7D                          mov     a,l             ; Get LSB
+     793/     415 : CD DE 03                    call    PrintByte       ; Print it
+     794/     418 : C9                          ret                     ; Return
+     795/     419 :                     
+     796/     419 :                     
+     797/     419 :                     ; GetHex
+     798/     419 :                     ; Gets a single hex digit from the keyboard, 0-9 or A-F or a-f.
+     799/     419 :                     ; Ignores invalid characters. <Esc> cancels and sets carry bit.
+     800/     419 :                     ; Returns binary nybble in A.
+     801/     419 :                     ; Registers affected: A
+     802/     419 :                     
+     803/     419 :                     GetHex:
+     804/     419 : CD 6E 03                    call    GetChar         ; Get a character
+     805/     41C : FE 1B                       cpi     '\e'            ; Is it <Escape> ?
+     806/     41E : C2 24 04                    jnz     next            ; Branch if not
+     807/     421 : 97                          sub     a               ; Set A to zero
+     808/     422 : 37                          stc                     ; Otherwise set carry and return.
+     809/     423 : C9                          ret
+     810/     424 : FE 30               next:   cpi     '0'             ; Less than '0'?
+     811/     426 : DA 19 04                    jc      GetHex          ; Yes, ignore and try again
+     812/     429 : FE 3A                       cpi     '9'+1           ; Greater than 9?
+     813/     42B : DA 45 04                    jc      validDigit      ; Branch if not (is 0-9)
+     814/     42E : FE 41                       cpi     'A'             ; Less than 'A'?
+     815/     430 : DA 19 04                    jc      GetHex          ; Yes, ignore and try again
+     816/     433 : FE 47                       cpi     'F'+1           ; Greater than 'F'?
+     817/     435 : DA 4F 04                    jc      validULetter    ; Branch if not (is A-F)
+     818/     438 : FE 61                       cpi     'a'             ; less that 'a'?
+     819/     43A : DA 19 04                    jc      GetHex          ; Yes, ignore and try again
+     820/     43D : FE 67                       cpi     'f'+1           ; Greater than 'f'?
+     821/     43F : DA 4D 04                    jc      validLLetter    ; Branch if not (is a-f)
+     822/     442 : C3 19 04                    jmp     GetHex          ; Invalid, try again
+     823/     445 :                     validDigit:
+     824/     445 : CD 5F 03                    call    PrintChar       ; Echo the character
+     825/     448 : D6 30                       sui     '0'             ; Convert digit to binary
+     826/     44A : C3 57 04                    jmp     done
+     827/     44D :                     validLLetter:
+     828/     44D : E6 DF                       ani     11011111b       ; Convert to lowercase letter to upper case
+     829/     44F :                     validULetter:
+     830/     44F : CD 5F 03                    call    PrintChar       ; Echo the character
+     831/     452 : D6 37                       sui     'A'-10          ; Convert uppercase letter to binary
+     832/     454 : C3 57 04                    jmp     done
+     833/     457 : 37                  done:   stc                     ; Weird 8080 way to clear carry
+     834/     458 : 3F                          cmc                     ; Set it and then complement it
+     835/     459 : C9                          ret
+     836/     45A :                     
+     837/     45A :                     
+     838/     45A :                     ; GetByte
+     839/     45A :                     ; Gets a two character hex number from the keyboard.
+     840/     45A :                     ; Ignores invalid characters. <Esc> cancels and sets carry bit.
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 15 - 2015-4-27 19:42:39
+
+
+     841/     45A :                     ; Returns binary byte in A.
+     842/     45A :                     ; Registers affected: A,B
+     843/     45A :                     
+     844/     45A :                     GetByte:
+     845/     45A : CD 19 04                    call    GetHex          ; Get most significant nybble
+     846/     45D : D8                          rc                      ; Exit if <ESC> pressed
+     847/     45E : 07                          rlc                     ; Shift to upper nybble
+     848/     45F : 07                          rlc
+     849/     460 : 07                          rlc
+     850/     461 : 07                          rlc
+     851/     462 : 47                          mov     b,a             ; Save result in B register
+     852/     463 : CD 19 04                    call    GetHex          ; Get least significant nybble
+     853/     466 : D8                          rc                      ; Exit if <ESC> pressed
+     854/     467 : 80                          add     b               ; Add upper nybble to lower
+     855/     468 : C9                          ret                     ; Return
+     856/     469 :                     
+     857/     469 :                     
+     858/     469 :                     ; GetAddress
+     859/     469 :                     ; Gets a four character hex number from the keyboard.
+     860/     469 :                     ; Ignores invalid characters. <Esc> cancels and sets carry bit.
+     861/     469 :                     ; Returns binary word in HL.
+     862/     469 :                     ; Registers affected: A,B,H,L
+     863/     469 :                     
+     864/     469 :                     GetAddress:
+     865/     469 : CD 5A 04                    call    GetByte         ; Get MSB
+     866/     46C : D8                          rc                      ; Exit if <ESC> pressed
+     867/     46D : 67                          mov     h,a             ; Save MSB in H
+     868/     46E : CD 5A 04                    call    GetByte         ; Get LSB
+     869/     471 : D8                          rc                      ; Exit if <ESC> pressed
+     870/     472 : 6F                          mov     l,a             ; Save LSB in L
+     871/     473 : C9                          ret                     ; Return
+     872/     474 :                     
+     873/     474 :                     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     874/     474 :                     ;
+     875/     474 :                     ; Strings
+     876/     474 :                     
+     877/     474 :                     strStartup:
+     878/     474 : 4A 4D 4F 4E 20 4D           db      "JMON Monitor 0.1 by Jeff Tranter\r\n",0
+                    6F 6E 69 74 6F 72 
+                    20 30 2E 31 20 62 
+                    79 20 4A 65 66 66 
+                    20 54 72 61 6E 74 
+                    65 72 0D 0A 00 
+     879/     497 :                     
+     880/     497 :                     strInvalid:
+     881/     497 : 49 6E 76 61 6C 69           db      "Invalid command. Type ? for help.\r\n",0
+                    64 20 63 6F 6D 6D 
+                    61 6E 64 2E 20 54 
+                    79 70 65 20 3F 20 
+                    66 6F 72 20 68 65 
+                    6C 70 2E 0D 0A 00 
+     882/     4BB :                     
+     883/     4BB :                     strHelp:
+     884/     4BB : 0D 0A                       db      "\r\n"
+     885/     4BD : 56 61 6C 69 64 20           db      "Valid commands:\r\n"
+                    63 6F 6D 6D 61 6E 
+                    64 73 3A 0D 0A 
+     886/     4CE : 43 20 3C 73 72 63           db      "C <src> <dest> <num bytes> Copy memory\r\n"
+                    3E 20 3C 64 65 73 
+                    74 3E 20 3C 6E 75 
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 16 - 2015-4-27 19:42:39
+
+
+                    6D 20 62 79 74 65 
+                    73 3E 20 43 6F 70 
+                    79 20 6D 65 6D 6F 
+                    72 79 0D 0A 
+     887/     4F6 : 44 20 3C 61 64 64           db      "D <address>                Dump memory\r\n"
+                    72 65 73 73 3E 20 
+                    20 20 20 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 44 75 6D 
+                    70 20 6D 65 6D 6F 
+                    72 79 0D 0A 
+     888/     51E : 46 20 3C 73 74 61           db      "F <start> <end> <data>     Fill memory\r\n"
+                    72 74 3E 20 3C 65 
+                    6E 64 3E 20 3C 64 
+                    61 74 61 3E 20 20 
+                    20 20 20 46 69 6C 
+                    6C 20 6D 65 6D 6F 
+                    72 79 0D 0A 
+     889/     546 : 47 20 3C 61 64 64           db      "G <address>                Go\r\n"
+                    72 65 73 73 3E 20 
+                    20 20 20 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 47 6F 0D 
+                    0A 
+     890/     565 : 49 20 20 20 20 20           db      "I                          Show info\r\n"
+                    20 20 20 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 53 68 6F 
+                    77 20 69 6E 66 6F 
+                    0D 0A 
+     891/     58B : 4B 20 3C 73 74 61           db      "K <start> <end>            Checksum\r\n"
+                    72 74 3E 20 3C 65 
+                    6E 64 3E 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 43 68 65 
+                    63 6B 73 75 6D 0D 
+                    0A 
+     892/     5B0 : 4C 20 20 20 20 20           db      "L                          Clear screen\r\n"
+                    20 20 20 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 43 6C 65 
+                    61 72 20 73 63 72 
+                    65 65 6E 0D 0A 
+     893/     5D9 : 52 20 20 20 20 20           db      "R                          Examine registers\r\n"
+                    20 20 20 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 45 78 61 
+                    6D 69 6E 65 20 72 
+                    65 67 69 73 74 65 
+                    72 73 0D 0A 
+     894/     607 : 53 20 3C 73 74 61           db      "S <start> <end> <data>     Search memory\r\n"
+                    72 74 3E 20 3C 65 
+                    6E 64 3E 20 3C 64 
+                    61 74 61 3E 20 20 
+                    20 20 20 53 65 61 
+                    72 63 68 20 6D 65 
+                    6D 6F 72 79 0D 0A 
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 17 - 2015-4-27 19:42:39
+
+
+     895/     631 : 54 20 3C 73 74 61           db      "T <start> <end>            Test memory\r\n"
+                    72 74 3E 20 3C 65 
+                    6E 64 3E 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 54 65 73 
+                    74 20 6D 65 6D 6F 
+                    72 79 0D 0A 
+     896/     659 : 56 20 3C 73 74 61           db      "V <start> <end> <dest>     Verify memory\r\n"
+                    72 74 3E 20 3C 65 
+                    6E 64 3E 20 3C 64 
+                    65 73 74 3E 20 20 
+                    20 20 20 56 65 72 
+                    69 66 79 20 6D 65 
+                    6D 6F 72 79 0D 0A 
+     897/     683 : 3A 20 3C 61 64 64           db      ": <address> <data>...      Write to memory\r\n"
+                    72 65 73 73 3E 20 
+                    3C 64 61 74 61 3E 
+                    2E 2E 2E 20 20 20 
+                    20 20 20 57 72 69 
+                    74 65 20 74 6F 20 
+                    6D 65 6D 6F 72 79 
+                    0D 0A 
+     898/     6AF : 3D 20 3C 61 64 64           db      "= <address> +/- <address>  Hex math calculation\r\n"
+                    72 65 73 73 3E 20 
+                    2B 2F 2D 20 3C 61 
+                    64 64 72 65 73 73 
+                    3E 20 20 48 65 78 
+                    20 6D 61 74 68 20 
+                    63 61 6C 63 75 6C 
+                    61 74 69 6F 6E 0D 
+                    0A 
+     899/     6E0 : 3F 20 20 20 20 20           db      "?                          Help\r\n",0
+                    20 20 20 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 20 20 20 
+                    20 20 20 48 65 6C 
+                    70 0D 0A 00 
+     900/     702 :                     
+     901/     702 :                     strClearScreen:
+     902/     702 : 1B 5B 32 4A 1B 5B           db      "\e[2J\e[H",0       ; VT100/ANSI clear screen, cursor home
+                    48 00 
+     903/     70A :                     
+     904/     70A :                     strCpuType:
+     905/     70A : 43 50 55 20 74 79           db      "CPU type: ",0
+                    70 65 3A 20 00 
+     906/     715 :                     str8080:
+     907/     715 : 38 30 38 30 00              db      "8080",0
+     908/     71A :                     strZ80:
+     909/     71A : 5A 38 30 00                 db      "Z80",0
+     910/     71E :                     strContinue:
+     911/     71E : 50 72 65 73 73 20           db      "Press <Space> to continue, <ESC> to stop ",0
+                    3C 53 70 61 63 65 
+                    3E 20 74 6F 20 63 
+                    6F 6E 74 69 6E 75 
+                    65 2C 20 3C 45 53 
+                    43 3E 20 74 6F 20 
+                    73 74 6F 70 20 00 
+     912/     748 :                     strNotImplemented:
+     913/     748 : 53 6F 72 72 79 2C           db      "Sorry, command not yet implemented",0
+                    20 63 6F 6D 6D 61 
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 18 - 2015-4-27 19:42:39
+
+
+                    6E 64 20 6E 6F 74 
+                    20 79 65 74 20 69 
+                    6D 70 6C 65 6D 65 
+                    6E 74 65 64 00 
+     914/     76B :                     
+     915/     76B :                     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     916/     76B :                     ;
+     917/     76B :                     ; Variables
+     918/     76B :                     
+     919/     76B :                     save_a  db      ?               ; Saved values of registers
+     920/     76C :                     save_f  db      ?
+     921/     76D :                     save_b  db      ?
+     922/     76E :                     save_c  db      ?
+     923/     76F :                     save_d  db      ?
+     924/     770 :                     save_e  db      ?
+     925/     771 :                     save_h  db      ?
+     926/     772 :                     save_l  db      ?
+     927/     773 :                     save_sp dw      ?
+     928/     775 : 00 00               save_pc dw      0000h
+     929/     777 :                     src     dw      ?               ; Used for commands like Copy
+     930/     779 :                     dst     dw      ?
+     931/     77B :                     size    dw      ?
+     932/     77D :                     
+     933/     77D :                     
+     934/     77D :                             end
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 19 - 2015-4-27 19:42:39
+
+
+  symbol table (* = unused):
+  ------------------------
+
+*ARCHITECTURE :    k8-unknown-linux - |  BHCONV :                       3EC C |
+*BIGENDIAN :                      0 - |  BIN1 :                         3FD C |
+*BRANCHEXT :                      0 - |  BYTES :                         10 - |
+*CASESENSITIVE :                  0 - |  CHECKLOOP :                    32C C |
+ CHECKSUMCOMMAND :              312 C |  CLEARCOMMAND :                 189 C |
+ CLEARSCREEN :                  3B2 C | *CONSTPI :        3.141592653589793 - |
+ CONT :                         136 C |  CONTGO :                       15A C |
+ COPY :                         305 C |  COPYCOMMAND :                  2B7 C |
+ CPM :                            0 - |  CR :                             D - |
+*CREG :                          10 P | *DATE :                   2015-4-27 - |
+ DECR :                         40A C |  DELAY :                        407 C |
+ DOASCII :                      11E C |  DOLINE :                       10C C |
+ DONE :                         457 C |  DREG :                          11 P |
+ DST :                          779 C |  DUMPCOMMAND :                   EC C |
+ EOS :                          3C7 C |  FALSE :                          0 - |
+ FILL :                         2A6 C |  FILLCOMMAND :                  285 C |
+ FINISH :                       2B3 C | *FULLPMMU :                       1 - |
+ GETADDRESS :                   469 C |  GETBYTE :                      45A C |
+ GETCHAR :                      36E C |  GETHEX :                       419 C |
+ GOCOMMAND :                    14A C | *HAS64 :                          1 - |
+*HASDSP :                         0 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - |  HELPCOMMAND :                  27B C |
+ INC :                          34B C | *INEXTMODE :                      0 - |
+ INFOCOMMAND :                  190 C | *INLWORDMODE :                    0 - |
+*INMAXMODE :                      0 - | *INSRCMODE :                      0 - |
+*INSUPMODE :                      0 - |  INVALID :                       E0 C |
+ LINES :                         18 - | *LISTON :                         1 - |
+ LOOP1 :                        360 C | *MACEXP :                         1 - |
+ MAINLOOP :                      38 C |  MATHCOMMAND :                  34F C |
+ MEMORYCOMMAND :                34F C | *MOMCPU :                      8080 - |
+*MOMCPUNAME :                  8080 - | *NESTMAX :                      100 - |
+ NEXT :                         424 C |  NEXTBIT :                      234 C |
+ NEXTCH :                       3BA C |  NL :                             A - |
+ NOTPRINTABLE :                 3AD C |  NOTUPPER :                     3DD C |
+*PACKING :                        0 - | *PADDING :                        1 - |
+ PPR :                          3A8 C |  PRINTADDRESS :                 410 C |
+ PRINTASCII :                   39D C |  PRINTBYTE :                    3DE C |
+ PRINTCHAR :                    35F C |  PRINTCR :                      378 C |
+ PRINTEQUALS :                  385 C |  PRINTONE :                     395 C |
+ PRINTSPACE :                   3C9 C |  PRINTSTRING :                  3B9 C |
+ PRINTZERO :                    38D C |  PRNT :                         1AF C |
+ PROMPT :                        3F - |  REGISTERSCOMMAND :             1BC C |
+*RELAXED :                        0 - |  SAVE_A :                       76B C |
+ SAVE_B :                       76D C |  SAVE_C :                       76E C |
+ SAVE_D :                       76F C |  SAVE_E :                       770 C |
+ SAVE_F :                       76C C |  SAVE_H :                       771 C |
+ SAVE_L :                       772 C |  SAVE_PC :                      775 C |
+ SAVE_SP :                      773 C |  SEARCHCOMMAND :                34F C |
+ SIZE :                         77B C |  SRC :                          777 C |
+ SREG :                          10 P |  STACK :                       7000 - |
+ START :                          0 C |  STARTLINE :                    101 C |
+ STARTSCREEN :                   FC C |  STR8080 :                      715 C |
+ STRCLEARSCREEN :               702 C |  STRCONTINUE :                  71E C |
+ STRCPUTYPE :                   70A C |  STRHELP :                      4BB C |
+ STRINVALID :                   497 C |  STRNOTIMPLEMENTED :            748 C |
+ STRSTARTUP :                   474 C |  STRZ80 :                       71A C |
+ TESTCOMMAND :                  34F C | *TIME :                    19:42:39 - |
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 20 - 2015-4-27 19:42:39
+
+
+ TOUPPER :                      3D1 C | *TRUE :                           1 - |
+ TRYCOLON :                      BF C |  TRYD :                          51 C |
+ TRYEQUALS :                     CA C |  TRYF :                          5C C |
+ TRYG :                          67 C |  TRYHELP :                       D5 C |
+ TRYI :                          72 C |  TRYK :                          7D C |
+ TRYL :                          88 C |  TRYR :                          93 C |
+ TRYS :                          9E C |  TRYSPACE :                     142 C |
+ TRYT :                          A9 C |  TRYV :                          B4 C |
+ VALIDDIGIT :                   445 C |  VALIDLLETTER :                 44D C |
+ VALIDULETTER :                 44F C |  VERIFYCOMMAND :                34F C |
+*VERSION :                     142F - |  Z80 :                          1B6 C |
+
+    136 symbols
+     28 unused symbols
+
+ AS V1.42 Beta [Bld 92] - source file jmon.asm - page 21 - 2015-4-27 19:42:39
+
+
+  codepages:
+  ----------
+
+STANDARD (0 changed characters)
+
+
+0.01 seconds assembly time
+
+    935 lines source file
+      2 passes
+      0 errors
+      0 warnings
