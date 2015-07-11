@@ -9,9 +9,8 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
         ORG     ORGIN
 ;
 ;
-HOME    EQU     0       ;ABORT (VER 1-2)
-;HOME   EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     '2'     ;VERSION NUMBER
+HOME    EQU     ORGIN   ;ABORT ADDRESS
+VERS    EQU     '3'     ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -104,11 +103,9 @@ WARM:   LXI     H,WARM  ;RETURN HERE
         CPI     'D'     ;DUMP
         JZ      DUMP    ;HEX/ASCII (2)
         CPI     'C'     ;CALL
-        JZ      WARM    ;(VER 1-2)
-;       JZ      CALLS   ;SUBROUTINE (3)
+        JZ      CALLS   ;SUBROUTINE (3)
         CPI     'G'     ;GO
-        JZ      WARM    ;(VER 1-2)
-;       JZ      GO      ;SOMEWHERE (3)
+        JZ      GO      ;SOMEWHERE (3)
         CPI     'L'     ;LOAD
         JZ      WARM    ;(VER 1-3)
 ;       JZ      LOAD    ;INTO MEMORY (4)
@@ -348,5 +345,13 @@ TSTOP:  INX     H
         RNC             ;NOT DONE
         POP     H       ;RAISE STACK
         RET
+;
+; ROUTINE TO GO ANYWHERE IN MEMORY
+; ADDRESS OF WARM IS ON STACK, SO A
+; SIMPLE RET WILL RETURN TO THIS MONITOR
+;
+GO:     POP     H       ;RAISE STACK
+CALLS:  CALL    READHL  ;GET ADDRESS
+        PCHL            ;GO THERE
 ;
         END
