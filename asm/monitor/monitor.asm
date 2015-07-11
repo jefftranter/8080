@@ -3,7 +3,7 @@
 ; July 11, 2015
 ;
 TOP     EQU     24      ;MEMORY TOP, K BYTES
-ORGIN   EQU     (TOP-2)*1024    ;PROGRAM START
+ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
         CPU     8080
         ORG     ORGIN
@@ -34,11 +34,11 @@ BACKUP  EQU     CTRH    ;BACKUP CHAR
 DEL     EQU     127     ;RUBOUT
 ESC     EQU     27      ;ESCAPE
 APOS    EQU     (39-'0') & 0FFH
-CR      EQU     13       ;CARRIAGE RET
-LF      EQU     10       ;LINE FEED
-INC     EQU     0DBH     ;IN OP CODE
-OUTC    EQU     0D3H     ;OUT OP CODE
-RETC    EQU     0C9H     ;RET OP CODE
+CR      EQU     13      ;CARRIAGE RET
+LF      EQU     10      ;LINE FEED
+INC     EQU     0DBH    ;IN OP CODE
+OUTC    EQU     0D3H    ;OUT OP CODE
+RETC    EQU     0C9H    ;RET OP CODE
 ;
 START:
         JMP     COLD    ;COLD START
@@ -71,7 +71,7 @@ OUT2:   CALL    INSTAT  ;INPUT?
 ;
 ; FREEZE OUTPUT UNTIL ^Q OR ^X
 ;
-OUT3:   CALL    INPUTT  ; INPUT?
+OUT3:   CALL    INPUTT  ;INPUT?
         CPI     CTRQ    ;RESUME?
         JNZ     OUT3    ;NO
         JMP     OUT2
@@ -199,4 +199,3 @@ SENDM:  LDAX    D       ;GET BYTE
         JMP     SENDM   ;NEXT
 ;
         END
-
