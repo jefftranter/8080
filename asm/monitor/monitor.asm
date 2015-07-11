@@ -10,7 +10,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 ;
 HOME    EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     '3'     ;VERSION NUMBER
+VERS    EQU     '4'     ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -107,8 +107,7 @@ WARM:   LXI     H,WARM  ;RETURN HERE
         CPI     'G'     ;GO
         JZ      GO      ;SOMEWHERE (3)
         CPI     'L'     ;LOAD
-        JZ      WARM    ;(VER 1-3)
-;       JZ      LOAD    ;INTO MEMORY (4)
+        JZ      LOAD    ;INTO MEMORY (4)
         JMP     WARM    ;TRY AGAIN
 ;
 ; INPUT A LINE FROM CONSOLE AND PUT IT
@@ -353,5 +352,46 @@ TSTOP:  INX     H
 GO:     POP     H       ;RAISE STACK
 CALLS:  CALL    READHL  ;GET ADDRESS
         PCHL            ;GO THERE
+;
+; LOAD HEX OR ASCII CHAR INTO MEMORY
+; FROM CONSOLE. CHECK TO SEE IF
+; THE DATA ACTUALLY GOT THERE
+; APOSTROPHE PRECEEDS ASCII CHAR
+; CARRIAGE RETURN PASSES OVER LOCATION
+;
+LOAD:   CALL    READHL  ;ADDRESS
+LOAD2:  CALL    OUTHL   ;PRINT IT
+        CALL    PASCI   ;ASCII
+        CALL    OUTSP
+        MOV     C,M     ;ORIG BYTE
+        CALL    OUTHEX  ;HEX
+        PUSH    H       ;SAVE PNTR
+        CALL    INPL2   ;INPUT
+        CALL    READHL  ; BYTE
+        MOV     B,L     ; TO B
+        POP     H
+        CPI     APOS
+        JZ      LOAD6   ;ASCII INPUT
+        MOV     A,C     ;HOW MANY?
+        ORA     A       ;NONE?
+        JZ      LOAD3   ;YES
+LOAD4:  CALL    CHEKM   ;INTO MEMORY
+LOAD3:  INX     H       ;POINTER
+        JMP     LOAD2
+;
+; LOAD ASCII CHARACTER
+;
+LOAD6:  CALL    GETCH
+        MOV     B,A
+        JMP     LOAD4
+;
+; COPY BYTE FROM B TO MEMORY
+; AND SEE THAT IT GOT THERE
+;
+CHEKM:  MOV     M,B     ;PUT IN MEM
+        MOV     A,M     ;GET BACK
+        CMP     B       ;SAME?
+        RZ              ;YES
+        JMP     ERROR   ;BAD
 ;
         END
