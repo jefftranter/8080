@@ -11,7 +11,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 HOME    EQU     0       ;ABORT (VER 1-2)
 ;HOME   EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     '1'
+VERS    EQU     '2'     ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -102,8 +102,7 @@ WARM:   LXI     H,WARM  ;RETURN HERE
         CALL    INPLN   ;CONSOLE LINE
         CALL    GETCH   ;GET CHAR
         CPI     'D'     ;DUMP
-        JZ      WARM    ;(VER 1-2)
-;       JZ      DUMP    ;HEX/ASCII (2)
+        JZ      DUMP    ;HEX/ASCII (2)
         CPI     'C'     ;CALL
         JZ      WARM    ;(VER 1-2)
 ;       JZ      CALLS   ;SUBROUTINE (3)
@@ -197,5 +196,157 @@ SENDM:  LDAX    D       ;GET BYTE
         CALL    OUTT    ;SEND IT
         INX     D       ;POINTER
         JMP     SENDM   ;NEXT
+;
+; DUMP MEMORY IN HEXADECIMAL AND ASCII
+;
+DUMP:   CALL    RDHLDE  ;RANGE
+DUMP2:  CALL    CRHL    ;NEW LINE
+DUMP3:  MOV     C,M     ;GET BYTE
+        CALL    OUTHX   ;PRINT
+        INX     H       ;POINTER
+        MOV     A,L
+        ANI     0FH     ;LINE END?
+        JZ      DUMP4   ;YES, ASCII
+        ANI     3       ;SPACE
+        CZ      OUTSP   ; 4 BYTES
+        JMP     DUMP3   ;NEXT HEX
+DUMP4:  CALL    OUTSP
+        PUSH    D
+        LXI     D,-10H  ;RESET LINE
+        DAD     D
+        POP     D
+DUMP5:  CALL    PASCI   ;ASCII DUMP
+        CALL    TSTOP   ;DONE?
+        MOV     A,L     ;NO
+        ANI     0FH     ;LINE END?
+        JNZ     DUMP5   ;NO
+        JMP     DUMP2
+;
+; DISPLAY MEMORY BYTE IN ASCII IF
+; POSSIBLE, OTHERWISE GIVE DECIMAL PNT
+;
+PASCI:  MOV     A,M     ;GET BYTE
+        CPI     DEL     ;HIGH BIT ON?
+        JNC     PASC2   ;YES
+        CPI     ' '     ;CONTROL CHAR?
+        JNC     PASC3   ;NO
+PASC2:  MVI     A,'.'   ;CHANGE TO DOT
+PASC3:  JMP     OUTT    ;SEND
+;
+; GET H,L ADN D,E FROM CONSOLE
+; CHECK THAT D,E IS LARGER
+;
+RDHLDE: CALL    HHLDE
+RDHDD2: MOV     A,E
+        SUB     L       ;E - L
+        MOV     A,D
+        SBB     H       ;D - H
+        JC      ERROR   ;H,L BIGGER
+        RET
+;
+; INPUT H,L AND D,E. SEE THAT
+; 2 ADDRESSES ARE ENTERED
+;
+HHLDE:  CALL    READHL  ;H,L
+        JC      ERROR   ;ONLY 1 ADDR
+        XCHG            ;SAVE IN D,E
+        CALL    READHL  ;D,E
+        XCHG            ;PUT BACK
+        RET
+;
+; INPUT H,L FROM CONSOLE
+;
+READHL: PUSH    D
+        PUSH    B       ;SAVE REGS
+        LXI     H,0     ;CLEAR
+RDHL2:  CALL    GETCH   ;GET CHAR
+        JC      RDHL5   ;LINE END
+        CALL    NIB     ;TO BINARY
+        JC      RDHL4   ;NOT HEX
+        DAD     H       ;TIMES 2
+        DAD     H       ;TIMES 4
+        DAD     H       ;TIMES 8
+        DAD     H       ;TIMES 16
+        ORA     L       ;ADD NEW CHAR
+        MOV     L,A
+        JMP     RDHL2   ;NEXT
+;
+; CHECK FOR BLANK AT END
+;
+RDHL4:  CPI     APOS    ;APOSTROPHE
+        JZ      RDHL5   ;ASCII INPUT
+        CPI     (' '-'0') & 0FFH
+        JNZ     ERROR   ;NO
+RDHL5:  POP     B
+        POP     D       ;RESTORE
+        RET
+;
+; CONVERT ASCII CHARACTERS TO BINARY
+;
+NIB:    SUI     '0'     ;ASCII BIAS
+        RC      ; < 0
+        CPI     'F'-'0'+1
+        CMC             ;INVERT
+        RC              ;ERROR, > F
+        CPI     10
+        CMC             ;INVERT
+        RNC             ;NUMBER 0-9
+        SUI     'A'-'9'-1
+        CPI     10      ;SKIP : TO
+        RET             ;LETTER A-F
+;
+; PRINT ? ON IMPROPER INPUT
+;
+ERROR:  MVI     A,'?'
+        CALL    OUTT
+        JMP     START   ;TRY AGAIN
+;
+; START NEW LINE, GIVE ADDRESS
+;
+CRHL:   CALL    CRLF    ;NEW LINE
+;
+; PRINT H,L IN HEX
+;
+OUTHL:  MOV     C,H
+        CALL    OUTHX   ;H
+OUTLL:  MOV     C,L
+;
+; OUTPUT HEX BYTE FROM C AND A SPACE
+;
+OUTHEX: CALL    OUTHX
+;
+; OUTPUT A SPACE
+;
+OUTSP:  MVI     A,' '
+        JMP     OUTT
+;
+; OUTPUT A HEX BYTE FROM C
+; BINARY TO ASCII HEX CONVERSION
+;
+OUTHX:  MOV     A,C
+        RAR             ;ROTATE
+        RAR             ; FOUR
+        RAR             ; BITS TO
+        RAR             ; RIGHT
+        CALL    HEX1    ;UPPER CHAR
+        MOV     A,C     ;LOWER CHAR
+HEX1:   ANI     0FH     ;TAKE 4 BITS
+        ADI     90H
+        DAA             ;DAA TRICK
+        ACI     40H
+        DAA
+        JMP     OUTT
+;
+; CHECK FOR END, H,L MINUS D,E
+; INCREMENT H,L
+;
+TSTOP:  INX     H
+        MOV     A,E
+        SUB     L       ; E - L
+        MOV     A,D
+        SBB     H       ; D - H
+        RNC             ;NOT DONE
+        POP     H       ;RAISE STACK
+        RET
 ;
         END
