@@ -28,9 +28,9 @@ AD<start> <end>        Dump memory in ASCII from <start> to <end>.
 
 AL<address>            Load ASCII data to <address>. End with Control-X.
 
-AS<start> <end>
-                       Search for ASCII data from <start> through <end> address.
-                       End search data with Control-X.
+AS<start> <end> <chars>
+                       Search for ASCII data consisting of one or two
+                       characters, from <start> through <end> address.
 
 C<address>             Call routine at <address> (should end in RET instruction).
 

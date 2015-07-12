@@ -10,7 +10,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 ;
 HOME    EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     '11'    ;VERSION NUMBER
+VERS    EQU     '12'    ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -146,7 +146,7 @@ MSIZE:  MOV     C,H     ;MEM TOP
 ;
 ; COMMAND TABLE
 ;
-TABLE:  DW      ERROR   ;A, ASCII
+TABLE:  DW      ASCII   ;A, ASCII
         DW      ERROR   ;B
         DW      CALLS   ;C, CALL SUBR
         DW      DUMP    ;D, DUMP
@@ -560,5 +560,64 @@ SEAR5:  DCX     H       ;A MATCH
         POP     B
 SEAR4:  CALL    TSTOP   ;DONE?
         JMP     SEAR3   ;NO
+;
+; ASCII SUB-COMMAND PROCESSOR
+;
+ASCII:  CALL    GETCH   ;NEXT CHAR
+        CPI     'D'     ;DISPLAY
+        JZ      ADUMP
+        CPI     'S'     ;SEARCH
+        JZ      ASCS
+        CPI     'L'     ;LOAD
+        JNZ     ERROR
+;
+; LOAD ASCII CHARACTERS INTO MEMORY
+; QUIT ON CONTROL-X
+;
+        CALL    READHL  ;ADDRESS
+        CALL    OUTHL   ;PRINT IT
+ALOD2:  CALL    INPUTT  ;NEXT CHAR
+        CALL    OUTT    ;PRINT IT
+        MOV     B,A     ;SAVE
+        CALL    CHEKM   ;INTO MEMORY
+        INX     H       ;POINTER
+        MOV     A,L
+        ANI     7FH     ;LINE END?
+        JNZ     ALOD2   ;NO
+        CALL    CRHL    ;NEW LINE
+        JMP     ALOD2
+;
+; DISPLAY MEMORY IN STRAIGHT ASCII.
+; KEEP CARRIAGE RETURN, LINE FEED, CHANGE
+; TAB TO SPACE, REMOVE OTHER CONTROL CHAR.
+;
+ADUMP:  CALL    RDHLDE  ;RANGE
+ADMP2:  MOV     A,M     ;GET BYTE
+        CPI     DEL     ;HIGH BIT ON?
+        JNC     ADMP4   ;YES
+        CPI     ' '     ;CONTROL?
+        JNC     ADMP3   ;NO
+        CPI     CR      ;CARR RET?
+        JZ      ADMP3   ;YES, OK
+        CPI     LF      ;LINE FEED?
+        JZ      ADMP3   ;YES, OK
+        CPI     TAB
+        JNZ     ADMP4   ;SKIP OTHER
+        MVI     A,' '   ;SPACE FOR TAB
+ADMP3:  CALL    OUTT    ;SEND
+ADMP4:  CALL    TSTOP   ;DONE?
+        JMP     ADMP2   ;END
+;
+; SEARCH FOR 1 OR 2 ASCII CHARACTERS
+; NO SPACE BETWEEN ASCII CHARS
+; FORMAT: START STOP 1 OR 2 ASCII CHAR
+;
+ASCS:   CALL    RDHLDE  ;RANGE
+        CALL    GETCH   ;FIRST CHAR
+        MOV     C,A
+        CALL    GETCH   ;2ND OR CARR RET
+        JC      SEAR2   ;ONLY ONE CHAR
+        MOV     B,A     ;2ND
+        JMP     SEAR3
 ;
         END
