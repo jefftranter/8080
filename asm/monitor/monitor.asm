@@ -10,7 +10,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 ;
 HOME    EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     "15"    ;VERSION NUMBER
+VERS    EQU     "17"    ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -163,11 +163,11 @@ TABLE:  DW      ASCII   ;A, ASCII
         DW      OPORT   ;O, PORT OUTPUT
         DW      ERROR   ;P
         DW      ERROR   ;Q
-        DW      ERROR   ;R, REPLACE
+        DW      REPL    ;R, REPLACE
         DW      SEARCH  ;S, SEARCH
         DW      ERROR   ;T
         DW      ERROR   ;U
-        DW      ERROR   ;V, VERIFY MEM
+        DW      VERM    ;V, VERIFY MEM
         DW      ERROR   ;W
         DW      REGS    ;X, STACK POINTER
         DW      ERROR   ;Y
@@ -716,5 +716,51 @@ JERR:   PUSH    PSW     ;SAVE COMPLEMENT
         CALL    BITS    ;PRINT BINARY
         POP     H
         JMP     JUST3   ;CONTINUE
+;
+; REPLACE HEX BYTE WITH ANOTHER
+; OVER GIVEN RANGE
+; FORMAT IS: START, STOP, ORIG, NEW
+;
+REPL:   CALL    HLDEBC  ;RANGE, 1ST BYTE
+        JC      ERROR   ;NO, 2ND
+        MOV     B,C     ;1ST TO B
+        PUSH    H
+        CALL    READHL  ;2ND BYTE
+        MOV     C,L     ;INTO C
+        POP     H
+REPL2:  MOV     A,M     ;FETCH BYTE
+        CMP     B       ;A MATCH?
+        JNZ     REPL3   ;NO
+        MOV     M,C     ;SUBSTITUTE
+        MOV     A,C
+        CMP     M       ;SAME?
+        JNZ     ERRB    ;NO, BAD
+REPL3:  CALL    TSTOP   ;DONE?
+        JMP     REPL2
+;
+; GIVE RANGE OF 1ST BLOCK
+; AND START OF SECOND
+;
+VERM:   CALL    HLDEBC  ;3 ADDRESSES
+VERM2:  LDAX    B       ;FETCH BYTE
+        CMP     M       ;SAME AS OTHER?
+        JZ      VERM3   ;YES
+        PUSH    H       ;DIFFERENT
+        PUSH    B
+        CALL    CRHL    ;PRINT 1ST POINTER
+        MOV     C,M     ;FIRST BYTE
+        CALL    OUTHEX  ;PRINT IT
+        MVI     A,':'
+        CALL    OUTT
+        POP     H       ;B,C TO H,L
+        CALL    OUTHL   ;SECOND POINTER
+        MOV     C,M     ;2ND BYTE
+        CALL    OUTHX   ;PRINT IT
+        MOV     C,L     ;RESTORE C
+        MOV     B,H     ;AND B
+        POP     H       ;AND H,L
+VERM3:  CALL    TSTOP   ;DONE?
+        INX     B       ;2ND POINTER
+        JMP     VERM2
 ;
         END
