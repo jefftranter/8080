@@ -11,14 +11,8 @@ http://john.ccac.rwth-aachen.de:8000/as/index.html
 A make file is provided to build the software. You may need to adjust
 it for your environment.
 
-The program can be loaded in several ways:
-
-1. Toggle in the binary code using the front panel.
-2. Load the .BIN file from the SD card.
-3. Copy the .HEX file to CP/M, run LOAD on it to generate a .COM file.
-   and run the COM file.
-
-The start address is 5800.
+The program can be run by copying the monitor.bin file to the SD card,
+then loading and running it. The start address is 5800.
 
 The prompt, e.g. "57>" shows the high byte of the stack address.
 
