@@ -18,4 +18,42 @@ The program can be loaded in several ways:
 3. Copy the .HEX file to CP/M, run LOAD on it to generate a .COM file.
    and run the COM file.
 
+The start address is 5800.
+
+The prompt, e.g. "57>" shows the high byte of the stack address.
+
+Summary of commands:
+
+C<address>             Call routine at address (should end in RET instruction).
+
+D<start> <end>         Dump memory in hex and ASCII from start to end.
+
+F<start> <end> <data>  Fill memory from start to end with byte data (hex or
+                       ASCII preceded by "'".
+
+
+G<address>             Go to routine at address.
+
+L<address>             Load or edit memory from address. Enter new data in hex,
+                       ASCII preceded by "'", or <Return> to advance.
+                       <Control>-X will return to prompt.
+
+M<start> <end> <new>  Move (copy) memory from start through end address to new
+                      start address.
+
+S<start> <end> <byte> <byte>
+                      Search for byte or word size data from start through end address.
+
+X                     Show current stack pointer address.
+
+Z<start> <end>        Write zeroes to memory from start to end.
+
+
+Keys:
+
+<Control>-Q  - resume output.
+<Control>-S  - suspend output.
+<Control>-X  - abort, jump to monitor warm start.
+<Delete>     - delete last character entered.
+
 Jeff Tranter <tranter@pobox.com>

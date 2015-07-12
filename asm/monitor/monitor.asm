@@ -10,7 +10,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 ;
 HOME    EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     '9'     ;VERSION NUMBER
+VERS    EQU     '11'    ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -158,13 +158,13 @@ TABLE:  DW      ERROR   ;A, ASCII
         DW      ERROR   ;J, MEMORY TEST
         DW      ERROR   ;K
         DW      LOAD    ;L, LOAD
-        DW      ERROR   ;M, MOVE
+        DW      MOVE    ;M, MOVE
         DW      ERROR   ;N
         DW      ERROR   ;O, PORT OUTPUT
         DW      ERROR   ;P
         DW      ERROR   ;Q
         DW      ERROR   ;R, REPLACE
-        DW      ERROR   ;S, SEARCH
+        DW      SEARCH  ;S, SEARCH
         DW      ERROR   ;T
         DW      ERROR   ;U
         DW      ERROR   ;V, VERIFY MEM
@@ -509,5 +509,56 @@ HLDEBC: CALL    HLDECK  ;RANGE
 HLDECK: CALL    HHLDE   ;2 ADDR
         JC      ERROR   ;THAT'S ALL
         JMP     RDHLD2  ;CHECK
+;
+; MOVE A BLOCK OF MEMORY H,L-D,E TO B,C
+;
+MOVE:   CALL    HLDEBC  ;3 ADDR
+MOVEDN: CALL    MOVIN   ;MOVE/CHECK
+        CALL    TSTOP   ;DONE?
+        INX     B       ;NO
+        JMP     MOVEDN
+;
+MOVIN:  MOV     A,M     ;BYTE
+        STAX    B       ;NEW LOCATION
+        LDAX    B       ;CHECK
+        CMP     M       ;IS IT THERE?
+        RZ              ;YES
+        MOV     H,B     ;ERROR
+        MOV     L,C     ;INTO H,L
+        JMP     ERRP    ;SHOW BAD
+;
+; SEARCH FOR 1 OR 2 BYTES OVER THE
+; RANGE H,L D,E. BYTES ARE IN B,C
+; B HAS CARRIAGE RETURN IF ONLY ONE BYTE
+; PUT SPACE BETWEEN BYTES IF TWO
+; FORMAT: START STOP BYTE1 BYTE2
+;
+SEARCH: CALL    HLDEBC  ;RANGE, 1ST BYTE
+SEAR2:  MVI     B,CR    ;SET FOR 1 BYTE
+        JC      SEAR3   ;ONLY ONE
+        PUSH    H
+        CALL    READHL  ;2ND BYTE
+        MOV     B,L     ;INTO C
+        POP     H
+SEAR3:  MOV     A,M     ;GET BYTE
+        CMP     C       ;MATCH?
+        JNZ     SEAR4   ;NO
+        INX     H       ;YES
+        MOV     A,B     ;ONLY 1?
+        CPI     CR
+        JZ      SEAR5   ;YES
+;
+; FOUND FIRST MATCH, CHECK FOR SECOND
+;
+        MOV     A,M     ;NEXT BYTE
+        CMP     B       ;MATCH?
+        JNZ     SEAR4   ;NO
+;
+SEAR5:  DCX     H       ;A MATCH
+        PUSH    B
+        CALL    CRHL    ;SHOW ADDR
+        POP     B
+SEAR4:  CALL    TSTOP   ;DONE?
+        JMP     SEAR3   ;NO
 ;
         END
