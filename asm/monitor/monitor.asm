@@ -10,7 +10,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 ;
 HOME    EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     '6'     ;VERSION NUMBER
+VERS    EQU     '7'     ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -127,15 +127,51 @@ MSIZE:  MOV     C,H     ;MEM TOP
         CALL    INPLN   ;CONSOLE LINE
         CALL    GETCH   ;FIRST CHAR
 ;
-        CPI     'D'     ;DUMP
-        JZ      DUMP    ;HEX/ASCII (2)
-        CPI     'C'     ;CALL
-        JZ      CALLS   ;SUBROUTINE (3)
-        CPI     'G'     ;GO
-        JZ      GO      ;SOMEWHERE (3)
-        CPI     'L'     ;LOAD
-        JZ      LOAD    ;INTO MEMORY (4)
-        JMP     WARM    ;TRY AGAIN
+; MAIN COMMAND PROCESSOR
+;
+        SUI     'A'     ;CONVERT OFFSET
+        JC      ERROR   ; < A
+        CPI     'Z'-'A'+1
+        JNC     ERROR   ; > Z
+        ADD     A       ;DOUBLE
+        LXI     H,TABLE ;START
+        MVI     D,0
+        MOV     E,A     ;OFFSET
+        DAD     D       ;ADD TO TABLE
+        MOV     E,M     ;LOW BYTE
+        INX     H
+        MOV     D,M     ;HIGH BYTE
+        XCHG            ;INTO H,L
+        PCHL            ;GO THERE
+;
+; COMMAND TABLE
+;
+TABLE:  DW      ERROR   ;A, ASCII
+        DW      ERROR   ;B
+        DW      CALLS   ;C, CALL SUBR
+        DW      DUMP    ;D, DUMP
+        DW      ERROR   ;E
+        DW      ERROR   ;F, FILL
+        DW      GO      ;G, GO
+        DW      ERROR   ;H, HEX MATH
+        DW      ERROR   ;I, PORT INPUT
+        DW      ERROR   ;J, MEMORY TEST
+        DW      ERROR   ;K
+        DW      LOAD    ;L, LOAD
+        DW      ERROR   ;M, MOVE
+        DW      ERROR   ;N
+        DW      ERROR   ;O, PORT OUTPUT
+        DW      ERROR   ;P
+        DW      ERROR   ;Q
+        DW      ERROR   ;R, REPLACE
+        DW      ERROR   ;S, SEARCH
+        DW      ERROR   ;T
+        DW      ERROR   ;U
+        DW      ERROR   ;V, VERIFY MEM
+        DW      ERROR   ;W
+        DW      ERROR   ;X, STACK POINTER
+        DW      ERROR   ;Y
+        DW      ERROR   ;Z, ZERO
 ;
 ; INPUT A LINE FROM CONSOLE AND PUT IT
 ; INTO THE BUFFER. CARRIAGE RETURN ENDS
