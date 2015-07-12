@@ -10,7 +10,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 ;
 HOME    EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     "14"    ;VERSION NUMBER
+VERS    EQU     "15"    ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -155,7 +155,7 @@ TABLE:  DW      ASCII   ;A, ASCII
         DW      GO      ;G, GO
         DW      HMATH   ;H, HEX MATH
         DW      IPORT   ;I, PORT INPUT
-        DW      ERROR   ;J, MEMORY TEST
+        DW      JUST    ;J, MEMORY TEST
         DW      ERROR   ;K
         DW      LOAD    ;L, LOAD
         DW      MOVE    ;M, MOVE
@@ -674,5 +674,47 @@ HMATH:  CALL    HHLDE   ;TWO NUMBERS
         SBB     D
         MOV     H,A     ;HIGH BYTES
         JMP     OUTHL   ;DIFFERENCE
+;
+; MEMORY TEST
+; THAT DOESN'T ALTER CURRENT BYTE
+; INPUT RANGE OF ADDRESSES, ABOUT WITH ^X
+;
+JUST:   CALL    RDHLDE  ;RANGE
+        PUSH    H       ;SAVE START ADDR
+JUST2:  MOV     A,M     ;GET BYTE
+        CMA             ;COMPLEMENT IT
+        MOV     M,A     ;PUT IT BACK
+        CMP     M       ;DID IT GO?
+        JNZ     JERR    ;NO
+        CMA             ;ORIGINAL BYTE
+        MOV     M,A     ;PUT IT BACK
+JUST3:  MOV     A,L     ;PASS
+        SUB     E       ; COMPLETED?
+        MOV     A,H
+        SBB     D
+        INX     H
+        JC      JUST2   ;NO
+;
+; AFTER EACH PASS,
+; SEE IF ABORT WANTED
+;
+        CALL    INSTAT  ;INPUT?
+        CNZ     INPUTT  ;YES, GET IT
+        POP     H       ;SAVE START ADDR
+        PUSH    H       ;SAVE AGAIN
+        JMP     JUST2   ;NEXT PASS
+;
+; FOUND MEMORY ERROR, PRINT POINTER AND
+; BIT MAP: 0=GOOD, 1=BAD BIT
+;
+JERR:   PUSH    PSW     ;SAVE COMPLEMENT
+        CALL    CRHL    ;PRINT POINTER
+        POP     PSW
+        XRA     M       ;SET BAD BITS
+        PUSH    H       ;SAVE POINTER
+        MOV     L,A     ;BIT MAP TO L
+        CALL    BITS    ;PRINT BINARY
+        POP     H
+        JMP     JUST3   ;CONTINUE
 ;
         END
