@@ -10,7 +10,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 ;
 HOME    EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     '12'    ;VERSION NUMBER
+VERS    EQU     "13"    ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -90,7 +90,7 @@ OUT4:   IN      CSTATO  ;CHECK STATUS
 ;
 SIGNON: DB      CR,LF
         DB      " Ver "
-        DW      VERS
+        DB      VERS
         DB      0
 ;
 ; CONTINUATION OF COLD START
@@ -154,13 +154,13 @@ TABLE:  DW      ASCII   ;A, ASCII
         DW      FILL    ;F, FILL
         DW      GO      ;G, GO
         DW      ERROR   ;H, HEX MATH
-        DW      ERROR   ;I, PORT INPUT
+        DW      IPORT   ;I, PORT INPUT
         DW      ERROR   ;J, MEMORY TEST
         DW      ERROR   ;K
         DW      LOAD    ;L, LOAD
         DW      MOVE    ;M, MOVE
         DW      ERROR   ;N
-        DW      ERROR   ;O, PORT OUTPUT
+        DW      OPORT   ;O, PORT OUTPUT
         DW      ERROR   ;P
         DW      ERROR   ;Q
         DW      ERROR   ;R, REPLACE
@@ -619,5 +619,45 @@ ASCS:   CALL    RDHLDE  ;RANGE
         JC      SEAR2   ;ONLY ONE CHAR
         MOV     B,A     ;2ND
         JMP     SEAR3
+;
+; INPUT FOR ANY PORT (8080 VERSION)
+;
+IPORT:  CALL    READHL  ;PORT
+        MOV     C,L     ;PORT TO C
+        MVI     A,INC   ;IN CODE
+        CALL    PUTIO   ;SETUP INPUT
+        MOV     L,A
+        CALL    OUTLL   ;HEX VALUE
+;
+; PRINT L REGISTER IN BINARY (8080 VER)
+;
+BITS:   MVI     B,8     ;8 BITS
+BIT2:   MOV     A,L
+        ADD     A       ;SHIFT LEFT
+        MOV     L,A
+        MVI     A,'0'/2 ;HALF OF 0
+        ADC     A       ;DOUBLE AND CARRY
+        CALL    OUTT    ;PRINT BIT
+        DCR     B
+        JNZ     BIT2    ;8 TIMES
+        RET
+;
+; OUTPUT BYTE FROM PORT (8080 VERSION)
+; FORMAT IS: O,PORT,BYTE
+;
+OPORT:  CALL    READHL  ;PORT
+        MOV     C,L
+        CALL    READHL  ;DATA
+        MVI     A,OUTC  ;OUT OPCODE
+;
+; EMULATE Z80 INP AND OUP FOR 8080
+;
+PUTIO:  STA     PORTN   ;IN OR OUT CODE
+        MOV     A,C     ;PORT NUMBER
+        STA     PORTN+1
+        MVI     A,RETC  ;RET OPCODE
+        STA     PORTN+2
+        MOV     A,L     ;OUTPUT BYTE
+        JMP     PORTN   ;EXECUTE
 ;
         END
