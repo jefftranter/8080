@@ -10,7 +10,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 ;
 HOME    EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     '8'     ;VERSION NUMBER
+VERS    EQU     '9'     ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -151,7 +151,7 @@ TABLE:  DW      ERROR   ;A, ASCII
         DW      CALLS   ;C, CALL SUBR
         DW      DUMP    ;D, DUMP
         DW      ERROR   ;E
-        DW      ERROR   ;F, FILL
+        DW      FILL    ;F, FILL
         DW      GO      ;G, GO
         DW      ERROR   ;H, HEX MATH
         DW      ERROR   ;I, PORT INPUT
@@ -171,7 +171,7 @@ TABLE:  DW      ERROR   ;A, ASCII
         DW      ERROR   ;W
         DW      REGS    ;X, STACK POINTER
         DW      ERROR   ;Y
-        DW      ERROR   ;Z, ZERO
+        DW      ZERO    ;Z, ZERO
 ;
 ; INPUT A LINE FROM CONSOLE AND PUT IT
 ; INTO THE BUFFER. CARRIAGE RETURN ENDS
@@ -296,7 +296,7 @@ PASC3:  JMP     OUTT    ;SEND
 ; CHECK THAT D,E IS LARGER
 ;
 RDHLDE: CALL    HHLDE
-RDHDD2: MOV     A,E
+RDHLD2: MOV     A,E
         SUB     L       ;E - L
         MOV     A,D
         SBB     H       ;D - H
@@ -466,5 +466,48 @@ ERR2:   CALL    OUTT
 REGS:   LXI     H,0
         DAD     SP
         JMP     OUTHL
+;
+; ZERO A PORTION OF MEMORY
+; THE MONITOR AND STACK ARE
+; PROTECTED
+;
+ZERO:   CALL    RDHLDE  ;RANGE
+        MVI     B,0
+        JMP     FILL2
+;
+; FILL A PORTION OF MEMORY
+;
+FILL:   CALL    HLDEBC  ;RANGE, BYTE
+        CPI     APOS    ;APOSTROPHE?
+        JZ      FILL4   ;YES, ASCII
+        MOV     B,C
+FILL2:  MOV     A,H     ;FILL BYTE
+        CPI     STACK >> 8 ;TOO FAR?
+        JNC     ERROR   ;YES
+FILL3:  CALL    CHEKM   ;PUT, CHECK
+        CALL    TSTOP   ;DONE?
+        JMP     FILL3   ;NEXT
+;
+FILL4:  CALL    GETCH   ;ASCII CHAR
+        MOV     B,A
+        JMP     FILL3
+;
+; GET H,L D,E AND B,C
+;
+HLDEBC: CALL    HLDECK  ;RANGE
+        JC      ERROR   ;NO BYTE
+        PUSH    H
+        CALL    READHL  ;3RD INPUT
+        MOV     B,H     ;MOVE TO
+        MOV     C,L     ; B,C
+        POP     H
+        RET
+;
+; GET 2 ADDRESSES, CHECK THAT
+; ADDITIONAL DATA IS INCLUDED
+;
+HLDECK: CALL    HHLDE   ;2 ADDR
+        JC      ERROR   ;THAT'S ALL
+        JMP     RDHLD2  ;CHECK
 ;
         END
