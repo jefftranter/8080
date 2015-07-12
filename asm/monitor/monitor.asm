@@ -10,7 +10,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 ;
 HOME    EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     '7'     ;VERSION NUMBER
+VERS    EQU     '8'     ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -169,7 +169,7 @@ TABLE:  DW      ERROR   ;A, ASCII
         DW      ERROR   ;U
         DW      ERROR   ;V, VERIFY MEM
         DW      ERROR   ;W
-        DW      ERROR   ;X, STACK POINTER
+        DW      REGS    ;X, STACK POINTER
         DW      ERROR   ;Y
         DW      ERROR   ;Z, ZERO
 ;
@@ -455,6 +455,16 @@ CHEKM:  MOV     M,B     ;PUT IN MEM
         MOV     A,M     ;GET BACK
         CMP     B       ;SAME?
         RZ              ;YES
-        JMP     ERROR   ;BAD
+ERRP:   POP     PSW     ;RAISE STACK
+ERRB:   MVI     A,'B'   ;BAD
+ERR2:   CALL    OUTT
+        CALL    OUTSP
+        JMP     OUTHL   ;POINTER
+;
+; DISPLAY STACK POINTER
+;
+REGS:   LXI     H,0
+        DAD     SP
+        JMP     OUTHL
 ;
         END
