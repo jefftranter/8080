@@ -1,9 +1,9 @@
 This is a simple machine language monitor program for Intel 8080
 microprocessor that appeared in the book "8080/Z80 Assembly Language
-Techniqes for Improved Programming" by Alan R. Miller. The code appears
-in chapter six.
+Techniques for Improved Programming" by Alan R. Miller. The code
+appears in chapter six.
 
-I have ported it run on the Briel Altair 8800.
+I have confirmed that it runs on the Briel Altair 8800.
 
 The code is written to be assembled using the AS macro assembler. See
 http://john.ccac.rwth-aachen.de:8000/as/index.html
@@ -24,30 +24,51 @@ The prompt, e.g. "57>" shows the high byte of the stack address.
 
 Summary of commands:
 
-C<address>             Call routine at address (should end in RET instruction).
+AD<start> <end>        Dump memory in ASCII from <start> to <end>.
 
-D<start> <end>         Dump memory in hex and ASCII from start to end.
+AL<address>            Load ASCII data to <address>. End with Control-X.
 
-F<start> <end> <data>  Fill memory from start to end with byte data (hex or
+AS<start> <end>
+                       Search for ASCII data from <start> through <end> address.
+                       End search data with Control-X.
+
+C<address>             Call routine at <address> (should end in RET instruction).
+
+D<start> <end>         Dump memory in hex and ASCII from <start> to <end>.
+
+F<start> <end> <data>  Fill memory from <start> to <end> with byte <data> (hex or
                        ASCII preceded by "'".
 
+G<address>             Go to routine at <address>.
 
-G<address>             Go to routine at address.
+H<address1> <address2> Hex math: report sum and difference of two hex addresses.
 
-L<address>             Load or edit memory from address. Enter new data in hex,
+I<port>                Input (read) and display data from i/o port <port>.
+
+J<start> <end>         Perform memory test from <start> to <end> address.
+
+L<address>             Load or edit memory from <address>. Enter new data in hex,
                        ASCII preceded by "'", or <Return> to advance.
                        <Control>-X will return to prompt.
 
-M<start> <end> <new>  Move (copy) memory from start through end address to new
-                      start address.
+M<start> <end> <new>   Move (copy) memory from <start> through <end> address to <new>
+                       start address.
+
+O<port> <data>         Output (send) data to i/o port <port>.
+
+R<start> <end> <from> <to>
+                       Replace every occurrence of hex byte <from> to <to>, in range
+                       of addresses <start> through <end>.
 
 S<start> <end> <byte> <byte>
-                      Search for byte or word size data from start through end address.
+                       Search for byte or word size data from start through end address.
 
-X                     Show current stack pointer address.
+V<start> <end> <to>    Compare (verify) data between <start> and <end> address with data
+                       starting at <to> address.
 
-Z<start> <end>        Write zeroes to memory from start to end.
+X                      Show current stack pointer address.
 
+Z<start> <end>         Write zeroes to memory from addresses <start> through <end>.
 
 Keys:
 
