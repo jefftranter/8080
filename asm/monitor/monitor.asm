@@ -89,7 +89,7 @@ OUT4:   IN      CSTATO  ;CHECK STATUS
         RET
 ;
 SIGNON: DB      CR,LF
-        DB      " Ver "
+        DB      "Ver "
         DB      VERS
         DB      0
 ;
