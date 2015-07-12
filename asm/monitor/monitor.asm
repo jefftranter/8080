@@ -10,7 +10,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 ;
 HOME    EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     '5'     ;VERSION NUMBER
+VERS    EQU     '6'     ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -103,9 +103,30 @@ COLD:   LXI     SP,STACK
 ;
 WARM:   LXI     H,WARM  ;RETURN HERE
         PUSH    H
+;
+; FIND TOP OF USABLE MEMORY.
+; CHECK FIRST BYTE OF EACH PAGE OF MEMORY
+; STARTING AT ADDRESS ZERO.  STOP AT STACK
+; OR MISSING/DEFECTIVE/PROTECTED MEMORY.
+; DISPLAY HIGH BYTE OF MEMORY TOP.
+        LXI     H,0     ;PAGE ZERO
+        MVI     B,STACK >> 8
+NPAGE:  MOV     A,M     ;GET BYTE
+        CMA             ;COMPLEMENT
+        MOV     M,A     ;PUT IT BACK
+        CMP     M       ;SAME?
+        JNZ     MSIZE   ;NO, MEM TOP
+        CMA             ;ORIG BYTE
+        MOV     M,A     ;RESTORE IT
+        INR     H       ;NEXT PAGE
+        DCR     B
+        JNZ     NPAGE
+MSIZE:  MOV     C,H     ;MEM TOP
         CALL    CRLF    ;NEW LINE
+        CALL    OUTHX   ;PRINT MEM SIZE
         CALL    INPLN   ;CONSOLE LINE
-        CALL    GETCH   ;GET CHAR
+        CALL    GETCH   ;FIRST CHAR
+;
         CPI     'D'     ;DUMP
         JZ      DUMP    ;HEX/ASCII (2)
         CPI     'C'     ;CALL
