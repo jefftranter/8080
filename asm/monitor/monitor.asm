@@ -10,7 +10,7 @@ ORGIN   EQU     (TOP-2)*1024  ;PROGRAM START
 ;
 ;
 HOME    EQU     ORGIN   ;ABORT ADDRESS
-VERS    EQU     "13"    ;VERSION NUMBER
+VERS    EQU     "14"    ;VERSION NUMBER
 STACK   EQU     ORGIN-60H
 CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
@@ -153,7 +153,7 @@ TABLE:  DW      ASCII   ;A, ASCII
         DW      ERROR   ;E
         DW      FILL    ;F, FILL
         DW      GO      ;G, GO
-        DW      ERROR   ;H, HEX MATH
+        DW      HMATH   ;H, HEX MATH
         DW      IPORT   ;I, PORT INPUT
         DW      ERROR   ;J, MEMORY TEST
         DW      ERROR   ;K
@@ -659,5 +659,20 @@ PUTIO:  STA     PORTN   ;IN OR OUT CODE
         STA     PORTN+2
         MOV     A,L     ;OUTPUT BYTE
         JMP     PORTN   ;EXECUTE
+;
+; HEXADECIMAL MATH, SUM AND DIFFERENCE
+;
+HMATH:  CALL    HHLDE   ;TWO NUMBERS
+        PUSH    H       ;SAVE H,L
+        DAD     D       ;SUM
+        CALL    OUTHL   ;PRINT IT
+        POP     H
+        MOV     A,L
+        SUB     E       ;LOW BYTES
+        MOV     L,A
+        MOV     A,H
+        SBB     D
+        MOV     H,A     ;HIGH BYTES
+        JMP     OUTHL   ;DIFFERENCE
 ;
         END
