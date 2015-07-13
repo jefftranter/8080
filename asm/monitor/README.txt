@@ -8,6 +8,10 @@ I have confirmed that it runs on the Briel Altair 8800.
 The code is written to be assembled using the AS macro assembler. See
 http://john.ccac.rwth-aachen.de:8000/as/index.html
 
+The file monitor.asm is the orginal source code. The file
+monitorz80.asm is a version using Z80 instructions which assembles to
+the same binary code.
+
 A make file is provided to build the software. You may need to adjust
 it for your environment.
 

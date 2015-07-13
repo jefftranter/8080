@@ -16,8 +16,8 @@ CSTAT   EQU     10H     ;CONSOLE STATUS
 CDATA   EQU     CSTAT+1 ;CONSOLE DATA
 CSTATO  EQU     CSTAT   ;CON OUT STATUS
 CDATAO  EQU     CSTATO+1 ;OUT DATA
-INMSK   EQU     1        ;INPUT MASK
-OMSK    EQU     2        ;OUTPUT MASK
+INMSK   EQU     1       ;INPUT MASK
+OMSK    EQU     2       ;OUTPUT MASK
 ;
 PORTN   EQU     STACK   ;3BYTES I/O
 IBUFP   EQU     STACK+3 ;BUFFER POINTER
@@ -56,7 +56,7 @@ INPUTT: CALL    INSTAT  ;CHECK STATUS
 INPUT2: IN      A,(CDATA) ;GET BYTE
         AND     DEL
         CP      CTRX    ;ABORT?
-        JP      Z,HOME    ;YES
+        JP      Z,HOME  ;YES
         RET
 ;
 ; GET CONSOLE-INPUT STATUS
@@ -69,7 +69,7 @@ INSTAT: IN      A,(CSTAT)
 ;
 OUTT:   PUSH    AF
 OUT2:   CALL    INSTAT  ;INPUT?
-        JP      Z,OUT4   ;NO ***
+        JP      Z,OUT4  ;NO ***
         CALL    INPUT2  ;GET INPUT
         CP      CTRS    ;FREEZE?
         JP      NZ,OUT2 ;NO
@@ -78,12 +78,12 @@ OUT2:   CALL    INSTAT  ;INPUT?
 ;
 OUT3:   CALL    INPUTT  ;INPUT?
         CP      CTRQ    ;RESUME?
-        JP      NZ,OUT3  ;NO
+        JP      NZ,OUT3 ;NO
         JP      OUT2
 ;
 OUT4:   IN      A,(CSTATO) ;CHECK STATUS
         AND     OMSK
-        JP      Z,OUT2    ;NOT READY***
+        JP      Z,OUT2 ;NOT READY***
         POP     AF
         OUT     (CDATAO),A ;SEND DATA
         RET
@@ -116,7 +116,7 @@ NPAGE:  LD      A,(HL)  ;GET BYTE
         CPL             ;COMPLEMENT
         LD      (HL),A  ;PUT IT BACK
         CP      (HL)    ;SAME?
-        JP      NZ,MSIZE   ;NO, MEM TOP
+        JP      NZ,MSIZE ;NO, MEM TOP
         CPL             ;ORIG BYTE
         LD      (HL),A  ;RESTORE IT
         INC     H       ;NEXT PAGE
@@ -131,9 +131,9 @@ MSIZE:  LD      C,H     ;MEM TOP
 ; MAIN COMMAND PROCESSOR
 ;
         SUB     'A'     ;CONVERT OFFSET
-        JP      C,ERROR   ; < A
+        JP      C,ERROR ; < A
         CP      'Z'-'A'+1
-        JP    NC,ERROR   ; > Z
+        JP      NC,ERROR ; > Z
         ADD     A,A     ;DOUBLE
         LD      HL,TABLE ;START
         LD      D,0
@@ -187,16 +187,16 @@ INPL2:  LD      HL,IBUFF ;BUFFER ADDR
         LD      C,0     ;COUNT
 INPLI:  CALL    INPUTT  ;CONSOLE CHAR
         CP      ' '     ;CONTROL?
-        JP      C,INPLC   ;YES
+        JP      C,INPLC ;YES
         CP      DEL     ;DELETE
-        JP      Z,INPLB   ;YES
+        JP      Z,INPLB ;YES
         CP      'Z'+1   ;UPPER CHAR?
-        JP      C,INPL3   ;YES
+        JP      C,INPL3 ;YES
         AND     5FH     ;MAKE UPPER
 INPL3:  LD      (HL),A  ;INTO BUFFER
         LD      A,32    ;BUFFER SIZE
         CP      C       ;FULL?
-        JP      Z,INPLI   ;YES, LOOP
+        JP      Z,INPLI ;YES, LOOP
         LD      A,(HL)  ;GET CHAR
         INC     HL      ;INCR POINTER
         INC     C       ;AND COUNT
@@ -206,7 +206,7 @@ INPLE:  CALL    OUTT    ;SHOW CHAR
 ; PROCESS CONTROL CHARACTER
 ;
 INPLC:  CP      CTRH    ;^H?
-        JP      Z,INPLB   ;YES
+        JP      Z,INPLB ;YES
         CP      CR      ;RETURN?
         JP      NZ,INPLI   ;NO, IGNORE
 ;
@@ -226,8 +226,8 @@ CRLF:   LD      A,CR
 ;
 INPLB:  LD      A,C     ;CHAR COUNT
         OR      A       ;ZERO?
-        JP      Z,INPLI   ;YES
-        DEC     HL       ;BACK POINTER
+        JP      Z,INPLI ;YES
+        DEC     HL      ;BACK POINTER
         DEC     C       ;AND COUNT
         LD      A,BACKUP ;CHARACTER
         JP      INPLE   ;SEND
@@ -237,10 +237,10 @@ INPLB:  LD      A,C     ;CHAR COUNT
 ;
 GETCH:  PUSH    HL      ;SAVE REGS
         LD      HL,(IBUFP) ;GET POINTER
-        LD      A,(IBUFC)   ;AND COUNT
+        LD      A,(IBUFC)  ;AND COUNT
         SUB     1       ;DECR WITH CARRY
         JP      C,GETC4   ;NO MORE CHAR
-        LD      (IBUFC),A  ;SAVE NEW COUNT
+        LD      (IBUFC),A ;SAVE NEW COUNT
         LD      A,(HL)  ;GET CHARACTER
         INC     HL      ;INCR POINTER
         LD      (IBUFP),HL ;AND SAVE
@@ -266,7 +266,7 @@ DUMP3:  LD      C,(HL)  ;GET BYTE
         INC     HL      ;POINTER
         LD      A,L
         AND     0FH     ;LINE END?
-        JP      Z,DUMP4   ;YES, ASCII
+        JP      Z,DUMP4 ;YES, ASCII
         AND     3       ;SPACE
         CALL    Z,OUTSP ; 4 BYTES
         JP      DUMP3   ;NEXT HEX
@@ -279,7 +279,7 @@ DUMP5:  CALL    PASCI   ;ASCII DUMP
         CALL    TSTOP   ;DONE?
         LD      A,L     ;NO
         AND     0FH     ;LINE END?
-        JP      NZ,DUMP5   ;NO
+        JP      NZ,DUMP5 ;NO
         JP      DUMP2
 ;
 ; DISPLAY MEMORY BYTE IN ASCII IF
@@ -287,9 +287,9 @@ DUMP5:  CALL    PASCI   ;ASCII DUMP
 ;
 PASCI:  LD      A,(HL)  ;GET BYTE
         CP      DEL     ;HIGH BIT ON?
-        JP    NC,PASC2   ;YES
+        JP      NC,PASC2   ;YES
         CP      ' '     ;CONTROL CHAR?
-        JP    NC,PASC3   ;NO
+        JP      NC,PASC3 ;NO
 PASC2:  LD      A,'.'   ;CHANGE TO DOT
 PASC3:  JP      OUTT    ;SEND
 ;
@@ -320,9 +320,9 @@ READHL: PUSH    DE
         PUSH    BC      ;SAVE REGS
         LD      HL,0    ;CLEAR
 RDHL2:  CALL    GETCH   ;GET CHAR
-        JP      C,RDHL5   ;LINE END
+        JP      C,RDHL5 ;LINE END
         CALL    NIB     ;TO BINARY
-        JP      C,RDHL4   ;NOT HEX
+        JP      C,RDHL4 ;NOT HEX
         ADD     HL,HL   ;TIMES 2
         ADD     HL,HL   ;TIMES 4
         ADD     HL,HL   ;TIMES 8
@@ -435,10 +435,10 @@ LOAD2:  CALL    OUTHL   ;PRINT IT
         LD      B,L     ; TO B
         POP     HL
         CP      APOS
-        JP      Z,LOAD6   ;ASCII INPUT
+        JP      Z,LOAD6 ;ASCII INPUT
         LD      A,C     ;HOW MANY?
-        OR      A,A       ;NONE?
-        JP      Z,LOAD3   ;YES
+        OR      A,A     ;NONE?
+        JP      Z,LOAD3 ;YES
 LOAD4:  CALL    CHEKM   ;INTO MEMORY
 LOAD3:  INC     HL      ;POINTER
         JP      LOAD2
@@ -457,10 +457,10 @@ CHEKM:  LD      (HL),B ;PUT IN MEM
         CP      B      ;SAME?
         RET     Z      ;YES
 ERRP:   POP     AF     ;RAISE STACK
-ERRB:   LD      A,'B'   ;BAD
+ERRB:   LD      A,'B'  ;BAD
 ERR2:   CALL    OUTT
         CALL    OUTSP
-        JP      OUTHL   ;POINTER
+        JP      OUTHL  ;POINTER
 ;
 ; DISPLAY STACK POINTER
 ;
@@ -472,7 +472,7 @@ REGS:   LD      HL,0
 ; THE MONITOR AND STACK ARE
 ; PROTECTED
 ;
-ZERO:   CALL    RDHLDE  ;RANGE
+ZERO:   CALL    RDHLDE ;RANGE
         LD      B,0
         JP      FILL2
 ;
@@ -480,11 +480,11 @@ ZERO:   CALL    RDHLDE  ;RANGE
 ;
 FILL:   CALL    HLDEBC  ;RANGE, BYTE
         CP      APOS    ;APOSTROPHE?
-        JP      Z,FILL4   ;YES, ASCII
+        JP      Z,FILL4 ;YES, ASCII
         LD      B,C
 FILL2:  LD      A,H     ;FILL BYTE
         CP      STACK >> 8 ;TOO FAR?
-        JP    NC,ERROR   ;YES
+        JP      NC,ERROR ;YES
 FILL3:  CALL    CHEKM   ;PUT, CHECK
         CALL    TSTOP   ;DONE?
         JP      FILL3   ;NEXT
@@ -496,7 +496,7 @@ FILL4:  CALL    GETCH   ;ASCII CHAR
 ; GET H,L D,E AND B,C
 ;
 HLDEBC: CALL    HLDECK  ;RANGE
-        JP      C,ERROR   ;NO BYTE
+        JP      C,ERROR ;NO BYTE
         PUSH    HL
         CALL    READHL  ;3RD INPUT
         LD      B,H     ;LD E TO
@@ -508,7 +508,7 @@ HLDEBC: CALL    HLDECK  ;RANGE
 ; ADDITIONAL DATA IS INCLUDED
 ;
 HLDECK: CALL    HHLDE   ;2 ADDR
-        JP      C,ERROR   ;THAT'S ALL
+        JP      C,ERROR ;THAT'S ALL
         JP      RDHLD2  ;CHECK
 ;
 ; MOVE A BLOCK OF MEMORY H,L-D,E TO B,C
@@ -536,7 +536,7 @@ MOVIN:  LD      A,(HL)  ;BYTE
 ;
 SEARCH: CALL    HLDEBC  ;RANGE, 1ST BYTE
 SEAR2:  LD      B,CR    ;SET FOR 1 BYTE
-        JP      C,SEAR3   ;ONLY ONE
+        JP      C,SEAR3 ;ONLY ONE
         PUSH    HL
         CALL    READHL  ;2ND BYTE
         LD      B,L     ;INTO C
@@ -547,13 +547,13 @@ SEAR3:  LD      A,(HL)  ;GET BYTE
         INC     HL      ;YES
         LD      A,B     ;ONLY 1?
         CP      CR
-        JP      Z,SEAR5   ;YES
+        JP      Z,SEAR5 ;YES
 ;
 ; FOUND FIRST MATCH, CHECK FOR SECOND
 ;
         LD      A,(HL)  ;NEXT BYTE
         CP      B       ;MATCH?
-        JP      NZ,SEAR4   ;NO
+        JP      NZ,SEAR4 ;NO
 ;
 SEAR5:  DEC     HL      ;A MATCH
         PUSH    BC
@@ -584,7 +584,7 @@ ALOD2:  CALL    INPUTT  ;NEXT CHAR
         INC     HL      ;POINTER
         LD      A,L
         AND     7FH     ;LINE END?
-        JP      NZ,ALOD2   ;NO
+        JP      NZ,ALOD2 ;NO
         CALL    CRHL    ;NEW LINE
         JP      ALOD2
 ;
@@ -595,9 +595,9 @@ ALOD2:  CALL    INPUTT  ;NEXT CHAR
 ADUMP:  CALL    RDHLDE  ;RANGE
 ADMP2:  LD      A,(HL)  ;GET BYTE
         CP      DEL     ;HIGH BIT ON?
-        JP    NC,ADMP4   ;YES
+        JP      NC,ADMP4   ;YES
         CP      ' '     ;CONTROL?
-        JP    NC,ADMP3   ;NO
+        JP      NC,ADMP3   ;NO
         CP      CR      ;CARR RET?
         JP      Z,ADMP3   ;YES, OK
         CP      LF      ;LINE FEED?
@@ -694,13 +694,13 @@ JUST3:  LD      A,L     ;PASS
         LD      A,H
         SBC     A,D
         INC     HL
-        JP      C,JUST2   ;NO
+        JP      C,JUST2 ;NO
 ;
 ; AFTER EACH PASS,
 ; SEE IF ABORT WANTED
 ;
         CALL    INSTAT  ;INPUT?
-        CALL    NZ,INPUTT  ;YES, GET IT
+        CALL    NZ,INPUTT ;YES, GET IT
         POP     HL      ;SAVE START ADDR
         PUSH    HL      ;SAVE AGAIN
         JP      JUST2   ;NEXT PASS
@@ -708,7 +708,7 @@ JUST3:  LD      A,L     ;PASS
 ; FOUND MEMORY ERROR, PRINT POINTER AND
 ; BIT MAP: 0=GOOD, 1=BAD BIT
 ;
-JERR:   PUSH    AF     ;SAVE COMPLEMENT
+JERR:   PUSH    AF      ;SAVE COMPLEMENT
         CALL    CRHL    ;PRINT POINTER
         POP     AF
         XOR     (HL)    ;SET BAD BITS
@@ -723,7 +723,7 @@ JERR:   PUSH    AF     ;SAVE COMPLEMENT
 ; FORMAT IS: START, STOP, ORIG, NEW
 ;
 REPL:   CALL    HLDEBC  ;RANGE, 1ST BYTE
-        JP      C,ERROR   ;NO, 2ND
+        JP      C,ERROR ;NO, 2ND
         LD      B,C     ;1ST TO B
         PUSH    HL
         CALL    READHL  ;2ND BYTE
@@ -731,7 +731,7 @@ REPL:   CALL    HLDEBC  ;RANGE, 1ST BYTE
         POP     HL
 REPL2:  LD      A,(HL)  ;FETCH BYTE
         CP      B       ;A MATCH?
-        JP      NZ,REPL3   ;NO
+        JP      NZ,REPL3 ;NO
         LD      (HL),C  ;SUBSTITUTE
         LD      A,C
         CP      (HL)    ;SAME?
