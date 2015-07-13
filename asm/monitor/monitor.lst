@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 1 - 2015-7-12 16:49:44
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 1 - 2015-7-12 21:24:23
 
 
        1/       0 :                     ; TITLE '8080 system monitor, ver 1'
@@ -61,7 +61,7 @@
       58/    581F : FE 18                       CPI     CTRX    ;ABORT?
       59/    5821 : CA 00 58                    JZ      HOME    ;YES
       60/    5824 : C9                          RET
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 2 - 2015-7-12 16:49:44
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 2 - 2015-7-12 21:24:23
 
 
       61/    5825 :                     ;
@@ -115,695 +115,696 @@
      109/    5865 :                     ; STARTING AT ADDRESS ZERO.  STOP AT STACK
      110/    5865 :                     ; OR MISSING/DEFECTIVE/PROTECTED MEMORY.
      111/    5865 :                     ; DISPLAY HIGH BYTE OF MEMORY TOP.
-     112/    5865 : 21 00 00                    LXI     H,0     ;PAGE ZERO
-     113/    5868 : 06 57                       MVI     B,STACK >> 8
-     114/    586A : 7E                  NPAGE:  MOV     A,M     ;GET BYTE
-     115/    586B : 2F                          CMA             ;COMPLEMENT
-     116/    586C : 77                          MOV     M,A     ;PUT IT BACK
-     117/    586D : BE                          CMP     M       ;SAME?
-     118/    586E : C2 78 58                    JNZ     MSIZE   ;NO, MEM TOP
-     119/    5871 : 2F                          CMA             ;ORIG BYTE
-     120/    5872 : 77                          MOV     M,A     ;RESTORE IT
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 3 - 2015-7-12 16:49:44
+     112/    5865 :                     ;
+     113/    5865 : 21 00 00                    LXI     H,0     ;PAGE ZERO
+     114/    5868 : 06 57                       MVI     B,STACK >> 8
+     115/    586A : 7E                  NPAGE:  MOV     A,M     ;GET BYTE
+     116/    586B : 2F                          CMA             ;COMPLEMENT
+     117/    586C : 77                          MOV     M,A     ;PUT IT BACK
+     118/    586D : BE                          CMP     M       ;SAME?
+     119/    586E : C2 78 58                    JNZ     MSIZE   ;NO, MEM TOP
+     120/    5871 : 2F                          CMA             ;ORIG BYTE
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 3 - 2015-7-12 21:24:23
 
 
-     121/    5873 : 24                          INR     H       ;NEXT PAGE
-     122/    5874 : 05                          DCR     B
-     123/    5875 : C2 6A 58                    JNZ     NPAGE
-     124/    5878 : 4C                  MSIZE:  MOV     C,H     ;MEM TOP
-     125/    5879 : CD 0F 59                    CALL    CRLF    ;NEW LINE
-     126/    587C : CD EC 59                    CALL    OUTHX   ;PRINT MEM SIZE
-     127/    587F : CD D0 58                    CALL    INPLN   ;CONSOLE LINE
-     128/    5882 : CD 25 59                    CALL    GETCH   ;FIRST CHAR
-     129/    5885 :                     ;
-     130/    5885 :                     ; MAIN COMMAND PROCESSOR
-     131/    5885 :                     ;
-     132/    5885 : D6 41                       SUI     'A'     ;CONVERT OFFSET
-     133/    5887 : DA D4 59                    JC      ERROR   ; < A
-     134/    588A : FE 1A                       CPI     'Z'-'A'+1
-     135/    588C : D2 D4 59                    JNC     ERROR   ; > Z
-     136/    588F : 87                          ADD     A       ;DOUBLE
-     137/    5890 : 21 9C 58                    LXI     H,TABLE ;START
-     138/    5893 : 16 00                       MVI     D,0
-     139/    5895 : 5F                          MOV     E,A     ;OFFSET
-     140/    5896 : 19                          DAD     D       ;ADD TO TABLE
-     141/    5897 : 5E                          MOV     E,M     ;LOW BYTE
-     142/    5898 : 23                          INX     H
-     143/    5899 : 56                          MOV     D,M     ;HIGH BYTE
-     144/    589A : EB                          XCHG            ;INTO H,L
-     145/    589B : E9                          PCHL            ;GO THERE
-     146/    589C :                     ;
-     147/    589C :                     ; COMMAND TABLE
-     148/    589C :                     ;
-     149/    589C : D5 5A               TABLE:  DW      ASCII   ;A, ASCII
-     150/    589E : D4 59                       DW      ERROR   ;B
-     151/    58A0 : 09 5A                       DW      CALLS   ;C, CALL SUBR
-     152/    58A2 : 45 59                       DW      DUMP    ;D, DUMP
-     153/    58A4 : D4 59                       DW      ERROR   ;E
-     154/    58A6 : 5D 5A                       DW      FILL    ;F, FILL
-     155/    58A8 : 08 5A                       DW      GO      ;G, GO
-     156/    58AA : 73 5B                       DW      HMATH   ;H, HEX MATH
-     157/    58AC : 3D 5B                       DW      IPORT   ;I, PORT INPUT
-     158/    58AE : 85 5B                       DW      JUST    ;J, MEMORY TEST
-     159/    58B0 : D4 59                       DW      ERROR   ;K
-     160/    58B2 : 0D 5A                       DW      LOAD    ;L, LOAD
-     161/    58B4 : 93 5A                       DW      MOVE    ;M, MOVE
-     162/    58B6 : D4 59                       DW      ERROR   ;N
-     163/    58B8 : 5A 5B                       DW      OPORT   ;O, PORT OUTPUT
-     164/    58BA : D4 59                       DW      ERROR   ;P
-     165/    58BC : D4 59                       DW      ERROR   ;Q
-     166/    58BE : B4 5B                       DW      REPL    ;R, REPLACE
-     167/    58C0 : AA 5A                       DW      SEARCH  ;S, SEARCH
-     168/    58C2 : D4 59                       DW      ERROR   ;T
-     169/    58C4 : D4 59                       DW      ERROR   ;U
-     170/    58C6 : D2 5B                       DW      VERM    ;V, VERIFY MEM
-     171/    58C8 : D4 59                       DW      ERROR   ;W
-     172/    58CA : 4E 5A                       DW      REGS    ;X, STACK POINTER
-     173/    58CC : D4 59                       DW      ERROR   ;Y
-     174/    58CE : 55 5A                       DW      ZERO    ;Z, ZERO
-     175/    58D0 :                     ;
-     176/    58D0 :                     ; INPUT A LINE FROM CONSOLE AND PUT IT
-     177/    58D0 :                     ; INTO THE BUFFER. CARRIAGE RETURN ENDS
-     178/    58D0 :                     ; THE LINE. RUBOUT OR ^H CORRECTS LAST
-     179/    58D0 :                     ; ENTRY. CONTROL-X RESTARTS LINE.
-     180/    58D0 :                     ; OTHER CONTROL CHARACTERS ARE IGNORED.
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 4 - 2015-7-12 16:49:44
+     121/    5872 : 77                          MOV     M,A     ;RESTORE IT
+     122/    5873 : 24                          INR     H       ;NEXT PAGE
+     123/    5874 : 05                          DCR     B
+     124/    5875 : C2 6A 58                    JNZ     NPAGE
+     125/    5878 : 4C                  MSIZE:  MOV     C,H     ;MEM TOP
+     126/    5879 : CD 0F 59                    CALL    CRLF    ;NEW LINE
+     127/    587C : CD EC 59                    CALL    OUTHX   ;PRINT MEM SIZE
+     128/    587F : CD D0 58                    CALL    INPLN   ;CONSOLE LINE
+     129/    5882 : CD 25 59                    CALL    GETCH   ;FIRST CHAR
+     130/    5885 :                     ;
+     131/    5885 :                     ; MAIN COMMAND PROCESSOR
+     132/    5885 :                     ;
+     133/    5885 : D6 41                       SUI     'A'     ;CONVERT OFFSET
+     134/    5887 : DA D4 59                    JC      ERROR   ; < A
+     135/    588A : FE 1A                       CPI     'Z'-'A'+1
+     136/    588C : D2 D4 59                    JNC     ERROR   ; > Z
+     137/    588F : 87                          ADD     A       ;DOUBLE
+     138/    5890 : 21 9C 58                    LXI     H,TABLE ;START
+     139/    5893 : 16 00                       MVI     D,0
+     140/    5895 : 5F                          MOV     E,A     ;OFFSET
+     141/    5896 : 19                          DAD     D       ;ADD TO TABLE
+     142/    5897 : 5E                          MOV     E,M     ;LOW BYTE
+     143/    5898 : 23                          INX     H
+     144/    5899 : 56                          MOV     D,M     ;HIGH BYTE
+     145/    589A : EB                          XCHG            ;INTO H,L
+     146/    589B : E9                          PCHL            ;GO THERE
+     147/    589C :                     ;
+     148/    589C :                     ; COMMAND TABLE
+     149/    589C :                     ;
+     150/    589C : D5 5A               TABLE:  DW      ASCII   ;A, ASCII
+     151/    589E : D4 59                       DW      ERROR   ;B
+     152/    58A0 : 09 5A                       DW      CALLS   ;C, CALL SUBR
+     153/    58A2 : 45 59                       DW      DUMP    ;D, DUMP
+     154/    58A4 : D4 59                       DW      ERROR   ;E
+     155/    58A6 : 5D 5A                       DW      FILL    ;F, FILL
+     156/    58A8 : 08 5A                       DW      GO      ;G, GO
+     157/    58AA : 73 5B                       DW      HMATH   ;H, HEX MATH
+     158/    58AC : 3D 5B                       DW      IPORT   ;I, PORT INPUT
+     159/    58AE : 85 5B                       DW      JUST    ;J, MEMORY TEST
+     160/    58B0 : D4 59                       DW      ERROR   ;K
+     161/    58B2 : 0D 5A                       DW      LOAD    ;L, LOAD
+     162/    58B4 : 93 5A                       DW      MOVE    ;M, MOVE
+     163/    58B6 : D4 59                       DW      ERROR   ;N
+     164/    58B8 : 5A 5B                       DW      OPORT   ;O, PORT OUTPUT
+     165/    58BA : D4 59                       DW      ERROR   ;P
+     166/    58BC : D4 59                       DW      ERROR   ;Q
+     167/    58BE : B4 5B                       DW      REPL    ;R, REPLACE
+     168/    58C0 : AA 5A                       DW      SEARCH  ;S, SEARCH
+     169/    58C2 : D4 59                       DW      ERROR   ;T
+     170/    58C4 : D4 59                       DW      ERROR   ;U
+     171/    58C6 : D2 5B                       DW      VERM    ;V, VERIFY MEM
+     172/    58C8 : D4 59                       DW      ERROR   ;W
+     173/    58CA : 4E 5A                       DW      REGS    ;X, STACK POINTER
+     174/    58CC : D4 59                       DW      ERROR   ;Y
+     175/    58CE : 55 5A                       DW      ZERO    ;Z, ZERO
+     176/    58D0 :                     ;
+     177/    58D0 :                     ; INPUT A LINE FROM CONSOLE AND PUT IT
+     178/    58D0 :                     ; INTO THE BUFFER. CARRIAGE RETURN ENDS
+     179/    58D0 :                     ; THE LINE. RUBOUT OR ^H CORRECTS LAST
+     180/    58D0 :                     ; ENTRY. CONTROL-X RESTARTS LINE.
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 4 - 2015-7-12 21:24:23
 
 
-     181/    58D0 :                     ;
-     182/    58D0 : 3E 3E               INPLN:  MVI     A,'>'   ;PROMPT
-     183/    58D2 : CD 2A 58                    CALL    OUTT
-     184/    58D5 : 21 A6 57            INPL2:  LXI     H,IBUFF ;BUFFER ADDR
-     185/    58D8 : 22 A3 57                    SHLD    IBUFP   ;SAVE POINTER
-     186/    58DB : 0E 00                       MVI     C,0     ;COUNT
-     187/    58DD : CD 15 58            INPLI:  CALL    INPUTT  ;CONSOLE CHAR
-     188/    58E0 : FE 20                       CPI     ' '     ;CONTROL?
-     189/    58E2 : DA 01 59                    JC      INPLC   ;YES
-     190/    58E5 : FE 7F                       CPI     DEL     ;DELETE
-     191/    58E7 : CA 19 59                    JZ      INPLB   ;YES
-     192/    58EA : FE 5B                       CPI     'Z'+1   ;UPPER CHAR?
-     193/    58EC : DA F1 58                    JC      INPL3   ;YES
-     194/    58EF : E6 5F                       ANI     5FH     ;MAKE UPPER
-     195/    58F1 : 77                  INPL3:  MOV     M,A     ;INTO BUFFER
-     196/    58F2 : 3E 20                       MVI     A,32    ;BUFFER SIZE
-     197/    58F4 : B9                          CMP     C       ;FULL?
-     198/    58F5 : CA DD 58                    JZ      INPLI   ;YES. LOOP
-     199/    58F8 : 7E                          MOV     A,M     ;GET CHAR
-     200/    58F9 : 23                          INX     H       ;INCR POINTER
-     201/    58FA : 0C                          INR     C       ;AND COUNT
-     202/    58FB : CD 2A 58            INPLE:  CALL    OUTT    ;SHOW CHAR
-     203/    58FE : C3 DD 58                    JMP     INPLI   ;NEXT CHAR
-     204/    5901 :                     ;
-     205/    5901 :                     ; PROCESS CONTROL CHARACTER
-     206/    5901 :                     ;
-     207/    5901 : FE 08               INPLC:  CPI     CTRH    ;^H?
-     208/    5903 : CA 19 59                    JZ      INPLB   ;YES
-     209/    5906 : FE 0D                       CPI     CR      ;RETURN:
-     210/    5908 : C2 DD 58                    JNZ     INPLI   ;NO, IGNORE
-     211/    590B :                     ;
-     212/    590B :                     ; END OF INPUT LINE
-     213/    590B :                     ;
-     214/    590B : 79                          MOV     A,C     ;COUNT
-     215/    590C : 32 A5 57                    STA     IBUFC   ;SAVE
-     216/    590F :                     ;
-     217/    590F :                     ; CARRIAGE-RETURN, LINE-FEED ROUTINE
-     218/    590F :                     ;
-     219/    590F : 3E 0D               CRLF:   MVI     A,CR
-     220/    5911 : CD 2A 58                    CALL    OUTT    ;SEND CR
-     221/    5914 : 3E 0A                       MVI     A,LF
-     222/    5916 : C3 2A 58                    JMP     OUTT    ;SEND LF
-     223/    5919 :                     ;
-     224/    5919 :                     ; DELETE PRIOR CHARACTER IF ANY
-     225/    5919 :                     ;
-     226/    5919 : 79                  INPLB:  MOV     A,C     ;CHAR COUNT
-     227/    591A : B7                          ORA     A       ;ZERO?
-     228/    591B : CA DD 58                    JZ      INPLI   ;YES
-     229/    591E : 2B                          DCX     H       ;BACK POINTER
-     230/    591F : 0D                          DCR     C       ;AND COUNT
-     231/    5920 : 3E 08                       MVI     A,BACKUP ;CHARACTER
-     232/    5922 : C3 FB 58                    JMP     INPLE   ;SEND
-     233/    5925 :                     ;
-     234/    5925 :                     ; GET A CHARACTER FROM CONSOLE BUFFER
-     235/    5925 :                     ; SET CARRY IF EMPTY
-     236/    5925 :                     ;
-     237/    5925 : E5                  GETCH:  PUSH    H       ;SAVE REGS
-     238/    5926 : 2A A3 57                    LHLD    IBUFP   ;GET POINTER
-     239/    5929 : 3A A5 57                    LDA     IBUFC   ;AND COUNT
-     240/    592C : D6 01                       SUI     1       ;DECR WITH CARRY
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 5 - 2015-7-12 16:49:44
+     181/    58D0 :                     ; OTHER CONTROL CHARACTERS ARE IGNORED.
+     182/    58D0 :                     ;
+     183/    58D0 : 3E 3E               INPLN:  MVI     A,'>'   ;PROMPT
+     184/    58D2 : CD 2A 58                    CALL    OUTT
+     185/    58D5 : 21 A6 57            INPL2:  LXI     H,IBUFF ;BUFFER ADDR
+     186/    58D8 : 22 A3 57                    SHLD    IBUFP   ;SAVE POINTER
+     187/    58DB : 0E 00                       MVI     C,0     ;COUNT
+     188/    58DD : CD 15 58            INPLI:  CALL    INPUTT  ;CONSOLE CHAR
+     189/    58E0 : FE 20                       CPI     ' '     ;CONTROL?
+     190/    58E2 : DA 01 59                    JC      INPLC   ;YES
+     191/    58E5 : FE 7F                       CPI     DEL     ;DELETE
+     192/    58E7 : CA 19 59                    JZ      INPLB   ;YES
+     193/    58EA : FE 5B                       CPI     'Z'+1   ;UPPER CHAR?
+     194/    58EC : DA F1 58                    JC      INPL3   ;YES
+     195/    58EF : E6 5F                       ANI     5FH     ;MAKE UPPER
+     196/    58F1 : 77                  INPL3:  MOV     M,A     ;INTO BUFFER
+     197/    58F2 : 3E 20                       MVI     A,32    ;BUFFER SIZE
+     198/    58F4 : B9                          CMP     C       ;FULL?
+     199/    58F5 : CA DD 58                    JZ      INPLI   ;YES, LOOP
+     200/    58F8 : 7E                          MOV     A,M     ;GET CHAR
+     201/    58F9 : 23                          INX     H       ;INCR POINTER
+     202/    58FA : 0C                          INR     C       ;AND COUNT
+     203/    58FB : CD 2A 58            INPLE:  CALL    OUTT    ;SHOW CHAR
+     204/    58FE : C3 DD 58                    JMP     INPLI   ;NEXT CHAR
+     205/    5901 :                     ;
+     206/    5901 :                     ; PROCESS CONTROL CHARACTER
+     207/    5901 :                     ;
+     208/    5901 : FE 08               INPLC:  CPI     CTRH    ;^H?
+     209/    5903 : CA 19 59                    JZ      INPLB   ;YES
+     210/    5906 : FE 0D                       CPI     CR      ;RETURN?
+     211/    5908 : C2 DD 58                    JNZ     INPLI   ;NO, IGNORE
+     212/    590B :                     ;
+     213/    590B :                     ; END OF INPUT LINE
+     214/    590B :                     ;
+     215/    590B : 79                          MOV     A,C     ;COUNT
+     216/    590C : 32 A5 57                    STA     IBUFC   ;SAVE
+     217/    590F :                     ;
+     218/    590F :                     ; CARRIAGE-RETURN, LINE-FEED ROUTINE
+     219/    590F :                     ;
+     220/    590F : 3E 0D               CRLF:   MVI     A,CR
+     221/    5911 : CD 2A 58                    CALL    OUTT    ;SEND CR
+     222/    5914 : 3E 0A                       MVI     A,LF
+     223/    5916 : C3 2A 58                    JMP     OUTT    ;SEND LF
+     224/    5919 :                     ;
+     225/    5919 :                     ; DELETE PRIOR CHARACTER IF ANY
+     226/    5919 :                     ;
+     227/    5919 : 79                  INPLB:  MOV     A,C     ;CHAR COUNT
+     228/    591A : B7                          ORA     A       ;ZERO?
+     229/    591B : CA DD 58                    JZ      INPLI   ;YES
+     230/    591E : 2B                          DCX     H       ;BACK POINTER
+     231/    591F : 0D                          DCR     C       ;AND COUNT
+     232/    5920 : 3E 08                       MVI     A,BACKUP ;CHARACTER
+     233/    5922 : C3 FB 58                    JMP     INPLE   ;SEND
+     234/    5925 :                     ;
+     235/    5925 :                     ; GET A CHARACTER FROM CONSOLE BUFFER
+     236/    5925 :                     ; SET CARRY IF EMPTY
+     237/    5925 :                     ;
+     238/    5925 : E5                  GETCH:  PUSH    H       ;SAVE REGS
+     239/    5926 : 2A A3 57                    LHLD    IBUFP   ;GET POINTER
+     240/    5929 : 3A A5 57                    LDA     IBUFC   ;AND COUNT
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 5 - 2015-7-12 21:24:23
 
 
-     241/    592E : DA 39 59                    JC      GETC4   ;NO MORE CHAR
-     242/    5931 : 32 A5 57                    STA     IBUFC   ;SAVE NEW COUNT
-     243/    5934 : 7E                          MOV     A,M     ;GET CHARACTER
-     244/    5935 : 23                          INX     H       ;INCR POINTER
-     245/    5936 : 22 A3 57                    SHLD    IBUFP   ;AND SAVE
-     246/    5939 : E1                  GETC4:  POP     H       ;RESTORE REGS
-     247/    593A : C9                          RET
-     248/    593B :                     ;
-     249/    593B :                     ; SEND ASCII MESSAGE UNTIL BINARY ZERO
-     250/    593B :                     ; IS FOUND. POINTER IS D,E
-     251/    593B :                     ;
-     252/    593B : 1A                  SENDM:  LDAX    D       ;GET BYTE
-     253/    593C : B7                          ORA     A       ;ZERO?
-     254/    593D : C8                          RZ              ;YES, DONE
-     255/    593E : CD 2A 58                    CALL    OUTT    ;SEND IT
-     256/    5941 : 13                          INX     D       ;POINTER
-     257/    5942 : C3 3B 59                    JMP     SENDM   ;NEXT
-     258/    5945 :                     ;
-     259/    5945 :                     ; DUMP MEMORY IN HEXADECIMAL AND ASCII
-     260/    5945 :                     ;
-     261/    5945 : CD 86 59            DUMP:   CALL    RDHLDE  ;RANGE
-     262/    5948 : CD DC 59            DUMP2:  CALL    CRHL    ;NEW LINE
-     263/    594B : 4E                  DUMP3:  MOV     C,M     ;GET BYTE
-     264/    594C : CD EC 59                    CALL    OUTHX   ;PRINT
-     265/    594F : 23                          INX     H       ;POINTER
-     266/    5950 : 7D                          MOV     A,L
-     267/    5951 : E6 0F                       ANI     0FH     ;LINE END?
-     268/    5953 : CA 5E 59                    JZ      DUMP4   ;YES, ASCII
-     269/    5956 : E6 03                       ANI     3       ;SPACE
-     270/    5958 : CC E7 59                    CZ      OUTSP   ; 4 BYTES
-     271/    595B : C3 4B 59                    JMP     DUMP3   ;NEXT HEX
-     272/    595E : CD E7 59            DUMP4:  CALL    OUTSP
-     273/    5961 : D5                          PUSH    D
-     274/    5962 : 11 F0 FF                    LXI     D,-10H  ;RESET LINE
-     275/    5965 : 19                          DAD     D
-     276/    5966 : D1                          POP     D
-     277/    5967 : CD 76 59            DUMP5:  CALL    PASCI   ;ASCII DUMP
-     278/    596A : CD 00 5A                    CALL    TSTOP   ;DONE?
-     279/    596D : 7D                          MOV     A,L     ;NO
-     280/    596E : E6 0F                       ANI     0FH     ;LINE END?
-     281/    5970 : C2 67 59                    JNZ     DUMP5   ;NO
-     282/    5973 : C3 48 59                    JMP     DUMP2
-     283/    5976 :                     ;
-     284/    5976 :                     ; DISPLAY MEMORY BYTE IN ASCII IF
-     285/    5976 :                     ; POSSIBLE, OTHERWISE GIVE DECIMAL PNT
-     286/    5976 :                     ;
-     287/    5976 : 7E                  PASCI:  MOV     A,M     ;GET BYTE
-     288/    5977 : FE 7F                       CPI     DEL     ;HIGH BIT ON?
-     289/    5979 : D2 81 59                    JNC     PASC2   ;YES
-     290/    597C : FE 20                       CPI     ' '     ;CONTROL CHAR?
-     291/    597E : D2 83 59                    JNC     PASC3   ;NO
-     292/    5981 : 3E 2E               PASC2:  MVI     A,'.'   ;CHANGE TO DOT
-     293/    5983 : C3 2A 58            PASC3:  JMP     OUTT    ;SEND
-     294/    5986 :                     ;
-     295/    5986 :                     ; GET H,L ADN D,E FROM CONSOLE
-     296/    5986 :                     ; CHECK THAT D,E IS LARGER
-     297/    5986 :                     ;
-     298/    5986 : CD 91 59            RDHLDE: CALL    HHLDE
-     299/    5989 : 7B                  RDHLD2: MOV     A,E
-     300/    598A : 95                          SUB     L       ;E - L
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 6 - 2015-7-12 16:49:44
+     241/    592C : D6 01                       SUI     1       ;DECR WITH CARRY
+     242/    592E : DA 39 59                    JC      GETC4   ;NO MORE CHAR
+     243/    5931 : 32 A5 57                    STA     IBUFC   ;SAVE NEW COUNT
+     244/    5934 : 7E                          MOV     A,M     ;GET CHARACTER
+     245/    5935 : 23                          INX     H       ;INCR POINTER
+     246/    5936 : 22 A3 57                    SHLD    IBUFP   ;AND SAVE
+     247/    5939 : E1                  GETC4:  POP     H       ;RESTORE REGS
+     248/    593A : C9                          RET
+     249/    593B :                     ;
+     250/    593B :                     ; SEND ASCII MESSAGE UNTIL BINARY ZERO
+     251/    593B :                     ; IS FOUND. POINTER IS D,E
+     252/    593B :                     ;
+     253/    593B : 1A                  SENDM:  LDAX    D       ;GET BYTE
+     254/    593C : B7                          ORA     A       ;ZERO?
+     255/    593D : C8                          RZ              ;YES, DONE
+     256/    593E : CD 2A 58                    CALL    OUTT    ;SEND IT
+     257/    5941 : 13                          INX     D       ;POINTER
+     258/    5942 : C3 3B 59                    JMP     SENDM   ;NEXT
+     259/    5945 :                     ;
+     260/    5945 :                     ; DUMP MEMORY IN HEXADECIMAL AND ASCII
+     261/    5945 :                     ;
+     262/    5945 : CD 86 59            DUMP:   CALL    RDHLDE  ;RANGE
+     263/    5948 : CD DC 59            DUMP2:  CALL    CRHL    ;NEW LINE
+     264/    594B : 4E                  DUMP3:  MOV     C,M     ;GET BYTE
+     265/    594C : CD EC 59                    CALL    OUTHX   ;PRINT
+     266/    594F : 23                          INX     H       ;POINTER
+     267/    5950 : 7D                          MOV     A,L
+     268/    5951 : E6 0F                       ANI     0FH     ;LINE END?
+     269/    5953 : CA 5E 59                    JZ      DUMP4   ;YES, ASCII
+     270/    5956 : E6 03                       ANI     3       ;SPACE
+     271/    5958 : CC E7 59                    CZ      OUTSP   ; 4 BYTES
+     272/    595B : C3 4B 59                    JMP     DUMP3   ;NEXT HEX
+     273/    595E : CD E7 59            DUMP4:  CALL    OUTSP
+     274/    5961 : D5                          PUSH    D
+     275/    5962 : 11 F0 FF                    LXI     D,-10H  ;RESET LINE
+     276/    5965 : 19                          DAD     D
+     277/    5966 : D1                          POP     D
+     278/    5967 : CD 76 59            DUMP5:  CALL    PASCI   ;ASCII DUMP
+     279/    596A : CD 00 5A                    CALL    TSTOP   ;DONE?
+     280/    596D : 7D                          MOV     A,L     ;NO
+     281/    596E : E6 0F                       ANI     0FH     ;LINE END?
+     282/    5970 : C2 67 59                    JNZ     DUMP5   ;NO
+     283/    5973 : C3 48 59                    JMP     DUMP2
+     284/    5976 :                     ;
+     285/    5976 :                     ; DISPLAY MEMORY BYTE IN ASCII IF
+     286/    5976 :                     ; POSSIBLE, OTHERWISE GIVE DECIMAL PNT
+     287/    5976 :                     ;
+     288/    5976 : 7E                  PASCI:  MOV     A,M     ;GET BYTE
+     289/    5977 : FE 7F                       CPI     DEL     ;HIGH BIT ON?
+     290/    5979 : D2 81 59                    JNC     PASC2   ;YES
+     291/    597C : FE 20                       CPI     ' '     ;CONTROL CHAR?
+     292/    597E : D2 83 59                    JNC     PASC3   ;NO
+     293/    5981 : 3E 2E               PASC2:  MVI     A,'.'   ;CHANGE TO DOT
+     294/    5983 : C3 2A 58            PASC3:  JMP     OUTT    ;SEND
+     295/    5986 :                     ;
+     296/    5986 :                     ; GET H,L ADN D,E FROM CONSOLE
+     297/    5986 :                     ; CHECK THAT D,E IS LARGER
+     298/    5986 :                     ;
+     299/    5986 : CD 91 59            RDHLDE: CALL    HHLDE
+     300/    5989 : 7B                  RDHLD2: MOV     A,E
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 6 - 2015-7-12 21:24:23
 
 
-     301/    598B : 7A                          MOV     A,D
-     302/    598C : 9C                          SBB     H       ;D - H
-     303/    598D : DA D4 59                    JC      ERROR   ;H,L BIGGER
-     304/    5990 : C9                          RET
-     305/    5991 :                     ;
-     306/    5991 :                     ; INPUT H,L AND D,E. SEE THAT
-     307/    5991 :                     ; 2 ADDRESSES ARE ENTERED
-     308/    5991 :                     ;
-     309/    5991 : CD 9D 59            HHLDE:  CALL    READHL  ;H,L
-     310/    5994 : DA D4 59                    JC      ERROR   ;ONLY 1 ADDR
-     311/    5997 : EB                          XCHG            ;SAVE IN D,E
-     312/    5998 : CD 9D 59                    CALL    READHL  ;D,E
-     313/    599B : EB                          XCHG            ;PUT BACK
-     314/    599C : C9                          RET
-     315/    599D :                     ;
-     316/    599D :                     ; INPUT H,L FROM CONSOLE
-     317/    599D :                     ;
-     318/    599D : D5                  READHL: PUSH    D
-     319/    599E : C5                          PUSH    B       ;SAVE REGS
-     320/    599F : 21 00 00                    LXI     H,0     ;CLEAR
-     321/    59A2 : CD 25 59            RDHL2:  CALL    GETCH   ;GET CHAR
-     322/    59A5 : DA C1 59                    JC      RDHL5   ;LINE END
-     323/    59A8 : CD C4 59                    CALL    NIB     ;TO BINARY
-     324/    59AB : DA B7 59                    JC      RDHL4   ;NOT HEX
-     325/    59AE : 29                          DAD     H       ;TIMES 2
-     326/    59AF : 29                          DAD     H       ;TIMES 4
-     327/    59B0 : 29                          DAD     H       ;TIMES 8
-     328/    59B1 : 29                          DAD     H       ;TIMES 16
-     329/    59B2 : B5                          ORA     L       ;ADD NEW CHAR
-     330/    59B3 : 6F                          MOV     L,A
-     331/    59B4 : C3 A2 59                    JMP     RDHL2   ;NEXT
-     332/    59B7 :                     ;
-     333/    59B7 :                     ; CHECK FOR BLANK AT END
-     334/    59B7 :                     ;
-     335/    59B7 : FE F7               RDHL4:  CPI     APOS    ;APOSTROPHE
-     336/    59B9 : CA C1 59                    JZ      RDHL5   ;ASCII INPUT
-     337/    59BC : FE F0                       CPI     (' '-'0') & 0FFH
-     338/    59BE : C2 D4 59                    JNZ     ERROR   ;NO
-     339/    59C1 : C1                  RDHL5:  POP     B
-     340/    59C2 : D1                          POP     D       ;RESTORE
-     341/    59C3 : C9                          RET
-     342/    59C4 :                     ;
-     343/    59C4 :                     ; CONVERT ASCII CHARACTERS TO BINARY
-     344/    59C4 :                     ;
-     345/    59C4 : D6 30               NIB:    SUI     '0'     ;ASCII BIAS
-     346/    59C6 : D8                          RC      ; < 0
-     347/    59C7 : FE 17                       CPI     'F'-'0'+1
-     348/    59C9 : 3F                          CMC             ;INVERT
-     349/    59CA : D8                          RC              ;ERROR, > F
-     350/    59CB : FE 0A                       CPI     10
-     351/    59CD : 3F                          CMC             ;INVERT
-     352/    59CE : D0                          RNC             ;NUMBER 0-9
-     353/    59CF : D6 07                       SUI     'A'-'9'-1
-     354/    59D1 : FE 0A                       CPI     10      ;SKIP : TO
-     355/    59D3 : C9                          RET             ;LETTER A-F
-     356/    59D4 :                     ;
-     357/    59D4 :                     ; PRINT ? ON IMPROPER INPUT
-     358/    59D4 :                     ;
-     359/    59D4 : 3E 3F               ERROR:  MVI     A,'?'
-     360/    59D6 : CD 2A 58                    CALL    OUTT
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 7 - 2015-7-12 16:49:44
+     301/    598A : 95                          SUB     L       ;E - L
+     302/    598B : 7A                          MOV     A,D
+     303/    598C : 9C                          SBB     H       ;D - H
+     304/    598D : DA D4 59                    JC      ERROR   ;H,L BIGGER
+     305/    5990 : C9                          RET
+     306/    5991 :                     ;
+     307/    5991 :                     ; INPUT H,L AND D,E. SEE THAT
+     308/    5991 :                     ; 2 ADDRESSES ARE ENTERED
+     309/    5991 :                     ;
+     310/    5991 : CD 9D 59            HHLDE:  CALL    READHL  ;H,L
+     311/    5994 : DA D4 59                    JC      ERROR   ;ONLY 1 ADDR
+     312/    5997 : EB                          XCHG            ;SAVE IN D,E
+     313/    5998 : CD 9D 59                    CALL    READHL  ;D,E
+     314/    599B : EB                          XCHG            ;PUT BACK
+     315/    599C : C9                          RET
+     316/    599D :                     ;
+     317/    599D :                     ; INPUT H,L FROM CONSOLE
+     318/    599D :                     ;
+     319/    599D : D5                  READHL: PUSH    D
+     320/    599E : C5                          PUSH    B       ;SAVE REGS
+     321/    599F : 21 00 00                    LXI     H,0     ;CLEAR
+     322/    59A2 : CD 25 59            RDHL2:  CALL    GETCH   ;GET CHAR
+     323/    59A5 : DA C1 59                    JC      RDHL5   ;LINE END
+     324/    59A8 : CD C4 59                    CALL    NIB     ;TO BINARY
+     325/    59AB : DA B7 59                    JC      RDHL4   ;NOT HEX
+     326/    59AE : 29                          DAD     H       ;TIMES 2
+     327/    59AF : 29                          DAD     H       ;TIMES 4
+     328/    59B0 : 29                          DAD     H       ;TIMES 8
+     329/    59B1 : 29                          DAD     H       ;TIMES 16
+     330/    59B2 : B5                          ORA     L       ;ADD NEW CHAR
+     331/    59B3 : 6F                          MOV     L,A
+     332/    59B4 : C3 A2 59                    JMP     RDHL2   ;NEXT
+     333/    59B7 :                     ;
+     334/    59B7 :                     ; CHECK FOR BLANK AT END
+     335/    59B7 :                     ;
+     336/    59B7 : FE F7               RDHL4:  CPI     APOS    ;APOSTROPHE
+     337/    59B9 : CA C1 59                    JZ      RDHL5   ;ASCII INPUT
+     338/    59BC : FE F0                       CPI     (' '-'0') & 0FFH
+     339/    59BE : C2 D4 59                    JNZ     ERROR   ;NO
+     340/    59C1 : C1                  RDHL5:  POP     B
+     341/    59C2 : D1                          POP     D       ;RESTORE
+     342/    59C3 : C9                          RET
+     343/    59C4 :                     ;
+     344/    59C4 :                     ; CONVERT ASCII CHARACTERS TO BINARY
+     345/    59C4 :                     ;
+     346/    59C4 : D6 30               NIB:    SUI     '0'     ;ASCII BIAS
+     347/    59C6 : D8                          RC      ; < 0
+     348/    59C7 : FE 17                       CPI     'F'-'0'+1
+     349/    59C9 : 3F                          CMC             ;INVERT
+     350/    59CA : D8                          RC              ;ERROR, > F
+     351/    59CB : FE 0A                       CPI     10
+     352/    59CD : 3F                          CMC             ;INVERT
+     353/    59CE : D0                          RNC             ;NUMBER 0-9
+     354/    59CF : D6 07                       SUI     'A'-'9'-1
+     355/    59D1 : FE 0A                       CPI     10      ;SKIP : TO
+     356/    59D3 : C9                          RET             ;LETTER A-F
+     357/    59D4 :                     ;
+     358/    59D4 :                     ; PRINT ? ON IMPROPER INPUT
+     359/    59D4 :                     ;
+     360/    59D4 : 3E 3F               ERROR:  MVI     A,'?'
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 7 - 2015-7-12 21:24:23
 
 
-     361/    59D9 : C3 00 58                    JMP     START   ;TRY AGAIN
-     362/    59DC :                     ;
-     363/    59DC :                     ; START NEW LINE, GIVE ADDRESS
-     364/    59DC :                     ;
-     365/    59DC : CD 0F 59            CRHL:   CALL    CRLF    ;NEW LINE
-     366/    59DF :                     ;
-     367/    59DF :                     ; PRINT H,L IN HEX
-     368/    59DF :                     ;
-     369/    59DF : 4C                  OUTHL:  MOV     C,H
-     370/    59E0 : CD EC 59                    CALL    OUTHX   ;H
-     371/    59E3 : 4D                  OUTLL:  MOV     C,L
-     372/    59E4 :                     ;
-     373/    59E4 :                     ; OUTPUT HEX BYTE FROM C AND A SPACE
-     374/    59E4 :                     ;
-     375/    59E4 : CD EC 59            OUTHEX: CALL    OUTHX
-     376/    59E7 :                     ;
-     377/    59E7 :                     ; OUTPUT A SPACE
-     378/    59E7 :                     ;
-     379/    59E7 : 3E 20               OUTSP:  MVI     A,' '
-     380/    59E9 : C3 2A 58                    JMP     OUTT
-     381/    59EC :                     ;
-     382/    59EC :                     ; OUTPUT A HEX BYTE FROM C
-     383/    59EC :                     ; BINARY TO ASCII HEX CONVERSION
-     384/    59EC :                     ;
-     385/    59EC : 79                  OUTHX:  MOV     A,C
-     386/    59ED : 1F                          RAR             ;ROTATE
-     387/    59EE : 1F                          RAR             ; FOUR
-     388/    59EF : 1F                          RAR             ; BITS TO
-     389/    59F0 : 1F                          RAR             ; RIGHT
-     390/    59F1 : CD F5 59                    CALL    HEX1    ;UPPER CHAR
-     391/    59F4 : 79                          MOV     A,C     ;LOWER CHAR
-     392/    59F5 : E6 0F               HEX1:   ANI     0FH     ;TAKE 4 BITS
-     393/    59F7 : C6 90                       ADI     90H
-     394/    59F9 : 27                          DAA             ;DAA TRICK
-     395/    59FA : CE 40                       ACI     40H
-     396/    59FC : 27                          DAA
-     397/    59FD : C3 2A 58                    JMP     OUTT
-     398/    5A00 :                     ;
-     399/    5A00 :                     ; CHECK FOR END, H,L MINUS D,E
-     400/    5A00 :                     ; INCREMENT H,L
-     401/    5A00 :                     ;
-     402/    5A00 : 23                  TSTOP:  INX     H
-     403/    5A01 : 7B                          MOV     A,E
-     404/    5A02 : 95                          SUB     L       ; E - L
-     405/    5A03 : 7A                          MOV     A,D
-     406/    5A04 : 9C                          SBB     H       ; D - H
-     407/    5A05 : D0                          RNC             ;NOT DONE
-     408/    5A06 : E1                          POP     H       ;RAISE STACK
-     409/    5A07 : C9                          RET
-     410/    5A08 :                     ;
-     411/    5A08 :                     ; ROUTINE TO GO ANYWHERE IN MEMORY
-     412/    5A08 :                     ; ADDRESS OF WARM IS ON STACK, SO A
-     413/    5A08 :                     ; SIMPLE RET WILL RETURN TO THIS MONITOR
-     414/    5A08 :                     ;
-     415/    5A08 : E1                  GO:     POP     H       ;RAISE STACK
-     416/    5A09 : CD 9D 59            CALLS:  CALL    READHL  ;GET ADDRESS
-     417/    5A0C : E9                          PCHL            ;GO THERE
-     418/    5A0D :                     ;
-     419/    5A0D :                     ; LOAD HEX OR ASCII CHAR INTO MEMORY
-     420/    5A0D :                     ; FROM CONSOLE. CHECK TO SEE IF
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 8 - 2015-7-12 16:49:44
+     361/    59D6 : CD 2A 58                    CALL    OUTT
+     362/    59D9 : C3 00 58                    JMP     START   ;TRY AGAIN
+     363/    59DC :                     ;
+     364/    59DC :                     ; START NEW LINE, GIVE ADDRESS
+     365/    59DC :                     ;
+     366/    59DC : CD 0F 59            CRHL:   CALL    CRLF    ;NEW LINE
+     367/    59DF :                     ;
+     368/    59DF :                     ; PRINT H,L IN HEX
+     369/    59DF :                     ;
+     370/    59DF : 4C                  OUTHL:  MOV     C,H
+     371/    59E0 : CD EC 59                    CALL    OUTHX   ;H
+     372/    59E3 : 4D                  OUTLL:  MOV     C,L
+     373/    59E4 :                     ;
+     374/    59E4 :                     ; OUTPUT HEX BYTE FROM C AND A SPACE
+     375/    59E4 :                     ;
+     376/    59E4 : CD EC 59            OUTHEX: CALL    OUTHX
+     377/    59E7 :                     ;
+     378/    59E7 :                     ; OUTPUT A SPACE
+     379/    59E7 :                     ;
+     380/    59E7 : 3E 20               OUTSP:  MVI     A,' '
+     381/    59E9 : C3 2A 58                    JMP     OUTT
+     382/    59EC :                     ;
+     383/    59EC :                     ; OUTPUT A HEX BYTE FROM C
+     384/    59EC :                     ; BINARY TO ASCII HEX CONVERSION
+     385/    59EC :                     ;
+     386/    59EC : 79                  OUTHX:  MOV     A,C
+     387/    59ED : 1F                          RAR             ;ROTATE
+     388/    59EE : 1F                          RAR             ; FOUR
+     389/    59EF : 1F                          RAR             ; BITS TO
+     390/    59F0 : 1F                          RAR             ; RIGHT
+     391/    59F1 : CD F5 59                    CALL    HEX1    ;UPPER CHAR
+     392/    59F4 : 79                          MOV     A,C     ;LOWER CHAR
+     393/    59F5 : E6 0F               HEX1:   ANI     0FH     ;TAKE 4 BITS
+     394/    59F7 : C6 90                       ADI     90H
+     395/    59F9 : 27                          DAA             ;DAA TRICK
+     396/    59FA : CE 40                       ACI     40H
+     397/    59FC : 27                          DAA
+     398/    59FD : C3 2A 58                    JMP     OUTT
+     399/    5A00 :                     ;
+     400/    5A00 :                     ; CHECK FOR END, H,L MINUS D,E
+     401/    5A00 :                     ; INCREMENT H,L
+     402/    5A00 :                     ;
+     403/    5A00 : 23                  TSTOP:  INX     H
+     404/    5A01 : 7B                          MOV     A,E
+     405/    5A02 : 95                          SUB     L       ; E - L
+     406/    5A03 : 7A                          MOV     A,D
+     407/    5A04 : 9C                          SBB     H       ; D - H
+     408/    5A05 : D0                          RNC             ;NOT DONE
+     409/    5A06 : E1                          POP     H       ;RAISE STACK
+     410/    5A07 : C9                          RET
+     411/    5A08 :                     ;
+     412/    5A08 :                     ; ROUTINE TO GO ANYWHERE IN MEMORY
+     413/    5A08 :                     ; ADDRESS OF WARM IS ON STACK, SO A
+     414/    5A08 :                     ; SIMPLE RET WILL RETURN TO THIS MONITOR
+     415/    5A08 :                     ;
+     416/    5A08 : E1                  GO:     POP     H       ;RAISE STACK
+     417/    5A09 : CD 9D 59            CALLS:  CALL    READHL  ;GET ADDRESS
+     418/    5A0C : E9                          PCHL            ;GO THERE
+     419/    5A0D :                     ;
+     420/    5A0D :                     ; LOAD HEX OR ASCII CHAR INTO MEMORY
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 8 - 2015-7-12 21:24:23
 
 
-     421/    5A0D :                     ; THE DATA ACTUALLY GOT THERE
-     422/    5A0D :                     ; APOSTROPHE PRECEEDS ASCII CHAR
-     423/    5A0D :                     ; CARRIAGE RETURN PASSES OVER LOCATION
-     424/    5A0D :                     ;
-     425/    5A0D : CD 9D 59            LOAD:   CALL    READHL  ;ADDRESS
-     426/    5A10 : CD DF 59            LOAD2:  CALL    OUTHL   ;PRINT IT
-     427/    5A13 : CD 76 59                    CALL    PASCI   ;ASCII
-     428/    5A16 : CD E7 59                    CALL    OUTSP
-     429/    5A19 : 4E                          MOV     C,M     ;ORIG BYTE
-     430/    5A1A : CD E4 59                    CALL    OUTHEX  ;HEX
-     431/    5A1D : E5                          PUSH    H       ;SAVE PNTR
-     432/    5A1E : CD D5 58                    CALL    INPL2   ;INPUT
-     433/    5A21 : CD 9D 59                    CALL    READHL  ; BYTE
-     434/    5A24 : 45                          MOV     B,L     ; TO B
-     435/    5A25 : E1                          POP     H
-     436/    5A26 : FE F7                       CPI     APOS
-     437/    5A28 : CA 37 5A                    JZ      LOAD6   ;ASCII INPUT
-     438/    5A2B : 79                          MOV     A,C     ;HOW MANY?
-     439/    5A2C : B7                          ORA     A       ;NONE?
-     440/    5A2D : CA 33 5A                    JZ      LOAD3   ;YES
-     441/    5A30 : CD 3E 5A            LOAD4:  CALL    CHEKM   ;INTO MEMORY
-     442/    5A33 : 23                  LOAD3:  INX     H       ;POINTER
-     443/    5A34 : C3 10 5A                    JMP     LOAD2
-     444/    5A37 :                     ;
-     445/    5A37 :                     ; LOAD ASCII CHARACTER
-     446/    5A37 :                     ;
-     447/    5A37 : CD 25 59            LOAD6:  CALL    GETCH
-     448/    5A3A : 47                          MOV     B,A
-     449/    5A3B : C3 30 5A                    JMP     LOAD4
-     450/    5A3E :                     ;
-     451/    5A3E :                     ; COPY BYTE FROM B TO MEMORY
-     452/    5A3E :                     ; AND SEE THAT IT GOT THERE
-     453/    5A3E :                     ;
-     454/    5A3E : 70                  CHEKM:  MOV     M,B     ;PUT IN MEM
-     455/    5A3F : 7E                          MOV     A,M     ;GET BACK
-     456/    5A40 : B8                          CMP     B       ;SAME?
-     457/    5A41 : C8                          RZ              ;YES
-     458/    5A42 : F1                  ERRP:   POP     PSW     ;RAISE STACK
-     459/    5A43 : 3E 42               ERRB:   MVI     A,'B'   ;BAD
-     460/    5A45 : CD 2A 58            ERR2:   CALL    OUTT
-     461/    5A48 : CD E7 59                    CALL    OUTSP
-     462/    5A4B : C3 DF 59                    JMP     OUTHL   ;POINTER
-     463/    5A4E :                     ;
-     464/    5A4E :                     ; DISPLAY STACK POINTER
-     465/    5A4E :                     ;
-     466/    5A4E : 21 00 00            REGS:   LXI     H,0
-     467/    5A51 : 39                          DAD     SP
-     468/    5A52 : C3 DF 59                    JMP     OUTHL
-     469/    5A55 :                     ;
-     470/    5A55 :                     ; ZERO A PORTION OF MEMORY
-     471/    5A55 :                     ; THE MONITOR AND STACK ARE
-     472/    5A55 :                     ; PROTECTED
-     473/    5A55 :                     ;
-     474/    5A55 : CD 86 59            ZERO:   CALL    RDHLDE  ;RANGE
-     475/    5A58 : 06 00                       MVI     B,0
-     476/    5A5A : C3 66 5A                    JMP     FILL2
-     477/    5A5D :                     ;
-     478/    5A5D :                     ; FILL A PORTION OF MEMORY
-     479/    5A5D :                     ;
-     480/    5A5D : CD 7C 5A            FILL:   CALL    HLDEBC  ;RANGE, BYTE
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 9 - 2015-7-12 16:49:44
+     421/    5A0D :                     ; FROM CONSOLE. CHECK TO SEE IF
+     422/    5A0D :                     ; THE DATA ACTUALLY GOT THERE
+     423/    5A0D :                     ; APOSTROPHE PRECEEDS ASCII CHAR
+     424/    5A0D :                     ; CARRIAGE RETURN PASSES OVER LOCATION
+     425/    5A0D :                     ;
+     426/    5A0D : CD 9D 59            LOAD:   CALL    READHL  ;ADDRESS
+     427/    5A10 : CD DF 59            LOAD2:  CALL    OUTHL   ;PRINT IT
+     428/    5A13 : CD 76 59                    CALL    PASCI   ;ASCII
+     429/    5A16 : CD E7 59                    CALL    OUTSP
+     430/    5A19 : 4E                          MOV     C,M     ;ORIG BYTE
+     431/    5A1A : CD E4 59                    CALL    OUTHEX  ;HEX
+     432/    5A1D : E5                          PUSH    H       ;SAVE PNTR
+     433/    5A1E : CD D5 58                    CALL    INPL2   ;INPUT
+     434/    5A21 : CD 9D 59                    CALL    READHL  ; BYTE
+     435/    5A24 : 45                          MOV     B,L     ; TO B
+     436/    5A25 : E1                          POP     H
+     437/    5A26 : FE F7                       CPI     APOS
+     438/    5A28 : CA 37 5A                    JZ      LOAD6   ;ASCII INPUT
+     439/    5A2B : 79                          MOV     A,C     ;HOW MANY?
+     440/    5A2C : B7                          ORA     A       ;NONE?
+     441/    5A2D : CA 33 5A                    JZ      LOAD3   ;YES
+     442/    5A30 : CD 3E 5A            LOAD4:  CALL    CHEKM   ;INTO MEMORY
+     443/    5A33 : 23                  LOAD3:  INX     H       ;POINTER
+     444/    5A34 : C3 10 5A                    JMP     LOAD2
+     445/    5A37 :                     ;
+     446/    5A37 :                     ; LOAD ASCII CHARACTER
+     447/    5A37 :                     ;
+     448/    5A37 : CD 25 59            LOAD6:  CALL    GETCH
+     449/    5A3A : 47                          MOV     B,A
+     450/    5A3B : C3 30 5A                    JMP     LOAD4
+     451/    5A3E :                     ;
+     452/    5A3E :                     ; COPY BYTE FROM B TO MEMORY
+     453/    5A3E :                     ; AND SEE THAT IT GOT THERE
+     454/    5A3E :                     ;
+     455/    5A3E : 70                  CHEKM:  MOV     M,B     ;PUT IN MEM
+     456/    5A3F : 7E                          MOV     A,M     ;GET BACK
+     457/    5A40 : B8                          CMP     B       ;SAME?
+     458/    5A41 : C8                          RZ              ;YES
+     459/    5A42 : F1                  ERRP:   POP     PSW     ;RAISE STACK
+     460/    5A43 : 3E 42               ERRB:   MVI     A,'B'   ;BAD
+     461/    5A45 : CD 2A 58            ERR2:   CALL    OUTT
+     462/    5A48 : CD E7 59                    CALL    OUTSP
+     463/    5A4B : C3 DF 59                    JMP     OUTHL   ;POINTER
+     464/    5A4E :                     ;
+     465/    5A4E :                     ; DISPLAY STACK POINTER
+     466/    5A4E :                     ;
+     467/    5A4E : 21 00 00            REGS:   LXI     H,0
+     468/    5A51 : 39                          DAD     SP
+     469/    5A52 : C3 DF 59                    JMP     OUTHL
+     470/    5A55 :                     ;
+     471/    5A55 :                     ; ZERO A PORTION OF MEMORY
+     472/    5A55 :                     ; THE MONITOR AND STACK ARE
+     473/    5A55 :                     ; PROTECTED
+     474/    5A55 :                     ;
+     475/    5A55 : CD 86 59            ZERO:   CALL    RDHLDE  ;RANGE
+     476/    5A58 : 06 00                       MVI     B,0
+     477/    5A5A : C3 66 5A                    JMP     FILL2
+     478/    5A5D :                     ;
+     479/    5A5D :                     ; FILL A PORTION OF MEMORY
+     480/    5A5D :                     ;
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 9 - 2015-7-12 21:24:23
 
 
-     481/    5A60 : FE F7                       CPI     APOS    ;APOSTROPHE?
-     482/    5A62 : CA 75 5A                    JZ      FILL4   ;YES, ASCII
-     483/    5A65 : 41                          MOV     B,C
-     484/    5A66 : 7C                  FILL2:  MOV     A,H     ;FILL BYTE
-     485/    5A67 : FE 57                       CPI     STACK >> 8 ;TOO FAR?
-     486/    5A69 : D2 D4 59                    JNC     ERROR   ;YES
-     487/    5A6C : CD 3E 5A            FILL3:  CALL    CHEKM   ;PUT, CHECK
-     488/    5A6F : CD 00 5A                    CALL    TSTOP   ;DONE?
-     489/    5A72 : C3 6C 5A                    JMP     FILL3   ;NEXT
-     490/    5A75 :                     ;
-     491/    5A75 : CD 25 59            FILL4:  CALL    GETCH   ;ASCII CHAR
-     492/    5A78 : 47                          MOV     B,A
-     493/    5A79 : C3 6C 5A                    JMP     FILL3
-     494/    5A7C :                     ;
-     495/    5A7C :                     ; GET H,L D,E AND B,C
-     496/    5A7C :                     ;
-     497/    5A7C : CD 8A 5A            HLDEBC: CALL    HLDECK  ;RANGE
-     498/    5A7F : DA D4 59                    JC      ERROR   ;NO BYTE
-     499/    5A82 : E5                          PUSH    H
-     500/    5A83 : CD 9D 59                    CALL    READHL  ;3RD INPUT
-     501/    5A86 : 44                          MOV     B,H     ;MOVE TO
-     502/    5A87 : 4D                          MOV     C,L     ; B,C
-     503/    5A88 : E1                          POP     H
-     504/    5A89 : C9                          RET
-     505/    5A8A :                     ;
-     506/    5A8A :                     ; GET 2 ADDRESSES, CHECK THAT
-     507/    5A8A :                     ; ADDITIONAL DATA IS INCLUDED
-     508/    5A8A :                     ;
-     509/    5A8A : CD 91 59            HLDECK: CALL    HHLDE   ;2 ADDR
-     510/    5A8D : DA D4 59                    JC      ERROR   ;THAT'S ALL
-     511/    5A90 : C3 89 59                    JMP     RDHLD2  ;CHECK
-     512/    5A93 :                     ;
-     513/    5A93 :                     ; MOVE A BLOCK OF MEMORY H,L-D,E TO B,C
-     514/    5A93 :                     ;
-     515/    5A93 : CD 7C 5A            MOVE:   CALL    HLDEBC  ;3 ADDR
-     516/    5A96 : CD A0 5A            MOVEDN: CALL    MOVIN   ;MOVE/CHECK
-     517/    5A99 : CD 00 5A                    CALL    TSTOP   ;DONE?
-     518/    5A9C : 03                          INX     B       ;NO
-     519/    5A9D : C3 96 5A                    JMP     MOVEDN
-     520/    5AA0 :                     ;
-     521/    5AA0 : 7E                  MOVIN:  MOV     A,M     ;BYTE
-     522/    5AA1 : 02                          STAX    B       ;NEW LOCATION
-     523/    5AA2 : 0A                          LDAX    B       ;CHECK
-     524/    5AA3 : BE                          CMP     M       ;IS IT THERE?
-     525/    5AA4 : C8                          RZ              ;YES
-     526/    5AA5 : 60                          MOV     H,B     ;ERROR
-     527/    5AA6 : 69                          MOV     L,C     ;INTO H,L
-     528/    5AA7 : C3 42 5A                    JMP     ERRP    ;SHOW BAD
-     529/    5AAA :                     ;
-     530/    5AAA :                     ; SEARCH FOR 1 OR 2 BYTES OVER THE
-     531/    5AAA :                     ; RANGE H,L D,E. BYTES ARE IN B,C
-     532/    5AAA :                     ; B HAS CARRIAGE RETURN IF ONLY ONE BYTE
-     533/    5AAA :                     ; PUT SPACE BETWEEN BYTES IF TWO
-     534/    5AAA :                     ; FORMAT: START STOP BYTE1 BYTE2
-     535/    5AAA :                     ;
-     536/    5AAA : CD 7C 5A            SEARCH: CALL    HLDEBC  ;RANGE, 1ST BYTE
-     537/    5AAD : 06 0D               SEAR2:  MVI     B,CR    ;SET FOR 1 BYTE
-     538/    5AAF : DA B8 5A                    JC      SEAR3   ;ONLY ONE
-     539/    5AB2 : E5                          PUSH    H
-     540/    5AB3 : CD 9D 59                    CALL    READHL  ;2ND BYTE
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 10 - 2015-7-12 16:49:44
+     481/    5A5D : CD 7C 5A            FILL:   CALL    HLDEBC  ;RANGE, BYTE
+     482/    5A60 : FE F7                       CPI     APOS    ;APOSTROPHE?
+     483/    5A62 : CA 75 5A                    JZ      FILL4   ;YES, ASCII
+     484/    5A65 : 41                          MOV     B,C
+     485/    5A66 : 7C                  FILL2:  MOV     A,H     ;FILL BYTE
+     486/    5A67 : FE 57                       CPI     STACK >> 8 ;TOO FAR?
+     487/    5A69 : D2 D4 59                    JNC     ERROR   ;YES
+     488/    5A6C : CD 3E 5A            FILL3:  CALL    CHEKM   ;PUT, CHECK
+     489/    5A6F : CD 00 5A                    CALL    TSTOP   ;DONE?
+     490/    5A72 : C3 6C 5A                    JMP     FILL3   ;NEXT
+     491/    5A75 :                     ;
+     492/    5A75 : CD 25 59            FILL4:  CALL    GETCH   ;ASCII CHAR
+     493/    5A78 : 47                          MOV     B,A
+     494/    5A79 : C3 6C 5A                    JMP     FILL3
+     495/    5A7C :                     ;
+     496/    5A7C :                     ; GET H,L D,E AND B,C
+     497/    5A7C :                     ;
+     498/    5A7C : CD 8A 5A            HLDEBC: CALL    HLDECK  ;RANGE
+     499/    5A7F : DA D4 59                    JC      ERROR   ;NO BYTE
+     500/    5A82 : E5                          PUSH    H
+     501/    5A83 : CD 9D 59                    CALL    READHL  ;3RD INPUT
+     502/    5A86 : 44                          MOV     B,H     ;MOVE TO
+     503/    5A87 : 4D                          MOV     C,L     ; B,C
+     504/    5A88 : E1                          POP     H
+     505/    5A89 : C9                          RET
+     506/    5A8A :                     ;
+     507/    5A8A :                     ; GET 2 ADDRESSES, CHECK THAT
+     508/    5A8A :                     ; ADDITIONAL DATA IS INCLUDED
+     509/    5A8A :                     ;
+     510/    5A8A : CD 91 59            HLDECK: CALL    HHLDE   ;2 ADDR
+     511/    5A8D : DA D4 59                    JC      ERROR   ;THAT'S ALL
+     512/    5A90 : C3 89 59                    JMP     RDHLD2  ;CHECK
+     513/    5A93 :                     ;
+     514/    5A93 :                     ; MOVE A BLOCK OF MEMORY H,L-D,E TO B,C
+     515/    5A93 :                     ;
+     516/    5A93 : CD 7C 5A            MOVE:   CALL    HLDEBC  ;3 ADDR
+     517/    5A96 : CD A0 5A            MOVEDN: CALL    MOVIN   ;MOVE/CHECK
+     518/    5A99 : CD 00 5A                    CALL    TSTOP   ;DONE?
+     519/    5A9C : 03                          INX     B       ;NO
+     520/    5A9D : C3 96 5A                    JMP     MOVEDN
+     521/    5AA0 :                     ;
+     522/    5AA0 : 7E                  MOVIN:  MOV     A,M     ;BYTE
+     523/    5AA1 : 02                          STAX    B       ;NEW LOCATION
+     524/    5AA2 : 0A                          LDAX    B       ;CHECK
+     525/    5AA3 : BE                          CMP     M       ;IS IT THERE?
+     526/    5AA4 : C8                          RZ              ;YES
+     527/    5AA5 : 60                          MOV     H,B     ;ERROR
+     528/    5AA6 : 69                          MOV     L,C     ;INTO H,L
+     529/    5AA7 : C3 42 5A                    JMP     ERRP    ;SHOW BAD
+     530/    5AAA :                     ;
+     531/    5AAA :                     ; SEARCH FOR 1 OR 2 BYTES OVER THE
+     532/    5AAA :                     ; RANGE H,L D,E. BYTES ARE IN B,C
+     533/    5AAA :                     ; B HAS CARRIAGE RETURN IF ONLY ONE BYTE
+     534/    5AAA :                     ; PUT SPACE BETWEEN BYTES IF TWO
+     535/    5AAA :                     ; FORMAT: START STOP BYTE1 BYTE2
+     536/    5AAA :                     ;
+     537/    5AAA : CD 7C 5A            SEARCH: CALL    HLDEBC  ;RANGE, 1ST BYTE
+     538/    5AAD : 06 0D               SEAR2:  MVI     B,CR    ;SET FOR 1 BYTE
+     539/    5AAF : DA B8 5A                    JC      SEAR3   ;ONLY ONE
+     540/    5AB2 : E5                          PUSH    H
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 10 - 2015-7-12 21:24:23
 
 
-     541/    5AB6 : 45                          MOV     B,L     ;INTO C
-     542/    5AB7 : E1                          POP     H
-     543/    5AB8 : 7E                  SEAR3:  MOV     A,M     ;GET BYTE
-     544/    5AB9 : B9                          CMP     C       ;MATCH?
-     545/    5ABA : C2 CF 5A                    JNZ     SEAR4   ;NO
-     546/    5ABD : 23                          INX     H       ;YES
-     547/    5ABE : 78                          MOV     A,B     ;ONLY 1?
-     548/    5ABF : FE 0D                       CPI     CR
-     549/    5AC1 : CA C9 5A                    JZ      SEAR5   ;YES
-     550/    5AC4 :                     ;
-     551/    5AC4 :                     ; FOUND FIRST MATCH, CHECK FOR SECOND
-     552/    5AC4 :                     ;
-     553/    5AC4 : 7E                          MOV     A,M     ;NEXT BYTE
-     554/    5AC5 : B8                          CMP     B       ;MATCH?
-     555/    5AC6 : C2 CF 5A                    JNZ     SEAR4   ;NO
-     556/    5AC9 :                     ;
-     557/    5AC9 : 2B                  SEAR5:  DCX     H       ;A MATCH
-     558/    5ACA : C5                          PUSH    B
-     559/    5ACB : CD DC 59                    CALL    CRHL    ;SHOW ADDR
-     560/    5ACE : C1                          POP     B
-     561/    5ACF : CD 00 5A            SEAR4:  CALL    TSTOP   ;DONE?
-     562/    5AD2 : C3 B8 5A                    JMP     SEAR3   ;NO
-     563/    5AD5 :                     ;
-     564/    5AD5 :                     ; ASCII SUB-COMMAND PROCESSOR
-     565/    5AD5 :                     ;
-     566/    5AD5 : CD 25 59            ASCII:  CALL    GETCH   ;NEXT CHAR
-     567/    5AD8 : FE 44                       CPI     'D'     ;DISPLAY
-     568/    5ADA : CA 04 5B                    JZ      ADUMP
-     569/    5ADD : FE 53                       CPI     'S'     ;SEARCH
-     570/    5ADF : CA 2C 5B                    JZ      ASCS
-     571/    5AE2 : FE 4C                       CPI     'L'     ;LOAD
-     572/    5AE4 : C2 D4 59                    JNZ     ERROR
-     573/    5AE7 :                     ;
-     574/    5AE7 :                     ; LOAD ASCII CHARACTERS INTO MEMORY
-     575/    5AE7 :                     ; QUIT ON CONTROL-X
-     576/    5AE7 :                     ;
-     577/    5AE7 : CD 9D 59                    CALL    READHL  ;ADDRESS
-     578/    5AEA : CD DF 59                    CALL    OUTHL   ;PRINT IT
-     579/    5AED : CD 15 58            ALOD2:  CALL    INPUTT  ;NEXT CHAR
-     580/    5AF0 : CD 2A 58                    CALL    OUTT    ;PRINT IT
-     581/    5AF3 : 47                          MOV     B,A     ;SAVE
-     582/    5AF4 : CD 3E 5A                    CALL    CHEKM   ;INTO MEMORY
-     583/    5AF7 : 23                          INX     H       ;POINTER
-     584/    5AF8 : 7D                          MOV     A,L
-     585/    5AF9 : E6 7F                       ANI     7FH     ;LINE END?
-     586/    5AFB : C2 ED 5A                    JNZ     ALOD2   ;NO
-     587/    5AFE : CD DC 59                    CALL    CRHL    ;NEW LINE
-     588/    5B01 : C3 ED 5A                    JMP     ALOD2
-     589/    5B04 :                     ;
-     590/    5B04 :                     ; DISPLAY MEMORY IN STRAIGHT ASCII.
-     591/    5B04 :                     ; KEEP CARRIAGE RETURN, LINE FEED, CHANGE
-     592/    5B04 :                     ; TAB TO SPACE, REMOVE OTHER CONTROL CHAR.
-     593/    5B04 :                     ;
-     594/    5B04 : CD 86 59            ADUMP:  CALL    RDHLDE  ;RANGE
-     595/    5B07 : 7E                  ADMP2:  MOV     A,M     ;GET BYTE
-     596/    5B08 : FE 7F                       CPI     DEL     ;HIGH BIT ON?
-     597/    5B0A : D2 26 5B                    JNC     ADMP4   ;YES
-     598/    5B0D : FE 20                       CPI     ' '     ;CONTROL?
-     599/    5B0F : D2 23 5B                    JNC     ADMP3   ;NO
-     600/    5B12 : FE 0D                       CPI     CR      ;CARR RET?
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 11 - 2015-7-12 16:49:44
+     541/    5AB3 : CD 9D 59                    CALL    READHL  ;2ND BYTE
+     542/    5AB6 : 45                          MOV     B,L     ;INTO C
+     543/    5AB7 : E1                          POP     H
+     544/    5AB8 : 7E                  SEAR3:  MOV     A,M     ;GET BYTE
+     545/    5AB9 : B9                          CMP     C       ;MATCH?
+     546/    5ABA : C2 CF 5A                    JNZ     SEAR4   ;NO
+     547/    5ABD : 23                          INX     H       ;YES
+     548/    5ABE : 78                          MOV     A,B     ;ONLY 1?
+     549/    5ABF : FE 0D                       CPI     CR
+     550/    5AC1 : CA C9 5A                    JZ      SEAR5   ;YES
+     551/    5AC4 :                     ;
+     552/    5AC4 :                     ; FOUND FIRST MATCH, CHECK FOR SECOND
+     553/    5AC4 :                     ;
+     554/    5AC4 : 7E                          MOV     A,M     ;NEXT BYTE
+     555/    5AC5 : B8                          CMP     B       ;MATCH?
+     556/    5AC6 : C2 CF 5A                    JNZ     SEAR4   ;NO
+     557/    5AC9 :                     ;
+     558/    5AC9 : 2B                  SEAR5:  DCX     H       ;A MATCH
+     559/    5ACA : C5                          PUSH    B
+     560/    5ACB : CD DC 59                    CALL    CRHL    ;SHOW ADDR
+     561/    5ACE : C1                          POP     B
+     562/    5ACF : CD 00 5A            SEAR4:  CALL    TSTOP   ;DONE?
+     563/    5AD2 : C3 B8 5A                    JMP     SEAR3   ;NO
+     564/    5AD5 :                     ;
+     565/    5AD5 :                     ; ASCII SUB-COMMAND PROCESSOR
+     566/    5AD5 :                     ;
+     567/    5AD5 : CD 25 59            ASCII:  CALL    GETCH   ;NEXT CHAR
+     568/    5AD8 : FE 44                       CPI     'D'     ;DISPLAY
+     569/    5ADA : CA 04 5B                    JZ      ADUMP
+     570/    5ADD : FE 53                       CPI     'S'     ;SEARCH
+     571/    5ADF : CA 2C 5B                    JZ      ASCS
+     572/    5AE2 : FE 4C                       CPI     'L'     ;LOAD
+     573/    5AE4 : C2 D4 59                    JNZ     ERROR
+     574/    5AE7 :                     ;
+     575/    5AE7 :                     ; LOAD ASCII CHARACTERS INTO MEMORY
+     576/    5AE7 :                     ; QUIT ON CONTROL-X
+     577/    5AE7 :                     ;
+     578/    5AE7 : CD 9D 59                    CALL    READHL  ;ADDRESS
+     579/    5AEA : CD DF 59                    CALL    OUTHL   ;PRINT IT
+     580/    5AED : CD 15 58            ALOD2:  CALL    INPUTT  ;NEXT CHAR
+     581/    5AF0 : CD 2A 58                    CALL    OUTT    ;PRINT IT
+     582/    5AF3 : 47                          MOV     B,A     ;SAVE
+     583/    5AF4 : CD 3E 5A                    CALL    CHEKM   ;INTO MEMORY
+     584/    5AF7 : 23                          INX     H       ;POINTER
+     585/    5AF8 : 7D                          MOV     A,L
+     586/    5AF9 : E6 7F                       ANI     7FH     ;LINE END?
+     587/    5AFB : C2 ED 5A                    JNZ     ALOD2   ;NO
+     588/    5AFE : CD DC 59                    CALL    CRHL    ;NEW LINE
+     589/    5B01 : C3 ED 5A                    JMP     ALOD2
+     590/    5B04 :                     ;
+     591/    5B04 :                     ; DISPLAY MEMORY IN STRAIGHT ASCII.
+     592/    5B04 :                     ; KEEP CARRIAGE RETURN, LINE FEED, CHANGE
+     593/    5B04 :                     ; TAB TO SPACE, REMOVE OTHER CONTROL CHAR.
+     594/    5B04 :                     ;
+     595/    5B04 : CD 86 59            ADUMP:  CALL    RDHLDE  ;RANGE
+     596/    5B07 : 7E                  ADMP2:  MOV     A,M     ;GET BYTE
+     597/    5B08 : FE 7F                       CPI     DEL     ;HIGH BIT ON?
+     598/    5B0A : D2 26 5B                    JNC     ADMP4   ;YES
+     599/    5B0D : FE 20                       CPI     ' '     ;CONTROL?
+     600/    5B0F : D2 23 5B                    JNC     ADMP3   ;NO
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 11 - 2015-7-12 21:24:23
 
 
-     601/    5B14 : CA 23 5B                    JZ      ADMP3   ;YES, OK
-     602/    5B17 : FE 0A                       CPI     LF      ;LINE FEED?
-     603/    5B19 : CA 23 5B                    JZ      ADMP3   ;YES, OK
-     604/    5B1C : FE 09                       CPI     TAB
-     605/    5B1E : C2 26 5B                    JNZ     ADMP4   ;SKIP OTHER
-     606/    5B21 : 3E 20                       MVI     A,' '   ;SPACE FOR TAB
-     607/    5B23 : CD 2A 58            ADMP3:  CALL    OUTT    ;SEND
-     608/    5B26 : CD 00 5A            ADMP4:  CALL    TSTOP   ;DONE?
-     609/    5B29 : C3 07 5B                    JMP     ADMP2   ;END
-     610/    5B2C :                     ;
-     611/    5B2C :                     ; SEARCH FOR 1 OR 2 ASCII CHARACTERS
-     612/    5B2C :                     ; NO SPACE BETWEEN ASCII CHARS
-     613/    5B2C :                     ; FORMAT: START STOP 1 OR 2 ASCII CHAR
-     614/    5B2C :                     ;
-     615/    5B2C : CD 86 59            ASCS:   CALL    RDHLDE  ;RANGE
-     616/    5B2F : CD 25 59                    CALL    GETCH   ;FIRST CHAR
-     617/    5B32 : 4F                          MOV     C,A
-     618/    5B33 : CD 25 59                    CALL    GETCH   ;2ND OR CARR RET
-     619/    5B36 : DA AD 5A                    JC      SEAR2   ;ONLY ONE CHAR
-     620/    5B39 : 47                          MOV     B,A     ;2ND
-     621/    5B3A : C3 B8 5A                    JMP     SEAR3
-     622/    5B3D :                     ;
-     623/    5B3D :                     ; INPUT FOR ANY PORT (8080 VERSION)
-     624/    5B3D :                     ;
-     625/    5B3D : CD 9D 59            IPORT:  CALL    READHL  ;PORT
-     626/    5B40 : 4D                          MOV     C,L     ;PORT TO C
-     627/    5B41 : 3E DB                       MVI     A,INC   ;IN CODE
-     628/    5B43 : CD 63 5B                    CALL    PUTIO   ;SETUP INPUT
-     629/    5B46 : 6F                          MOV     L,A
-     630/    5B47 : CD E3 59                    CALL    OUTLL   ;HEX VALUE
-     631/    5B4A :                     ;
-     632/    5B4A :                     ; PRINT L REGISTER IN BINARY (8080 VER)
-     633/    5B4A :                     ;
-     634/    5B4A : 06 08               BITS:   MVI     B,8     ;8 BITS
-     635/    5B4C : 7D                  BIT2:   MOV     A,L
-     636/    5B4D : 87                          ADD     A       ;SHIFT LEFT
-     637/    5B4E : 6F                          MOV     L,A
-     638/    5B4F : 3E 18                       MVI     A,'0'/2 ;HALF OF 0
-     639/    5B51 : 8F                          ADC     A       ;DOUBLE AND CARRY
-     640/    5B52 : CD 2A 58                    CALL    OUTT    ;PRINT BIT
-     641/    5B55 : 05                          DCR     B
-     642/    5B56 : C2 4C 5B                    JNZ     BIT2    ;8 TIMES
-     643/    5B59 : C9                          RET
-     644/    5B5A :                     ;
-     645/    5B5A :                     ; OUTPUT BYTE FROM PORT (8080 VERSION)
-     646/    5B5A :                     ; FORMAT IS: O,PORT,BYTE
-     647/    5B5A :                     ;
-     648/    5B5A : CD 9D 59            OPORT:  CALL    READHL  ;PORT
-     649/    5B5D : 4D                          MOV     C,L
-     650/    5B5E : CD 9D 59                    CALL    READHL  ;DATA
-     651/    5B61 : 3E D3                       MVI     A,OUTC  ;OUT OPCODE
-     652/    5B63 :                     ;
-     653/    5B63 :                     ; EMULATE Z80 INP AND OUTP FOR 8080
-     654/    5B63 :                     ;
-     655/    5B63 : 32 A0 57            PUTIO:  STA     PORTN   ;IN OR OUT CODE
-     656/    5B66 : 79                          MOV     A,C     ;PORT NUMBER
-     657/    5B67 : 32 A1 57                    STA     PORTN+1
-     658/    5B6A : 3E C9                       MVI     A,RETC  ;RET OPCODE
-     659/    5B6C : 32 A2 57                    STA     PORTN+2
-     660/    5B6F : 7D                          MOV     A,L     ;OUTPUT BYTE
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 12 - 2015-7-12 16:49:44
+     601/    5B12 : FE 0D                       CPI     CR      ;CARR RET?
+     602/    5B14 : CA 23 5B                    JZ      ADMP3   ;YES, OK
+     603/    5B17 : FE 0A                       CPI     LF      ;LINE FEED?
+     604/    5B19 : CA 23 5B                    JZ      ADMP3   ;YES, OK
+     605/    5B1C : FE 09                       CPI     TAB
+     606/    5B1E : C2 26 5B                    JNZ     ADMP4   ;SKIP OTHER
+     607/    5B21 : 3E 20                       MVI     A,' '   ;SPACE FOR TAB
+     608/    5B23 : CD 2A 58            ADMP3:  CALL    OUTT    ;SEND
+     609/    5B26 : CD 00 5A            ADMP4:  CALL    TSTOP   ;DONE?
+     610/    5B29 : C3 07 5B                    JMP     ADMP2   ;END
+     611/    5B2C :                     ;
+     612/    5B2C :                     ; SEARCH FOR 1 OR 2 ASCII CHARACTERS
+     613/    5B2C :                     ; NO SPACE BETWEEN ASCII CHARS
+     614/    5B2C :                     ; FORMAT: START STOP 1 OR 2 ASCII CHAR
+     615/    5B2C :                     ;
+     616/    5B2C : CD 86 59            ASCS:   CALL    RDHLDE  ;RANGE
+     617/    5B2F : CD 25 59                    CALL    GETCH   ;FIRST CHAR
+     618/    5B32 : 4F                          MOV     C,A
+     619/    5B33 : CD 25 59                    CALL    GETCH   ;2ND OR CARR RET
+     620/    5B36 : DA AD 5A                    JC      SEAR2   ;ONLY ONE CHAR
+     621/    5B39 : 47                          MOV     B,A     ;2ND
+     622/    5B3A : C3 B8 5A                    JMP     SEAR3
+     623/    5B3D :                     ;
+     624/    5B3D :                     ; INPUT FOR ANY PORT (8080 VERSION)
+     625/    5B3D :                     ;
+     626/    5B3D : CD 9D 59            IPORT:  CALL    READHL  ;PORT
+     627/    5B40 : 4D                          MOV     C,L     ;PORT TO C
+     628/    5B41 : 3E DB                       MVI     A,INC   ;IN CODE
+     629/    5B43 : CD 63 5B                    CALL    PUTIO   ;SETUP INPUT
+     630/    5B46 : 6F                          MOV     L,A
+     631/    5B47 : CD E3 59                    CALL    OUTLL   ;HEX VALUE
+     632/    5B4A :                     ;
+     633/    5B4A :                     ; PRINT L REGISTER IN BINARY (8080 VER)
+     634/    5B4A :                     ;
+     635/    5B4A : 06 08               BITS:   MVI     B,8     ;8 BITS
+     636/    5B4C : 7D                  BIT2:   MOV     A,L
+     637/    5B4D : 87                          ADD     A       ;SHIFT LEFT
+     638/    5B4E : 6F                          MOV     L,A
+     639/    5B4F : 3E 18                       MVI     A,'0'/2 ;HALF OF 0
+     640/    5B51 : 8F                          ADC     A       ;DOUBLE AND CARRY
+     641/    5B52 : CD 2A 58                    CALL    OUTT    ;PRINT BIT
+     642/    5B55 : 05                          DCR     B
+     643/    5B56 : C2 4C 5B                    JNZ     BIT2    ;8 TIMES
+     644/    5B59 : C9                          RET
+     645/    5B5A :                     ;
+     646/    5B5A :                     ; OUTPUT BYTE FROM PORT (8080 VERSION)
+     647/    5B5A :                     ; FORMAT IS: O,PORT,BYTE
+     648/    5B5A :                     ;
+     649/    5B5A : CD 9D 59            OPORT:  CALL    READHL  ;PORT
+     650/    5B5D : 4D                          MOV     C,L
+     651/    5B5E : CD 9D 59                    CALL    READHL  ;DATA
+     652/    5B61 : 3E D3                       MVI     A,OUTC  ;OUT OPCODE
+     653/    5B63 :                     ;
+     654/    5B63 :                     ; EMULATE Z80 INP AND OUTP FOR 8080
+     655/    5B63 :                     ;
+     656/    5B63 : 32 A0 57            PUTIO:  STA     PORTN   ;IN OR OUT CODE
+     657/    5B66 : 79                          MOV     A,C     ;PORT NUMBER
+     658/    5B67 : 32 A1 57                    STA     PORTN+1
+     659/    5B6A : 3E C9                       MVI     A,RETC  ;RET OPCODE
+     660/    5B6C : 32 A2 57                    STA     PORTN+2
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 12 - 2015-7-12 21:24:23
 
 
-     661/    5B70 : C3 A0 57                    JMP     PORTN   ;EXECUTE
-     662/    5B73 :                     ;
-     663/    5B73 :                     ; HEXADECIMAL MATH, SUM AND DIFFERENCE
-     664/    5B73 :                     ;
-     665/    5B73 : CD 91 59            HMATH:  CALL    HHLDE   ;TWO NUMBERS
-     666/    5B76 : E5                          PUSH    H       ;SAVE H,L
-     667/    5B77 : 19                          DAD     D       ;SUM
-     668/    5B78 : CD DF 59                    CALL    OUTHL   ;PRINT IT
-     669/    5B7B : E1                          POP     H
-     670/    5B7C : 7D                          MOV     A,L
-     671/    5B7D : 93                          SUB     E       ;LOW BYTES
-     672/    5B7E : 6F                          MOV     L,A
-     673/    5B7F : 7C                          MOV     A,H
-     674/    5B80 : 9A                          SBB     D
-     675/    5B81 : 67                          MOV     H,A     ;HIGH BYTES
-     676/    5B82 : C3 DF 59                    JMP     OUTHL   ;DIFFERENCE
-     677/    5B85 :                     ;
-     678/    5B85 :                     ; MEMORY TEST
-     679/    5B85 :                     ; THAT DOESN'T ALTER CURRENT BYTE
-     680/    5B85 :                     ; INPUT RANGE OF ADDRESSES, ABOUT WITH ^X
-     681/    5B85 :                     ;
-     682/    5B85 : CD 86 59            JUST:   CALL    RDHLDE  ;RANGE
-     683/    5B88 : E5                          PUSH    H       ;SAVE START ADDR
-     684/    5B89 : 7E                  JUST2:  MOV     A,M     ;GET BYTE
-     685/    5B8A : 2F                          CMA             ;COMPLEMENT IT
-     686/    5B8B : 77                          MOV     M,A     ;PUT IT BACK
-     687/    5B8C : BE                          CMP     M       ;DID IT GO?
-     688/    5B8D : C2 A5 5B                    JNZ     JERR    ;NO
-     689/    5B90 : 2F                          CMA             ;ORIGINAL BYTE
-     690/    5B91 : 77                          MOV     M,A     ;PUT IT BACK
-     691/    5B92 : 7D                  JUST3:  MOV     A,L     ;PASS
-     692/    5B93 : 93                          SUB     E       ; COMPLETED?
-     693/    5B94 : 7C                          MOV     A,H
-     694/    5B95 : 9A                          SBB     D
-     695/    5B96 : 23                          INX     H
-     696/    5B97 : DA 89 5B                    JC      JUST2   ;NO
-     697/    5B9A :                     ;
-     698/    5B9A :                     ; AFTER EACH PASS,
-     699/    5B9A :                     ; SEE IF ABORT WANTED
-     700/    5B9A :                     ;
-     701/    5B9A : CD 25 58                    CALL    INSTAT  ;INPUT?
-     702/    5B9D : C4 15 58                    CNZ     INPUTT  ;YES, GET IT
-     703/    5BA0 : E1                          POP     H       ;SAVE START ADDR
-     704/    5BA1 : E5                          PUSH    H       ;SAVE AGAIN
-     705/    5BA2 : C3 89 5B                    JMP     JUST2   ;NEXT PASS
-     706/    5BA5 :                     ;
-     707/    5BA5 :                     ; FOUND MEMORY ERROR, PRINT POINTER AND
-     708/    5BA5 :                     ; BIT MAP: 0=GOOD, 1=BAD BIT
-     709/    5BA5 :                     ;
-     710/    5BA5 : F5                  JERR:   PUSH    PSW     ;SAVE COMPLEMENT
-     711/    5BA6 : CD DC 59                    CALL    CRHL    ;PRINT POINTER
-     712/    5BA9 : F1                          POP     PSW
-     713/    5BAA : AE                          XRA     M       ;SET BAD BITS
-     714/    5BAB : E5                          PUSH    H       ;SAVE POINTER
-     715/    5BAC : 6F                          MOV     L,A     ;BIT MAP TO L
-     716/    5BAD : CD 4A 5B                    CALL    BITS    ;PRINT BINARY
-     717/    5BB0 : E1                          POP     H
-     718/    5BB1 : C3 92 5B                    JMP     JUST3   ;CONTINUE
-     719/    5BB4 :                     ;
-     720/    5BB4 :                     ; REPLACE HEX BYTE WITH ANOTHER
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 13 - 2015-7-12 16:49:44
+     661/    5B6F : 7D                          MOV     A,L     ;OUTPUT BYTE
+     662/    5B70 : C3 A0 57                    JMP     PORTN   ;EXECUTE
+     663/    5B73 :                     ;
+     664/    5B73 :                     ; HEXADECIMAL MATH, SUM AND DIFFERENCE
+     665/    5B73 :                     ;
+     666/    5B73 : CD 91 59            HMATH:  CALL    HHLDE   ;TWO NUMBERS
+     667/    5B76 : E5                          PUSH    H       ;SAVE H,L
+     668/    5B77 : 19                          DAD     D       ;SUM
+     669/    5B78 : CD DF 59                    CALL    OUTHL   ;PRINT IT
+     670/    5B7B : E1                          POP     H
+     671/    5B7C : 7D                          MOV     A,L
+     672/    5B7D : 93                          SUB     E       ;LOW BYTES
+     673/    5B7E : 6F                          MOV     L,A
+     674/    5B7F : 7C                          MOV     A,H
+     675/    5B80 : 9A                          SBB     D
+     676/    5B81 : 67                          MOV     H,A     ;HIGH BYTES
+     677/    5B82 : C3 DF 59                    JMP     OUTHL   ;DIFFERENCE
+     678/    5B85 :                     ;
+     679/    5B85 :                     ; MEMORY TEST
+     680/    5B85 :                     ; THAT DOESN'T ALTER CURRENT BYTE
+     681/    5B85 :                     ; INPUT RANGE OF ADDRESSES, ABORT WITH ^X
+     682/    5B85 :                     ;
+     683/    5B85 : CD 86 59            JUST:   CALL    RDHLDE  ;RANGE
+     684/    5B88 : E5                          PUSH    H       ;SAVE START ADDR
+     685/    5B89 : 7E                  JUST2:  MOV     A,M     ;GET BYTE
+     686/    5B8A : 2F                          CMA             ;COMPLEMENT IT
+     687/    5B8B : 77                          MOV     M,A     ;PUT IT BACK
+     688/    5B8C : BE                          CMP     M       ;DID IT GO?
+     689/    5B8D : C2 A5 5B                    JNZ     JERR    ;NO
+     690/    5B90 : 2F                          CMA             ;ORIGINAL BYTE
+     691/    5B91 : 77                          MOV     M,A     ;PUT IT BACK
+     692/    5B92 : 7D                  JUST3:  MOV     A,L     ;PASS
+     693/    5B93 : 93                          SUB     E       ; COMPLETED?
+     694/    5B94 : 7C                          MOV     A,H
+     695/    5B95 : 9A                          SBB     D
+     696/    5B96 : 23                          INX     H
+     697/    5B97 : DA 89 5B                    JC      JUST2   ;NO
+     698/    5B9A :                     ;
+     699/    5B9A :                     ; AFTER EACH PASS,
+     700/    5B9A :                     ; SEE IF ABORT WANTED
+     701/    5B9A :                     ;
+     702/    5B9A : CD 25 58                    CALL    INSTAT  ;INPUT?
+     703/    5B9D : C4 15 58                    CNZ     INPUTT  ;YES, GET IT
+     704/    5BA0 : E1                          POP     H       ;SAVE START ADDR
+     705/    5BA1 : E5                          PUSH    H       ;SAVE AGAIN
+     706/    5BA2 : C3 89 5B                    JMP     JUST2   ;NEXT PASS
+     707/    5BA5 :                     ;
+     708/    5BA5 :                     ; FOUND MEMORY ERROR, PRINT POINTER AND
+     709/    5BA5 :                     ; BIT MAP: 0=GOOD, 1=BAD BIT
+     710/    5BA5 :                     ;
+     711/    5BA5 : F5                  JERR:   PUSH    PSW     ;SAVE COMPLEMENT
+     712/    5BA6 : CD DC 59                    CALL    CRHL    ;PRINT POINTER
+     713/    5BA9 : F1                          POP     PSW
+     714/    5BAA : AE                          XRA     M       ;SET BAD BITS
+     715/    5BAB : E5                          PUSH    H       ;SAVE POINTER
+     716/    5BAC : 6F                          MOV     L,A     ;BIT MAP TO L
+     717/    5BAD : CD 4A 5B                    CALL    BITS    ;PRINT BINARY
+     718/    5BB0 : E1                          POP     H
+     719/    5BB1 : C3 92 5B                    JMP     JUST3   ;CONTINUE
+     720/    5BB4 :                     ;
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 13 - 2015-7-12 21:24:23
 
 
-     721/    5BB4 :                     ; OVER GIVEN RANGE
-     722/    5BB4 :                     ; FORMAT IS: START, STOP, ORIG, NEW
-     723/    5BB4 :                     ;
-     724/    5BB4 : CD 7C 5A            REPL:   CALL    HLDEBC  ;RANGE, 1ST BYTE
-     725/    5BB7 : DA D4 59                    JC      ERROR   ;NO, 2ND
-     726/    5BBA : 41                          MOV     B,C     ;1ST TO B
-     727/    5BBB : E5                          PUSH    H
-     728/    5BBC : CD 9D 59                    CALL    READHL  ;2ND BYTE
-     729/    5BBF : 4D                          MOV     C,L     ;INTO C
-     730/    5BC0 : E1                          POP     H
-     731/    5BC1 : 7E                  REPL2:  MOV     A,M     ;FETCH BYTE
-     732/    5BC2 : B8                          CMP     B       ;A MATCH?
-     733/    5BC3 : C2 CC 5B                    JNZ     REPL3   ;NO
-     734/    5BC6 : 71                          MOV     M,C     ;SUBSTITUTE
-     735/    5BC7 : 79                          MOV     A,C
-     736/    5BC8 : BE                          CMP     M       ;SAME?
-     737/    5BC9 : C2 43 5A                    JNZ     ERRB    ;NO, BAD
-     738/    5BCC : CD 00 5A            REPL3:  CALL    TSTOP   ;DONE?
-     739/    5BCF : C3 C1 5B                    JMP     REPL2
-     740/    5BD2 :                     ;
-     741/    5BD2 :                     ; GIVE RANGE OF 1ST BLOCK
-     742/    5BD2 :                     ; AND START OF SECOND
-     743/    5BD2 :                     ;
-     744/    5BD2 : CD 7C 5A            VERM:   CALL    HLDEBC  ;3 ADDRESSES
-     745/    5BD5 : 0A                  VERM2:  LDAX    B       ;FETCH BYTE
-     746/    5BD6 : BE                          CMP     M       ;SAME AS OTHER?
-     747/    5BD7 : CA F3 5B                    JZ      VERM3   ;YES
-     748/    5BDA : E5                          PUSH    H       ;DIFFERENT
-     749/    5BDB : C5                          PUSH    B
-     750/    5BDC : CD DC 59                    CALL    CRHL    ;PRINT 1ST POINTER
-     751/    5BDF : 4E                          MOV     C,M     ;FIRST BYTE
-     752/    5BE0 : CD E4 59                    CALL    OUTHEX  ;PRINT IT
-     753/    5BE3 : 3E 3A                       MVI     A,':'
-     754/    5BE5 : CD 2A 58                    CALL    OUTT
-     755/    5BE8 : E1                          POP     H       ;B,C TO H,L
-     756/    5BE9 : CD DF 59                    CALL    OUTHL   ;SECOND POINTER
-     757/    5BEC : 4E                          MOV     C,M     ;2ND BYTE
-     758/    5BED : CD EC 59                    CALL    OUTHX   ;PRINT IT
-     759/    5BF0 : 4D                          MOV     C,L     ;RESTORE C
-     760/    5BF1 : 44                          MOV     B,H     ;AND B
-     761/    5BF2 : E1                          POP     H       ;AND H,L
-     762/    5BF3 : CD 00 5A            VERM3:  CALL    TSTOP   ;DONE?
-     763/    5BF6 : 03                          INX     B       ;2ND POINTER
-     764/    5BF7 : C3 D5 5B                    JMP     VERM2
-     765/    5BFA :                     ;
-     766/    5BFA :                             END
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 14 - 2015-7-12 16:49:44
+     721/    5BB4 :                     ; REPLACE HEX BYTE WITH ANOTHER
+     722/    5BB4 :                     ; OVER GIVEN RANGE
+     723/    5BB4 :                     ; FORMAT IS: START, STOP, ORIG, NEW
+     724/    5BB4 :                     ;
+     725/    5BB4 : CD 7C 5A            REPL:   CALL    HLDEBC  ;RANGE, 1ST BYTE
+     726/    5BB7 : DA D4 59                    JC      ERROR   ;NO, 2ND
+     727/    5BBA : 41                          MOV     B,C     ;1ST TO B
+     728/    5BBB : E5                          PUSH    H
+     729/    5BBC : CD 9D 59                    CALL    READHL  ;2ND BYTE
+     730/    5BBF : 4D                          MOV     C,L     ;INTO C
+     731/    5BC0 : E1                          POP     H
+     732/    5BC1 : 7E                  REPL2:  MOV     A,M     ;FETCH BYTE
+     733/    5BC2 : B8                          CMP     B       ;A MATCH?
+     734/    5BC3 : C2 CC 5B                    JNZ     REPL3   ;NO
+     735/    5BC6 : 71                          MOV     M,C     ;SUBSTITUTE
+     736/    5BC7 : 79                          MOV     A,C
+     737/    5BC8 : BE                          CMP     M       ;SAME?
+     738/    5BC9 : C2 43 5A                    JNZ     ERRB    ;NO, BAD
+     739/    5BCC : CD 00 5A            REPL3:  CALL    TSTOP   ;DONE?
+     740/    5BCF : C3 C1 5B                    JMP     REPL2
+     741/    5BD2 :                     ;
+     742/    5BD2 :                     ; GIVE RANGE OF 1ST BLOCK
+     743/    5BD2 :                     ; AND START OF SECOND
+     744/    5BD2 :                     ;
+     745/    5BD2 : CD 7C 5A            VERM:   CALL    HLDEBC  ;3 ADDRESSES
+     746/    5BD5 : 0A                  VERM2:  LDAX    B       ;FETCH BYTE
+     747/    5BD6 : BE                          CMP     M       ;SAME AS OTHER?
+     748/    5BD7 : CA F3 5B                    JZ      VERM3   ;YES
+     749/    5BDA : E5                          PUSH    H       ;DIFFERENT
+     750/    5BDB : C5                          PUSH    B
+     751/    5BDC : CD DC 59                    CALL    CRHL    ;PRINT 1ST POINTER
+     752/    5BDF : 4E                          MOV     C,M     ;FIRST BYTE
+     753/    5BE0 : CD E4 59                    CALL    OUTHEX  ;PRINT IT
+     754/    5BE3 : 3E 3A                       MVI     A,':'
+     755/    5BE5 : CD 2A 58                    CALL    OUTT
+     756/    5BE8 : E1                          POP     H       ;B,C TO H,L
+     757/    5BE9 : CD DF 59                    CALL    OUTHL   ;SECOND POINTER
+     758/    5BEC : 4E                          MOV     C,M     ;2ND BYTE
+     759/    5BED : CD EC 59                    CALL    OUTHX   ;PRINT IT
+     760/    5BF0 : 4D                          MOV     C,L     ;RESTORE C
+     761/    5BF1 : 44                          MOV     B,H     ;AND B
+     762/    5BF2 : E1                          POP     H       ;AND H,L
+     763/    5BF3 : CD 00 5A            VERM3:  CALL    TSTOP   ;DONE?
+     764/    5BF6 : 03                          INX     B       ;2ND POINTER
+     765/    5BF7 : C3 D5 5B                    JMP     VERM2
+     766/    5BFA :                     ;
+     767/    5BFA :                             END
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 14 - 2015-7-12 21:24:23
 
 
   symbol table (* = unused):
@@ -866,7 +867,7 @@
  OPORT :                       5B5A C |  ORGIN :                       5800 - |
  OUT2 :                        582B C |  OUT3 :                        5839 C |
  OUT4 :                        5844 C |  OUTC :                          D3 - |
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 15 - 2015-7-12 16:49:44
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 15 - 2015-7-12 21:24:23
 
 
 *OUTH :                        5812 C |  OUTHEX :                      59E4 C |
@@ -888,7 +889,7 @@
  SENDM :                       593B C |  SIGNON :                      584F C |
  STACK :                       57A0 - |  START :                       5800 C |
  TAB :                            9 - |  TABLE :                       589C C |
-*TIME :                    16:49:44 - |  TOP :                           18 - |
+*TIME :                    21:24:23 - |  TOP :                           18 - |
 *TRUE :                           1 - |  TSTOP :                       5A00 C |
  VERM :                        5BD2 C |  VERM2 :                       5BD5 C |
  VERM3 :                       5BF3 C |  VERS :                          17 - |
@@ -898,7 +899,7 @@
     163 symbols
      36 unused symbols
 
- AS V1.42 Beta [Bld 92] - source file monitor.asm - page 16 - 2015-7-12 16:49:44
+ AS V1.42 Beta [Bld 92] - source file monitor.asm - page 16 - 2015-7-12 21:24:23
 
 
   codepages:
@@ -907,9 +908,9 @@
 STANDARD (0 changed characters)
 
 
-0.01 seconds assembly time
+0.02 seconds assembly time
 
-    767 lines source file
+    768 lines source file
       2 passes
       0 errors
       0 warnings
