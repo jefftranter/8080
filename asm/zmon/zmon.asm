@@ -156,4 +156,130 @@ PRINT:
         PUSH    B
         MVI     B,64H   ;RETRY COUNT
 PNT1:   DCR     B
-
+        JZ      FAULT
+        IN      0C2H
+        BIT     7,A
+        JRZ     PNT1
+        POP     B
+        MOV     A,C
+        OUT     0C3H
+        MVI     A,'4'
+        OUT     0C2H
+        MVI     A,'<'
+        OUT    0C2H
+        IN      0C3H
+        RET
+FAULT:
+        POP     B
+        CALL    STAT
+        JMP     PRINT
+;
+STAT:   IN      0C3H
+        BIT     3,A
+        RNZ
+        LXI     H,PFMSG
+        CALL    OSTR
+        CALL    CONIN
+        RET
+;
+BOUND:
+        CALL    LOADHL
+        CALL    SPACE
+        MVI     A,'T'
+        CALL    PNT
+        MVI     A,'0'
+        CALL    PNT
+        CALL    SPACE
+        PUSH    H
+        CALL    LOADHL
+        MOV     D,H
+        MOV     E,L
+        POP     H
+        CALL    LCR
+        RET
+;
+LOADHL:
+        PUSH    PSW
+        CALL    TOBIN
+        MOV     H,A
+        CALL    TOBIN
+        MOV     L,A
+        POP     PSW
+        RET
+;
+;       PRINT HL THEN : THEN MEMORY CONTENTS
+;
+POH:
+        PUSH    PSW
+        CALL    POH1
+        MVI     A,':'
+        CALL    PNT
+        CALL    POH2
+        POP     PSW
+        RET
+;
+;       PRINT HL IN HEX-ASCII
+;
+POH1:
+        PUSH    PSW
+        MOV     A,H
+        CALL    PHCHAR
+        MOV     A,L
+        CALL    PHCHAR
+        POP     PSW
+        RET
+;
+;       PRINTS M POINTED AT BY HL IN HEX-ASCII
+;
+POH2:
+        PUSH    PSW
+        MOV     A,M
+        CALL    PHCHAR
+        POP     PSW
+        RET
+;
+;       CONVERTS BINARY VALUE IN A TO HEX-ASCII
+;       AND PRINTS IT
+;
+PHCHAR:
+        PUSH    B
+        CALL    BHCONV
+        MOV     A,B
+        CALL    PNT
+        MOV     A,C
+        CALL    PNT
+        POP     B
+        RET
+;
+;       CONVERTS BYTE IN ACCUM TO TWO
+;       HEX-ASCII DIGITS IN BC
+;
+BHCONV:
+        PUSH    H
+        MOV     L,A
+        RAR
+        RAR
+        RAR
+        RAR
+        CALL    BIN1
+        MOV     B,A
+        MOV     A,L
+        CALL    BIN1
+        MOV     C,A
+        POP     H
+        RET
+;
+;       CONVERT THE BOTTOM NYBBLE OF THE BYTE IN A
+;
+BIN1:
+        ANI     0FH
+        ADI     '0'
+        CPI     ':'
+        RC
+        ADI     7
+        RET
+;
+;       CONVERT UP TO 4 HEX DIGITS TO BINARY
+;
+TOBIN:
+     
