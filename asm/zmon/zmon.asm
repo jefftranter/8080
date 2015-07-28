@@ -1,5 +1,5 @@
         CPU     8080
-        ORG     0F00H
+        ORG     0F000H
 STACK   EQU     0E26EH
 ;
 ;
@@ -28,7 +28,7 @@ INIT:
 ;
 PARSE:  IN      1
         CALL    PROMPT
-        CALL    CMD.
+        CALL    CMD
         CPI     'E'
         JZ      EXAM
         CPI     'M'
@@ -158,8 +158,10 @@ PRINT:
 PNT1:   DCR     B
         JZ      FAULT
         IN      0C2H
-        BIT     7,A
-        JRZ     PNT1
+;       BIT     7,A     ;Note: Z80 opcode!
+        DB      0CBH,7FH
+;       JRZ     PNT1    ;Note: Z80 opcode!
+        DB      28H,0F6H
         POP     B
         MOV     A,C
         OUT     0C3H
@@ -175,7 +177,8 @@ FAULT:
         JMP     PRINT
 ;
 STAT:   IN      0C3H
-        BIT     3,A
+;       BIT     3,A     ;Note: Z80 opcode!
+        DB      0CBH,5FH
         RNZ
         LXI     H,PFMSG
         CALL    OSTR
@@ -195,7 +198,7 @@ BOUND:
         MOV     D,H
         MOV     E,L
         POP     H
-        CALL    LCR
+        CALL    LFCR
         RET
 ;
 LOADHL:
@@ -282,4 +285,179 @@ BIN1:
 ;       CONVERT UP TO 4 HEX DIGITS TO BINARY
 ;
 TOBIN:
-     
+        CALL    INECHO
+        CPI     0DH
+        JNZ     MORE
+        LXI     SP,STACK
+        JMP     PARSE
+MORE:
+        PUSH    H
+        LXI     H,0
+        CALL    CHECK
+        CALL    ATOB
+        ADD     A         
+        ADD     A         
+        ADD     A         
+        ADD     A         
+        MOV     L,A
+        CALL    INECHO
+        CALL    CHECK
+        CALL    ATOB
+        ANI     0FH
+        ORA     L
+        POP     H
+        RET
+;
+;       CHECK FOR LEGAL HEX-ASCII IN A
+;       RETURN TO COMMAND MODE IF NOT
+;
+CHECK:
+        CPI     '0'
+        JC      CHERROR
+        CPI     'A'
+        JC      NUMBER
+        CPI     'G'
+        JNC     CHERROR
+        RET
+NUMBER:
+        CPI     ':'
+        JNC     CHERROR
+        RET
+CHERROR:
+        LXI     SP,STACK
+        JMP     ERROR
+;
+;       CONVERT ASCII DIGIT TO BINARY
+;
+ATOB:
+        SUI     '0'
+        CPI     0AH
+        RC
+        SUI     7
+        RET
+;
+;       PRINT AN ASCII SPACE
+;
+SPACE:
+        PUSH    PSW
+        MVI     A,' '
+        CALL    PNT
+        POP     PSW
+        RET
+;
+;       PRINT MONITOR PROMPT
+;
+PROMPT:
+        PUSH    PSW
+        CALL    LFCR
+        MVI     A,':'
+        CALL    PNT
+        POP     PSW
+        RET
+;
+;       PRINT THE > PROMPT
+;
+EPROMPT:
+        PUSH    PSW
+        CALL    LFCR
+        MVI     A,'>'
+        CALL    PNT
+        POP     PSW
+        RET
+;
+; PRINT LF,CR
+;
+LFCR:
+        PUSH    PSW
+        MVI     A,0AH
+        CALL    PNT
+        MVI     A,0DH
+        CALL    PNT
+        POP     PSW
+        RET
+;
+;       INPUT ROUTINE THAT RETURNS TO THE
+;       MONITOR ON A CR - ECHOS CHARACTER
+;
+CMD:
+        CALL    CONIN
+        CPI     0DH
+        JZ      PARSE
+;
+;       PRINT TO THE CONSOLE
+;
+PNT:
+        PUSH    PSW
+PRDY:
+        IN      0
+        RLC
+        JC      PRDY
+        POP     PSW
+        OUT     1
+        RET
+;
+;       CONSOLE OUT - CP/M COMPATIBLE
+;
+CONOUT:
+        MOV     A,C
+        JMP     PNT
+;
+;       GET CHAR FROM CONSOLE AND ECHO IT
+;
+INECHO:
+        CALL    CONIN
+        CALL    PNT
+        RET
+;
+;       CONSOLE IN
+;
+CONIN:
+        IN      0
+        RRC
+        JC      CONIN
+        IN      1
+        ANI     7FH
+        RET
+;
+;       STRING PRINTER
+;       PRINTS TILL A BYTE OF FF IS FOUND
+;
+OSTR:
+        PUSH    PSW
+OST1:   MOV     A,M
+        CPI     0FFH
+        JZ      OST2
+        CALL    PNT
+        INX     H
+        JMP     OST1
+OST2:   POP     PSW
+        RET
+;
+;       CLEAR THE TERMINAL SCREEN
+;
+CLRSCR:
+        PUSH    H
+        LXI     H,CLRMSG
+        CALL    OSTR
+        POP     H
+        RET
+;
+;       GET CONSOLE STATUS CP/M COMPATIBLE
+;
+CONSTAT:
+        IN      0
+        RRC
+        MVI     A,0
+        RC
+        MVI     A,0FFH
+        RET
+;
+CLRMSG:
+        DB      1BH,'E',0FFH
+SOMSG:
+        DB      "Z-MON  V5L3",0FFH
+PFMSG:
+        DB      0DH,0AH,"FAULT",0FFH
+;
+        END
+
