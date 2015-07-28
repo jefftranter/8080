@@ -158,10 +158,12 @@ PRINT:
 PNT1:   DCR     B
         JZ      FAULT
         IN      0C2H
-;       BIT     7,A     ;Note: Z80 opcode!
-        DB      0CBH,7FH
-;       JRZ     PNT1    ;Note: Z80 opcode!
-        DB      28H,0F6H
+        CPU     Z80
+        BIT     7,A     ;Note: Z80 opcode!
+        CPU     8080
+        CPU     Z80
+        JR      Z,PNT1  ;Note: Z80 opcode!
+        CPU     8080
         POP     B
         MOV     A,C
         OUT     0C3H
@@ -177,8 +179,9 @@ FAULT:
         JMP     PRINT
 ;
 STAT:   IN      0C3H
-;       BIT     3,A     ;Note: Z80 opcode!
-        DB      0CBH,5FH
+        CPU     Z80
+        BIT     3,A     ;Note: Z80 opcode!
+        CPU     8080
         RNZ
         LXI     H,PFMSG
         CALL    OSTR
@@ -460,4 +463,3 @@ PFMSG:
         DB      0DH,0AH,"FAULT",0FFH
 ;
         END
-
