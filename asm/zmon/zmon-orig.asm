@@ -89,7 +89,7 @@ DUMP:
         CALL    EPROMPT
         CALL    BOUND
         CALL    CLRSCR
-D0:     MVI     B,18H   ;SETB FOR 24 LINES ON A SCREEN
+D0:     MVI     B,18H   ;SET B FOR 24 LINES ON A SCREEN
 D1:     CALL    LFCR
         MVI     C,10H   ;SET C FOR 16 BYTES ACROSS
 ;

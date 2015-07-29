@@ -18,7 +18,7 @@ A make file is provided to build the software. You may need to adjust
 it for your environment.
 
 The program can be run by copying the file monitor.bin to the SD card
-then loading and running it. The start address is 5800.
+then loading and running it. The start address is 0000.
 
 Commands:
 

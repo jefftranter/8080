@@ -84,14 +84,13 @@ DEPOS:
         INX     H
         JMP     EXMN
 ;
-;
 ;       DUMP MEMORY
 ;
 DUMP:
         CALL    EPROMPT
         CALL    BOUND
         CALL    CLRSCR
-D0:     MVI     B,18H   ;SETB FOR 24 LINES ON A SCREEN
+D0:     MVI     B,18H   ;SET B FOR 24 LINES ON A SCREEN
 D1:     CALL    LFCR
         MVI     C,10H   ;SET C FOR 16 BYTES ACROSS
 ;
@@ -131,12 +130,12 @@ KEEPON: INX     H
 ;
 LINEDONE:
         DCR     B
-        JNZ     D1      ;
+        JNZ     D1
         CALL    CMD
         MVI     B,10H
         JMP     D0
 ;
-;       INIT PRINTER - Does not apply to Altair hardware
+;       INIT PRINTER - Initialize printer. Does not apply to Altair hardware.
 ;
         IFDEF PRINTER
 PINIT:
@@ -464,7 +463,9 @@ CLRMSG:
 
 SOMSG:
         DB      "Z-MON  V5L3",0FFH
+        IFDEF PRINTER
 PFMSG:
         DB      0DH,0AH,"FAULT",0FFH
+        ENDIF
 ;
         END
