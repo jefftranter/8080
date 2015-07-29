@@ -1,15 +1,17 @@
         CPU     8080
-        ORG     0F000H
-STACK   EQU     0E26EH
+        ORG     0000H
+STACK   EQU     7000H
 ;
 ;
-;       ZMON 6.2
+;       ZMON 6.2 - Altair version
 ;
 ;
         JMP     INIT
         JMP     CONIN
         JMP     CONOUT
+        IFDEF PRINTER
         JMP     PRINT
+        ENDIF
         JMP     CONSTAT
         JMP     INIT
 ;
@@ -22,11 +24,11 @@ INIT:
         LXI     H,SOMSG
         CALL    OSTR
         POP     H
-        CALL    PINIT
+;       CALL    PINIT   ; Does not apply to Altair
 ;
 ;GET A COMMAND AND PARSE IT
 ;
-PARSE:  IN      1
+PARSE:  IN      11H
         CALL    PROMPT
         CALL    CMD
         CPI     'E'
@@ -121,9 +123,9 @@ KEEPON: INX     H
 ;
 ;       IS HE BEATING ON THE KEYBOARD?
 ;
-        IN      0
-        RRC
-        JNC     PARSE
+        IN      10H
+        ANI     01H
+        JNZ     PARSE
 ;
         JMP     PNTBYTE
 ;
@@ -134,8 +136,9 @@ LINEDONE:
         MVI     B,10H
         JMP     D0
 ;
-;       INIT PRINTER
+;       INIT PRINTER - Does not apply to Altair hardware
 ;
+        IFDEF PRINTER
 PINIT:
         MVI     A,0
         OUT     0C0H    ;SET UP
@@ -187,6 +190,7 @@ STAT:   IN      0C3H
         CALL    OSTR
         CALL    CONIN
         RET
+        ENDIF
 ;
 BOUND:
         CALL    LOADHL
@@ -390,16 +394,16 @@ CMD:
 ;       PRINT TO THE CONSOLE
 ;
 PNT:
-        PUSH    PSW
+        PUSH    PSW     ; Save A register
 PRDY:
-        IN      0
-        RLC
-        JC      PRDY
-        POP     PSW
-        OUT     1
-        RET
+        IN      10H     ; Read status register
+        ANI     02H     ; Mask out TDRE bit
+        JZ      PRDY    ; Repeat until TDRE is set
+        POP     PSW     ; Restore A
+        OUT     11H     ; Output it to data register
+        RET             ; And return
 ;
-;       CONSOLE OUT - CP/M COMPATABLE
+;       CONSOLE OUT - CP/M COMPATIBLE
 ;
 CONOUT:
         MOV     A,C
@@ -415,12 +419,12 @@ INECHO:
 ;       CONSOLE IN
 ;
 CONIN:
-        IN      0
-        RRC
-        JC      CONIN
-        IN      1
-        ANI     7FH
-        RET
+        IN      10H             ; Read status register
+        ANI     01H             ; Mask out RDRF bit
+        JZ      CONIN           ; Repeat until RDRF is set
+        IN      11H             ; Read character from data register
+        ANI     7FH             ; Convert to 7-bit ASCII
+        RET                     ; And return
 ;
 ;       STRING PRINTER
 ;       PRINTS TILL A BYTE OF FF IS FOUND
@@ -445,7 +449,7 @@ CLRSCR:
         POP     H
         RET
 ;
-;       GET CONSOLE STATUS CP/M COMPATABLE
+;       GET CONSOLE STATUS CP/M COMPATIBLE
 ;
 CONSTAT:
         IN      0
@@ -456,7 +460,8 @@ CONSTAT:
         RET
 ;
 CLRMSG:
-        DB      1BH,'E',0FFH
+        DB      "\e[2J\e[H",0FFH ; VT100/ANSI clear screen, cursor home
+
 SOMSG:
         DB      "Z-MON  V5L3",0FFH
 PFMSG:
