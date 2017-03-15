@@ -26,7 +26,6 @@
 # 0 001 001 000 110 110   00 001 001  011
 
 import sys
-import fileinput
 import argparse
 import signal
 
