@@ -7,7 +7,7 @@
         ORG     0000H
 
 TOPS    EQU     033FH
-TCOD    EQU     0200h
+TCOD    EQU     0200H
 TOPMM   EQU     0FFFFH
 PORT0   EQU     0800H
 PORT4   EQU     0804H
