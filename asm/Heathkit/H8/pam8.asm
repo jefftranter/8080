@@ -381,3 +381,103 @@ CLK4
         IN      IP.PAD
         CPI     56Q             ; SEE IF '0' AND '#'
         JNZ     CUI1            ; IF NOT, ALLOW USER PROCESSING OF CLOCK
+
+;       ERROR - COMMAND ERROR.
+;
+;       ERROR IS CALLED AS A 'BAIL-OUT' ROUTINE.
+;
+;       IT RESETS THE OPERATIONAL MODE, AND RESTORES THE STACKPOINTER.
+;
+;       ENTRY   NONE
+;       EXIT    TO MTR LOOP
+;               CTLFLG SET
+;               .MFLAG CLEARED
+;       USES    ALL
+
+ERROR
+        LXI     H,.MFLAG
+        MOV     A,H             ; (A) = .MFLAG
+        ANI     377Q-UO.DDU-UO.NFR ; RE-ENABLE DISPLAYS
+        MOV     M,A             ; REPLACE
+        INX     H
+        MVI     M,CB.SSI+CB.MTL+CB.CLI+CB.SPK ; RESTORE *CTLFLG*
+        ERRNZ   CTLFLG-.MFLAG-1
+        EI
+        LHLD    REGPTR
+        SPHL                    ; RESTORE STACK POINTER TO EMPTY STATE
+        CALL    ALARM           ; ALARM FOR 200 MS
+
+;       MTR - MONITOR LOOP.
+;
+;       THIS IS THE MAIN EXECUTIVE LOOP FOR THE FRONT PANEL EMULATOR.
+
+MTR
+        EI
+
+MTR1    LXI     H,HTR1
+        PUSH    H               ; SET 'MTR1' AS RETURN ADDRESS
+        LXI     B,DSPMOD        ; (BC) = #DSPMOD
+        LDAX    B
+        ANI     1               ; (A) = 1 IF ALTER
+        CMA
+        STA     DSPROT          ; ROTATE LED PERIODS IF ALTER
+
+;       READ KEY
+
+        CALL    RCK             ; READ CONSOLE KEYPAD
+        LHLD    ABUSS
+        CPI     10
+        JNC     MTR4            ; IF IN 'ALWAYS VALID' GROUP
+        MOV     E,A             ; SAVE VALUE
+;       SET     DSPMOD
+        LDAX    B               ; (A) = DSPMOD
+        RRC
+        JC      MTR5            ; IF IN ALTER MODE
+        MOV     A,E             ; (A) = CODE
+
+;       HAVE A COMMAND (NOT A VALUE)
+
+MTR4    SUI     4               ; (A) = COMMAND
+        JC      ERROR           ; IF BAD
+        MOV     E,A
+        PUSH    H               ; SAVE ABUSS VALUE
+        LXI     H,MTRA
+        MVI     D,0
+        DAD     D               ; (H,L) = ADDRESS OF TABLE ENTRY
+        MOV     E,M
+        DAD     D               ; (H,L) = ADDRESS OF PROCESSOR
+        XTHL                    ; SET ADDRESS, (H,L) = (ABUSS)
+        LXI     D,REGI          ; (D,E) = ADDRESS OF REG INDEX
+;       SET     DSPMOD
+        LDAX    B               ; (A) = DSPMOD
+        ANI     2               ; SET 'Z' IF MEMORY
+        LDAX    B               ; (A) = DSPMOD
+        RET                     ; JUMP TO PROCESSOR
+
+RTRA                            ; JUMP TABLE
+        DB      GO-$            ; 4 - GO
+        DB      IN- $           ; 5 - INPUT
+        DB      OUT-$           ; 6 - OUTUT
+        DB      SSTEP-$         ; 7 - SINGLE STEP
+        DB      RMEM-$          ; 8 - CASSETTE LOAD
+        DB      WMEM-$          ; 9 - CASSETTE DUMP
+        DB      NEXT-$          ; + - NEXT
+        DB      LAST-$          ; - - LAST
+        DB      ABORT-$         ; * - ABORT
+        DB      R$W-$           ; / - DISPLAY/ALTER
+        DB      MEMM-$          ; # - MEMORY MODE
+        DB      REGM-$          ; . - REGISTER MODE
+
+;       PROCESS MEMORY/REGISTER ALTERATIONS.
+;
+;       THIS CODE IS ENTERED IF
+;
+;       1) AM IN ALTER MODE, AND
+;       2) A KEY FROM 0-7 WAS ENTERED.
+
+MTR5    RRC
+        MOV     A,E             ; (A) = VALUE
+        JC      MTR6            ; IS REGISTER
+        STC                     ; INDICATE 1ST DIGIT IS IN (A)
+        CALL    IOB             ; INPUT OCTAL BYTE
+        INX     H               ; DISPLAY NEXT LOCATION
