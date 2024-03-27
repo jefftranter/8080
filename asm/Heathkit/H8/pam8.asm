@@ -196,7 +196,7 @@ INT5    JMP     UIVEC+12        ; JUMP TO USER ROUTINE
 
 DLY     PUSH    PSW             ; SAVE COUNT
         XRA     A               ; DONT SOUND HORN
-        JMP     HRNO            ; PROCESS AS HORN
+        JMP     HRN0            ; PROCESS AS HORN
 
         ORG     60Q
 INT6    JMP     UIVEC+15        ; JUMP TO USER ROUTINE
@@ -248,7 +248,7 @@ INIT2   DCX     H
 ;       CONFIGURE LOAD/DUMP UART
 
         MVI     A,UMI.1B+UMI.L8+UMI.16X
-        OUT     OP.IPC          ; SET 8 BIT, NO PARITY, 1 STOP, X16
+        OUT     OP.TPC          ; SET 8 BIT, NO PARITY, 1 STOP, X16
 
 ;       SAVALL - SAVE ALL REGISTERS ON STACK.
 ;
@@ -411,8 +411,7 @@ ERROR
 ;
 ;       THIS IS THE MAIN EXECUTIVE LOOP FOR THE FRONT PANEL EMULATOR.
 
-MTR
-        EI
+MTR     EI
 
 MTR1    LXI     H,HTR1
         PUSH    H               ; SET 'MTR1' AS RETURN ADDRESS
@@ -457,14 +456,14 @@ MTR4    SUI     4               ; (A) = COMMAND
 RTRA                            ; JUMP TABLE
         DB      GO-$            ; 4 - GO
         DB      IN- $           ; 5 - INPUT
-        DB      OUT-$           ; 6 - OUTUT
+        DB      OUT-$           ; 6 - OUTPUT
         DB      SSTEP-$         ; 7 - SINGLE STEP
         DB      RMEM-$          ; 8 - CASSETTE LOAD
         DB      WMEM-$          ; 9 - CASSETTE DUMP
         DB      NEXT-$          ; + - NEXT
         DB      LAST-$          ; - - LAST
         DB      ABORT-$         ; * - ABORT
-        DB      R$W-$           ; / - DISPLAY/ALTER
+        DB      RW-$            ; / - DISPLAY/ALTER
         DB      MEMM-$          ; # - MEMORY MODE
         DB      REGM-$          ; . - REGISTER MODE
 
@@ -481,3 +480,688 @@ MTR5    RRC
         STC                     ; INDICATE 1ST DIGIT IS IN (A)
         CALL    IOB             ; INPUT OCTAL BYTE
         INX     H               ; DISPLAY NEXT LOCATION
+
+;       SAE - STORE ABUSS AND EXIT.
+;
+;       ENTRY   (HL) = ABUSS VALUE
+;       EXIT    TO (RET)
+;       USES    NONE
+
+SAE     SHLD    ABUSS
+        RET
+
+;       ALTER REGISTER
+
+MTR6    PUSH    PSW             ; SAVE CODE
+        CALL    LRA             ; LOCATE REGISTER ADDRESS
+        ANA     A
+        JZ      ERROR           ; NOT ALLOWED TO ALTER STACKPOINTER
+        INX     H
+        POP     PSW             ; RESTORE VALUE AND CARRY FLAG
+        JMP     IOA             ; INPUT OCTAL ADDRESS
+
+
+;       REGM - ENTER REGISTER DISPLAY MODE.
+;
+;       ENTRY   (A) = DSPMOD
+;               (BC) = #DSPMOD
+
+REGM    MVI     A,2             ; SET DISPLAY REGISTER MODE
+;       SET     DSPMOD
+        STAX    B               ; SET DISPLAY REGISTER MODE
+        ERRNZ   DSPMOD-DSPROT-1
+        DCX     B               ; (BC) = #DSPROT
+        XRA     A
+        STAX    B               ; SET ALL PERIODS ON
+        CALL    RCK             ; READ KEY ENTRY
+        DCR     A               ; DISPLACE
+        CPI     6
+        JNC     ERROR           ; NOT 1-6
+        RLC
+        STAX    D               ; SET NEW REG IND
+;       SET     REGI
+        RET
+
+;       RW - TOGGLE DISPLAY/ALTER MODE.
+;
+;       ENTRY   (A) = DSPMOD
+;               (BC) = ADDRESS OF DSPMOD
+
+;       SET     DSPMOD
+RW      XRI     1
+        STAX    B
+        RET
+
+;       NEXT - INCREMENT DISPLAY ELEMENT
+;
+;       ENTRY   (HL) = (ABUSS)
+;               (DE) = ADDRESS OF REGIND
+
+NEXT    INX     H
+        JZ      SAE             ; IF MEMORY, STORE VALUES AND EXIT
+
+;       IS REGISTER MODE.
+
+;       SET     REGI
+        LDAX    D               ; (A) = REGI
+        ADI     2               ; INCREMENT REGISTER INDEX
+        STAX    D               ; WRAP TO *SP*
+        CPI     12
+        RC                      ; IF NOT TOO LARGE, EXIT
+        XRA     A               ; OVERFLOW
+        STAX    D
+ABORT   RET
+
+;       LAST - INCREMENT DISPLAY ELEMENT
+;
+;       ENTRY   (HL) = (ABUSS)
+;               (DE) = ADDRESS OF REGIND
+;
+
+LAST    DCX     H
+        JZ      SAE             ; IF MEMORY, STORE AND EXIT
+
+;       IS REGISTER MODE
+
+;       SET     REGI
+LST2    LDAX    D               ; (A) = REGI
+        SUI     2
+        STAX    D
+        RNC                     ; IF OK
+        MVI     A,10            ; UNDERFLOW TO *PC*
+        STAX    D
+        RET
+
+;       MEMM - ENTER DISPLAY MEMORY MODE
+;
+;       ENTRY   (BC) = ADDRESS OF DSPMOD
+
+MEMM    XRA     A               ; (A) = 0
+;       SET     DSPMOD
+        STAX    B               ; SET DISPLAY MEMORY MODE
+        ERRNZ   DSPMOD-DSPROT-1
+        DCX     B               ; (BC) = #DSPROT
+        STAX    B               ; SET ALL PERIODS ON
+        LXI     H,ABUSS+1
+        JMP     IOA             ; INPUT OCTAL ADDRESS
+
+;       IN - INPUT DATA BYTE.
+;
+;       OUT - OUTPUT DATA BYTE.
+;
+;       ENTRY   (HL) = (ABUSS)
+
+IN      MVI     B,MI.IN
+        DB      MI.LXID         ; SKIP NEXT INSTRUCTION
+OUT     MVI     B,MI.OUT
+        MOV     A,H             ; (A) = VALUE
+        MOV     H,L             ; (H) = PORT
+        MOV     L,B             ; (L) = IN/OUT INSTRUCTION
+        SHLD    IOWRK
+        CALL    IOWRK           ; PERFORM IO
+        MOV     L,H             ; (L) = PORT
+        MOV     H,A             ; (H) = VALUE
+        JMP     SAE             ; STORE ABUSS AND EXIT
+
+;       GO - RETURN TO USER MODE
+;
+;       ENTRY   NONE
+
+GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
+
+;       SSTEP - SINGLE STEP INSTRUCTION
+;
+;       ENTRY   NONE
+
+SSTEP                           ; SINGLE STEP
+        DI                      ; DISABLE INTERRUPTS UNTIL THE RIGHT TIME
+        LDA     CTLFLG
+        XRI     CB.SSI          ; CLEAR SINGLE STEP INHIBIT
+        OUT     OP.CTL          ; PRIME SINGLE STEP INTERRUPT
+SST1    STA     CTLFLG          ; SET NEW FLAG VALUES
+        POP     H               ; CLEAN STACK
+        JMP     INTXIT          ; RETURN TO USER ROUTINE FOR STEP
+
+;       STPRTN - SINGLE STEP RETURN
+
+STPRTN
+        ORI     CB.SSI          ; DISABLE SINGLE STEP INTERRUPTION
+        OUT     OP.CTL          ; TURN OFF SINGLE STEP ENABLE
+;       SET     CTLFLG
+        STAX    D
+        ANI     CB.MTL          ; SEE IF IN MONITOR MODE
+        JNZ     MTR
+        JMP     UIVEC+3         ; TRANSFER TO USER'S ROUTINE
+
+;       RMEM - LOAD MEMORY FROM TAPE
+;
+
+RMEM    LXI     H,YPABT
+        SHLD    TPERRX          ; SETUP ERROR EXIT ADDRESS
+;       JMP     LOAD
+
+;       LOAD - LOAD MEMORY FROM TAPE
+;
+;       READ THE NEXT RECORD FROM THE CASSETTE TAPE.
+;
+;       USE THE LOAD ADDRESS IN THE TAPE RECORD.
+;
+;       ENTRY   (HL) = ERROR EXIT ADDRESS
+;       EXIT    USER P-REG (IN STACK) SET TO ENTRY ADDRESS
+;               TO CALLER IF ALL OK
+;               TO ERROR EXIT IF TAPE ERRORS DETECTED.
+
+LOAD
+        LXI     B,1000Q-RT.MI*256-256 ; (BC) = - REQUIRED TYPE AND #
+LOA0    CALL    SRC             ; SCAN FOR RECORD START
+        MOV     L,A             ; (HL) = COUNT
+        XCHG                    ; (DE) = COUNT, (HL) = TYPE AND #
+        DCR     C               ; (C) = - NEXT #
+        DAD     B
+        MOV     A,H
+        PUSH    B               ; SAVE TYPE AND #
+        PUSH    PSW             ; SAVE TYPE CODE
+        ANI     177Q            ; CLEAR END FLAG BIT
+        ORA     L
+        MVI     A,2             ; SEQUENCE ERROR
+        JNZ     TPERR           ; IF NOT RIGHT TYPE OF SEQUENCE
+        CALL    RNP             ; READ ADDR
+        MOV     B,H
+        MOV     C,A             ; (BC) = P-REG ADDRESS
+        MVI     A,10
+        PUSH    D               ; SAVE (DE)
+        CALL    LRA.            ; LOCATE REG ADDRESS
+        POP     D               ; RESTORE (DE)
+        MOV     M,C             ; SET P-REG IN MEM
+        INX     H
+        MOV     M,B
+        CALL    RNP             ; READ ADDRESS
+        MOV     L,A             ; (HL) = ADDRESS, (DE) = COUNT
+        SHLD    START
+
+LOA1    CALL    RNB             ; READ BYTE
+        MOV     M,A
+        SHLD    ABUSS           ; SET ABUSS FOR DISPLAY
+        INX     H
+        DCX     D
+        MOV     A,D
+        ORA     E
+        JNZ     LOA1            ; IF MORE TO GO
+
+        CALL    CTC             ; CHECK TAPE CHECKSUM
+
+;       READ NEXT BLOCK
+
+        POP     PSW             ; (A) = FILE TYPE BYTE
+        POP     B               ; (BC) = -(LAST TYPE, LAST #0
+        RLC
+        JC      TFT             ; ALL DONE - TURN OFF TAPE
+        JMP     LOAD            ; READ ANOTHER RECORD
+
+;       DUMP - DUMP MEMORY TO MAG TAPE.
+;
+;       DUMP SPECIFIED MEMORY RANGE TO MAG TAPE.
+;
+;       ENTRY   (START) = START ADDRESS
+;               (ABUSS) = END ADDRESS
+;               USER PC = ENTRY POINT ADDRESS
+;       EXIT    TO CALLER.
+
+WHEN
+        LXI     H,TPABT
+        SHLD    TPERRX          ; TAPE ERROR EXIT
+
+DUMP    MVI     A,UCI.TE
+        OUT     OP.TPC          ; SETUP TAPE CONTROL
+        MVI     A,A.SYN
+        MVI     H,32            ; (H) = # OF SYNC CHARACTERS
+WME1    CALL    WNB
+        DCR     H
+        JNZ     WME1            ; WRITE SYN HEADER
+        MVI     A,A.STX
+        CALL    WNB             ; WRITE STX
+        MOV     L,H             ; (HL) = 00
+        SHLD    CRCSUM          ; CLEAR CRC 16
+        LXI     H,RT.MI+80H*256+1 ; FIRST AND LAST MI RECORD
+        CALL    WNP
+        LHLD    START
+        XCHG                    ; (D,E) = START ADDRESS
+        LHLD    ABUSS           ; (H,L) = STOP ADDR
+        INX     H               ; COMPUTE WITH STOP+1
+        MOV     A,L
+        SUB     E
+        MOV     L,A
+        MOV     A,H
+        SBB     D
+        MOV     H,A             ; (HL) = COUNT
+        CALL    WNP             ; WRITE COUNT
+        PUSH    H
+        MVI     A,10
+        PUSH    D               ; SAVE (DE)
+        CALL    LRA.            ; LOCATE P-REG ADDRESS
+        MOV     A,M
+        INX     H
+        MOV     H,M
+        MOV     L,A             ; (HL) = CONTENTS OF PC
+        CALL    WNP             ; WRITE HEADER
+        POP     H               ; (HL) = ADDRESS
+        POP     D               ; (DE) = COUNT
+        CALL    WNP
+
+WHE2    MOV     A,M
+        CALL    WNB             ; WRITE BYTE
+        SHLD    ABUSS           ; SET ADDRESS FOR DISPLAY
+        INX     H
+        DCX     D
+        MOV     A,D
+        ORA     E
+        JNZ     WME2            ; IF MORE TO GO
+
+;       WRITE CHECKSUM
+
+        LHLD    CRCSUM
+        CALL    WNP             ; WRITE IT
+        CALL    WNP             ; FLUSH CHECKSUM
+;       JMP     TFT
+
+;       TFT - TURN OFF TAPE.
+;
+;       STOP THE TAPE TRANSPORT.
+;
+
+TFT     XRA     A
+        OUT     OP.TPC          ; TURN OFF TAPE
+
+;       HORN - MAKE NOISE.
+;
+;       ENTRY   (A) = (MILLISECOND COUNT)/2
+;       EXIT    NONE
+;       USES    A,F
+
+ALARM   MVI     A,200/2         ; 200 MS BEEP
+HORN    PUSH    PSW
+        MVI     A,CB.SPK        ; TURN ON SPEAKER
+
+HRN0    XTHL                    ; SAVE (HL), (H) = COUNT
+        PUSH    D               ; SAVE (DE)
+        XCHG                    ; (D) = LOOP COUNT
+        LXI     H,CTLFLG
+        XRA     M
+        MOV     E,M             ; (E) = OLD CTLFLG VALUE
+        MOV     M,A             ; TURN ON HORN
+        MVI     L,TICCNT
+
+        MOV     A,B             ; (A) = CYCLE COUNT
+        ADD     M
+HRN2    CMP     M               ; WAIT REQUIRED TICCOUNTS
+        JNZ     HRN2
+        MVI     L,CTLFLG
+        MOV     M,E             ; TURN HORN OFF
+        POP     D
+        POP     H
+        RET
+
+;       CTC - VERIFY CHECKSUM.
+;
+;       ENTRY   TAPE JUST BEFORE CRC
+;       EXIT    TO CALLER IF OK
+;               TO *TPERR* IF BAD
+;       USES    A,F,H,L
+
+CTC     CALL    RNP             ; READ NEXT PAIR
+        LHLD    CRCSUM
+        MOV     A,H
+        ORA     L
+        RZ                      ; RETURN IF OK
+        MVI     A,1             ; CHECKSUM ERROR
+;       JMP     TPERR           ; (B) = CODE
+
+;       TPERR - PROCESS TAPE ERROR.
+;
+;       DISPLAY ERR NUMBER IN LOW BYTE OF ABUSS
+;
+;       IF ERROR NUMBER EVEN, DON'T ALLOW #
+;       IF ERROR NUMBER ODD, ALLOW #
+;
+;       ENTRY   (A) = NUMBER
+
+TPERR   STA     ABUSS
+        MOV     B,A             ; (B) = CODE
+        CALL    TFT             ; TURN OFF TAPE
+
+;       IS #, RETURN (IF PARITY ERROR)
+
+        DB      MI.ANI          ; FALL THROUGH WITH CARRY CLEAR
+TER3    MOV     A,B
+
+        RRC
+        RC                      ; RETURN IF OK
+
+;       BEEP AND FLASH ERROR NUMBER
+
+TER1    CC      ALARM           ; ALARM IF PROPER TIME
+        CALL    TPXIT           ; SEE IF #
+        IN      IP.PAD
+        CPI     00101111B       ; CHECK FOR #
+        JZ      TER3            ; IF #
+        LDA     TICCNT+1
+        RAR                     ; 'C' SET IF 1/2 SECOND
+        JMP     TER1
+
+;       TPABT - ABORT TAPE LOAD OR DUMP.
+;
+;       ENTERED WHEN LOADING OR DUMPING, AND THE '*' KEY
+;       IS STRUCK.
+
+TPABT   XRA     A
+        OUT     OP.TPC          ; OFF TAPE
+        JMP     ERROR
+
+;       TPXIT - CHECK FOR USER FORCED EDIT.
+;
+;       TPXIT CHECKS FOR AN `*` KEYPAD ENTRY. IF SO, TAKE
+;       THE TAPE DRIVER ABNORMAL EXIT.
+;
+;       ENTRY   NONE
+;       EXIT    TO *RET* IF NOT '*'
+;               (A) = PORT STATUS
+;               TO (TPERRX) IF '*' DOWN
+;       USES    A,F
+
+TPXIT   IN      IP.PAD
+        CPI     01101111B       ; *
+        IN      IP.TPC          ; READ TAPE STATUS
+        RNZ                     ; NOT '*', RETURN WITH STATUS
+        LHLD    TPERRX
+        PCHL                    ; ENTER (TPERRX)
+
+;       SRS - SCAN RECORD START
+;
+;       SRS READS BYTES UNTIL IT RECOGNIZES THE START OF A RECORD.
+;
+;       THIS REQUIRES
+;       AT LEAST 10 SYNC CHARACTERS
+;       1 STX CHARACTER
+;
+;       THE CRC-16 IS THEN INITIALIZED.
+;
+;       ENTRY   NONE
+;       EXIT    TAPE POSITIONED (AND MOVING), CRCSUM=0
+;               (DE) = HEADER BYTES
+;               (HL) = RECORD COUNT
+;       USES    A,F,D,E,H,L
+
+SRS
+SRS1    MVI     D,0
+        MOV     H,D
+        MOV     L,D             ; (HL) = 0
+SRS2    CALL    RNB             ; READ NEXT BYTE
+        INR     D
+        CPI     A.SYN
+        JZ      SRS2            ; HAVE SYN
+        CPI     A.STX
+        JNZ     SRS1            ; NOT STX - START OVER
+
+        MVI     A,10
+        CMP     D               ; SEE IF ENOUGH SYNC CHARACTERS
+        JNC     SRA1            ; NOT ENOUGH
+        SHLD    CRCSUM          ; CLEAR CRC-16
+        CALL    RNP             ; READ LEADER
+        MOV     D,H
+        MOV     E,A
+;       JMP     RNP             ; READ COUNT
+
+;       RNP - READ NEXT PAIR.
+;
+;       RNP READS THE NEXT TWO BYTES FROM THE INPUT DEVICE.
+;
+;       ENTRY   NONE
+;       EXIT    (H,A) = BYTE PAIR
+;       USES    A,F,H
+
+RNP     CALL    RNB             ; READ NEXT BYTE
+        MOV     H,A
+;       JMP     RNB             ; READ NEXT BYTE
+
+;       RNB - READ NEXT BYTE
+;
+;       RNB READS THE NEXT SINGLE BYTE FROM THE INPUT DEVICE.
+;       THE CHECKSUM IS TAKEN FOR THE CHARACTER.
+;
+;       ENTRY   NONE
+;       EXIT    (A) = CHARACTER
+;       USES    A,F
+
+RNB     MVI     A,UCI.R0+UCI.CR+UCI.RE ; TURN ON READER FOR NEXT BYTE
+        OUT     OP.TPC
+RNB1    CALL    TPXIT           ; CHECK FOR *, READ STATUS
+        ANI     USR.RXR
+        JZ      RNB1            ; IF NOT READY
+        IN      IP.RFB          ; INPUT DATA
+;       JMP     CRC             ; CHECKSUM
+
+;       CRC - COMPUTE CRC-16
+;
+;       CRC COMPUTES A CRC-16 CHECKSUM FOR THE POLYNOMIAL
+;
+;       (X + 1) * (X^15 + X + 1)
+;
+;       SINCE THE CHECKSUM GENERATED IS A DIVISION REMAINDER,
+;       A CHECKSUMED DATA SEQUENCE CAN BE VERIFIED BY RUNNING
+;       THE DATA THROUGH CRC, AND THEN RUNNING THE PREVIOUSLY OBTAINED
+;       CHECKSUM THROUGH CRC. THE RESULTANT CHECKSUM SHOULD BE 0.
+;
+;       ENTRY   (CRCSUM) = CURRENT CHECKSUM
+;               (A) = BYTE
+;       EXIT    (CRCSUM) UPDATED
+;               (A) UNCHANGED
+;       USES    F
+
+CRC     PUSH    B               ; SAVE (BC)
+        MVI     B,8             ; (B) = BIT COUNT
+        PUSH    H
+        LHLD    CRCSUM
+CRC1    RLC
+        MOV     C,A             ; (C) = BIT
+        MOV     A,L
+        ADD     A
+        MOV     L,A
+        MOV     A,H
+        RAL
+        MOV     H,A
+        RAL
+        XRA     C
+        RRC
+        JNC     CRC2            ; IF NOT TO XOR
+        MOV     A,H
+        XRI     200Q
+        MOV     H,A
+        MOV A,L
+        XRI     5Q
+        MOV     L,A
+CRC2    MOV     A,C
+        DCR     B
+        JNZ     CRC1            ; IF MORE TO GO
+        SHLD    CRCSUM
+        POP     H               ; RESTORE (HL)
+        POP     B               ; RESTORE (BC)
+        RET                     ; EXIT
+
+;       WNP - WRITE NEXT PAIR
+;
+;       WNP WRITE THE NEXT TWO BYTES TO THE CASSETTE DRIVE.
+;
+;       ENTRY   (H,L) = BYTES
+;       EXIT    WRITTEN.
+;       USES    A,F
+
+WNP     MOV     A,H
+        CALL    WNB
+        MOV     A,L
+;       JMP     WNB             ; WRITE NEXT BYTE
+
+;       WNB - WRITE NEXT BYTE
+;
+;       WNB WRITE THE NEXT BYTE TO THE CASSETTE TAPE.
+;
+;       ENTRY   (A) = BYTE
+;       EXIT    NONE.
+;       USES    F
+
+WNB     PUSH    PSW
+WNB1    CALL    TPXIT           ; CHECK FOR #, READ STATUS
+        ANI     USR.TXR
+        JZ      WNB1            ; IF MORE TO GO
+        MVI     A,UCI.ER+UCI.TE ; ENABLE TRANSMITTER
+        OUT     OP.TPC          ; TURN ON TAPE
+        POP     PSW
+        OUT     OP.TPD          ; OUTPUT DATA
+        JMP     CRC             ; COMPUTE CRC
+
+;       LRA - LOCATE REGISTER ADDRESS
+;
+;       ENTRY   NONE.
+;       EXIT    (A) = REGISTER INDEX
+;               (H,L) = STORAGE ADDRESS
+;               (D,E) = (0,A)
+;       USES    A,D,E,H,L,F
+
+LRA     LDA     REGI
+LRA.    MOV     E,A
+        MVI     D,0
+        LHLD    REGPTR
+        DAD     D               ; (DE) = (REGPTR)+(REGI)
+        RET
+
+;       IOA - INPUT OCTAL NUMBER
+;
+;       ENTRY   (H,L) = ADDRESS OF RECEPTION DOUBLE BYTE.
+;       EXIT    TO *RET* IF ERROK
+;               TO *RET*+1 IF OK, VALUE IN MEMORY.
+;       USES    A,B,E,H,C,F
+
+IOA     CALL    IOB             ; INPUT BYTE
+        DCX     H
+
+;       IOB - INPUT OCTAL BYTE.
+;
+;       READ ONE OCTAL BYTE FROM THE KEYSET.
+;
+;       ENTRY   (H,L) = ADDRESS OF BYTE TO HOLD VALUE
+;               'C' SET IF FIRST DIGIT IN (A)
+;       EXIT    TO *RET* IF ALL OK
+;               TO *ERROR* IF ERROR
+;       USES    A,D,E,H,L,F
+
+IOB     MVI     D,3             ; (D) = DIGIT COUNT
+IOB1    CNC     RCK             ; READ CONSOLE KEYSET
+
+        CPI     8
+        JNC     ERROR           ; IF ILLEGAL DIGIT
+
+        MOV     E,A             ; (E) = VALUE
+        MOV     A,H
+        RLC                     ; SHIFT 3
+        RLC
+        RLC
+        ANI     370Q
+        ORA     E
+        MOV     M,A             ; REPLACE
+        DCR     D
+        JNZ     IOB1            ; IF NOT DONE
+        MVI     A,30/2          ; BEEP FOR 30 MS
+        JMP     HORN
+
+;       DOD - DECODE FOR OCTAL DISPLAY
+;
+;       ENTRY   (H,L) = ADDRESS OF LED REFRESH AREA
+;               (B) = *OR* PATTERN TO FORCE ON BARS OR PERIODS
+;               (A) = OCTAL VALUE
+;       EXIT    (H,L) = HEX DIGIT ADDRESS
+;       USES    A,B,C,D,H,L
+
+DOD     PUSH    D
+        MVI     D,DODA/256
+        MVI     C,3
+DOD1    RAL                     ; LEFT 3 PLACES
+        RAL
+        RAL
+        PUSH    PSW             ; SAVE FOR NEXT DIGIT
+        ANI     7
+        ADI     DODA
+        MOV     E,A             ; (D) = INDEX
+        LDAX    D               ; (A) = PATTERN
+        XRA     B
+        ANI     177Q
+        XRA     B
+        MOV     M,A             ; SET IN MEMORY
+        INX     H
+        MOV     A,B
+        RLC
+        MOV     B,A
+        POP     PSW             ; (A) = VALUE
+        DCR     C
+        JNZ     DOD1            ; IF MORE TO GO
+        POP     D
+        RET                     ; RETURN
+
+;       UFD - UPDATE FRONT PANEL DISPLAYS.
+;
+;       UFD IS CALLED BY
+
+
+
+
+
+
+;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYPAD
+;       MONITOR.
+
+        ORG     20000Q          ; 8192
+START   DS      2               ; DUMP STARTING ADDRESS
+IOWRK   DS      2               ; IN OR OUT INSTRUCTION
+PRSRAM                          ; FOLLOWING CELLS INITIALIZED FROM ROM
+        DS      1               ; RET
+
+REGI    DS      1               ; INDEX OF REGISTER UNDER DISPLAY
+DSPROT  DS      1               ; PERIOD FLAG BYTE
+DSPMOD  DS      1               ; DISPLAY MODE
+
+.MFLAG  DS      1               ; USER FLAG OPTIONS
+                                ; SEE *UI.XXX* BITS DESCRIBED AT FRONT
+
+CTLFLG  DS      1               ; FRONT PANEL CONTROL BITS
+REFIND  DS      1               ; REFRESH INDEX (0 TO 7)
+PRSL    EQU     7               ; END OF AREA INITIALIZED FROM ROM
+
+FPLEDS                          ; FRONT PANEL LED PATTERNS
+ALEDS   DS      1               ; ADDR 0
+        DS      1               ; ADDR 1
+        DS      1               ; ADDR 2
+
+        DS      1               ; ADDR 3
+        DS      1               ; ADDR 4
+        DS      1               ; ADDR 5
+
+DLEDS   DS      1               ; DATA 0
+        DS      1               ; DATA 1
+        DS      1               ; DATA 2
+
+ABUSS   DS      2               ; ADDRESS BUS
+ACKA    DS      1               ; RCK SAVE AREA
+CRCSUM  DS      2               ; CRC-16 CHECKSUM
+TPERRX  DS      2               ; TAPE ERROR EXIT ADDRESS
+TICCNT  DS      2               ; CLOCK TIC COUNTER
+
+REGPTR  DS      2               ; REGISTER CONTENTS POINTER
+
+UIVEC                           ; USER INTERRUPT VECTOR
+        DS      3               ; JUMP TO CLOCK PROCESSOR
+        DS      3               ; JUMP TO SINGLE STEP PROCESSOR
+        DS      3               ; JUMP TO I/O 3
+        DS      3               ; JUMP TO I/O 4
+        DS      3               ; JUMP TO I/O 5
+        DS      3               ; JUMP TO I/O 6
+        DS      3               ; JUMP TO I/O 7
+
+        END
