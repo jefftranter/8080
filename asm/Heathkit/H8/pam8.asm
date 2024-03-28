@@ -29,7 +29,7 @@
 ;       0       MASTER CLEAR. (NEVER USES FOR I/O OR RESET)
 ;
 ;       1       CLOCK INTERRUPT. NORMALLY TAKEN BY PAM/8.
-;               SETTING BIT *U0.CLK* IN BYTE *.MFLAG* ALLOWS
+;               SETTING BIT *U0.CLK* IN BYTE *MFLAG* ALLOWS
 ;               USER PROCESSING (VIA A JUMP THROUGH *UIVEC*).
 ;               UPON ENTRY OF THE USER ROUTINE, THE STACK
 ;               CONTAINS:
@@ -80,7 +80,7 @@
 IP.PAD  EQU     360Q            ; PAD INPUT PORT
 OP.CTL  EQU     360Q            ; CONTROL OUTPUT PORT
 OP.DIG  EQU     360Q            ; DIGIT SELECT OUTPUT PORT
-OP.SEQ  EQU     361Q            ; SEGMENT SELECT OUTPUT PORT
+OP.SEG  EQU     361Q            ; SEGMENT SELECT OUTPUT PORT
 IP.TPC  EQU     371Q            ; TAPE CONTROL IN
 OP.TPC  EQU     371Q            ; TAPE CONTROL OUT
 IP.TPD  EQU     370Q            ; TAPE DATA IN
@@ -118,7 +118,7 @@ MI.LXID EQU     00010001B       ; LXI D
 
 ;               USER OPTION BITS.
 ;
-;               THESE BITS ARE SET IN CELL .MFLAG.
+;               THESE BITS ARE SET IN CELL MFLAG.
 
 UO.HLT  EQU     10000000B       ; DISABLE HALT PROCESSING
 UO.NFR  EQU     00000010B       ; NO REFRESH OF FRONT PANEL
@@ -287,11 +287,11 @@ SAVALL  XTHL                    ; SET H,L ON STACK TOP
 ;       CUI IS CALLED TO SEE IF THE USER HAS SPECIFIED PROCESSING
 ;       FOR THE CLOCK INTERRUPT.
 
-;       SET     .MFLAG          ; REFERENCE TO MFLAG
-CUI1    LDAX    B               ; (A) = .MFLAG
+;       SET     MFLAG           ; REFERENCE TO MFLAG
+CUI1    LDAX    B               ; (A) = MFLAG
         ERRNZ   U0.CLK-1        ; CODE ASSUMED = 01
         RRC
-        CC      VIVEC           ; IF SPECIFIED, TRANSFER TO USER
+        CC      UIVEC           ; IF SPECIFIED, TRANSFER TO USER
 
 ;       RETURN TO PROGRAM FROM INTERRUPT.
 
@@ -322,12 +322,12 @@ CLOCK   LHLD    TICCNT
 ;       ONE PER INTERRUPT. FIRST, NUMBER 9 IS LIT, THEN NUMBER 8,
 ;       ETC.
 
-        LXI     H,.MFLAG
+        LXI     H,MFLAG
         MOV     A,M
         MOV     B,A             ; (B) = CURRENT FLAG
         ANI     UO.NFR          ; SEE IF FRONT PANEL REFRESH WANTED
         INX     H
-        ERRNZ   CTLFLG-.MFLAG-1
+        ERRNZ   CTLFLG-MFLAG-1
         MOV     A,M             ; (A) = CTLFLG
         MOV     C,D             ; (C) = 0 IN CASE NO PANEL DISPLAY
         JNZ     CLK3            ; IF NOT
@@ -358,8 +358,8 @@ CLK3                            ; (A) = CTLNLG
         ANI     CB.MTL
         JNZ     INTXIT          ; IF IN MONITOR CODE
         DCX     B
-        ERRNZ   CTLFLG-.MFLAG01
-        LDAX    B               ; (A) = .MFLAG
+        ERRNZ   CTLFLG-MFLAG01
+        LDAX    B               ; (A) = MFLAG
         ERRNZ   UO.HLT-2000     ; ASSUME HIGH-ORDER
         RAL
         JC      CLK4            ; SKIP IT
@@ -391,17 +391,17 @@ CLK4
 ;       ENTRY   NONE
 ;       EXIT    TO MTR LOOP
 ;               CTLFLG SET
-;               .MFLAG CLEARED
+;               MFLAG CLEARED
 ;       USES    ALL
 
 ERROR
-        LXI     H,.MFLAG
-        MOV     A,H             ; (A) = .MFLAG
+        LXI     H,MFLAG
+        MOV     A,H             ; (A) = MFLAG
         ANI     377Q-UO.DDU-UO.NFR ; RE-ENABLE DISPLAYS
         MOV     M,A             ; REPLACE
         INX     H
         MVI     M,CB.SSI+CB.MTL+CB.CLI+CB.SPK ; RESTORE *CTLFLG*
-        ERRNZ   CTLFLG-.MFLAG-1
+        ERRNZ   CTLFLG-MFLAG-1
         EI
         LHLD    REGPTR
         SPHL                    ; RESTORE STACK POINTER TO EMPTY STATE
@@ -413,7 +413,7 @@ ERROR
 
 MTR     EI
 
-MTR1    LXI     H,HTR1
+MTR1    LXI     H,MTR1
         PUSH    H               ; SET 'MTR1' AS RETURN ADDRESS
         LXI     B,DSPMOD        ; (BC) = #DSPMOD
         LDAX    B
@@ -453,7 +453,7 @@ MTR4    SUI     4               ; (A) = COMMAND
         LDAX    B               ; (A) = DSPMOD
         RET                     ; JUMP TO PROCESSOR
 
-RTRA                            ; JUMP TABLE
+MTRA                            ; JUMP TABLE
         DB      GO-$            ; 4 - GO
         DB      IN- $           ; 5 - INPUT
         DB      OUT-$           ; 6 - OUTPUT
@@ -1301,7 +1301,7 @@ DODA
 PRSROM
         DB      1               ; REFIND
         DB      0               ; CTLFLG
-        DB      0               ; .MFLAG
+        DB      0               ; MFLAG
         DB      0               ; DSPMOD
         DB      0               ; DSPROT
         DB      10              ; REGI
@@ -1321,7 +1321,7 @@ REGI    DS      1               ; INDEX OF REGISTER UNDER DISPLAY
 DSPROT  DS      1               ; PERIOD FLAG BYTE
 DSPMOD  DS      1               ; DISPLAY MODE
 
-.MFLAG  DS      1               ; USER FLAG OPTIONS
+MFLAG   DS      1               ; USER FLAG OPTIONS
                                 ; SEE *UI.XXX* BITS DESCRIBED AT FRONT
 
 CTLFLG  DS      1               ; FRONT PANEL CONTROL BITS
