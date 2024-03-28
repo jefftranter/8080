@@ -46,7 +46,7 @@
 ;       2       SINGLE STEP. SINGLE STEP INTERRUPTS GENERATED
 ;               BY PAM/8 ARE PROCESSED BY PAM/8.
 ;               ANY SINGLE STEP INTERRUPT RECEIVED WHEN IN
-;               USER MODE CAASES A JUMP THROUGH *UIVEC*+3.
+;               USER MODE CAUSES A JUMP THROUGH *UIVEC*+3.
 ;               STACK UPON USER ROUTINE ENTRY;
 ;               (STACK+0)  = (STACKPTR+12)
 ;               (STACK+2)  = (AF)
@@ -121,7 +121,7 @@ MI.LXID EQU     00010001B       ; LXI D
 ;               THESE BITS ARE SET IN CELL MFLAG.
 
 UO.HLT  EQU     10000000B       ; DISABLE HALT PROCESSING
-UO.NFR  EQU     00000010B       ; NO REFRESH OF FRONT PANEL
+UO.NFR  EQU     CB.CLI          ; NO REFRESH OF FRONT PANEL
 UO.DDU  EQU     00000010B       ; DISABLE DISPLAY UPDATE
 UI.CLK  EQU     00000001B       ; ALLOW CLOCK INTERRUPT PROCESSING
 
@@ -225,7 +225,7 @@ INIT    LDAX    D               ; COPY *PRSROM* INTO RAM
         INR     E               ; INCREMENT SOURCE
         JNZ     INIT            ; IF NOT DONE
 
-SINCR   EQU     4000Q           ; SEARCH INCREMENT
+SINCR   EQU     2000Q           ; SEARCH INCREMENT
 
         MVI     D,SINCR/256     ; (DE) = SEARCH INCREMENT
         LXI     H,START-SINCR   ; (HL) = FIRST RAM - SEARCH INCREMENT
@@ -331,6 +331,7 @@ CLOCK   LHLD    TICCNT
         MOV     A,M             ; (A) = CTLFLG
         MOV     C,D             ; (C) = 0 IN CASE NO PANEL DISPLAY
         JNZ     CLK3            ; IF NOT
+        INX     H
         ERRNZ   REFIND-CTLFLG-1
         DCR     M               ; DECREMENT DIGIT INDEX
         JNZ     CLK2            ; IF NOT WRAP-AROUND
@@ -338,7 +339,7 @@ CLOCK   LHLD    TICCNT
 CLK2    MOV     E,M
         DAD     D               ; (H,L) = ADDRESS OF PATTERN
         MOV     C,E
-CLK3                            ; (A) = CTLNLG
+CLK3                            ; (A) = CTLFLG
         ORA     C               ; (A) = INDEX + FIXED BITS
         OUT     OP.DIG          ; SELECT DIGIT
         MOV     A,M
@@ -346,7 +347,7 @@ CLK3                            ; (A) = CTLNLG
 
 ;       SEE IF TIME TO DECODE DISPLAY VALUES
 
-        MVI     L,TICCNT
+        MVI     L,TICCNT#256
         MOV     A,M
         ANI     37Q             ; EVERY 32 INTERRUPTS
         CZ      UFD             ; UPDATE FRONT PANEL DISPLAYS
@@ -396,7 +397,7 @@ CLK4
 
 ERROR
         LXI     H,MFLAG
-        MOV     A,H             ; (A) = MFLAG
+        MOV     A,M             ; (A) = MFLAG
         ANI     377Q-UO.DDU-UO.NFR ; RE-ENABLE DISPLAYS
         MOV     M,A             ; REPLACE
         INX     H
@@ -636,7 +637,7 @@ STPRTN
 ;       RMEM - LOAD MEMORY FROM TAPE
 ;
 
-RMEM    LXI     H,YPABT
+RMEM    LXI     H,TPABT
         SHLD    TPERRX          ; SETUP ERROR EXIT ADDRESS
 ;       JMP     LOAD
 
@@ -651,9 +652,8 @@ RMEM    LXI     H,YPABT
 ;               TO CALLER IF ALL OK
 ;               TO ERROR EXIT IF TAPE ERRORS DETECTED.
 
-LOAD
-        LXI     B,1000Q-RT.MI*256-256 ; (BC) = - REQUIRED TYPE AND #
-LOA0    CALL    SRC             ; SCAN FOR RECORD START
+LOAD    LXI     B,177000Q        ; 400Q-RT.MI*256-256 (BC) = - REQUIRED TYPE AND #
+LOA0    CALL    SRS             ; SCAN FOR RECORD START
         MOV     L,A             ; (HL) = COUNT
         XCHG                    ; (DE) = COUNT, (HL) = TYPE AND #
         DCR     C               ; (C) = - NEXT #
@@ -696,7 +696,7 @@ LOA1    CALL    RNB             ; READ BYTE
         POP     B               ; (BC) = -(LAST TYPE, LAST #0
         RLC
         JC      TFT             ; ALL DONE - TURN OFF TAPE
-        JMP     LOAD            ; READ ANOTHER RECORD
+        JMP     LOA0            ; READ ANOTHER RECORD
 
 ;       DUMP - DUMP MEMORY TO MAG TAPE.
 ;
@@ -707,8 +707,7 @@ LOA1    CALL    RNB             ; READ BYTE
 ;               USER PC = ENTRY POINT ADDRESS
 ;       EXIT    TO CALLER.
 
-WHEN
-        LXI     H,TPABT
+WMEM    LXI     H,TPABT
         SHLD    TPERRX          ; TAPE ERROR EXIT
 
 DUMP    MVI     A,UCI.TE
@@ -722,7 +721,7 @@ WME1    CALL    WNB
         CALL    WNB             ; WRITE STX
         MOV     L,H             ; (HL) = 00
         SHLD    CRCSUM          ; CLEAR CRC 16
-        LXI     H,RT.MI+80H*256+1 ; FIRST AND LAST MI RECORD
+        LXI     H,100401Q       ; RT.MI+80H*256+1 FIRST AND LAST MI RECORD
         CALL    WNP
         LHLD    START
         XCHG                    ; (D,E) = START ADDRESS
@@ -748,7 +747,7 @@ WME1    CALL    WNB
         POP     D               ; (DE) = COUNT
         CALL    WNP
 
-WHE2    MOV     A,M
+WME2    MOV     A,M
         CALL    WNB             ; WRITE BYTE
         SHLD    ABUSS           ; SET ADDRESS FOR DISPLAY
         INX     H
@@ -789,13 +788,13 @@ HRN0    XTHL                    ; SAVE (HL), (H) = COUNT
         XRA     M
         MOV     E,M             ; (E) = OLD CTLFLG VALUE
         MOV     M,A             ; TURN ON HORN
-        MVI     L,TICCNT
+        MVI     L,TICCNT#256
 
-        MOV     A,B             ; (A) = CYCLE COUNT
+        MOV     A,D             ; (A) = CYCLE COUNT
         ADD     M
 HRN2    CMP     M               ; WAIT REQUIRED TICCOUNTS
         JNZ     HRN2
-        MVI     L,CTLFLG
+        MVI     L,CTLFLG#256
         MOV     M,E             ; TURN HORN OFF
         POP     D
         POP     H
@@ -904,7 +903,7 @@ SRS2    CALL    RNB             ; READ NEXT BYTE
 
         MVI     A,10
         CMP     D               ; SEE IF ENOUGH SYNC CHARACTERS
-        JNC     SRA1            ; NOT ENOUGH
+        JNC     SRS1            ; NOT ENOUGH
         SHLD    CRCSUM          ; CLEAR CRC-16
         CALL    RNP             ; READ LEADER
         MOV     D,H
@@ -932,12 +931,12 @@ RNP     CALL    RNB             ; READ NEXT BYTE
 ;       EXIT    (A) = CHARACTER
 ;       USES    A,F
 
-RNB     MVI     A,UCI.R0+UCI.CR+UCI.RE ; TURN ON READER FOR NEXT BYTE
+RNB     MVI     A,UCI.RO+UCI.ER+UCI.RE ; TURN ON READER FOR NEXT BYTE
         OUT     OP.TPC
 RNB1    CALL    TPXIT           ; CHECK FOR *, READ STATUS
         ANI     USR.RXR
         JZ      RNB1            ; IF NOT READY
-        IN      IP.RFB          ; INPUT DATA
+        IN      IP.TPD          ; INPUT DATA
 ;       JMP     CRC             ; CHECKSUM
 
 ;       CRC - COMPUTE CRC-16
@@ -1060,7 +1059,7 @@ IOB1    CNC     RCK             ; READ CONSOLE KEYSET
         JNC     ERROR           ; IF ILLEGAL DIGIT
 
         MOV     E,A             ; (E) = VALUE
-        MOV     A,H
+        MOV     A,M
         RLC                     ; SHIFT 3
         RLC
         RLC
@@ -1088,7 +1087,7 @@ DOD1    RAL                     ; LEFT 3 PLACES
         RAL
         PUSH    PSW             ; SAVE FOR NEXT DIGIT
         ANI     7
-        ADI     DODA
+        ADI     DODA#256
         MOV     E,A             ; (D) = INDEX
         LDAX    D               ; (A) = PATTERN
         XRA     B
@@ -1115,12 +1114,11 @@ DOD1    RAL                     ; LEFT 3 PLACES
 ;       EXIT    NONE
 ;       USES    ALL
 
-UFD
-        MVI     A,UO.DDU
+UFD     MVI     A,UO.DDU
         ANA     B
         RNZ                     ; IF NOT TO HANDLE UPDATE
 
-        MVI     L,DSPROT
+        MVI     L,DSPROT#256
         MOV     A,M
         RLC
         MOV     M,A             ; ROTATE PATTERN
@@ -1130,11 +1128,11 @@ UFD
         MOV     A,M             ; (A) = DSPMOD
         ANI     2
         LHLD    ABUSS
-        JZ      UFDI            ; IF MEMORY
+        JZ      UFD1            ; IF MEMORY
 
 ;       AM DISPLAYING REGISTERS
 
-        CALL    RA              ; LOCATE REGISTER ADDRESS
+        CALL    LRA             ; LOCATE REGISTER ADDRESS
         PUSH    H
         LXI     H,DSPA
         DAD     D               ; (H,L) = ADDRESS OF REG NAME PATTERNS
@@ -1155,7 +1153,7 @@ UFD1    PUSH    PSW
         XCHG
         LXI     H,ALEDS
         MOV     A,D
-        CALL    DOB             ; FORMAT ABANK HIGH HALF
+        CALL    DOD             ; FORMAT ABANK HIGH HALF
         MOV     A,E
         CALL    DOD             ; FORMAT ABANK LOW HALF
         POP     PSW
@@ -1216,8 +1214,7 @@ UFD1    PUSH    PSW
 ;                    15 - '.'
 ;       USES    A,F
 
-RCK
-        PUSH    H
+RCK     PUSH    H
         PUSH    B
         MVI     C,400/20        ; WAIT 400 MS
         LXI     H,RCKA
@@ -1260,10 +1257,10 @@ RCK3    MOV     B,A             ; (B) = CODE
 ;         ---
 ;       6|   |2
 ;        | 0 |
-;        ---
+;         ---
 ;       5|   |3
 ;        |   |
-;         --- .7
+;         --- o7
 ;          4
 
 ;       REGISTER INDEX TO 7-SEGMENT PATTERN
@@ -1290,21 +1287,22 @@ DODA
         DB      00000000B       ; 8
         DB      00100000B       ; 9
 
+        DB      0               ; One unused byte
 
 ;       I/O ROUTINES TO BE COPIED INTO AND USED IN RAM.
 ;
 ;       MUST CONTINUE TO 3777A FOR PROPER COPY.
 ;       THE TABLE MUST ALSO BE BACKWARDS TO THE FINAL RAM.
 
-        ORG     4000Q-7
+        ORG     2000Q-7
 
-PRSROM
-        DB      1               ; REFIND
+PRSROM  DB      1               ; REFIND
         DB      0               ; CTLFLG
         DB      0               ; MFLAG
         DB      0               ; DSPMOD
         DB      0               ; DSPROT
         DB      10              ; REGI
+        DB      MI.RET
 
         ERRNZ   *-4000Q
 
@@ -1342,7 +1340,7 @@ DLEDS   DS      1               ; DATA 0
         DS      1               ; DATA 2
 
 ABUSS   DS      2               ; ADDRESS BUS
-ACKA    DS      1               ; RCK SAVE AREA
+RCKA    DS      1               ; RCK SAVE AREA
 CRCSUM  DS      2               ; CRC-16 CHECKSUM
 TPERRX  DS      2               ; TAPE ERROR EXIT ADDRESS
 TICCNT  DS      2               ; CLOCK TIC COUNTER

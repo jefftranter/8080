@@ -10,4 +10,7 @@ pam8.p: pam8.asm
 	asl -L -cpu 8080 -listradix 8 -splitbyte . pam8.asm
 
 clean:
+	$(RM) *.p
+
+distclean:
 	$(RM) *.lst *.p *.bin *.hex
