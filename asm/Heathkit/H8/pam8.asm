@@ -1107,12 +1107,206 @@ DOD1    RAL                     ; LEFT 3 PLACES
 
 ;       UFD - UPDATE FRONT PANEL DISPLAYS.
 ;
-;       UFD IS CALLED BY
+;       UFD IS CALLED BY THE CLOCK INTERRUPT PROCESSOR WHEN IT IS
+;       TIME TO UPDATE THE DISPLAY CONTENTS. CURRENTLY, THIS IS DONE
+;       EVERY 32 INTERRUPTS, OR ABOUT 32 TIMES A SECOND.
+;
+;       ENTRY   (H,L) = ADDRESS OF REFCNT
+;       EXIT    NONE
+;       USES    ALL
+
+UFD
+        MVI     A,UO.DDU
+        ANA     B
+        RNZ                     ; IF NOT TO HANDLE UPDATE
+
+        MVI     L,DSPROT
+        MOV     A,M
+        RLC
+        MOV     M,A             ; ROTATE PATTERN
+        MOV     B,A
+        INX     H
+        ERRNZ   DSPMOD-DSPROT-1
+        MOV     A,M             ; (A) = DSPMOD
+        ANI     2
+        LHLD    ABUSS
+        JZ      UFDI            ; IF MEMORY
+
+;       AM DISPLAYING REGISTERS
+
+        CALL    RA              ; LOCATE REGISTER ADDRESS
+        PUSH    H
+        LXI     H,DSPA
+        DAD     D               ; (H,L) = ADDRESS OF REG NAME PATTERNS
+        MOV     A,M
+        INX     H
+        MOV     H,M
+        MOV     L,A             ; (H,L) = REG NAME PATTERN
+        XTHL
+        ORA     H               ; CLEAR 'Z'
+        MOV     A,M
+        INX     H
+        MOV     H,M
+        MOV     L,A             ; (HL) = ADDRESS OF REGISTER PAIR CONTENTS
+
+;       SETUP DISPLAY
+
+UFD1    PUSH    PSW
+        XCHG
+        LXI     H,ALEDS
+        MOV     A,D
+        CALL    DOB             ; FORMAT ABANK HIGH HALF
+        MOV     A,E
+        CALL    DOD             ; FORMAT ABANK LOW HALF
+        POP     PSW
+        LDAX    D
+        JZ      DOD             ; IF MEMORY, DECODE BYTE VALUE
+
+;       IS REGISTER, SET REGISTER NAME,
+
+        MVI     M,377Q          ; CLEAR DIGIT
+        POP     H
+        SHLD    DLEDS+1
+        RET
+
+;       RCK - READ CONSOLE KEYPAD.
+;
+;       RCK IS CALLED TO READ A KEYSTROKE FROM THE CONSOLE KEYPAD.
+;       WHENEVER A KEY IS ACCEPTED.
+;       RCK PERFORMS DEBOUNCING, AND AUTO-REPEAT. A *BIP* IS SOUNDED
+;       WHEN A VALUE IS ACCEPTED.
+;
+;       KEY PAD VALUES:
+;
+;       1111 1110  -  0
+;       1111 1100  -  1
+;       1111 1010  -  2
+;       1111 1000  -  3
+;       1111 0110  -  4
+;       1111 0100  -  5
+;       1111 0010  -  6
+;       1111 0000  -  7
+;       1110 1111  -  8
+;       1100 1111  -  9
+;       1010 1111  -  +
+;       1000 1111  -  -
+;       0110 1111  -  *
+;       0100 1111  -  /
+;       0010 1111  0  #
+;       0000 1111  -  .
+;
+;
+;       ENTRY   NONE
+;       EXIT    TO CALLER WHEN A KEY IS HIT
+;               (A) = 0 - '0'
+;                     1 - '1'
+;                     2 - '2'
+;                     3 - '3'
+;                     4 - '4'
+;                     5 - '5'
+;                     6 - '6'
+;                     7 - '7'
+;                     8 - '8'
+;                     9 - '9'
+;                    10 - '+ '
+;                    11 - '-'
+;                    12 - '*'
+;                    13 - '/'
+;                    14 - '#'
+;                    15 - '.'
+;       USES    A,F
+
+RCK
+        PUSH    H
+        PUSH    B
+        MVI     C,400/20        ; WAIT 400 MS
+        LXI     H,RCKA
+
+RCK1    IN      IP.PAD          ; INPUT PAD VALUE
+        MOV     B,A             ; (B) = VALUE
+        MVI     A,20/2          ; WAIT 20 MS
+        CALL    DLY
+        MOV     A,B
+        CMP     M
+        JNZ     RCK2            ; HAVE A CHANGE
+        DCR     C
+        JNZ     RCK1            ; WAIT N CYCLE
+
+;       HAVE KEY VALUE
+
+RCK2    MOV     M,A             ; UPDATE RCKA
+        XRI     376Q            ; INVERT ALL BUT GROUP 0 FLAG
+        RRC
+        JNC     RCK3            ; HIT BANK 0
+        RRC
+        RRC
+        RRC
+        RRC
+        JNC     RCK1            ; NO HIT AT ALL
+RCK3    MOV     B,A             ; (B) = CODE
+        MVI     A,4/2
+        CALL    HORN            ; MAKE BIP
+        MOV     A,B
+        ANI     17Q
+        POP     B
+        POP     H
+        RET                     ; RETURN
+
+;       DISPLAY SEGMENT CODING:
+;
+;       BYTE = 76 5453 210
+;
+;          1
+;         ---
+;       6|   |2
+;        | 0 |
+;        ---
+;       5|   |3
+;        |   |
+;         --- .7
+;          4
+
+;       REGISTER INDEX TO 7-SEGMENT PATTERN
+
+DSPA
+        DW      1001100010100100B ; SP
+        DW      1001110010010000B ; AF
+        DW      1000110110000110B ; BC
+        DW      1000110011000010B ; DE
+        DW      1000111110010010B ; HL
+        DW      1100111010011000B ; PC
+
+;       OCTAL TO 7-SEGMENT PATTERN
+
+DODA
+        DB      00000001B       ; 0
+        DB      01110011B       ; 1
+        DB      01001000B       ; 2
+        DB      01100000B       ; 3
+        DB      00110010B       ; 4
+        DB      00100100B       ; 5
+        DB      00000100B       ; 6
+        DB      01110001B       ; 7
+        DB      00000000B       ; 8
+        DB      00100000B       ; 9
 
 
+;       I/O ROUTINES TO BE COPIED INTO AND USED IN RAM.
+;
+;       MUST CONTINUE TO 3777A FOR PROPER COPY.
+;       THE TABLE MUST ALSO BE BACKWARDS TO THE FINAL RAM.
 
+        ORG     4000Q-7
 
+PRSROM
+        DB      1               ; REFIND
+        DB      0               ; CTLFLG
+        DB      0               ; .MFLAG
+        DB      0               ; DSPMOD
+        DB      0               ; DSPROT
+        DB      10              ; REGI
 
+        ERRNZ   *-4000Q
 
 ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYPAD
 ;       MONITOR.
