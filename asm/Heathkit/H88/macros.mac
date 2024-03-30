@@ -1,0 +1,28 @@
+; Macros to emulate the Heathkit HDOS assembler.
+
+; Code currently commented out as the assembler enforces that the
+; expression must be evaluatable in first pass.
+
+ERRPL   MACRO EXP
+;       IF (EXP) > 0
+;         ERROR Expression is positive
+;       ENDIF
+        ENDM
+
+ERRMI   MACRO EXP
+;       IF (EXP) < 0
+;         ERROR Expression is negative
+;       ENDIF
+        ENDM
+
+ERRNZ   MACRO EXP
+;       IF (EXP) != 0
+;         ERROR Expression is not zero
+;       ENDIF
+        ENDM
+
+ERRZR   MACRO EXP
+;       IF (EXP) == 0
+;         ERROR Expression is zero
+;       ENDIF
+        ENDM
