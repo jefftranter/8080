@@ -183,3 +183,72 @@ INIT0.0 LXI     H,PRSRAM+PRSL-1 ; (HL) = RAM DESTINATION FOR CODE
 
         ERRPL   INIT-1000Q      ; BYTE IN WORD 10A MUST BE 0
 
+;       LEVEL 1 - CLOCK
+
+INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
+
+        ERRNZ   *-110           ; INT0 TAKES UP ONE BYTE
+
+        CALL    SAVALL          ; SAVE USER REGISTERS
+        MVI     D,0
+        JMP     CLOCK           ; PROCESS CLOCK INTERRUPT
+        ERRPL   CLOCK-1000Q     ; EXTRA BYTE MUST BE 0
+
+;       LEVEL 2 - SINGLE STEP
+
+INT2    EQU     20Q             ; LEVEL 2 ENTRY
+
+        ERRNZ   *-21Q           ; INT1 TAKES EXTRA BYTE
+
+        CALL    SAVALL          ; SAVE REGISTERS
+        LDAX    D               ; (A) = (CTLFLG)
+;       SET     CTLFLG
+        JMP     STPRTN          ; STEP RETURN
+
+;       I/O INTERRUPT VECTORS.
+;
+;       INTERRUPTS 3 THROUGH 7 ARE AVAILABLE FOR GENERA I/O USE.
+;
+;       THESE INTERRUPTS ARE NOT SUPPORTED BY MTR88, AND SHOULD
+;       NEVER OCCUR UNLESS THE USER HAS SUPPLIED HANDLER ROUTINES
+;       (THROUGH UIVEC).
+
+        ORG     30Q
+
+INT3    JMP     UIVEC+6         ; JUMP TO USER ROUTINE
+
+        DB      '44440'         ; HEATH PART NUMBER 444-10
+
+        ORG     40Q
+
+INT4    JMP     UIVEC+9         ; JUMP TO USER ROUTINE
+
+        DB      40Q,122Q,116Q,102Q,44Q ; SUPPORT CODE
+
+        ORG     50Q
+
+INT5    JMP     UIVEC+12        ; JUMP TO USER ROUTINE
+
+
+;       DLY - DELAY TIME INTERVAL
+;
+;       ENTRY   (A) = MILLISECOND DELAY COUNT/2
+;       EXIT    NONE
+;       USES    A,F
+
+        ERRNZ   *-53A
+
+DLY     PUSH    PSW             ; SAVE COUNT
+        XRA     A               ; DONT SOUND HORN
+        JMP     HRN0            ; PROCESS AS HORN
+
+        ORG     60Q
+
+INT6    JMP     UIVEC+15        ; JUMP TO USER ROUTINE
+
+GO.     MVI     A,CB.SSI+CB.CLI+CB.SPK ; OFF MONITOR MODE LIGHT
+        JMP     SST1            ; RETURN TO USER PROGRAM
+
+        ORG     70Q
+
+INT7    JMP     UIVEC+18        ; JUMP TO USER ROUTINE
