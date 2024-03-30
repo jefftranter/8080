@@ -252,3 +252,49 @@ GO.     MVI     A,CB.SSI+CB.CLI+CB.SPK ; OFF MONITOR MODE LIGHT
         ORG     70Q
 
 INT7    JMP     UIVEC+18        ; JUMP TO USER ROUTINE
+
+;       INIT - INITIALIZE SYSTEM
+;
+;       INIT IS CALLED WHENEVER A HARDWARE MASTER-CLEAR IS INITIATED.
+;
+;       SETUP MTR88 CONTROL CELLS IN RAM.
+;       DECODE HOW MUCH MEMORY EXISTS. SETUP STACKPOINTER, AND
+;       ENTER THE MONITOR LOOP.
+;
+;       ENTRY   FROM MASTER CLEAR
+;       EXIT    INTO MTR88 MAIN LOOP
+
+        ERRNZ   *-73Q
+
+INIT    LDAX    D               ; COPY *PRSROM* INTO RAM
+        MOV     M,A             ; MOVE BYTE
+        DCX     H               ; DECREMENT DESTINATION
+        INR     E               ; INCREMENT SOURCE
+        JNZ     INIT            ; IF NOT DONE
+
+SINCR   EQU     4000Q           ; SEARCH INCREMENT
+
+        MVI     D,SINCR/256     ; (DE) = SEARCH INCREMENT
+        LXI     H,START-SINCR   ; (HL) = FIRST RAM - SEARCH INCREMENT
+
+;       DETERMINE MEMORY LIMIT
+
+INIT1   MOV     M,A             ; RESTORE VALUE READ
+        DAD     D               ; INCREMENT TRIAL ADDRESS
+        MOV     A,M             ; (A) = CURRENT MEMORY VALUE
+        DCR     M               ; TRY TO CHANGE IT
+        CMP     M
+        JNZ     INIT1           ; IF MEMORY CHANGED
+
+INIT2   DCX     H
+
+        SPHL                    ; SET STACKPOINTER = MEMORY LIMIT -1
+
+        PUSH    H               ; SET *PC* VALUE ON STACK
+        LXI     H,ERROR
+        PUSH    H               ; SET 'RETURN ADDRESS'
+
+;       CONFIGURE LOAD/DUMP UART
+
+        MVI     A,UMI.1B+UMI.L8+UMI.16X
+        OUT     OP.TPC          ; SET 8 BIT, NO PARITY, 1 STOP, 16X
