@@ -298,3 +298,153 @@ INIT2   DCX     H
 
         MVI     A,UMI.1B+UMI.L8+UMI.16X
         OUT     OP.TPC          ; SET 8 BIT, NO PARITY, 1 STOP, 16X
+
+;       SAVALL - SAVE ALL REGISTERS ON STACK.
+;
+;       SAVALL IS CALLED WHEN AN INTERRUPT IS ACCEPTED, IN ORDER TO
+;       SAVE THE CONTENTS OF THE REGISTERS ON THE STACK.
+;
+;       ENTRY   CALLED DIRECTLY FROM INTERRUPT ROUTINE
+;       EXIT    ALL REGISTERS PUSHED ON STACK.
+;               IF NO YET IN MONITOR MODE, REGPTR = ADDRESS OF REGISTERS
+;               ON STACK.
+;               (DE) = ADDRESS OF CTLFLG
+
+        ERRNZ   *-132Q
+
+SAVALL  XTHL                    ; SET H,L ON STACK TOP
+        PUSH    D
+        PUSH    B
+        PUSH    PSW
+        XCHG                    ; (D,E) = RETURN ADDRESS
+        LXI     H,10
+        DAD     SP              ; (H,L) = ADDRESS OF USERS SP
+
+;       REPLACE THE INSTRUCTIONS WITH A JUMP AROUND THE NMI VECTOR JUMP
+;
+;       PUSH    H               ; SET ON STACK AS REGISTER
+;       PUSH    D               ; SET RETURN ADDRESS
+;       LXI     D,CTLFLG
+;       LDAX    D               ; (A) = CTLFLG
+
+        JMP     SAVALLX         ; GO TO SAVALL EXTENSION
+
+;       ENTRY POINT FOR THE Z80 NMI
+;
+
+        ERRNZ   *-66H           ; Z80 NMI ADDRESS
+
+NMIENT  JMP     NMI
+
+        ERRNZ   SAVALLR-151Q    ; DO NOT CHANGE ORGANIZATION
+
+SAVALLR                         ; SAVALL EXTENSION RETURN ADDRESS
+
+        CMA
+        ANI     CB+MTL+CB.SSI   ; SAVE REGISTER ADDR IF USER OR SINGLE STEP
+        RZ                      ; RETURN IF WAS INTERRUPT OF MONITOR LOOP
+        LXI     H,2
+        DAD     SP              ; (H,L) = ADDRESS OF 'STACKPTR' ON STACK
+        SHLD    REGPTR
+        RET
+
+;       CUI - CHECK FOR USER INTERRUPT PROCESSING.
+;
+;       CUI IS CALLED TO SEE IF THE USER HAS SPECIFIED PROCESSING
+;       FOR THE CLOCK INTERRUPT.
+
+        ERRNZ   *-165Q
+
+;       SET     MFLAG           ; REFERENCE TO MFLAG
+CUI1    LDAX    B               ; (A) = MFLAG
+        ERRNZ   UO.CLK-1        ; CODE ASSUMED = 01
+        RRC
+        CC      UIVEC           ; IF SPECIFIED, TRANSFER TO USER
+
+;       RETURN TO PROGRAM FROM INTERRUPT.
+
+        ERRNZ  *-172Q
+
+INTXIT  POP     PSW             ; REMOVE FAKE 'STACK REGISTER'
+        POP     PSW
+        POP     B
+        POP     D
+        POP     H
+        EI
+        RET
+
+;       CLOCK - PROCESS CLOCK INTERRUPT
+;
+;       CLOCK IS ENTERED WHENEVER A 2-MILLISECOND CLOCK INTERRUPT IS
+;       PROCESSED.
+;
+;       TICCNT IS INCREMENTED EVERY INTERRUPT.
+
+        ERRNZ   *-201Q
+
+CLOCK   LHLD    TICCNT
+        INX     H
+        SHLD    TICCNT          ; INCREMENT TICCOUNT
+
+        LDA     CTLFLG          ; CLEAR CLOCK INTERRUPT FLIP-FLOP
+        OUT     OP.CTL
+
+;       EXIT CLOCK INTERRUPT.
+
+        LXI     B,CTLFLG
+        LDAX    B               ; (A) = CTLFLG
+        ANI     CB.MTL
+        JNZ     INTXIT          ; IF IN MONITOR MODE
+        DCX     B
+        ERRNZ   CTLFLG-MFLAG-1
+        LDAX    B               ; (A) = MFLAG
+        ERRNZ   UO.HLT-200Q     ; ASSUME HIGH-ORDER
+        RAL
+        JC      CLK4            ; SKIP IT
+
+;       NOT IN MONITOR MODE. CHECK FOR HALT
+
+        MVI     A,10            ; (A) = INDEX OF *P* REG
+        CALL    LRA.            ; LOCATE REGISTER ADDRESS
+        MOV     E,M
+        INX     H
+        MOV     D,M             ; (D,E) = PC CONTENTS
+        DCX     D
+        LDAX    D
+        CPI     MI.HLT          ; CHECK FOR HALT
+        JNZ     CUI1
+
+        MVI     A,A.BEL         ; DING BELL
+        CALL    WCC
+        MVI     A,'H'           ; "H" FOR HALT
+        CALL    WCC
+        JMP     ERROR
+
+;       JE      ERROR           ; IF HALT, BE IN MONITOR MODE
+
+;       NONE OF THE ABOVE, SO ALLOW USER PROCESSING OF CLOCK INTERRUPT
+
+CLK     JMP     CUI1            ; ALLOW USER PROCESSING OF CLOCK
+
+;       NOTE: SOURCE CODE FOR THE FOLLOWING WAS NOT PUBLISHED.
+;       PRESUMABLY IT WAS PART OF THE MEMORY TEST AND FLOPPY DISK
+;       ROTATIONAL SPEED TEST ROUTINES MENTIONED IN THE MANUAL.
+
+        ORG        322Q
+
+;       ERROR - COMMAND ERROR.
+;
+;       ERROR IS CALLED AS A 'BAIL-OUT' ROUTINE.
+;
+;       IT RESETS THE OPERATIONAL MODE, AND RESTORES THE STACKPOINTER.
+;
+;       ENTRY   NONE
+;       EXIT    TO HTR LOOP
+;               CTLFLG SET
+;               MFLAG CLEARED
+;       USES    ALL
+
+        ERRNZ   *-322Q
+
+ERROR   LXI     H,MFLAG
+        MVI     A,M             ; (A) = MFLAG
