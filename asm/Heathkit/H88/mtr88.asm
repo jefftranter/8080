@@ -448,3 +448,82 @@ CLK     JMP     CUI1            ; ALLOW USER PROCESSING OF CLOCK
 
 ERROR   LXI     H,MFLAG
         MVI     A,M             ; (A) = MFLAG
+        ANI     377Q-UO.DDU-UO.NFR ; RE-ENABLE DISPLAYS
+        MOV     M,A             ; REPLACE
+        INX     H
+        MVI     M,CB.SSI+CB.MTL+CB.CLI+CB.SPK ; RESTORE *CTLFLG*
+        ERRNZ   CTLFLG-.MFLAG-1
+        EI
+        LHLD    REGPTR
+        SPHL                    ; RESTORE STACK POINTER TO EMPTY STATE
+        CALL    ALARM
+
+;       MTR - MONITOR LOOP.
+;
+
+        ERRNZ   *-344Q
+
+MTR     EI
+
+MTR1    LXI     H,MTR1
+        PUSH    H               ; SET 'MTR1' AS RETURN ADDRESS
+        LXI     H,MSG.PR        ; TYPE PROMPT MESSAGE
+        CALL    TYPMSG
+
+MTR.2   CALL    RCC             ; READ A CONSOLE CHARACTER
+        ANI     01011111B       ; MAKE SURE ITS UPPER CASE TO MATCH TABLE
+        LXI     H,MTRA          ; LOOK UP CHARACTER IN *MTRA*
+        MVI     B,MTRAL         ; (B) = LENGTH OF TABLE
+MTR.3   CMP     M               ; SEE IF CHARACTER FROM CONSOLE = TABLE ENTRY
+        JZ      MTR.4           ; IF EQUAL
+
+        INX     H               ; POINT TO NEXT TABLE ENTRY
+        INX     H
+        INX     H
+        DCR     B               ; SEE IF PAST END OF TABLE
+        JNZ     MTR.3           ; IF NOT PAST
+
+        MVI     A,A.BEL         ; ELSE, DING ERROR
+        CALL    WCC
+        JMP     MTR.2           ; TRY AGAIN
+
+MTR.4   CALL    WCC             ; WRITE CHARACTER BACK TO CONSOLE
+        INX     H               ; GET ROUTINE ADDRESS LSB
+        MOV     A,M
+        INX     H               ; GET MSB
+        MOV     H,M
+        MOV     L,A             ; (H,L) = ROUTINE ADDRESS
+
+MTRA                            ; JUMP TABLE
+
+        DB      'G'             ; GO TO USER ROUTINE
+        DW      GO88
+
+        DB      'L'             ; CASSETTE LOAD
+        DW      SRMEM
+
+        DB      'D'             ; SET UP CASSETTE DUMP
+        DW      SWMEM
+
+        DB      'S'             ; SUBSTITUTE MEMORY MODE
+        DW      SUBM
+
+        DB      'P'             ; PROGRAM COUNTER ALTER MODE
+        DW      PCA
+
+        DW      'B'             ; BOOT HDOS
+        DW      BOOT
+
+MTRAL   EQU     ($-MTRA)/3      ; NUMBER OF TABLE ENTRYS   /JWT 790507/
+;       LON     L
+
+;       SAE - STORE ABUSS AND EXIT.
+;
+;       ENTRY   (HL) = ABUSS VALUE
+;       EXIT    TO (RET)
+;       USES    NONE
+
+        ERRNZ   *-1063Q
+
+SAE     SHLD    ABUSS
+        RET
