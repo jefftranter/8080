@@ -420,7 +420,7 @@ CLOCK   LHLD    TICCNT
         CALL    WCC
         JMP     ERROR
 
-;       JE      ERROR           ; IF HALT, BE IN MONITOR MODE
+;       JZ      ERROR           ; IF HALT, BE IN MONITOR MODE
 
 ;       NONE OF THE ABOVE, SO ALLOW USER PROCESSING OF CLOCK INTERRUPT
 
@@ -527,3 +527,398 @@ MTRAL   EQU     ($-MTRA)/3      ; NUMBER OF TABLE ENTRYS   /JWT 790507/
 
 SAE     SHLD    ABUSS
         RET
+
+;       SRMEM - H88/H89 ENTRY POINT FOR A CASSETTE LOAD
+;
+
+SRMEM   LXI     H,MSO.LD        ; COMPLETE MESSAGE
+        CALL    TYPMSG
+        CALL    WCR             ; WAIT FOR A CARRIAGE RETURN
+        JMP     RMEM            ; LOAD TAPE
+
+;       PCA - PROGRAM COUNTER ALTER
+;
+;       PCA INPUTS AND/OR DISPLAYS THE CURRENT USER PROGRAM VALUE AND ALLOWS
+;       A NEW VALUE TO BE ENTERED OR RETAINS THE CURRENT VALUE IF
+;       A CR IS TYPED
+;
+;       ENTRY   NONE
+;       EXIT    NONE
+;       USES    A,D,E,H,L,F
+
+PCA     LXI     H,MSG.PC        ; COMPLETE PC MESSAGE
+        CALL    TYPMSG
+        MVI     A,10            ; GET LOCATION OF USER PC
+        CALL    LRA.
+        MOV     E,M             ; (D,E) = USER PC VALUE
+        INX     H
+        MOV     D,M
+        XCHG                    ; (H,L) = USER PC VALUE
+
+        CALL    IROC            ; INPUT NEXT CHARACTER
+        JC      PCA1            ; IF FIRST CHARACTER WAS OCTAL, INPUT NEW PC
+
+        CALL    TOA             ; ELSE, OUTPUT CURRENT VALUE
+        CALL    IROC            ; SEE IF USER WANTS TO CHANGE IT NOW
+        RNC                     ; IF NOT CHANGE, EXIT
+
+;       ENTER NEW USER PC VALUE
+
+PCA1    XCHG                    ; (H,L) = ADDRESS OF USER PC VALUE
+        MVI     D,A.CR          ; END BYTE WITH A RETURN
+        CALL    IOA             ; INPUT NEW ADDRESS
+        RET                     ; EXIT
+
+;       GO88 - GO TO USER ROUTINE FROM H88 MONITOR
+;
+;       GO88 WAITS FOR A CARRIAGE RETURN OR A NEW ADDRESS TERMINATED WITH
+;       A CARRIAGE RETURN.  IF NO ADDRESS IS ENTERED, GO88 TRANSFERS
+;       CONTROL TO THE ADDRESS SPECIFIED BY THE USER PC VALUE
+
+GO88    LXI     H,MSG.GO        ; COMPLETE GO MESSAGE
+        CALL    TYPMSG
+        CALL    IROC            ; INPUT A RETURN OR AN OCTAL CHARACTER
+        JNC     GO88.1          ; IF RETURN, GO TO CURRENT USER PC
+
+        PUSH    PSW             ; ELSE SAVE OCTAL CHARACTER AND FLAGS
+        MVI     A,10            ; GET ADDRESS OF USER PC
+        CALL    LRA.
+        INX     H               ; POINT TO MSB
+        POP     PSW             ; GET FIRST CHARACTER BACK
+        MVI     D,A.CR          ; END ADDRESS WITH A RETURN
+        CALL    IOA             ; INPUT NEW GO ADDRESS
+GO88.1  CALL    WCC             ; ECHO RETURN
+        MVI     A,A.LF          ; LINE FEED
+        CALL    WCC
+        JMP     GO              ; EXECUTE USER ROUTINE
+
+;       GO - RETURN TO USER MODE
+;
+;       ENTRY   NONE
+
+        ERRNZ   *-1222Q
+
+GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
+
+;       SSTEP - SINGLE STEP INSTRUCTION.
+;
+;       ENTRY   NONE
+
+        ERRNZ   *-1225Q
+
+SSTEP                           ; SINGLE STEP
+        DI                      ; DISABLE INTERRUPTS UNTIL THE RIGHT TIME
+        LDA     CTLGL
+        XRI     CB.SSI          ; CLEAR SINGLE STEP INHIBIT
+        OUT     OP.CTL          ; PRIME SINGLE STEP INTERRUPT
+SST1    STA     CTLFLG          ; SET NEW FLAG VALUES
+        POP     H               ; CLEAN STACK
+        JMP     INTXIT          ; RETURN TO USER ROUTINE FOR STEP
+
+;       STPRTN - SINGLE STEP RETURN
+
+        ERRNZ   *-1244Q
+
+STPRTN
+        ORI     CB.SSI          ; DISABLE SINGLE STEP INTERRUPTION
+        OUT     OP.CTL          ; TURN OFF SINGLE STEP ENABLE
+;       SET     CTLFLG
+        STAX    D
+        ANI     CB.MTL          ; SEE IF IN MONITOR MODE
+        JNZ     MTR
+        JMP     UIVEC+3         ; TRANSFER TO USER'S ROUTINE
+
+
+;       RMEM - LOAD MEMORY FROM TAPE
+;
+
+        ERRNZ   *-1261Q
+
+RMEM    LXI     H,TPABT
+        SHLD    TPERRX          ; SETUP ERROR EXIT ADDRESS
+;       JMP     LOAD
+
+;       LOAD - LOAD MEMORY FROM TAPE
+;
+;       READ THE NEXT RECORD FROM THE CASSETTE TAPE.
+;
+;       USE THE LOAD ADDRESS IN THE TAPE RECORD.
+;
+;       ENTRY   (HL) = ERROR EXIT ADDRESS
+;       EXIT    USER P-REG (IN STACK) SET TO ENTRY ADDRESS
+;               TO CALLER IF ALL OK
+;               TO ERROR EXIT IF TAPE ERRORS DETECTED.
+
+        ERRNZ   *-1267Q
+
+LOAD
+        LXI     B,1000Q-RT.MI*256-256 ; (BC) = - REQUIRED TYPE AND #
+LOA0    CALL    SRS             ; SCAN FOR RECORD COUNT
+        MOV     L,A             ; (HL) = COUNT
+        XCHG                    ; (DE) = COUNT, (HL) = TYPE AND #
+        DCR     C               ; (C) = NEXT #
+        DAD     B
+        MOV     A,H
+        PUSH    B               ; SAVE TYPE AND #
+        PUSH    PSW             ; SAVE TYPE CODE
+        ANI     177Q            ; CLEAR END FLAG BIT
+        ORA     L
+        MVI     A,2             ; SEQUENCE ERROR
+        JNZ     TPERR           ; IF NOT RIGHT TYPE OR SEQUENCE
+        CALL    RNP             ; READ ADDR
+        MOV     B,H
+        MOV     C,A             ; (BC) = P-REG ADDRESS
+        MVI     A,10
+        PUSH    D               ; SAVE (DE)
+        CALL    LRA.            ; LOCATE REG ADDRESS
+        POP     D               ; RESTORE (DE)
+        MOV     M,C             ; SET P-REG IN MEM
+        INX     H
+        MOV     H,B
+        CALL    RNP             ; READ ADDRESS
+        MOV     L,A             ; (HL) = ADDRESS, (DE) = COUNT
+        SHLD    START
+
+LOA1    CALL    RNB             ; READ BYE
+        MOV     M,A
+
+; SHOW H88 THAT SOMETHING IS HAPPENING
+
+        CALL    TPDSP           ; DISPLAY TO H88 USER THAT WE ARE LOADING
+
+        INX     H
+        DCX     D
+        MOV     A,D
+        ORA     E
+        JNZ     LOA1            ; IF MORE TO GO
+
+        CALL    CTC             ; CHECK TAPE CHECKSUM
+
+;       READ NEXT BLOCK
+
+        POP     PSW             ; (A) = FILE TYPE BYTE
+        POP     B               ; (BC) = -(LAST TYPE, LAST #)
+        RLC
+        JC      TFT             ; ALL DONE - TURN OFF TAPE
+        JMP     LOA0            ; READ ANOTHER RECORD
+
+;       DUMP - DUMP MEMORY TO MAG TAPE.
+;
+;       DUMP SPECIFIED MEMORY RANGE TO MAG TAPE.
+;
+;       ENTRY   (START) = START ADDRESS
+;               (ABUSS) = END ADDRESS
+;               USER PC = ENTRY POINT ADDRESS
+;       EXIT    TO CALLER.
+
+        ERRNZ   *-1374Q
+
+WMEM
+        LXI     H,TPABT
+        SHLD    TPERRX          ; SETUP ERROR EXIT
+
+        ERRNZ   *-2002Q
+
+DUMP    MVI     A,UCI.TE
+        OUT     OP.TPC          ; SETUP TAPE CONTROL
+        MVI     A,A.SYN
+        MVI     H,32            ; (H) = # OF SYNC CHARACTERS
+WME1    CALL    WNB
+        DCR     H
+        JNZ     WME1            ; WRITE SYN HEADER
+        MVI     A,A.STX
+        CALL    WNB             ; WRITE STX
+        MOV     L,H             ; (HL) = 00
+        SHLD    CRCSUM          ; CLEAR CRC 16
+        LXI     H,RT.MI+80H*256+1 ; FIRST AND LAST MI RECORD
+        CALL    WNP             ; WRITE HEADER
+        LHLD    START
+        XCHG                    ; (D,E) = START ADDRESS
+        LHLD    ABUSS           ; (H,L) = STOP ADDR
+        INX     H               ; COMPUTE WITH STOP+1
+        MOV     A,L
+        SUB     E
+        MOV     L,A
+        MOV     A,H
+        SBB     D
+        MOV     H,A             ; (HL) = COUNT
+        CALL    WNP             ; WRITE COUNT
+        PUSH    H
+        MVI     A,10
+        PUSH    D               ; SAVE (DE)
+        CALL    LRA.            ; LOCATE P-REG ADDRESS
+        MOV     A,M
+        INX     H
+        MOV     H,M
+        MOV     L,A             ; (HL) = CONTENTS OF PC
+        CALL    WNP             ; WRITE HEADER
+        POP     H               ; (HL) = ADDRESS
+        POP     D               ; (DE) = COUNT
+        CALL    WNP
+
+WME2    MOV     A,M
+        CALL    WNB             ; WRITE BYTE
+
+;       SHOW H88 USER THAT DUMP IS DUMPING
+
+        CALL    TPDSP           ; DISPLAY DUMP
+
+        INX     H
+        DCX     D
+        MOV     A,D
+        ORA     E
+        JNZ     WME2            ; IF MORE TO GO
+
+;       WRITE CHECKSUM
+
+        LHLD    CRCSUM
+        CALL    WNP             ; WRITE IT
+        CALL    WNP             ; FLUSH CHECKSUM
+;       JMP     TFT
+
+;       TFT - TURN OFF TAPE.
+;
+;       STOP THE TAPE TRANSPORT.
+;
+
+        ERRNZ   *-2133Q
+
+TFT     XRA     A
+        OUT OP.TPC              ; TURN OFF TAPE
+
+;       HORN - MAKE NOISE.
+;
+;       ENTRY   (A) = (MILLISECOND COUNT)/2
+;       EXIT    NONE
+;       USES    A,F
+
+        ERRNZ   *-2136Q
+
+ALARM
+        CPU     Z80
+        JR      ALARMB          ; BRANCH TO A JUMP TO NOISE TO DING BELL
+        CPU     8080
+
+        ERRNZ   *-2140Q
+
+HORN    PUSH    PSW
+        MVI     A,CB.SPK        ; TURN ON SPEAKER
+
+HRN0    XTHL                    ; SAVE (HL), (H) = COUNT
+        PUSH    D               ; SAVE (DE)
+        XCHG                    ; (D) = LOOP COUNT
+        LXI     H,CTLFLG
+        XRA     M
+        MOV     E,M             ; (E) = OLD CTLFLG VALUE
+        MOV     M,A             ; TURN ON HORN
+        MVI     L,TICCNT/256
+
+        MOV     A,D             ; (A) = CYCLE COUNT
+        ADD     M
+HRN2    CMP     M               ; WAIT REQUIRED TICCOUNTS
+        JNZ     HRN2
+
+        JMP     HRNX            ; JUMP TO AN EXTENSION OF HORN SO ROOM
+                                ; CAN BE MADE FOR A JUMP TO NOISE
+
+ALARMB  JMP     NOISE           ; SEND A BELL TO THE CONSOLE
+
+;       CTC - VERIFY CHECKSUM.
+;
+;       ENTRY   TAPE JUST BEFORE CRC
+;       EXIT    TO CALLER IF OK
+;               TO *TPERR* IF BAD
+;       USES    A,F,H,L
+
+        ERRNZ   *-2172Q
+
+CTC     CALL    RNP             ; READ NEXT PAIR
+        LHLD    CRCSUM
+        MOV     A,M
+        ORA     L
+        RZ                      ; RETURN IF OK
+        MVI     A,1             ; CHECKSUM ERROR
+;       JMP     TPERR           ; (B) = CODE
+
+;       TPERR - PROCESS TAPE ERROR
+;
+;       DISPLAY ERR NUMBER IF LOW BYTE OF ABUSS
+;
+;       IF ERROR NUMBER EVEN, DON'T ALLOW #
+;       IF ERROR NUMBER ODD, ALLOW #
+;
+;       ENTRY   (B) = PATTERN
+
+        ERRNZ   *-2205Q
+
+TPERR   MOV     B,A             ; (B) = CODE
+        CALL    TPERMSG         ; DISPLAY ERROR NUMBER ON CONSOLE
+        CALL    TFT             ; TURN OFF TAPE
+
+;       IS #, RETURN (IF PARITY ERROR)
+
+        DB      MI,ANI          ; FALL THROUGH WITH CARRY CLEAR
+TER3    MOV     A,B
+
+        RRC
+        RC                      ; RETURN IF OK
+
+;       BEEP AND FLASH ERROR NUMBER
+
+TER1    CC      ALARM           ; ALARM IF PROPER TIME
+        CALL    TPXIT           ; SEE IF #
+        IN      IP.PAD
+        CPI     00101111B       ; CHECK FOR #
+        JZ      TER3            ; IF #
+        LDA     TICCNT+1
+        RAR                     ; 'C' SET IF 1/2 SECOND
+        JMP     TER2
+
+;       TPABT - ABORT TAPE LOAD OR DUMP.
+;
+;       ENTERED WHEN LOADING OR DUMPING, AND THE '*' KEY
+;       IS STRUCK.
+
+        ERRNZ   *-2249Q
+
+TPABT   XRA     A
+        OUT     OP.TPC          ; OFF TAPE
+        JMP     ERROR
+
+;       TPXIT - CHECK FOR USER FORCED EXIT.
+;
+;       TPXIT CHECKS FOR AN '*' KEYPAD ENTRY. IF SO, TAKE
+;       THE TAPE DRIVER ABNORMAL EXIT.
+;
+;       ENTRY   NONE
+;       EXIT    TO *RET* IF NOT '*'
+;                (A) = PORT STATUS
+;               TO (TPERRX) IF '*' DOWN
+;       USES    A,F
+
+        ERRNZ   *-2252Q
+
+TPXIT   IN      IP.PAD
+        CPI     00001111B       ; *
+        IN      IP.TPX          ; READ TAPE STATUS
+        RNZ                     ; NOT '*', RETURN WITH STATUS
+        LHLD    TPERRX
+
+        ERRNZ   *-2264Q
+
+        PCHL                    ; ENTER (TPERRX)
+
+;       SRS - SCAN RECORD START
+;
+;       SRS READS BYTES UNTIL IT RECOGNIZES THE START OF A RECORD.
+;
+;       THIS REQUIRES
+;       AT LEAST 10 SYNC CHARACTERS
+;       1 STX CHARACTER
+;
+;       THE CRC-16 IS THEN INITIALIZED.
+;
+;       ENTRY   NONE
+;       EXIT    TAPE POSITIONED (AND MOVING), CRCSUM =0
+;               (DE) = HEADER BYTES
+;               (HA) = RECORD COUNT
