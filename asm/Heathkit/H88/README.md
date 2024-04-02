@@ -3,6 +3,10 @@ was based on the published source code with minimal changes to adapt
 it to the ASL assembler. The listing is in split octal, like the
 original Heathkit assembler listing.
 
+Some source code (for the memory test and and floppy disk rotational
+speed test) was not published in the Heathkit manuals. It has been
+reverse engineered in this code from the Heathkit ROMs.
+
 I have confirmed that the output matches the published binary for the
 ROM.
 

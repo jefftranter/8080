@@ -922,3 +922,236 @@ TPXIT   IN      IP.PAD
 ;       EXIT    TAPE POSITIONED (AND MOVING), CRCSUM =0
 ;               (DE) = HEADER BYTES
 ;               (HA) = RECORD COUNT
+;       USES    A,F,D,E,H,L
+
+        ERRNZ   *-2265Q
+
+SRS
+SRS1    MVI     D,0
+        MOV     H,D
+        MOV     L,D             ; (HL) = 0
+SRS2    CALL    RNB             ; READ NEXT BYTE
+        INR     D
+        CPI     A.SYN
+        JZ      SRS2            ; HAVE SYN
+        CPI     A.STX
+        JNZ     SRS1            ; NOT STX - START OVER
+
+        MVI     A,10
+        CMP     D               ; SEE IF ENOUGH SYNC CHARACTERS
+        JNC     SRS1            ; NOT ENOUGH
+        SHLD    CRCSUM          ; CLEAR CRC-16
+        CALL    RNP             ; READ LEADER
+        MOV     D,H
+        MOV     E,A
+;       JMP     RNP             ; READ COUNT
+
+;       RNP - READ NEXT PAIR
+;
+;       RNP READS THE NEXT TWO BYTES FROM THE INPUT DEVICE.
+;
+;       ENTRY   NONE
+;       EXIT    (H,A) = BYTE PAIR
+;       USES    A,F,H
+
+        ERRNZ   *-2325Q
+
+RNP     CALL    RNB             ; READ NEXT BYTE
+        MOV     M,A
+;       JMP     RNB             ; READ NEXT BYTE
+
+;       RNB - READ NEXT BYTE
+;
+;       RNB READS THE NEXT SINGLE BYTE FROM THE INPUT DEVICE.
+;       THE CHECKSUM IS TAKEN FOR THE CHARACTER.
+;
+;       ENTRY   NONE
+;       EXIT    (A) = CHARACTER
+;       USES    A,F
+
+        ERRNZ   *-2331Q
+
+RNB     MVI     A,UCI.RO+UCI.ER+ICI.RE ; TURN ON READ FOR NEXT BYTE
+        OUT     OP.TPC
+RNB1    CALL    TPXIT           ; CHECK FOR #, READ STATUS
+        ANI     USR.RXR
+        JZ      RNB1            ; IF NOT READY
+        IN      IP.TPD          ; INPUT DATA
+;       JMP     CRC             ; CHECKSUM
+
+;       CRC - COMPUTE CRC-16
+;
+;       CRC COMPUTES A CRC-16 CHECKSUM FROM THE POLYNOMIAL
+;
+;       (X + 1) * (X^15 + X + 1)
+;
+;       SINCE THE CHECKSUM GENERATED IS A DIVISION REMAINDER,
+;       A CHECKSUMED DATA SEQUENCE CAN BE VERIFIED BY RUNNING
+;       THE DATA THROUGH CRC, AND THEN RUNNING THE PREVIOUSLY OBTAINED
+;       CHECKSUM THROUGH CRC. THE RESULTANT CHECKSUM SHOULD BE 0.
+;
+;       ENTRY   (CRCSUM) = CURRENT CHECKSUM
+;               (A) = BYTE
+;       EXIT    (CRCSUM) UPDATED
+;               (A) UNCHANGED.
+;       USES    F
+
+        ERRNZ   *-2347Q
+
+CRC     PUSH    B               ; SAVE (BC)
+        MVI     B,8             ; (B) = BIT COUNT
+        PUSH    H
+        LHLD    CRCSUM
+CRC1    RLC
+        MOV     C,A             ; (C) = BIT
+        MOV     A,L
+        ADD     A
+        MOV     L,A
+        MOV     A,H
+        RAL
+        MOV     H,A
+        RAL
+        XRA     C
+        RRC
+        JNC     CRC2            ; IF NOT TO XOR
+        MOV     A,H
+        XRI     200Q
+        MOV     H,A
+        MOV     A,L
+        XRI     5Q
+        MOV     L,A
+CRC2    MOV     A,C
+        DCR     B
+        JNZ     CRC1            ; IF MORE TO GO
+        SHLD    CRCSUM
+        POP     H               ; RETURN (HL)
+        POP     B               ; RESTORE (BC)
+        RET                     ; EXIT
+
+;       WNP - WRITE NEXT PAIR.
+;
+;       WNP WRITES THE NEXT TWO BYTES TO THE CASSETTE DRIVE
+;
+;       ENTRY   (H,L) = BYTES
+;       EXIT    WRITTEN.
+;       USES    A,F
+
+        ERRNZ   *-3017Q
+
+WNP     MOV     A,H
+        CALL    WNB
+        MOV     A,L
+;       JMP     WNB             ; WRITE NEXT BYTE
+
+;       WNB - WRITE BYTE
+;
+;       WNB WRITE THE NEXT BYTE TO THE CASSETTE TAPE.
+;
+;       ENTRY   (A) = BYTE
+;       EXIT    NONE.
+;       USES    F
+
+        ERRNZ   *-3024A
+
+WNB     PUSH    PSW
+WNB1    CALL    TPXIT           ; CHECK FOR *, READ STATUS
+        ANI     USR.TXR
+        JZ      WNB1            ; IF MORE TO GO
+        MVI     A,UCI.ER+ECI.TE ; ENABLE TRANSMITTER
+        OUT     OP.TPC          ; TURN ON TAPE
+        POP     PSW
+        OUT     OP.TPD          ; OUTPUT DATA
+        JMP     CRC             ; COMPUTE CRC
+
+;       LRA - LOCATE REGISTER ADDRESS
+;
+;       ENTRY   NONE.
+;       EXIT    (A) = REGISTER INDEX
+;               (H,L) = STORAGE ADDRESS
+;               (D,E) = (O,A)
+;       USES    A,D,E,H,L,F
+
+        ERRNZ   *-3047Q
+
+LRA     LDA     REGI
+LRA.    MOV     E,A
+        MVI     D,0
+        LHLD    REGPTR
+        DAD     D               ; (DE) = (REGPTR)+(REGI)
+        RET
+
+;       IOA - INPUT OCTAL ADDRESS.
+;
+;       ENTRY   (H,L) = ADDRESS OF RECEPTION DOUBLE BYTE.
+;               (D) = TERMINATING CHARACTER
+;       EXIT    NONE
+;       USES    A,D,E,H,L,F
+
+        ERRNZ   *-3062Q
+
+IOA     JMP     IOA1
+        NOP                     ; RETAIN H8 ORG
+
+;       IOB - INPUT OCTAL BYTE
+;
+;       READ ONE OCTAL BYTE FROM THE KEYSET.
+;
+;       ENTRY   (H,L) = ADDRESS OF BYTE TO HOLD VALUE
+;               'C' SET IF FIRST DIGIT N (A)
+;       EXIT    NONE
+;       USES    A,D,E,H,L,F
+
+        ERRNZ   *-3066Q
+
+IOB     MVI     M,0             ; ZERO OUT OLD VALUE
+        CNC     RCC             ; READ CONSOLE CHARACTER
+
+;       SEE IF CHARACTER IS A VALID OCTAL VALUE
+;
+        CPI     '0'             ; LESS THAN ZERO?
+        JC      IOB2            ; IF (A) < 0, SEE IF A TERMINATING CHARACTER
+        CPI     '8'             ; GREATER THAN 7?
+        JNC     IOB1            ; IF TOO LARGE, TRY AGAIN
+
+;       HAVE AN OCTAL DIGIT
+;
+        CALL    WCC             ; ECHO CHARACTER
+        ANI     00000111B       ; MASK FOR BINARY VALUE
+        MOV     E,A             ; (E) = VALUE
+        MOV     A,M             ; GET OLD VALUE
+        RLC                     ; SHIFT 3
+        RLC
+        RLC
+        JMP     IOB1.5          ; JUMP AROUND AN H88/H89 TO H8 FAKE ROUTINE
+
+;       FAKE OUT ROUTINE FOR CALLERS OF *DOD* FROM THE H8 FRONT PANEL
+
+        ERRNZ    *-3122Q
+
+DOD     INX      H
+        INX      H
+        INX      H
+        RET
+
+;       CONTINUE
+
+IOB1.5  ANI     11111000B       ; TOSS OLD LSB DIGIT
+        ORA     E               ; REPLACE WITH NEW VALUE
+        MOV     M,A
+        JMP     IOB1            ; INPUT ANOTHER CHARACTER
+
+;       CHECK FOR A CARRIAGE RETURN TO TERMINATE BYTE
+;
+IOB2    CPI     A.CR            ; CARRIAGE RETURN?
+        RZ                      ; RETURN IF CARRIAGE RETURN         /JWT 790507/
+        XRA     A               ; CLEAR CARRY                       /JWT 790507/
+        CPU     Z80
+        JR      IOB1            ; GET A NEW CHARACTER               /JWT 790507/
+        CPU     8080
+
+; MORE CODE BELOW THAT WAS NOT PUBLISHED. REPLACED WITH DISASSEMBLY OF
+; ROM.
+
+        ORG     1660Q
+
+;       RCK - READ CONSOLE KEYPAD
