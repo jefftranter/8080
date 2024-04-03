@@ -1804,3 +1804,114 @@ MSG.PR  DB      A.CR,A.LF,"  H: ",0
 ;       "Type spaces to determine baud rate"
 
 MSG.SP  DB      "Type spaces to determine baud rate" ,0
+
+;       MSG.GO - (G)O
+;
+;       "GO"
+
+MSG.GO  DB      "o ",0
+
+;;      MSG.LD - (L)OAD
+;
+;       "LOAD"
+
+MSG.LD  DB      "oad",0
+
+;       MSG.DMP - (D)UMP
+;
+;       "DUMP"
+
+MSG.DMP DB      "UMP",0
+
+;       MSG.SUB - (S)UBSTITUTE
+;
+;       "SUBSTITUTE"
+
+MSG.SUB DB      "ubstitute ",0
+
+;       MSG.PC - (P)ROGRAM COUNTER
+;
+;       "PROGRAM COUNTER"
+
+MSG.PC  DB       "rogram Counter ",0
+
+;       MSG.BT - (B)OOT
+;
+;       "BOOT"
+
+MSG.BT  DB      "oot",0
+
+; MORE CODE BELOW THAT WAS NOT PUBLISHED. REPLACED WITH DISASSEMBLY OF
+; ROM.
+
+        ORG     3772Q
+
+;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
+;
+        ERRNZ   10000A-6-*      ; MUST BE 6 BYTES BEFORE END
+
+ESPEED  JMP     SPEED
+
+;       ENTRY POINT FOR DYNAMIC MEMORY TEST
+;
+        ERRNZ   10000A-3-*      ; MUST BE 3 BYTES BEFORE END
+
+EDTMEM  JMP     DYMEM
+
+        ERRNZ   *-10000A        ; MUST NOT EXCEED 2K BYTES
+
+;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET
+;       MONITOR.
+
+        ORG     20000Q          ; 8192
+
+START   DS      2               ; DUMP STARTING ADDRESS
+IOWRK   DS      2               ; IN OUR OUT INSTRUCTION
+PRSRAM                          ; FOLLOWING CELLS INITIALIZED FROM ROM
+        DS      1               ; RET
+REGI    DS      1               ; INDEX OF REGISTER UNDER DISPLAY
+DSPROT  DS      1               ; PERIOD FLAG BYTE
+DSPMOD  DS      1               ; DISPLAY MODE
+
+MFLAG   DS      1               ; USER FLAG OPTIONS
+                                ; SEE *UO.XXX* BITS DESCRIBED AT FRONT
+
+CTLFLG  DS      1               ; FRONT PANEL CONTROL BITS
+REFIND  DS      1               ; REFRESH INDEX (0 TO 7)
+PRSL    EQU     7               ; END OF AREA INITIALIZED FROM ROM
+
+FPLEDS                          ; FRONT PANEL LEDS PATTERNS
+ALEDS   DS      1               ; ADDR 0
+        DS      1               ; ADDR 1
+        DS      1               ; ADDR 2
+
+        DS      1               ; ADDR 3
+        DS      1               ; ADDR 4
+        DS      1               ; ADDR 5
+
+DLEDS   DS      1               ; DATA 0
+        DS      1               ; DATA 1
+        DS      1               ; DATA 2
+
+ABUSS   DS      2               ; ADDRESS BUSS
+RCCA    DS      1               ; RCC SAVE AREA
+CRCSUM  DS      2               ; CRC-16 CHECKSUM
+TPERRX  DS      2               ; TAPE ERROR EXIT ADDRESS
+TICCNT  DS      2               ; CLOCK TIC COUNTER
+
+REGPTR  DS      2               ; REGISTER CONTENTS POINTER
+
+UIVEC                           ; USER INTERRUPT VECTORS
+        DS      3               ; JUMP TO CLOCK PROCESSOR
+        DS      3               ; JUMP TO SINGLE STEP PROCESSOR
+        DS      3               ; JUMP TO I/O 3
+        DS      3               ; JUMP TO I/O 3
+        DS      3               ; JUMP TO I/O 5
+        DS      3               ; JUMP TO I/O 6
+        DS      3               ; JUMP TO I/O 7
+
+;       H88/H89 RAM USAGE BEYOND THAT OF H8MTRF
+;
+NMIRET  DS      2
+
+        END
