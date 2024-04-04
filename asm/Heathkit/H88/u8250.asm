@@ -8,10 +8,11 @@ UC.8BW  EQU     3
 UC.DLA  EQU     200Q
 UC.DR   EQU     1
 UC.THE  EQU     40Q
+
 UR.DLL  EQU     0
+UR.DLM  EQU     1
 UR.IER  EQU     1
 UR.LCR  EQU     3
-UR.LSR  EQU     4
+UR.LSR  EQU     5
 UR.RBR  EQU     0
 UR.THR  EQU     0
-UR.DLM  EQU     1

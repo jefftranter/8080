@@ -1,0 +1,2600 @@
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 1 - 2024-04-04 05:54:22 PM
+
+
+       1/      0 :                              INCLUDE macros.mac
+(1)    1/      0 :                      ; Macros to emulate the Heathkit HDOS assembler.
+(1)    2/      0 :                      
+(1)    3/      0 :                      ; Code currently commented out as the assembler enforces that the
+(1)    4/      0 :                      ; expression must be evaluatable in first pass.
+(1)    5/      0 :                      
+(1)    6/      0 :                      ERRPL   MACRO EXP
+(1)    7/      0 :                      ;       IF (EXP) > 0
+(1)    8/      0 :                      ;         ERROR Expression is positive
+(1)    9/      0 :                      ;       ENDIF
+(1)   10/      0 :                              ENDM
+(1)   11/      0 :                      
+(1)   12/      0 :                      ERRMI   MACRO EXP
+(1)   13/      0 :                      ;       IF (EXP) < 0
+(1)   14/      0 :                      ;         ERROR Expression is negative
+(1)   15/      0 :                      ;       ENDIF
+(1)   16/      0 :                              ENDM
+(1)   17/      0 :                      
+(1)   18/      0 :                      ERRNZ   MACRO EXP
+(1)   19/      0 :                      ;       IF (EXP) != 0
+(1)   20/      0 :                      ;         ERROR Expression is not zero
+(1)   21/      0 :                      ;       ENDIF
+(1)   22/      0 :                              ENDM
+(1)   23/      0 :                      
+(1)   24/      0 :                      ERRZR   MACRO EXP
+(1)   25/      0 :                      ;       IF (EXP) == 0
+(1)   26/      0 :                      ;         ERROR Expression is zero
+(1)   27/      0 :                      ;       ENDIF
+(1)   28/      0 :                              ENDM
+(1)   29/      0 :                      
+       2/      0 :                      
+       3/      0 :                      ;       MTR88 - H88 MONITOR
+       4/      0 :                      ;
+       5/      0 :                      ;       MTR88 IS AN ADAPTATION OF PAM/8 ORIGINALLY WRITTEN FOR THE
+       6/      0 :                      ;       HEATH H8 COMPUTER BY J. G. LETWIN IN 1976 AND MODIFIED BY
+       7/      0 :                      ;       R. N. BORCHARDT IN 1979 FOR USE IN THE HEATH H88/H89
+       8/      0 :                      ;       COMPUTERS.
+       9/      0 :                      
+      10/      0 :                      ;
+      11/      0 :                      ;       MTR88 PROVIDES COMPATIBILITY WITH PAM/8 SUCH THAT ALL ROUTINES
+      12/      0 :                      ;       HAVE RETAINED PREVIOUSLY DESCRIBED ENTRY POINTS AND ENTRY AND
+      13/      0 :                      ;       EXIT CONDITIONS. ROUTINES WHICH ARE NOT APPLICABLE SUCH AS
+      14/      0 :                      ;       THOSE PERTAINING TO THE FRONT PANEL DISPLAY HAVE BEEN DELETED.
+      15/      0 :                      ;
+      16/      0 :                      ;
+      17/      0 :                      ;       COPYRIGHT  05/1976, WINTEK CORPORATION.
+      18/      0 :                      ;                           902 N. 9TH ST.
+      19/      0 :                      ;                           LAFAYETTE, IND.
+      20/      0 :                      ;
+      21/      0 :                      ;       COPYRIGHT  01/1979, HEATH COMPANY
+      22/      0 :                      ;                           BENTON HARBOR, MI.
+      23/      0 :                      ;
+      24/      0 :                      
+      25/      0 : =30.000O             ROMDD   EQU     14000Q          ; HDOS BOOT ADDRESS
+      26/      0 :                      
+      27/      0 :                      ;       MTR88 - H88/H89 MONITOR.
+      28/      0 :                      ;
+      29/      0 :                      ;       THIS PROGRAM RESIDES (IN ROM) IN THE LOW 2048 BYTES OF THE HEATH
+      30/      0 :                      ;       H88/H89 COMPUTERS.
+      31/      0 :                      
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 2 - 2024-04-04 05:54:22 PM
+
+
+      32/      0 :                      ;       INTERRUPTS.
+      33/      0 :                      ;
+      34/      0 :                      ;       MTR88 IS THE PRIMARY PROCESSOR FOR ALL INTERRUPTS.
+      35/      0 :                      ;       THEY ARE PROCESSED AS FOLLOWS:
+      36/      0 :                      ;
+      37/      0 :                      ;       RST     USE
+      38/      0 :                      ;
+      39/      0 :                      ;       0       MASTER CLEAR. (NEVER USED FOR I/O OR REST)
+      40/      0 :                      ;
+      41/      0 :                      ;       1       CLOCK INTERRUPT. NORMALLY TAKEN BY MTR88,
+      42/      0 :                      ;               SETTING BIT *UO.CLK* IN BYTE *MFLAG* ALLOWS
+      43/      0 :                      ;               USER PROCESSING (VIA A JUMP THROUGH *UIVEC*).
+      44/      0 :                      ;               UPON ENTRY OF THE USER ROUTINE, THE STACK
+      45/      0 :                      ;               CONTAINS:
+      46/      0 :                      ;               (STACK+0)  = RETURN ADDRESS (TO MTR88)
+      47/      0 :                      ;               (STACK+2)  = (STACKPTR+14)
+      48/      0 :                      ;               (STACK+4)  = (AF)
+      49/      0 :                      ;               (STACK+6)  = (BC)
+      50/      0 :                      ;               (STACK+8)  = (DE)
+      51/      0 :                      ;               (STACK+10) = (HL)
+      52/      0 :                      ;               (STACK+12) = (PC)
+      53/      0 :                      ;               THE USER'S ROUTINE SHOULD RETURN TO MTR88 VIA
+      54/      0 :                      ;               A *RET* WITHOUT ENABLING INTERRUPTS.
+      55/      0 :                      ;
+      56/      0 :                      ;       2       SINGLE STEP INTERRUPTS RECEIVED WHEN IN
+      57/      0 :                      ;               USER MODE CAUSES A JUMP THROUGH *UIVEC*+3.
+      58/      0 :                      ;               STACK UPON USER ROUTINE ENTRY:
+      59/      0 :                      ;               (STACK+0)  = (STACKPTR+12)
+      60/      0 :                      ;               (STACK+2)  = (AF)
+      61/      0 :                      ;               (STACK+4)  = (BC)
+      62/      0 :                      ;               (STACK+6)  = (DE)
+      63/      0 :                      ;               (STACK+8)  = (HL)
+      64/      0 :                      ;               (STACK+10) = (PC)
+      65/      0 :                      ;               THE USER'S ROUTINE SHOULD HANDLE IT'S OWN RETURN
+      66/      0 :                      ;               FROM THE INTERRUPT.  THAT IS, *EI* FOLLOWED BY *RET*.
+      67/      0 :                      ;
+      68/      0 :                      ;       THE FOLLOWING INTERRUPTS ARE VECTORED DIRECTLY THROUGH *UIVEC*.
+      69/      0 :                      ;       THE USER ROUTINE MUST HAVE SETUP A JUMP IN *UIVEC* BEFORE ANY
+      70/      0 :                      ;       OF THESE INTERRUPTS MAY OCCUR. RETURN IS VIA *EI* AND THEN *RET*.
+      71/      0 :                      ;
+      72/      0 :                      ;       3       I/O 3. CAUSES A DIRECT JUMP THROUGH *UIVEC*+6
+      73/      0 :                      ;
+      74/      0 :                      ;       4       I/O 4. CAUSES A DIRECT JUMP THROUGH *UIVEC*+9
+      75/      0 :                      ;
+      76/      0 :                      ;       5       I/O 5. CAUSES A DIRECT JUMP THROUGH *UIVEC*+12
+      77/      0 :                      ;
+      78/      0 :                      ;       6       I/O 6. CAUSES A DIRECT JUMP THROUGH *UIVEC*+15
+      79/      0 :                      ;
+      80/      0 :                      ;       7       I/O 7. CAUSES A DIRECT JUMP THROUGH *UIVEC*+18
+      81/      0 :                      
+      82/      0 :                      ;       ASSEMBLY CONSTANTS
+      83/      0 :                      
+      84/      0 :                      ;       IO PORTS
+      85/      0 :                      
+      86/      0 :                      ;       ALL REFERENCES TO THE H8 FRONT PANEL PORTS ARE TRAPPED BY THE
+      87/      0 :                      ;       Z80 NMI OF THE H88/H89.  OP.CTL WILL STILL PERFORM AS IN AN H8
+      88/      0 :                      ;       IN RESPECT TO THE CLOCK AND SINGLE STEP CONTROL.  FOR MORE
+      89/      0 :                      ;       INFORMATION SEE THE NMI ROUTINE.
+      90/      0 :                      ;
+      91/      0 : =360O                IP.PAD  EQU     360Q            ; PAD INPUT PORT
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 3 - 2024-04-04 05:54:22 PM
+
+
+      92/      0 : =360O                OP.CTL  EQU     360Q            ; CONTROL OUTPUT PORT
+      93/      0 : =360O                OP.DIG  EQU     360Q            ; DIGIT SELECT OUTPUT PORT
+      94/      0 : =361O                OP.SEQ  EQU     361Q            ; SEGMENT SELECT OUTPUT PORT
+      95/      0 :                      
+      96/      0 :                      ;       H88/H89 CONTROL PORT
+      97/      0 : =362O                H88.CTL EQU     362Q            ; H88/H89 PORT FOR CLOCK AND SINGLE STEP
+      98/      0 : =2O                  H88B.CK EQU     00000010B       ; 2MS CLOCK ENABLE/DISABLE
+      99/      0 : =1O                  H88B.SS EQU     00000001B       ; SINGLE STEP ENABLE/DISABLE
+     100/      0 :                      
+     101/      0 : =362O                H88.SW  EQU     362Q            ; 8 POSITION DIP SWITCH
+     102/      0 : =300O                H88S.BR EQU     11000000B       ; BAUD RATE SWITCHES
+     103/      0 : =40O                 H88S.M  EQU     00100000B       ; MEMORY TEST/NORMAL OPERATION SWITCH
+     104/      0 :                      
+     105/      0 :                      ;       CASSETTE PORTS
+     106/      0 :                      
+     107/      0 : =371O                IP.TPC  EQU     371Q            ; TAPE CONTROL IN
+     108/      0 : =371O                OP.TPC  EQU     371Q            ; TAPE CONTROL OUT
+     109/      0 : =370O                IP.TPD  EQU     370Q            ; TAPE DATA IN
+     110/      0 : =370O                OP.TPD  EQU     370Q            ; TAPE DATA OUT
+     111/      0 :                      
+     112/      0 :                      ;       ASCII CHARACTERS
+     113/      0 :                      
+     114/      0 : =26O                 A.SYN   EQU     026Q            ; SYNC CHARACTER
+     115/      0 : =2O                  A.STX   EQU     002Q            ; STX CHARACTER
+     116/      0 : =7O                  A.BEL   EQU     007Q            ; BELL CHARACTER
+     117/      0 : =10O                 A.BKS   EQU     010Q            ; BACKSPACE CHARACTER
+     118/      0 : =12O                 A.LF    EQU     012Q            ; LINE FEED CHARACTER
+     119/      0 : =15O                 A.CR    EQU     015Q            ; CARRIAGE RETURN CHARACTER
+     120/      0 : =33O                 A.ESC   EQU     033Q            ; ESCAPE CHARACTER
+     121/      0 : =177O                A.DEL   EQU     177Q            ; DELETE OR RUBOUT CHARACTER
+     122/      0 :                      
+     123/      0 :                      ;       FRONT PANEL HARDWARE CONTROL BITS.
+     124/      0 :                      
+     125/      0 : =20O                 CB.SSI  EQU     00010000B       ; SINGLE STEP INTERRUPT
+     126/      0 : =40O                 CB.MTL  EQU     00100000B       ; MONITOR LIGHT
+     127/      0 : =100O                CB.CLI  EQU     01000000B       ; CLOCK INTERRUPT ENABLE
+     128/      0 : =200O                CB.SPK  EQU     10000000B       ; SPEAKER ENABLE
+     129/      0 :                      
+     130/      0 :                      ;       DISPLAY MODE FLAGS (IN *DSPMOD*)
+     131/      0 :                      
+     132/      0 : =0O                  DM.MR   EQU     0               ; MEMORY READ
+     133/      0 : =1O                  DM.MW   EQU     1               ; MEMORY WRITE
+     134/      0 : =2O                  DM.RR   EQU     2               ; REGISTER READ
+     135/      0 : =3O                  DM.RW   EQU     3               ; REGISTER WRITE
+     136/      0 :                      
+     137/      0 :                              INCLUDE tape.asm
+(1)    1/      0 :                      ;       TAPE EQUIVALENCES.
+(1)    2/      0 :                      
+(1)    3/      0 : =1O                  RT.MI   EQU     1       ; RECORD TYPE - MEMORY DUMP IMAGE
+(1)    4/      0 : =2O                  RT.BP   EQU     2       ; RECORD TYPE - BASIC PROGRAM
+(1)    5/      0 : =3O                  RT.CT   EQU     3       ; RECORD TYPE - COMPRESSED TEXT
+(1)    6/      0 :                      
+(1)    7/      0 :                      ;       BLOCK SIZE FOR INTER-PRODUCT COMMUNICATION
+(1)    8/      0 :                      
+(1)    9/      0 : =2.000O              BLKSIZ  EQU   512
+(1)   10/      0 :                      
+     138/      0 :                      
+     139/      0 :                      ;       MACHINE INSTRUCTIONS
+     140/      0 :                      
+     141/      0 : =166O                MI.HLT  EQU     01110110B       ; HALT
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 4 - 2024-04-04 05:54:22 PM
+
+
+     142/      0 : =311O                MI.RET  EQU     11001001B       ; RETURN
+     143/      0 : =333O                MI.IN   EQU     11011011B       ; INPUT
+     144/      0 : =323O                MI.OUT  EQU     11010011B       ; OUTPUT
+     145/      0 : =72O                 MI.LDA  EQU     00111010B       ; LDA
+     146/      0 : =346O                MI.ANI  EQU     11100110B       ; ANI
+     147/      0 : =21O                 MI.LXID EQU     00010001B       ; LXI D
+     148/      0 : =303O                MI.JMP  EQU     11000011B       ; JMP
+     149/      0 : =335O                MI.LDXA EQU     11011101B       ; LD IX,  (BYTE A)
+     150/      0 : =41O                 MI.LDXB EQU     00100001B       ; LD IX,  (BYTE B)
+     151/      0 : =375O                MI.LDYA EQU     11111101B       ; LD IY,  (BYTE A)
+     152/      0 : =41O                 MI.LDYB EQU     00100001B       ; LD IY,  (BYTE B)
+     153/      0 : =10O                 MI.EXAF EQU     00001000B       ; EX AD,AF'
+     154/      0 : =335O                MI.JIXA EQU     11011101B       ; JP (IX)  (BYTE A)
+     155/      0 : =351O                MI.JIXB EQU     11101001B       ; JP (IX)  (BYTE B)
+     156/      0 : =375O                MI.JIYA EQU     11111101B       ; JP (IY)  (BYTE A)
+     157/      0 : =371O                MI.JIYB EQU     11111001B       ; JP (IY)  (BYTE B)
+     158/      0 :                      
+     159/      0 :                      ;       USER OPTION BITS
+     160/      0 :                      ;
+     161/      0 :                      ;       THESE BITS ARE IN SELL MFLAG.
+     162/      0 :                      ;
+     163/      0 :                      
+     164/      0 : =200O                UO.HLT  EQU     10000000B       ; DISABLE HALT PROCESSING
+     165/      0 : =100O                UO.NFR  EQU     CB.CLI          ; NO REFRESH OF FRONT PANEL
+     166/      0 : =2O                  UO.DDU  EQU     00000010B       ; DISABLE DISPLAY UPDATE
+     167/      0 : =1O                  UO.CLK  EQU     00000001B       ; ALLOW PRIVATE INTERRUPT PROCESSING
+     168/      0 :                      
+     169/      0 :                              INCLUDE u8251.asm       ; DEFINE 8251 USART BITS
+(1)    1/      0 :                      ;       8251 USART BIT DEFINITIONS.
+(1)    2/      0 :                      ;
+(1)    3/      0 :                      
+(1)    4/      0 :                      ;       MODE INSTRUCTION CONTROL BITS.
+(1)    5/      0 :                      
+(1)    6/      0 : =100O                UMI.1B  EQU     01000000B       ; 1 STOP BIT
+(1)    7/      0 : =200O                UMI.HB  EQU     10000000B       ; 1 1/2 STOP BITS
+(1)    8/      0 : =300O                UMI.2B  EQU     11000000B       ; 2 STOP BITS
+(1)    9/      0 : =40O                 UMI.PE  EQU     00100000B       ; EVEN PARITY
+(1)   10/      0 : =20O                 UMI.PA  EQU     00010000B       ; USE PARITY
+(1)   11/      0 : =0O                  UMI.L5  EQU     00000000B       ; 5 BIT CHARACTERS
+(1)   12/      0 : =4O                  UMI.L6  EQU     00000100B       ; 6 BIT CHARACTERS
+(1)   13/      0 : =10O                 UMI.L7  EQU     00001000B       ; 7 BIT CHARACTERS
+(1)   14/      0 : =14O                 UMI.L8  EQU     00001100B       ; 8 BIT CHARACTERS
+(1)   15/      0 : =1O                  UMI.1X  EQU     00000001B       ; CLOCK X 1
+(1)   16/      0 : =2O                  UMI.16X EQU     00000010B       ; CLOCK X 16
+(1)   17/      0 : =3O                  UMI.64X EQU     00000011B       ; CLOCK X 64
+(1)   18/      0 :                      
+(1)   19/      0 :                      ;       COMMAND INSTRUCTION BITS.
+(1)   20/      0 :                      
+(1)   21/      0 : =100O                UCI.IR  EQU     01000000B       ; INTERNAL RESET
+(1)   22/      0 : =40O                 UCI.RO  EQU     00100000B       ; READER-ON CONTROL FLAG
+(1)   23/      0 : =20O                 UCI.ER  EQU     00010000B       ; ERROR RESET
+(1)   24/      0 : =4O                  UCI.RE  EQU     00000100B       ; RECEIVE ENABLE
+(1)   25/      0 : =2O                  UCI.IE  EQU     00000010B       ; ENABLE INTERRUPTS FLAG
+(1)   26/      0 : =1O                  UCI.TE  EQU     00000001B       ; TRANSMIT ENABLE
+(1)   27/      0 :                      
+(1)   28/      0 :                      ;       STATUS READ BITS.
+(1)   29/      0 :                      
+(1)   30/      0 : =40O                 USR.FE  EQU     00100000B       ; FRAMING ERROR
+(1)   31/      0 : =20O                 USR.OE  EQU     00010000B       ; OVERRUN ERROR
+(1)   32/      0 : =10O                 USR.PE  EQU     00001000B       ; PARITY ERROR
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm(u8251.asm) - Page 5 - 2024-04-04 05:54:22 PM
+
+
+(1)   33/      0 : =4O                  USR.TXE EQU     00000100B       ; TRANSMITTER EMPTY
+(1)   34/      0 : =2O                  USR.RXR EQU     00000010B       ; RECEIVER READY
+(1)   35/      0 : =1O                  USR.TXR EQU     00000001B       ; TRANSMITTER READY
+(1)   36/      0 :                      
+     170/      0 :                      
+     171/      0 :                              INCLUDE u8250.asm       ; DEFINE 8250 ACE BITS
+(1)    1/      0 :                      ; DEFINES FOR 8250 UART/ACE CHIP
+(1)    2/      0 :                      ;
+(1)    3/      0 :                      ; REVERSE ENGINEERED AS ORIGINAL SOURCE CODE WAS NOT PUBLISHED.
+(1)    4/      0 :                      
+(1)    5/      0 : =350O                SC.ACE  EQU     350Q            ; I/O PORT FOR ACE
+(1)    6/      0 :                      
+(1)    7/      0 : =3O                  UC.8BW  EQU     3
+(1)    8/      0 : =200O                UC.DLA  EQU     200Q
+(1)    9/      0 : =1O                  UC.DR   EQU     1
+(1)   10/      0 : =40O                 UC.THE  EQU     40Q
+(1)   11/      0 :                      
+(1)   12/      0 : =0O                  UR.DLL  EQU     0
+(1)   13/      0 : =1O                  UR.DLM  EQU     1
+(1)   14/      0 : =1O                  UR.IER  EQU     1
+(1)   15/      0 : =3O                  UR.LCR  EQU     3
+(1)   16/      0 : =5O                  UR.LSR  EQU     5
+(1)   17/      0 : =0O                  UR.RBR  EQU     0
+(1)   18/      0 : =0O                  UR.THR  EQU     0
+(1)   19/      0 :                      
+     172/      0 :                      
+     173/      0 :                      ;       INTERRUPT VECTORS.
+     174/      0 :                      ;
+     175/      0 :                      
+     176/      0 :                      ;       LEVEL 0 - RESET
+     177/      0 :                      ;
+     178/      0 :                      ;       THIS 'INTERRUPT' MAY NOT BE PROCESSED BY A USER PROGRAM.
+     179/      0 :                      
+     180/      0 : 303 000 004          INIT0   JMP     INIT0X          ; DO H88 EXTENSION OF INITIALIZATION
+     181/      3 : 041 012 040          INIT0.0 LXI     H,PRSRAM+PRSL-1 ; (HL) = RAM DESTINATION FOR CODE
+     182/      6 : 303 073 000                  JMP     INIT            ; INITIALIZE
+     183/     11 :                      
+     184/     11 : (MACRO)                      ERRPL   INIT-1000Q      ; BYTE IN WORD 10A MUST BE 0
+     184/     11 :                      ;       IF (INIT-1000Q) > 0
+     184/     11 :                      ;         ERROR Expression is positive
+     184/     11 :                      ;       ENDIF
+     185/     11 :                      
+     186/     11 :                      ;       LEVEL 1 - CLOCK
+     187/     11 :                      
+     188/     11 : =10O                 INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
+     189/     11 :                      
+     190/     11 : (MACRO)                      ERRNZ   *-110           ; INT0 TAKES UP ONE BYTE
+     190/     11 :                      ;       IF (*-110) != 0
+     190/     11 :                      ;         ERROR Expression is not zero
+     190/     11 :                      ;       ENDIF
+     191/     11 :                      
+     192/     11 : 315 132 000                  CALL    SAVALL          ; SAVE USER REGISTERS
+     193/     14 : 026 000                      MVI     D,0
+     194/     16 : 303 201 000                  JMP     CLOCK           ; PROCESS CLOCK INTERRUPT
+     195/     21 : (MACRO)                      ERRPL   CLOCK-1000Q     ; EXTRA BYTE MUST BE 0
+     195/     21 :                      ;       IF (CLOCK-1000Q) > 0
+     195/     21 :                      ;         ERROR Expression is positive
+     195/     21 :                      ;       ENDIF
+     196/     21 :                      
+     197/     21 :                      ;       LEVEL 2 - SINGLE STEP
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 6 - 2024-04-04 05:54:22 PM
+
+
+     198/     21 :                      
+     199/     21 : =20O                 INT2    EQU     20Q             ; LEVEL 2 ENTRY
+     200/     21 :                      
+     201/     21 : (MACRO)                      ERRNZ   *-21Q           ; INT1 TAKES EXTRA BYTE
+     201/     21 :                      ;       IF (*-21Q) != 0
+     201/     21 :                      ;         ERROR Expression is not zero
+     201/     21 :                      ;       ENDIF
+     202/     21 :                      
+     203/     21 : 315 132 000                  CALL    SAVALL          ; SAVE REGISTERS
+     204/     24 : 032                          LDAX    D               ; (A) = (CTLFLG)
+     205/     25 :                      ;       SET     CTLFLG
+     206/     25 : 303 244 001                  JMP     STPRTN          ; STEP RETURN
+     207/     30 :                      
+     208/     30 :                      ;       I/O INTERRUPT VECTORS.
+     209/     30 :                      ;
+     210/     30 :                      ;       INTERRUPTS 3 THROUGH 7 ARE AVAILABLE FOR GENERA I/O USE.
+     211/     30 :                      ;
+     212/     30 :                      ;       THESE INTERRUPTS ARE NOT SUPPORTED BY MTR88, AND SHOULD
+     213/     30 :                      ;       NEVER OCCUR UNLESS THE USER HAS SUPPLIED HANDLER ROUTINES
+     214/     30 :                      ;       (THROUGH UIVEC).
+     215/     30 :                      
+     216/     30 :                              ORG     30Q
+     217/     30 :                      
+     218/     30 : 303 045 040          INT3    JMP     UIVEC+6         ; JUMP TO USER ROUTINE
+     219/     33 :                      
+     220/     33 : 064 064 064 064 060          DB      '44440'         ; HEATH PART NUMBER 444-10
+     221/     40 :                      
+     222/     40 :                              ORG     40Q
+     223/     40 :                      
+     224/     40 : 303 050 040          INT4    JMP     UIVEC+9         ; JUMP TO USER ROUTINE
+     225/     43 :                      
+     226/     43 : 044 122 116 102 044          DB      44Q,122Q,116Q,102Q,44Q ; SUPPORT CODE
+     227/     50 :                      
+     228/     50 :                              ORG     50Q
+     229/     50 :                      
+     230/     50 : 303 053 040          INT5    JMP     UIVEC+12        ; JUMP TO USER ROUTINE
+     231/     53 :                      
+     232/     53 :                      
+     233/     53 :                      ;       DLY - DELAY TIME INTERVAL
+     234/     53 :                      ;
+     235/     53 :                      ;       ENTRY   (A) = MILLISECOND DELAY COUNT/2
+     236/     53 :                      ;       EXIT    NONE
+     237/     53 :                      ;       USES    A,F
+     238/     53 :                      
+     239/     53 : (MACRO)                      ERRNZ   *-53A
+     239/     53 :                      ;       IF (*-53A) != 0
+     239/     53 :                      ;         ERROR Expression is not zero
+     239/     53 :                      ;       ENDIF
+     240/     53 :                      
+     241/     53 : 365                  DLY     PUSH    PSW             ; SAVE COUNT
+     242/     54 : 257                          XRA     A               ; DONT SOUND HORN
+     243/     55 : 303 143 002                  JMP     HRN0            ; PROCESS AS HORN
+     244/     60 :                      
+     245/     60 :                              ORG     60Q
+     246/     60 :                      
+     247/     60 : 303 056 040          INT6    JMP     UIVEC+15        ; JUMP TO USER ROUTINE
+     248/     63 :                      
+     249/     63 : 076 320              GO.     MVI     A,CB.SSI+CB.CLI+CB.SPK ; OFF MONITOR MODE LIGHT
+     250/     65 : 303 235 001                  JMP     SST1            ; RETURN TO USER PROGRAM
+     251/     70 :                      
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 7 - 2024-04-04 05:54:22 PM
+
+
+     252/     70 :                              ORG     70Q
+     253/     70 :                      
+     254/     70 : 303 061 040          INT7    JMP     UIVEC+18        ; JUMP TO USER ROUTINE
+     255/     73 :                      
+     256/     73 :                      ;       INIT - INITIALIZE SYSTEM
+     257/     73 :                      ;
+     258/     73 :                      ;       INIT IS CALLED WHENEVER A HARDWARE MASTER-CLEAR IS INITIATED.
+     259/     73 :                      ;
+     260/     73 :                      ;       SETUP MTR88 CONTROL CELLS IN RAM.
+     261/     73 :                      ;       DECODE HOW MUCH MEMORY EXISTS. SETUP STACKPOINTER, AND
+     262/     73 :                      ;       ENTER THE MONITOR LOOP.
+     263/     73 :                      ;
+     264/     73 :                      ;       ENTRY   FROM MASTER CLEAR
+     265/     73 :                      ;       EXIT    INTO MTR88 MAIN LOOP
+     266/     73 :                      
+     267/     73 : (MACRO)                      ERRNZ   *-73Q
+     267/     73 :                      ;       IF (*-73Q) != 0
+     267/     73 :                      ;         ERROR Expression is not zero
+     267/     73 :                      ;       ENDIF
+     268/     73 :                      
+     269/     73 : 032                  INIT    LDAX    D               ; COPY *PRSROM* INTO RAM
+     270/     74 : 167                          MOV     M,A             ; MOVE BYTE
+     271/     75 : 053                          DCX     H               ; DECREMENT DESTINATION
+     272/     76 : 034                          INR     E               ; INCREMENT SOURCE
+     273/     77 : 302 073 000                  JNZ     INIT            ; IF NOT DONE
+     274/    102 :                      
+     275/    102 : =4.000O              SINCR   EQU     2000Q           ; SEARCH INCREMENT
+     276/    102 :                      
+     277/    102 : 026 004                      MVI     D,SINCR/256     ; (DE) = SEARCH INCREMENT
+     278/    104 : 041 000 034                  LXI     H,START-SINCR   ; (HL) = FIRST RAM - SEARCH INCREMENT
+     279/    107 :                      
+     280/    107 :                      ;       DETERMINE MEMORY LIMIT
+     281/    107 :                      
+     282/    107 : 167                  INIT1   MOV     M,A             ; RESTORE VALUE READ
+     283/    110 : 031                          DAD     D               ; INCREMENT TRIAL ADDRESS
+     284/    111 : 176                          MOV     A,M             ; (A) = CURRENT MEMORY VALUE
+     285/    112 : 065                          DCR     M               ; TRY TO CHANGE IT
+     286/    113 : 276                          CMP     M
+     287/    114 : 302 107 000                  JNZ     INIT1           ; IF MEMORY CHANGED
+     288/    117 :                      
+     289/    117 : 053                  INIT2   DCX     H
+     290/    120 :                      
+     291/    120 : 371                          SPHL                    ; SET STACKPOINTER = MEMORY LIMIT -1
+     292/    121 :                      
+     293/    121 : 345                          PUSH    H               ; SET *PC* VALUE ON STACK
+     294/    122 : 041 322 000                  LXI     H,ERROR
+     295/    125 : 345                          PUSH    H               ; SET 'RETURN ADDRESS'
+     296/    126 :                      
+     297/    126 :                      ;       CONFIGURE LOAD/DUMP UART
+     298/    126 :                      
+     299/    126 : 076 116                      MVI     A,UMI.1B+UMI.L8+UMI.16X
+     300/    130 : 323 371                      OUT     OP.TPC          ; SET 8 BIT, NO PARITY, 1 STOP, 16X
+     301/    132 :                      
+     302/    132 :                      ;       SAVALL - SAVE ALL REGISTERS ON STACK.
+     303/    132 :                      ;
+     304/    132 :                      ;       SAVALL IS CALLED WHEN AN INTERRUPT IS ACCEPTED, IN ORDER TO
+     305/    132 :                      ;       SAVE THE CONTENTS OF THE REGISTERS ON THE STACK.
+     306/    132 :                      ;
+     307/    132 :                      ;       ENTRY   CALLED DIRECTLY FROM INTERRUPT ROUTINE
+     308/    132 :                      ;       EXIT    ALL REGISTERS PUSHED ON STACK.
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 8 - 2024-04-04 05:54:22 PM
+
+
+     309/    132 :                      ;               IF NO YET IN MONITOR MODE, REGPTR = ADDRESS OF REGISTERS
+     310/    132 :                      ;               ON STACK.
+     311/    132 :                      ;               (DE) = ADDRESS OF CTLFLG
+     312/    132 :                      
+     313/    132 : (MACRO)                      ERRNZ   *-132Q
+     313/    132 :                      ;       IF (*-132Q) != 0
+     313/    132 :                      ;         ERROR Expression is not zero
+     313/    132 :                      ;       ENDIF
+     314/    132 :                      
+     315/    132 : 343                  SAVALL  XTHL                    ; SET H,L ON STACK TOP
+     316/    133 : 325                          PUSH    D
+     317/    134 : 305                          PUSH    B
+     318/    135 : 365                          PUSH    PSW
+     319/    136 : 353                          XCHG                    ; (D,E) = RETURN ADDRESS
+     320/    137 : 041 012 000                  LXI     H,10
+     321/    142 : 071                          DAD     SP              ; (H,L) = ADDRESS OF USERS SP
+     322/    143 :                      
+     323/    143 :                      ;       REPLACE THE INSTRUCTIONS WITH A JUMP AROUND THE NMI VECTOR JUMP
+     324/    143 :                      ;
+     325/    143 :                      ;       PUSH    H               ; SET ON STACK AS REGISTER
+     326/    143 :                      ;       PUSH    D               ; SET RETURN ADDRESS
+     327/    143 :                      ;       LXI     D,CTLFLG
+     328/    143 :                      ;       LDAX    D               ; (A) = CTLFLG
+     329/    143 :                      
+     330/    143 : 303 105 004                  JMP     SAVALLX         ; GO TO SAVALL EXTENSION
+     331/    146 :                      
+     332/    146 :                      ;       ENTRY POINT FOR THE Z80 NMI
+     333/    146 :                      ;
+     334/    146 :                      
+     335/    146 : (MACRO)                      ERRNZ   *-66H           ; Z80 NMI ADDRESS
+     335/    146 :                      ;       IF (*-66H) != 0
+     335/    146 :                      ;         ERROR Expression is not zero
+     335/    146 :                      ;       ENDIF
+     336/    146 :                      
+     337/    146 : 303 116 004          NMIENT  JMP     NMI
+     338/    151 :                      
+     339/    151 : (MACRO)                      ERRNZ   SAVALLR-151Q    ; DO NOT CHANGE ORGANIZATION
+     339/    151 :                      ;       IF (SAVALLR-151Q) != 0
+     339/    151 :                      ;         ERROR Expression is not zero
+     339/    151 :                      ;       ENDIF
+     340/    151 :                      
+     341/    151 :                      SAVALLR                         ; SAVALL EXTENSION RETURN ADDRESS
+     342/    151 :                      
+     343/    151 : 057                          CMA
+     344/    152 : 346 060                      ANI     CB.MTL+CB.SSI   ; SAVE REGISTER ADDR IF USER OR SINGLE STEP
+     345/    154 : 310                          RZ                      ; RETURN IF WAS INTERRUPT OF MONITOR LOOP
+     346/    155 : 041 002 000                  LXI     H,2
+     347/    160 : 071                          DAD     SP              ; (H,L) = ADDRESS OF 'STACKPTR' ON STACK
+     348/    161 : 042 035 040                  SHLD    REGPTR
+     349/    164 : 311                          RET
+     350/    165 :                      
+     351/    165 :                      ;       CUI - CHECK FOR USER INTERRUPT PROCESSING.
+     352/    165 :                      ;
+     353/    165 :                      ;       CUI IS CALLED TO SEE IF THE USER HAS SPECIFIED PROCESSING
+     354/    165 :                      ;       FOR THE CLOCK INTERRUPT.
+     355/    165 :                      
+     356/    165 : (MACRO)                      ERRNZ   *-165Q
+     356/    165 :                      ;       IF (*-165Q) != 0
+     356/    165 :                      ;         ERROR Expression is not zero
+     356/    165 :                      ;       ENDIF
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 9 - 2024-04-04 05:54:22 PM
+
+
+     357/    165 :                      
+     358/    165 :                      ;       SET     MFLAG           ; REFERENCE TO MFLAG
+     359/    165 : 012                  CUI1    LDAX    B               ; (A) = MFLAG
+     360/    166 : (MACRO)                      ERRNZ   UO.CLK-1        ; CODE ASSUMED = 01
+     360/    166 :                      ;       IF (UO.CLK-1) != 0
+     360/    166 :                      ;         ERROR Expression is not zero
+     360/    166 :                      ;       ENDIF
+     361/    166 : 017                          RRC
+     362/    167 : 334 037 040                  CC      UIVEC           ; IF SPECIFIED, TRANSFER TO USER
+     363/    172 :                      
+     364/    172 :                      ;       RETURN TO PROGRAM FROM INTERRUPT.
+     365/    172 :                      
+     366/    172 : (MACRO)                      ERRNZ  *-172Q
+     366/    172 :                      ;       IF (*-172Q) != 0
+     366/    172 :                      ;         ERROR Expression is not zero
+     366/    172 :                      ;       ENDIF
+     367/    172 :                      
+     368/    172 : 361                  INTXIT  POP     PSW             ; REMOVE FAKE 'STACK REGISTER'
+     369/    173 : 361                          POP     PSW
+     370/    174 : 301                          POP     B
+     371/    175 : 321                          POP     D
+     372/    176 : 341                          POP     H
+     373/    177 : 373                          EI
+     374/    200 : 311                          RET
+     375/    201 :                      
+     376/    201 :                      ;       CLOCK - PROCESS CLOCK INTERRUPT
+     377/    201 :                      ;
+     378/    201 :                      ;       CLOCK IS ENTERED WHENEVER A 2-MILLISECOND CLOCK INTERRUPT IS
+     379/    201 :                      ;       PROCESSED.
+     380/    201 :                      ;
+     381/    201 :                      ;       TICCNT IS INCREMENTED EVERY INTERRUPT.
+     382/    201 :                      
+     383/    201 : (MACRO)                      ERRNZ   *-201Q
+     383/    201 :                      ;       IF (*-201Q) != 0
+     383/    201 :                      ;         ERROR Expression is not zero
+     383/    201 :                      ;       ENDIF
+     384/    201 :                      
+     385/    201 : 052 033 040          CLOCK   LHLD    TICCNT
+     386/    204 : 043                          INX     H
+     387/    205 : 042 033 040                  SHLD    TICCNT          ; INCREMENT TICCOUNT
+     388/    210 :                      
+     389/    210 : 072 011 040                  LDA     CTLFLG          ; CLEAR CLOCK INTERRUPT FLIP-FLOP
+     390/    213 : 323 360                      OUT     OP.CTL
+     391/    215 :                      
+     392/    215 :                      ;       EXIT CLOCK INTERRUPT.
+     393/    215 :                      
+     394/    215 : 001 011 040                  LXI     B,CTLFLG
+     395/    220 : 012                          LDAX    B               ; (A) = CTLFLG
+     396/    221 : 346 040                      ANI     CB.MTL
+     397/    223 : 302 172 000                  JNZ     INTXIT          ; IF IN MONITOR MODE
+     398/    226 : 013                          DCX     B
+     399/    227 : (MACRO)                      ERRNZ   CTLFLG-MFLAG-1
+     399/    227 :                      ;       IF (CTLFLG-MFLAG-1) != 0
+     399/    227 :                      ;         ERROR Expression is not zero
+     399/    227 :                      ;       ENDIF
+     400/    227 : 012                          LDAX    B               ; (A) = MFLAG
+     401/    230 : (MACRO)                      ERRNZ   UO.HLT-200Q     ; ASSUME HIGH-ORDER
+     401/    230 :                      ;       IF (UO.HLT-200Q) != 0
+     401/    230 :                      ;         ERROR Expression is not zero
+     401/    230 :                      ;       ENDIF
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 10 - 2024-04-04 05:54:22 PM
+
+
+     402/    230 : 027                          RAL
+     403/    231 : 332 270 000                  JC      CLK4            ; SKIP IT
+     404/    234 :                      
+     405/    234 :                      ;       NOT IN MONITOR MODE. CHECK FOR HALT
+     406/    234 :                      
+     407/    234 : 076 012                      MVI     A,10            ; (A) = INDEX OF *P* REG
+     408/    236 : 315 052 003                  CALL    LRA.            ; LOCATE REGISTER ADDRESS
+     409/    241 : 136                          MOV     E,M
+     410/    242 : 043                          INX     H
+     411/    243 : 126                          MOV     D,M             ; (D,E) = PC CONTENTS
+     412/    244 : 033                          DCX     D
+     413/    245 : 032                          LDAX    D
+     414/    246 : 376 166                      CPI     MI.HLT          ; CHECK FOR HALT
+     415/    250 : 302 165 000                  JNZ     CUI1
+     416/    253 :                      
+     417/    253 : 076 007                      MVI     A,A.BEL         ; DING BELL
+     418/    255 : 315 302 003                  CALL    WCC
+     419/    260 : 076 110                      MVI     A,'H'           ; "H" FOR HALT
+     420/    262 : 315 302 003                  CALL    WCC
+     421/    265 : 303 322 000                  JMP     ERROR
+     422/    270 :                      
+     423/    270 :                      ;       JZ      ERROR           ; IF HALT, BE IN MONITOR MODE
+     424/    270 :                      
+     425/    270 :                      ;       NONE OF THE ABOVE, SO ALLOW USER PROCESSING OF CLOCK INTERRUPT
+     426/    270 :                      
+     427/    270 : 303 165 000          CLK4    JMP     CUI1            ; ALLOW USER PROCESSING OF CLOCK
+     428/    273 :                      
+     429/    273 :                      ;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
+     430/    273 :                      
+     431/    273 : 041 000 000 053 174          DB      041Q, 000Q, 000Q, 053Q, 174Q, 265Q, 302Q, 276Q
+             300 : 265 302 276        
+     432/    303 : 000 303 207 007 353          DB      000Q, 303Q, 207Q, 007Q, 353Q, 041Q, 047Q, 001Q
+             310 : 041 047 001        
+     433/    313 : 335 041 315 003 303          DB      335Q, 041Q, 315Q, 003Q, 303Q, 306Q, 007Q
+             320 : 306 007            
+     434/    322 :                      
+     435/    322 :                      ;       ERROR - COMMAND ERROR.
+     436/    322 :                      ;
+     437/    322 :                      ;       ERROR IS CALLED AS A 'BAIL-OUT' ROUTINE.
+     438/    322 :                      ;
+     439/    322 :                      ;       IT RESETS THE OPERATIONAL MODE, AND RESTORES THE STACKPOINTER.
+     440/    322 :                      ;
+     441/    322 :                      ;       ENTRY   NONE
+     442/    322 :                      ;       EXIT    TO HTR LOOP
+     443/    322 :                      ;               CTLFLG SET
+     444/    322 :                      ;               MFLAG CLEARED
+     445/    322 :                      ;       USES    ALL
+     446/    322 :                      
+     447/    322 : (MACRO)                      ERRNZ   *-322Q
+     447/    322 :                      ;       IF (*-322Q) != 0
+     447/    322 :                      ;         ERROR Expression is not zero
+     447/    322 :                      ;       ENDIF
+     448/    322 :                      
+     449/    322 : 041 010 040          ERROR   LXI     H,MFLAG
+     450/    325 : 176                          MOV     A,M             ; (A) = MFLAG
+     451/    326 : 346 275                      ANI     377Q-UO.DDU-UO.NFR ; RE-ENABLE DISPLAYS
+     452/    330 : 167                          MOV     M,A             ; REPLACE
+     453/    331 : 043                          INX     H
+     454/    332 : 066 360                      MVI     M,CB.SSI+CB.MTL+CB.CLI+CB.SPK ; RESTORE *CTLFLG*
+     455/    334 : (MACRO)                      ERRNZ   CTLFLG-.MFLAG-1
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 11 - 2024-04-04 05:54:22 PM
+
+
+     455/    334 :                      ;       IF (CTLFLG-.MFLAG-1) != 0
+     455/    334 :                      ;         ERROR Expression is not zero
+     455/    334 :                      ;       ENDIF
+     456/    334 : 373                          EI
+     457/    335 : 052 035 040                  LHLD    REGPTR
+     458/    340 : 371                          SPHL                    ; RESTORE STACK POINTER TO EMPTY STATE
+     459/    341 : 315 136 002                  CALL    ALARM
+     460/    344 :                      
+     461/    344 :                      ;       MTR - MONITOR LOOP.
+     462/    344 :                      ;
+     463/    344 :                      
+     464/    344 : (MACRO)                      ERRNZ   *-344Q
+     464/    344 :                      ;       IF (*-344Q) != 0
+     464/    344 :                      ;         ERROR Expression is not zero
+     464/    344 :                      ;       ENDIF
+     465/    344 :                      
+     466/    344 : 373                  MTR     EI
+     467/    345 :                      
+     468/    345 : 041 345 000          MTR1    LXI     H,MTR1
+     469/    350 : 345                          PUSH    H               ; SET 'MTR1' AS RETURN ADDRESS
+     470/    351 : 041 112 006                  LXI     H,MSG.PR        ; TYPE PROMPT MESSAGE
+     471/    354 : 315 100 006                  CALL    TYPMSG
+     472/    357 :                      
+     473/    357 : 315 262 003          MTR.2   CALL    RCC             ; READ A CONSOLE CHARACTER
+     474/    362 : 346 137                      ANI     01011111B       ; MAKE SURE ITS UPPER CASE TO MATCH TABLE
+     475/    364 : 041 025 001                  LXI     H,MTRA          ; LOOK UP CHARACTER IN *MTRA*
+     476/    367 : 006 006                      MVI     B,MTRAL         ; (B) = LENGTH OF TABLE
+     477/    371 : 276                  MTR.3   CMP     M               ; SEE IF CHARACTER FROM CONSOLE = TABLE ENTRY
+     478/    372 : 312 014 001                  JZ      MTR.4           ; IF EQUAL
+     479/    375 :                      
+     480/    375 : 043                          INX     H               ; POINT TO NEXT TABLE ENTRY
+     481/    376 : 043                          INX     H
+     482/    377 : 043                          INX     H
+     483/  1.000 : 005                          DCR     B               ; SEE IF PAST END OF TABLE
+     484/  1.001 : 302 371 000                  JNZ     MTR.3           ; IF NOT PAST
+     485/  1.004 :                      
+     486/  1.004 : 076 007                      MVI     A,A.BEL         ; ELSE, DING ERROR
+     487/  1.006 : 315 302 003                  CALL    WCC
+     488/  1.011 : 303 357 000                  JMP     MTR.2           ; TRY AGAIN
+     489/  1.014 :                      
+     490/  1.014 : 315 302 003          MTR.4   CALL    WCC             ; WRITE CHARACTER BACK TO CONSOLE
+     491/  1.017 : 043                          INX     H               ; GET ROUTINE ADDRESS LSB
+     492/  1.020 : 176                          MOV     A,M
+     493/  1.021 : 043                          INX     H               ; GET MSB
+     494/  1.022 : 146                          MOV     H,M
+     495/  1.023 : 157                          MOV     L,A             ; (H,L) = ROUTINE ADDRESS
+     496/  1.024 : 351                          PCHL                    ; GO TO ROUTINE
+     497/  1.025 :                      
+     498/  1.025 :                      MTRA                            ; JUMP TABLE
+     499/  1.025 :                      
+     500/  1.025 : 107                          DB      'G'             ; GO TO USER ROUTINE
+     501/  1.026 : 146 001                      DW      GO88
+     502/  1.030 :                      
+     503/  1.030 : 114                          DB      'L'             ; CASSETTE LOAD
+     504/  1.031 : 067 001                      DW      SRMEM
+     505/  1.033 :                      
+     506/  1.033 : 104                          DB      'D'             ; SET UP CASSETTE DUMP
+     507/  1.034 : 313 004                      DW      SWMEM
+     508/  1.036 :                      
+     509/  1.036 : 123                          DB      'S'             ; SUBSTITUTE MEMORY MODE
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 12 - 2024-04-04 05:54:22 PM
+
+
+     510/  1.037 : 370 004                      DW      SUBM
+     511/  1.041 :                      
+     512/  1.041 : 120                          DB      'P'             ; PROGRAM COUNTER ALTER MODE
+     513/  1.042 : 103 001                      DW      PCA
+     514/  1.044 :                      
+     515/  1.044 : 102                          DB      'B'             ; BOOT HDOS
+     516/  1.045 : 256 004                      DW      BOOT
+     517/  1.047 :                      
+     518/  1.047 : =6O                  MTRAL   EQU     ($-MTRA)/3      ; NUMBER OF TABLE ENTRYS   /JWT 790507/
+     519/  1.047 :                      
+     520/  1.047 :                      ;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
+     521/  1.047 :                      
+     522/  1.047 : 015 012 012 105 122          DB    015Q, 012Q, 012Q, 105Q, 122Q, 122Q, 117Q, 122Q
+           1.054 : 122 117 122        
+     523/  1.057 : 040 100 040 000              DB    040Q, 100Q, 040Q, 000Q
+     524/  1.063 :                      
+     525/  1.063 :                      ;       SAE - STORE ABUSS AND EXIT.
+     526/  1.063 :                      ;
+     527/  1.063 :                      ;       ENTRY   (HL) = ABUSS VALUE
+     528/  1.063 :                      ;       EXIT    TO (RET)
+     529/  1.063 :                      ;       USES    NONE
+     530/  1.063 :                      
+     531/  1.063 : (MACRO)                      ERRNZ   *-1063Q
+     531/  1.063 :                      ;       IF (*-1063Q) != 0
+     531/  1.063 :                      ;         ERROR Expression is not zero
+     531/  1.063 :                      ;       ENDIF
+     532/  1.063 :                      
+     533/  1.063 : 042 024 040          SAE     SHLD    ABUSS
+     534/  1.066 : 311                          RET
+     535/  1.067 :                      
+     536/  1.067 :                      ;       SRMEM - H88/H89 ENTRY POINT FOR A CASSETTE LOAD
+     537/  1.067 :                      ;
+     538/  1.067 :                      
+     539/  1.067 : 041 170 006          SRMEM   LXI     H,MSG.LD        ; COMPLETE MESSAGE
+     540/  1.072 : 315 100 006                  CALL    TYPMSG
+     541/  1.075 : 315 003 006                  CALL    WCR             ; WAIT FOR A CARRIAGE RETURN
+     542/  1.100 : 303 261 001                  JMP     RMEM            ; LOAD TAPE
+     543/  1.103 :                      
+     544/  1.103 :                      ;       PCA - PROGRAM COUNTER ALTER
+     545/  1.103 :                      ;
+     546/  1.103 :                      ;       PCA INPUTS AND/OR DISPLAYS THE CURRENT USER PROGRAM VALUE AND ALLOWS
+     547/  1.103 :                      ;       A NEW VALUE TO BE ENTERED OR RETAINS THE CURRENT VALUE IF
+     548/  1.103 :                      ;       A CR IS TYPED
+     549/  1.103 :                      ;
+     550/  1.103 :                      ;       ENTRY   NONE
+     551/  1.103 :                      ;       EXIT    NONE
+     552/  1.103 :                      ;       USES    A,D,E,H,L,F
+     553/  1.103 :                      
+     554/  1.103 : 041 214 006          PCA     LXI     H,MSG.PC        ; COMPLETE PC MESSAGE
+     555/  1.106 : 315 100 006                  CALL    TYPMSG
+     556/  1.111 : 076 012                      MVI     A,10            ; GET LOCATION OF USER PC
+     557/  1.113 : 315 052 003                  CALL    LRA.
+     558/  1.116 : 136                          MOV     E,M             ; (D,E) = USER PC VALUE
+     559/  1.117 : 043                          INX     H
+     560/  1.120 : 126                          MOV     D,M
+     561/  1.121 : 353                          XCHG                    ; (H,L) = USER PC VALUE
+     562/  1.122 :                      
+     563/  1.122 : 315 150 005                  CALL    IROC            ; INPUT NEXT CHARACTER
+     564/  1.125 : 332 137 001                  JC      PCA1            ; IF FIRST CHARACTER WAS OCTAL, INPUT NEW PC
+     565/  1.130 :                      
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 13 - 2024-04-04 05:54:22 PM
+
+
+     566/  1.130 : 315 313 005                  CALL    TOA             ; ELSE, OUTPUT CURRENT VALUE
+     567/  1.133 : 315 150 005                  CALL    IROC            ; SEE IF USER WANTS TO CHANGE IT NOW
+     568/  1.136 : 320                          RNC                     ; IF NOT CHANGE, EXIT
+     569/  1.137 :                      
+     570/  1.137 :                      ;       ENTER NEW USER PC VALUE
+     571/  1.137 :                      
+     572/  1.137 : 353                  PCA1    XCHG                    ; (H,L) = ADDRESS OF USER PC VALUE
+     573/  1.140 : 026 015                      MVI     D,A.CR          ; END BYTE WITH A RETURN
+     574/  1.142 : 315 062 003                  CALL    IOA             ; INPUT NEW ADDRESS
+     575/  1.145 : 311                          RET                     ; EXIT
+     576/  1.146 :                      
+     577/  1.146 :                      ;       GO88 - GO TO USER ROUTINE FROM H88 MONITOR
+     578/  1.146 :                      ;
+     579/  1.146 :                      ;       GO88 WAITS FOR A CARRIAGE RETURN OR A NEW ADDRESS TERMINATED WITH
+     580/  1.146 :                      ;       A CARRIAGE RETURN.  IF NO ADDRESS IS ENTERED, GO88 TRANSFERS
+     581/  1.146 :                      ;       CONTROL TO THE ADDRESS SPECIFIED BY THE USER PC VALUE
+     582/  1.146 :                      
+     583/  1.146 : 041 165 006          GO88    LXI     H,MSG.GO        ; COMPLETE GO MESSAGE
+     584/  1.151 : 315 100 006                  CALL    TYPMSG
+     585/  1.154 : 315 150 005                  CALL    IROC            ; INPUT A RETURN OR AN OCTAL CHARACTER
+     586/  1.157 : 322 177 001                  JNC     GO88.1          ; IF RETURN, GO TO CURRENT USER PC
+     587/  1.162 :                      
+     588/  1.162 : 365                          PUSH    PSW             ; ELSE SAVE OCTAL CHARACTER AND FLAGS
+     589/  1.163 : 076 012                      MVI     A,10            ; GET ADDRESS OF USER PC
+     590/  1.165 : 315 052 003                  CALL    LRA.
+     591/  1.170 : 043                          INX     H               ; POINT TO MSB
+     592/  1.171 : 361                          POP     PSW             ; GET FIRST CHARACTER BACK
+     593/  1.172 : 026 015                      MVI     D,A.CR          ; END ADDRESS WITH A RETURN
+     594/  1.174 : 315 062 003                  CALL    IOA             ; INPUT NEW GO ADDRESS
+     595/  1.177 : 315 302 003          GO88.1  CALL    WCC             ; ECHO RETURN
+     596/  1.202 : 076 012                      MVI     A,A.LF          ; LINE FEED
+     597/  1.204 : 315 302 003                  CALL    WCC
+     598/  1.207 : 303 222 001                  JMP     GO              ; EXECUTE USER ROUTINE
+     599/  1.212 :                      
+     600/  1.212 : 110 103 101 046 103          DB      110Q,103Q,101Q,046Q,103Q,101Q,107Q,056Q ; DESIGN CODE
+           1.217 : 101 107 056        
+     601/  1.222 :                      
+     602/  1.222 :                      ;       GO - RETURN TO USER MODE
+     603/  1.222 :                      ;
+     604/  1.222 :                      ;       ENTRY   NONE
+     605/  1.222 :                      
+     606/  1.222 : (MACRO)                      ERRNZ   *-1222Q
+     606/  1.222 :                      ;       IF (*-1222Q) != 0
+     606/  1.222 :                      ;         ERROR Expression is not zero
+     606/  1.222 :                      ;       ENDIF
+     607/  1.222 :                      
+     608/  1.222 : 303 063 000          GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
+     609/  1.225 :                      
+     610/  1.225 :                      ;       SSTEP - SINGLE STEP INSTRUCTION.
+     611/  1.225 :                      ;
+     612/  1.225 :                      ;       ENTRY   NONE
+     613/  1.225 :                      
+     614/  1.225 : (MACRO)                      ERRNZ   *-1225Q
+     614/  1.225 :                      ;       IF (*-1225Q) != 0
+     614/  1.225 :                      ;         ERROR Expression is not zero
+     614/  1.225 :                      ;       ENDIF
+     615/  1.225 :                      
+     616/  1.225 :                      SSTEP                           ; SINGLE STEP
+     617/  1.225 : 363                          DI                      ; DISABLE INTERRUPTS UNTIL THE RIGHT TIME
+     618/  1.226 : 072 011 040                  LDA     CTLFLG
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 14 - 2024-04-04 05:54:22 PM
+
+
+     619/  1.231 : 356 020                      XRI     CB.SSI          ; CLEAR SINGLE STEP INHIBIT
+     620/  1.233 : 323 360                      OUT     OP.CTL          ; PRIME SINGLE STEP INTERRUPT
+     621/  1.235 : 062 011 040          SST1    STA     CTLFLG          ; SET NEW FLAG VALUES
+     622/  1.240 : 341                          POP     H               ; CLEAN STACK
+     623/  1.241 : 303 172 000                  JMP     INTXIT          ; RETURN TO USER ROUTINE FOR STEP
+     624/  1.244 :                      
+     625/  1.244 :                      ;       STPRTN - SINGLE STEP RETURN
+     626/  1.244 :                      
+     627/  1.244 : (MACRO)                      ERRNZ   *-1244Q
+     627/  1.244 :                      ;       IF (*-1244Q) != 0
+     627/  1.244 :                      ;         ERROR Expression is not zero
+     627/  1.244 :                      ;       ENDIF
+     628/  1.244 :                      
+     629/  1.244 :                      STPRTN
+     630/  1.244 : 366 020                      ORI     CB.SSI          ; DISABLE SINGLE STEP INTERRUPTION
+     631/  1.246 : 323 360                      OUT     OP.CTL          ; TURN OFF SINGLE STEP ENABLE
+     632/  1.250 :                      ;       SET     CTLFLG
+     633/  1.250 : 022                          STAX    D
+     634/  1.251 : 346 040                      ANI     CB.MTL          ; SEE IF IN MONITOR MODE
+     635/  1.253 : 302 344 000                  JNZ     MTR
+     636/  1.256 : 303 042 040                  JMP     UIVEC+3         ; TRANSFER TO USER'S ROUTINE
+     637/  1.261 :                      
+     638/  1.261 :                      
+     639/  1.261 :                      ;       RMEM - LOAD MEMORY FROM TAPE
+     640/  1.261 :                      ;
+     641/  1.261 :                      
+     642/  1.261 : (MACRO)                      ERRNZ   *-1261Q
+     642/  1.261 :                      ;       IF (*-1261Q) != 0
+     642/  1.261 :                      ;         ERROR Expression is not zero
+     642/  1.261 :                      ;       ENDIF
+     643/  1.261 :                      
+     644/  1.261 : 041 244 002          RMEM    LXI     H,TPABT
+     645/  1.264 : 042 031 040                  SHLD    TPERRX          ; SETUP ERROR EXIT ADDRESS
+     646/  1.267 :                      ;       JMP     LOAD
+     647/  1.267 :                      
+     648/  1.267 :                      ;       LOAD - LOAD MEMORY FROM TAPE
+     649/  1.267 :                      ;
+     650/  1.267 :                      ;       READ THE NEXT RECORD FROM THE CASSETTE TAPE.
+     651/  1.267 :                      ;
+     652/  1.267 :                      ;       USE THE LOAD ADDRESS IN THE TAPE RECORD.
+     653/  1.267 :                      ;
+     654/  1.267 :                      ;       ENTRY   (HL) = ERROR EXIT ADDRESS
+     655/  1.267 :                      ;       EXIT    USER P-REG (IN STACK) SET TO ENTRY ADDRESS
+     656/  1.267 :                      ;               TO CALLER IF ALL OK
+     657/  1.267 :                      ;               TO ERROR EXIT IF TAPE ERRORS DETECTED.
+     658/  1.267 :                      
+     659/  1.267 : (MACRO)                      ERRNZ   *-1267Q
+     659/  1.267 :                      ;       IF (*-1267Q) != 0
+     659/  1.267 :                      ;         ERROR Expression is not zero
+     659/  1.267 :                      ;       ENDIF
+     660/  1.267 :                      
+     661/  1.267 : 001 000 376          LOAD    LXI     B,177000Q       ; 400Q-RT.MI*256-256 (BC) = - REQUIRED TYPE AND #
+     662/  1.272 : 315 265 002          LOA0    CALL    SRS             ; SCAN FOR RECORD COUNT
+     663/  1.275 : 157                          MOV     L,A             ; (HL) = COUNT
+     664/  1.276 : 353                          XCHG                    ; (DE) = COUNT, (HL) = TYPE AND #
+     665/  1.277 : 015                          DCR     C               ; (C) = NEXT #
+     666/  1.300 : 011                          DAD     B
+     667/  1.301 : 174                          MOV     A,H
+     668/  1.302 : 305                          PUSH    B               ; SAVE TYPE AND #
+     669/  1.303 : 365                          PUSH    PSW             ; SAVE TYPE CODE
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 15 - 2024-04-04 05:54:22 PM
+
+
+     670/  1.304 : 346 177                      ANI     177Q            ; CLEAR END FLAG BIT
+     671/  1.306 : 265                          ORA     L
+     672/  1.307 : 076 002                      MVI     A,2             ; SEQUENCE ERROR
+     673/  1.311 : 302 205 002                  JNZ     TPERR           ; IF NOT RIGHT TYPE OR SEQUENCE
+     674/  1.314 : 315 325 002                  CALL    RNP             ; READ ADDR
+     675/  1.317 : 104                          MOV     B,H
+     676/  1.320 : 117                          MOV     C,A             ; (BC) = P-REG ADDRESS
+     677/  1.321 : 076 012                      MVI     A,10
+     678/  1.323 : 325                          PUSH    D               ; SAVE (DE)
+     679/  1.324 : 315 052 003                  CALL    LRA.            ; LOCATE REG ADDRESS
+     680/  1.327 : 321                          POP     D               ; RESTORE (DE)
+     681/  1.330 : 161                          MOV     M,C             ; SET P-REG IN MEM
+     682/  1.331 : 043                          INX     H
+     683/  1.332 : 160                          MOV     M,B
+     684/  1.333 : 315 325 002                  CALL    RNP             ; READ ADDRESS
+     685/  1.336 : 157                          MOV     L,A             ; (HL) = ADDRESS, (DE) = COUNT
+     686/  1.337 : 042 000 040                  SHLD    START
+     687/  1.342 :                      
+     688/  1.342 : 315 331 002          LOA1    CALL    RNB             ; READ BYE
+     689/  1.345 : 167                          MOV     M,A
+     690/  1.346 :                      
+     691/  1.346 :                      ; SHOW H88 THAT SOMETHING IS HAPPENING
+     692/  1.346 :                      
+     693/  1.346 : 315 024 006                  CALL    TPDSP           ; DISPLAY TO H88 USER THAT WE ARE LOADING
+     694/  1.351 :                      
+     695/  1.351 : 043                          INX     H
+     696/  1.352 : 033                          DCX     D
+     697/  1.353 : 172                          MOV     A,D
+     698/  1.354 : 263                          ORA     E
+     699/  1.355 : 302 342 001                  JNZ     LOA1            ; IF MORE TO GO
+     700/  1.360 :                      
+     701/  1.360 : 315 172 002                  CALL    CTC             ; CHECK TAPE CHECKSUM
+     702/  1.363 :                      
+     703/  1.363 :                      ;       READ NEXT BLOCK
+     704/  1.363 :                      
+     705/  1.363 : 361                          POP     PSW             ; (A) = FILE TYPE BYTE
+     706/  1.364 : 301                          POP     B               ; (BC) = -(LAST TYPE, LAST #)
+     707/  1.365 : 007                          RLC
+     708/  1.366 : 332 133 002                  JC      TFT             ; ALL DONE - TURN OFF TAPE
+     709/  1.371 : 303 272 001                  JMP     LOA0            ; READ ANOTHER RECORD
+     710/  1.374 :                      
+     711/  1.374 :                      ;       DUMP - DUMP MEMORY TO MAG TAPE.
+     712/  1.374 :                      ;
+     713/  1.374 :                      ;       DUMP SPECIFIED MEMORY RANGE TO MAG TAPE.
+     714/  1.374 :                      ;
+     715/  1.374 :                      ;       ENTRY   (START) = START ADDRESS
+     716/  1.374 :                      ;               (ABUSS) = END ADDRESS
+     717/  1.374 :                      ;               USER PC = ENTRY POINT ADDRESS
+     718/  1.374 :                      ;       EXIT    TO CALLER.
+     719/  1.374 :                      
+     720/  1.374 : (MACRO)                      ERRNZ   *-1374Q
+     720/  1.374 :                      ;       IF (*-1374Q) != 0
+     720/  1.374 :                      ;         ERROR Expression is not zero
+     720/  1.374 :                      ;       ENDIF
+     721/  1.374 :                      
+     722/  1.374 :                      WMEM
+     723/  1.374 : 041 244 002                  LXI     H,TPABT
+     724/  1.377 : 042 031 040                  SHLD    TPERRX          ; SETUP ERROR EXIT
+     725/  2.002 :                      
+     726/  2.002 : (MACRO)                      ERRNZ   *-2002Q
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 16 - 2024-04-04 05:54:22 PM
+
+
+     726/  2.002 :                      ;       IF (*-2002Q) != 0
+     726/  2.002 :                      ;         ERROR Expression is not zero
+     726/  2.002 :                      ;       ENDIF
+     727/  2.002 :                      
+     728/  2.002 : 076 001              DUMP    MVI     A,UCI.TE
+     729/  2.004 : 323 371                      OUT     OP.TPC          ; SETUP TAPE CONTROL
+     730/  2.006 : 076 026                      MVI     A,A.SYN
+     731/  2.010 : 046 040                      MVI     H,32            ; (H) = # OF SYNC CHARACTERS
+     732/  2.012 : 315 024 003          WME1    CALL    WNB
+     733/  2.015 : 045                          DCR     H
+     734/  2.016 : 302 012 002                  JNZ     WME1            ; WRITE SYN HEADER
+     735/  2.021 : 076 002                      MVI     A,A.STX
+     736/  2.023 : 315 024 003                  CALL    WNB             ; WRITE STX
+     737/  2.026 : 154                          MOV     L,H             ; (HL) = 00
+     738/  2.027 : 042 027 040                  SHLD    CRCSUM          ; CLEAR CRC 16
+     739/  2.032 : 041 001 201                  LXI     H,100401Q       ; RT.MI+80H*256+1 FIRST AND LAST MI RECORD
+     740/  2.035 : 315 017 003                  CALL    WNP             ; WRITE HEADER
+     741/  2.040 : 052 000 040                  LHLD    START
+     742/  2.043 : 353                          XCHG                    ; (D,E) = START ADDRESS
+     743/  2.044 : 052 024 040                  LHLD    ABUSS           ; (H,L) = STOP ADDR
+     744/  2.047 : 043                          INX     H               ; COMPUTE WITH STOP+1
+     745/  2.050 : 175                          MOV     A,L
+     746/  2.051 : 223                          SUB     E
+     747/  2.052 : 157                          MOV     L,A
+     748/  2.053 : 174                          MOV     A,H
+     749/  2.054 : 232                          SBB     D
+     750/  2.055 : 147                          MOV     H,A             ; (HL) = COUNT
+     751/  2.056 : 315 017 003                  CALL    WNP             ; WRITE COUNT
+     752/  2.061 : 345                          PUSH    H
+     753/  2.062 : 076 012                      MVI     A,10
+     754/  2.064 : 325                          PUSH    D               ; SAVE (DE)
+     755/  2.065 : 315 052 003                  CALL    LRA.            ; LOCATE P-REG ADDRESS
+     756/  2.070 : 176                          MOV     A,M
+     757/  2.071 : 043                          INX     H
+     758/  2.072 : 146                          MOV     H,M
+     759/  2.073 : 157                          MOV     L,A             ; (HL) = CONTENTS OF PC
+     760/  2.074 : 315 017 003                  CALL    WNP             ; WRITE HEADER
+     761/  2.077 : 341                          POP     H               ; (HL) = ADDRESS
+     762/  2.100 : 321                          POP     D               ; (DE) = COUNT
+     763/  2.101 : 315 017 003                  CALL    WNP
+     764/  2.104 :                      
+     765/  2.104 : 176                  WME2    MOV     A,M
+     766/  2.105 : 315 024 003                  CALL    WNB             ; WRITE BYTE
+     767/  2.110 :                      
+     768/  2.110 :                      ;       SHOW H88 USER THAT DUMP IS DUMPING
+     769/  2.110 :                      
+     770/  2.110 : 315 024 006                  CALL    TPDSP           ; DISPLAY DUMP
+     771/  2.113 :                      
+     772/  2.113 : 043                          INX     H
+     773/  2.114 : 033                          DCX     D
+     774/  2.115 : 172                          MOV     A,D
+     775/  2.116 : 263                          ORA     E
+     776/  2.117 : 302 104 002                  JNZ     WME2            ; IF MORE TO GO
+     777/  2.122 :                      
+     778/  2.122 :                      ;       WRITE CHECKSUM
+     779/  2.122 :                      
+     780/  2.122 : 052 027 040                  LHLD    CRCSUM
+     781/  2.125 : 315 017 003                  CALL    WNP             ; WRITE IT
+     782/  2.130 : 315 017 003                  CALL    WNP             ; FLUSH CHECKSUM
+     783/  2.133 :                      ;       JMP     TFT
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 17 - 2024-04-04 05:54:22 PM
+
+
+     784/  2.133 :                      
+     785/  2.133 :                      ;       TFT - TURN OFF TAPE.
+     786/  2.133 :                      ;
+     787/  2.133 :                      ;       STOP THE TAPE TRANSPORT.
+     788/  2.133 :                      ;
+     789/  2.133 :                      
+     790/  2.133 : (MACRO)                      ERRNZ   *-2133Q
+     790/  2.133 :                      ;       IF (*-2133Q) != 0
+     790/  2.133 :                      ;         ERROR Expression is not zero
+     790/  2.133 :                      ;       ENDIF
+     791/  2.133 :                      
+     792/  2.133 : 257                  TFT     XRA     A
+     793/  2.134 : 323 371                      OUT OP.TPC              ; TURN OFF TAPE
+     794/  2.136 :                      
+     795/  2.136 :                      ;       HORN - MAKE NOISE.
+     796/  2.136 :                      ;
+     797/  2.136 :                      ;       ENTRY   (A) = (MILLISECOND COUNT)/2
+     798/  2.136 :                      ;       EXIT    NONE
+     799/  2.136 :                      ;       USES    A,F
+     800/  2.136 :                      
+     801/  2.136 : (MACRO)                      ERRNZ   *-2136Q
+     801/  2.136 :                      ;       IF (*-2136Q) != 0
+     801/  2.136 :                      ;         ERROR Expression is not zero
+     801/  2.136 :                      ;       ENDIF
+     802/  2.136 :                      
+     803/  2.136 :                      ALARM
+     804/  2.136 :                              CPU     Z80
+     805/  2.136 : 030 027                      JR      ALARMB          ; BRANCH TO A JUMP TO NOISE TO DING BELL
+     806/  2.140 :                              CPU     8080
+     807/  2.140 :                      
+     808/  2.140 : (MACRO)                      ERRNZ   *-2140Q
+     808/  2.140 :                      ;       IF (*-2140Q) != 0
+     808/  2.140 :                      ;         ERROR Expression is not zero
+     808/  2.140 :                      ;       ENDIF
+     809/  2.140 :                      
+     810/  2.140 : 365                  HORN    PUSH    PSW
+     811/  2.141 : 076 200                      MVI     A,CB.SPK        ; TURN ON SPEAKER
+     812/  2.143 :                      
+     813/  2.143 : 343                  HRN0    XTHL                    ; SAVE (HL), (H) = COUNT
+     814/  2.144 : 325                          PUSH    D               ; SAVE (DE)
+     815/  2.145 : 353                          XCHG                    ; (D) = LOOP COUNT
+     816/  2.146 : 041 011 040                  LXI     H,CTLFLG
+     817/  2.151 : 256                          XRA     M
+     818/  2.152 : 136                          MOV     E,M             ; (E) = OLD CTLFLG VALUE
+     819/  2.153 : 167                          MOV     M,A             ; TURN ON HORN
+     820/  2.154 : 056 033                      MVI     L,TICCNT#256
+     821/  2.156 :                      
+     822/  2.156 : 172                          MOV     A,D             ; (A) = CYCLE COUNT
+     823/  2.157 : 206                          ADD     M
+     824/  2.160 : 276                  HRN2    CMP     M               ; WAIT REQUIRED TICCOUNTS
+     825/  2.161 : 302 160 002                  JNZ     HRN2
+     826/  2.164 :                      
+     827/  2.164 : 303 045 006                  JMP     HRNX            ; JUMP TO AN EXTENSION OF HORN SO ROOM
+     828/  2.167 :                                                      ; CAN BE MADE FOR A JUMP TO NOISE
+     829/  2.167 :                      
+     830/  2.167 : 303 053 006          ALARMB  JMP     NOISE           ; SEND A BELL TO THE CONSOLE
+     831/  2.172 :                      
+     832/  2.172 :                      ;       CTC - VERIFY CHECKSUM.
+     833/  2.172 :                      ;
+     834/  2.172 :                      ;       ENTRY   TAPE JUST BEFORE CRC
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 18 - 2024-04-04 05:54:22 PM
+
+
+     835/  2.172 :                      ;       EXIT    TO CALLER IF OK
+     836/  2.172 :                      ;               TO *TPERR* IF BAD
+     837/  2.172 :                      ;       USES    A,F,H,L
+     838/  2.172 :                      
+     839/  2.172 : (MACRO)                      ERRNZ   *-2172Q
+     839/  2.172 :                      ;       IF (*-2172Q) != 0
+     839/  2.172 :                      ;         ERROR Expression is not zero
+     839/  2.172 :                      ;       ENDIF
+     840/  2.172 :                      
+     841/  2.172 : 315 325 002          CTC     CALL    RNP             ; READ NEXT PAIR
+     842/  2.175 : 052 027 040                  LHLD    CRCSUM
+     843/  2.200 : 174                          MOV     A,H
+     844/  2.201 : 265                          ORA     L
+     845/  2.202 : 310                          RZ                      ; RETURN IF OK
+     846/  2.203 : 076 001                      MVI     A,1             ; CHECKSUM ERROR
+     847/  2.205 :                      ;       JMP     TPERR           ; (B) = CODE
+     848/  2.205 :                      
+     849/  2.205 :                      ;       TPERR - PROCESS TAPE ERROR
+     850/  2.205 :                      ;
+     851/  2.205 :                      ;       DISPLAY ERR NUMBER IF LOW BYTE OF ABUSS
+     852/  2.205 :                      ;
+     853/  2.205 :                      ;       IF ERROR NUMBER EVEN, DON'T ALLOW #
+     854/  2.205 :                      ;       IF ERROR NUMBER ODD, ALLOW #
+     855/  2.205 :                      ;
+     856/  2.205 :                      ;       ENTRY   (B) = PATTERN
+     857/  2.205 :                      
+     858/  2.205 : (MACRO)                      ERRNZ   *-2205Q
+     858/  2.205 :                      ;       IF (*-2205Q) != 0
+     858/  2.205 :                      ;         ERROR Expression is not zero
+     858/  2.205 :                      ;       ENDIF
+     859/  2.205 :                      
+     860/  2.205 : 107                  TPERR   MOV     B,A             ; (B) = CODE
+     861/  2.206 : 315 063 006                  CALL    TPERMSG         ; DISPLAY ERROR NUMBER ON CONSOLE
+     862/  2.211 : 315 133 002                  CALL    TFT             ; TURN OFF TAPE
+     863/  2.214 :                      
+     864/  2.214 :                      ;       IS #, RETURN (IF PARITY ERROR)
+     865/  2.214 :                      
+     866/  2.214 : 346                          DB      MI.ANI          ; FALL THROUGH WITH CARRY CLEAR
+     867/  2.215 : 170                  TER3    MOV     A,B
+     868/  2.216 :                      
+     869/  2.216 : 017                          RRC
+     870/  2.217 : 330                          RC                      ; RETURN IF OK
+     871/  2.220 :                      
+     872/  2.220 :                      ;       BEEP AND FLASH ERROR NUMBER
+     873/  2.220 :                      
+     874/  2.220 : 334 136 002          TER1    CC      ALARM           ; ALARM IF PROPER TIME
+     875/  2.223 : 315 252 002                  CALL    TPXIT           ; SEE IF #
+     876/  2.226 : 333 360                      IN      IP.PAD
+     877/  2.230 : 376 057                      CPI     00101111B       ; CHECK FOR #
+     878/  2.232 : 312 215 002                  JZ      TER3            ; IF #
+     879/  2.235 : 072 034 040                  LDA     TICCNT+1
+     880/  2.240 : 037                          RAR                     ; 'C' SET IF 1/2 SECOND
+     881/  2.241 : 303 220 002                  JMP     TER1
+     882/  2.244 :                      
+     883/  2.244 :                      ;       TPABT - ABORT TAPE LOAD OR DUMP.
+     884/  2.244 :                      ;
+     885/  2.244 :                      ;       ENTERED WHEN LOADING OR DUMPING, AND THE '*' KEY
+     886/  2.244 :                      ;       IS STRUCK.
+     887/  2.244 :                      
+     888/  2.244 : (MACRO)                      ERRNZ   *-2249Q
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 19 - 2024-04-04 05:54:22 PM
+
+
+     888/  2.244 :                      ;       IF (*-2249Q) != 0
+     888/  2.244 :                      ;         ERROR Expression is not zero
+     888/  2.244 :                      ;       ENDIF
+     889/  2.244 :                      
+     890/  2.244 : 257                  TPABT   XRA     A
+     891/  2.245 : 323 371                      OUT     OP.TPC          ; OFF TAPE
+     892/  2.247 : 303 322 000                  JMP     ERROR
+     893/  2.252 :                      
+     894/  2.252 :                      ;       TPXIT - CHECK FOR USER FORCED EXIT.
+     895/  2.252 :                      ;
+     896/  2.252 :                      ;       TPXIT CHECKS FOR AN '*' KEYPAD ENTRY. IF SO, TAKE
+     897/  2.252 :                      ;       THE TAPE DRIVER ABNORMAL EXIT.
+     898/  2.252 :                      ;
+     899/  2.252 :                      ;       ENTRY   NONE
+     900/  2.252 :                      ;       EXIT    TO *RET* IF NOT '*'
+     901/  2.252 :                      ;                (A) = PORT STATUS
+     902/  2.252 :                      ;               TO (TPERRX) IF '*' DOWN
+     903/  2.252 :                      ;       USES    A,F
+     904/  2.252 :                      
+     905/  2.252 : (MACRO)                      ERRNZ   *-2252Q
+     905/  2.252 :                      ;       IF (*-2252Q) != 0
+     905/  2.252 :                      ;         ERROR Expression is not zero
+     905/  2.252 :                      ;       ENDIF
+     906/  2.252 :                      
+     907/  2.252 : 333 360              TPXIT   IN      IP.PAD
+     908/  2.254 : 376 157                      CPI     01101111B       ; *
+     909/  2.256 : 333 371                      IN      IP.TPC          ; READ TAPE STATUS
+     910/  2.260 : 300                          RNZ                     ; NOT '*', RETURN WITH STATUS
+     911/  2.261 : 052 031 040                  LHLD    TPERRX
+     912/  2.264 :                      
+     913/  2.264 : (MACRO)                      ERRNZ   *-2264Q
+     913/  2.264 :                      ;       IF (*-2264Q) != 0
+     913/  2.264 :                      ;         ERROR Expression is not zero
+     913/  2.264 :                      ;       ENDIF
+     914/  2.264 :                      
+     915/  2.264 : 351                          PCHL                    ; ENTER (TPERRX)
+     916/  2.265 :                      
+     917/  2.265 :                      ;       SRS - SCAN RECORD START
+     918/  2.265 :                      ;
+     919/  2.265 :                      ;       SRS READS BYTES UNTIL IT RECOGNIZES THE START OF A RECORD.
+     920/  2.265 :                      ;
+     921/  2.265 :                      ;       THIS REQUIRES
+     922/  2.265 :                      ;       AT LEAST 10 SYNC CHARACTERS
+     923/  2.265 :                      ;       1 STX CHARACTER
+     924/  2.265 :                      ;
+     925/  2.265 :                      ;       THE CRC-16 IS THEN INITIALIZED.
+     926/  2.265 :                      ;
+     927/  2.265 :                      ;       ENTRY   NONE
+     928/  2.265 :                      ;       EXIT    TAPE POSITIONED (AND MOVING), CRCSUM =0
+     929/  2.265 :                      ;               (DE) = HEADER BYTES
+     930/  2.265 :                      ;               (HA) = RECORD COUNT
+     931/  2.265 :                      ;       USES    A,F,D,E,H,L
+     932/  2.265 :                      
+     933/  2.265 : (MACRO)                      ERRNZ   *-2265Q
+     933/  2.265 :                      ;       IF (*-2265Q) != 0
+     933/  2.265 :                      ;         ERROR Expression is not zero
+     933/  2.265 :                      ;       ENDIF
+     934/  2.265 :                      
+     935/  2.265 :                      SRS
+     936/  2.265 : 026 000              SRS1    MVI     D,0
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 20 - 2024-04-04 05:54:22 PM
+
+
+     937/  2.267 : 142                          MOV     H,D
+     938/  2.270 : 152                          MOV     L,D             ; (HL) = 0
+     939/  2.271 : 315 331 002          SRS2    CALL    RNB             ; READ NEXT BYTE
+     940/  2.274 : 024                          INR     D
+     941/  2.275 : 376 026                      CPI     A.SYN
+     942/  2.277 : 312 271 002                  JZ      SRS2            ; HAVE SYN
+     943/  2.302 : 376 002                      CPI     A.STX
+     944/  2.304 : 302 265 002                  JNZ     SRS1            ; NOT STX - START OVER
+     945/  2.307 :                      
+     946/  2.307 : 076 012                      MVI     A,10
+     947/  2.311 : 272                          CMP     D               ; SEE IF ENOUGH SYNC CHARACTERS
+     948/  2.312 : 322 265 002                  JNC     SRS1            ; NOT ENOUGH
+     949/  2.315 : 042 027 040                  SHLD    CRCSUM          ; CLEAR CRC-16
+     950/  2.320 : 315 325 002                  CALL    RNP             ; READ LEADER
+     951/  2.323 : 124                          MOV     D,H
+     952/  2.324 : 137                          MOV     E,A
+     953/  2.325 :                      ;       JMP     RNP             ; READ COUNT
+     954/  2.325 :                      
+     955/  2.325 :                      ;       RNP - READ NEXT PAIR
+     956/  2.325 :                      ;
+     957/  2.325 :                      ;       RNP READS THE NEXT TWO BYTES FROM THE INPUT DEVICE.
+     958/  2.325 :                      ;
+     959/  2.325 :                      ;       ENTRY   NONE
+     960/  2.325 :                      ;       EXIT    (H,A) = BYTE PAIR
+     961/  2.325 :                      ;       USES    A,F,H
+     962/  2.325 :                      
+     963/  2.325 : (MACRO)                      ERRNZ   *-2325Q
+     963/  2.325 :                      ;       IF (*-2325Q) != 0
+     963/  2.325 :                      ;         ERROR Expression is not zero
+     963/  2.325 :                      ;       ENDIF
+     964/  2.325 :                      
+     965/  2.325 : 315 331 002          RNP     CALL    RNB             ; READ NEXT BYTE
+     966/  2.330 : 147                          MOV     H,A
+     967/  2.331 :                      ;       JMP     RNB             ; READ NEXT BYTE
+     968/  2.331 :                      
+     969/  2.331 :                      ;       RNB - READ NEXT BYTE
+     970/  2.331 :                      ;
+     971/  2.331 :                      ;       RNB READS THE NEXT SINGLE BYTE FROM THE INPUT DEVICE.
+     972/  2.331 :                      ;       THE CHECKSUM IS TAKEN FOR THE CHARACTER.
+     973/  2.331 :                      ;
+     974/  2.331 :                      ;       ENTRY   NONE
+     975/  2.331 :                      ;       EXIT    (A) = CHARACTER
+     976/  2.331 :                      ;       USES    A,F
+     977/  2.331 :                      
+     978/  2.331 : (MACRO)                      ERRNZ   *-2331Q
+     978/  2.331 :                      ;       IF (*-2331Q) != 0
+     978/  2.331 :                      ;         ERROR Expression is not zero
+     978/  2.331 :                      ;       ENDIF
+     979/  2.331 :                      
+     980/  2.331 : 076 064              RNB     MVI     A,UCI.RO+UCI.ER+UCI.RE ; TURN ON READ FOR NEXT BYTE
+     981/  2.333 : 323 371                      OUT     OP.TPC
+     982/  2.335 : 315 252 002          RNB1    CALL    TPXIT           ; CHECK FOR #, READ STATUS
+     983/  2.340 : 346 002                      ANI     USR.RXR
+     984/  2.342 : 312 335 002                  JZ      RNB1            ; IF NOT READY
+     985/  2.345 : 333 370                      IN      IP.TPD          ; INPUT DATA
+     986/  2.347 :                      ;       JMP     CRC             ; CHECKSUM
+     987/  2.347 :                      
+     988/  2.347 :                      ;       CRC - COMPUTE CRC-16
+     989/  2.347 :                      ;
+     990/  2.347 :                      ;       CRC COMPUTES A CRC-16 CHECKSUM FROM THE POLYNOMIAL
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 21 - 2024-04-04 05:54:22 PM
+
+
+     991/  2.347 :                      ;
+     992/  2.347 :                      ;       (X + 1) * (X^15 + X + 1)
+     993/  2.347 :                      ;
+     994/  2.347 :                      ;       SINCE THE CHECKSUM GENERATED IS A DIVISION REMAINDER,
+     995/  2.347 :                      ;       A CHECKSUMED DATA SEQUENCE CAN BE VERIFIED BY RUNNING
+     996/  2.347 :                      ;       THE DATA THROUGH CRC, AND THEN RUNNING THE PREVIOUSLY OBTAINED
+     997/  2.347 :                      ;       CHECKSUM THROUGH CRC. THE RESULTANT CHECKSUM SHOULD BE 0.
+     998/  2.347 :                      ;
+     999/  2.347 :                      ;       ENTRY   (CRCSUM) = CURRENT CHECKSUM
+    1000/  2.347 :                      ;               (A) = BYTE
+    1001/  2.347 :                      ;       EXIT    (CRCSUM) UPDATED
+    1002/  2.347 :                      ;               (A) UNCHANGED.
+    1003/  2.347 :                      ;       USES    F
+    1004/  2.347 :                      
+    1005/  2.347 : (MACRO)                      ERRNZ   *-2347Q
+    1005/  2.347 :                      ;       IF (*-2347Q) != 0
+    1005/  2.347 :                      ;         ERROR Expression is not zero
+    1005/  2.347 :                      ;       ENDIF
+    1006/  2.347 :                      
+    1007/  2.347 : 305                  CRC     PUSH    B               ; SAVE (BC)
+    1008/  2.350 : 006 010                      MVI     B,8             ; (B) = BIT COUNT
+    1009/  2.352 : 345                          PUSH    H
+    1010/  2.353 : 052 027 040                  LHLD    CRCSUM
+    1011/  2.356 : 007                  CRC1    RLC
+    1012/  2.357 : 117                          MOV     C,A             ; (C) = BIT
+    1013/  2.360 : 175                          MOV     A,L
+    1014/  2.361 : 207                          ADD     A
+    1015/  2.362 : 157                          MOV     L,A
+    1016/  2.363 : 174                          MOV     A,H
+    1017/  2.364 : 027                          RAL
+    1018/  2.365 : 147                          MOV     H,A
+    1019/  2.366 : 027                          RAL
+    1020/  2.367 : 251                          XRA     C
+    1021/  2.370 : 017                          RRC
+    1022/  2.371 : 322 004 003                  JNC     CRC2            ; IF NOT TO XOR
+    1023/  2.374 : 174                          MOV     A,H
+    1024/  2.375 : 356 200                      XRI     200Q
+    1025/  2.377 : 147                          MOV     H,A
+    1026/  3.000 : 175                          MOV     A,L
+    1027/  3.001 : 356 005                      XRI     5Q
+    1028/  3.003 : 157                          MOV     L,A
+    1029/  3.004 : 171                  CRC2    MOV     A,C
+    1030/  3.005 : 005                          DCR     B
+    1031/  3.006 : 302 356 002                  JNZ     CRC1            ; IF MORE TO GO
+    1032/  3.011 : 042 027 040                  SHLD    CRCSUM
+    1033/  3.014 : 341                          POP     H               ; RETURN (HL)
+    1034/  3.015 : 301                          POP     B               ; RESTORE (BC)
+    1035/  3.016 : 311                          RET                     ; EXIT
+    1036/  3.017 :                      
+    1037/  3.017 :                      ;       WNP - WRITE NEXT PAIR.
+    1038/  3.017 :                      ;
+    1039/  3.017 :                      ;       WNP WRITES THE NEXT TWO BYTES TO THE CASSETTE DRIVE
+    1040/  3.017 :                      ;
+    1041/  3.017 :                      ;       ENTRY   (H,L) = BYTES
+    1042/  3.017 :                      ;       EXIT    WRITTEN.
+    1043/  3.017 :                      ;       USES    A,F
+    1044/  3.017 :                      
+    1045/  3.017 : (MACRO)                      ERRNZ   *-3017Q
+    1045/  3.017 :                      ;       IF (*-3017Q) != 0
+    1045/  3.017 :                      ;         ERROR Expression is not zero
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 22 - 2024-04-04 05:54:22 PM
+
+
+    1045/  3.017 :                      ;       ENDIF
+    1046/  3.017 :                      
+    1047/  3.017 : 174                  WNP     MOV     A,H
+    1048/  3.020 : 315 024 003                  CALL    WNB
+    1049/  3.023 : 175                          MOV     A,L
+    1050/  3.024 :                      ;       JMP     WNB             ; WRITE NEXT BYTE
+    1051/  3.024 :                      
+    1052/  3.024 :                      ;       WNB - WRITE BYTE
+    1053/  3.024 :                      ;
+    1054/  3.024 :                      ;       WNB WRITE THE NEXT BYTE TO THE CASSETTE TAPE.
+    1055/  3.024 :                      ;
+    1056/  3.024 :                      ;       ENTRY   (A) = BYTE
+    1057/  3.024 :                      ;       EXIT    NONE.
+    1058/  3.024 :                      ;       USES    F
+    1059/  3.024 :                      
+    1060/  3.024 : (MACRO)                      ERRNZ   *-3024A
+    1060/  3.024 :                      ;       IF (*-3024A) != 0
+    1060/  3.024 :                      ;         ERROR Expression is not zero
+    1060/  3.024 :                      ;       ENDIF
+    1061/  3.024 :                      
+    1062/  3.024 : 365                  WNB     PUSH    PSW
+    1063/  3.025 : 315 252 002          WNB1    CALL    TPXIT           ; CHECK FOR *, READ STATUS
+    1064/  3.030 : 346 001                      ANI     USR.TXR
+    1065/  3.032 : 312 025 003                  JZ      WNB1            ; IF MORE TO GO
+    1066/  3.035 : 076 021                      MVI     A,UCI.ER+UCI.TE ; ENABLE TRANSMITTER
+    1067/  3.037 : 323 371                      OUT     OP.TPC          ; TURN ON TAPE
+    1068/  3.041 : 361                          POP     PSW
+    1069/  3.042 : 323 370                      OUT     OP.TPD          ; OUTPUT DATA
+    1070/  3.044 : 303 347 002                  JMP     CRC             ; COMPUTE CRC
+    1071/  3.047 :                      
+    1072/  3.047 :                      ;       LRA - LOCATE REGISTER ADDRESS
+    1073/  3.047 :                      ;
+    1074/  3.047 :                      ;       ENTRY   NONE.
+    1075/  3.047 :                      ;       EXIT    (A) = REGISTER INDEX
+    1076/  3.047 :                      ;               (H,L) = STORAGE ADDRESS
+    1077/  3.047 :                      ;               (D,E) = (O,A)
+    1078/  3.047 :                      ;       USES    A,D,E,H,L,F
+    1079/  3.047 :                      
+    1080/  3.047 : (MACRO)                      ERRNZ   *-3047Q
+    1080/  3.047 :                      ;       IF (*-3047Q) != 0
+    1080/  3.047 :                      ;         ERROR Expression is not zero
+    1080/  3.047 :                      ;       ENDIF
+    1081/  3.047 :                      
+    1082/  3.047 : 072 005 040          LRA     LDA     REGI
+    1083/  3.052 : 137                  LRA.    MOV     E,A
+    1084/  3.053 : 026 000                      MVI     D,0
+    1085/  3.055 : 052 035 040                  LHLD    REGPTR
+    1086/  3.060 : 031                          DAD     D               ; (DE) = (REGPTR)+(REGI)
+    1087/  3.061 : 311                          RET
+    1088/  3.062 :                      
+    1089/  3.062 :                      ;       IOA - INPUT OCTAL ADDRESS.
+    1090/  3.062 :                      ;
+    1091/  3.062 :                      ;       ENTRY   (H,L) = ADDRESS OF RECEPTION DOUBLE BYTE.
+    1092/  3.062 :                      ;               (D) = TERMINATING CHARACTER
+    1093/  3.062 :                      ;       EXIT    NONE
+    1094/  3.062 :                      ;       USES    A,D,E,H,L,F
+    1095/  3.062 :                      
+    1096/  3.062 : (MACRO)                      ERRNZ   *-3062Q
+    1096/  3.062 :                      ;       IF (*-3062Q) != 0
+    1096/  3.062 :                      ;         ERROR Expression is not zero
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 23 - 2024-04-04 05:54:22 PM
+
+
+    1096/  3.062 :                      ;       ENDIF
+    1097/  3.062 :                      
+    1098/  3.062 : 303 176 005          IOA     JMP     IOA1
+    1099/  3.065 : 000                          NOP                     ; RETAIN H8 ORG
+    1100/  3.066 :                      
+    1101/  3.066 :                      ;       IOB - INPUT OCTAL BYTE
+    1102/  3.066 :                      ;
+    1103/  3.066 :                      ;       READ ONE OCTAL BYTE FROM THE KEYSET.
+    1104/  3.066 :                      ;
+    1105/  3.066 :                      ;       ENTRY   (H,L) = ADDRESS OF BYTE TO HOLD VALUE
+    1106/  3.066 :                      ;               'C' SET IF FIRST DIGIT N (A)
+    1107/  3.066 :                      ;       EXIT    NONE
+    1108/  3.066 :                      ;       USES    A,D,E,H,L,F
+    1109/  3.066 :                      
+    1110/  3.066 : (MACRO)                      ERRNZ   *-3066Q
+    1110/  3.066 :                      ;       IF (*-3066Q) != 0
+    1110/  3.066 :                      ;         ERROR Expression is not zero
+    1110/  3.066 :                      ;       ENDIF
+    1111/  3.066 :                      
+    1112/  3.066 : 066 000              IOB     MVI     M,0             ; ZERO OUT OLD VALUE
+    1113/  3.070 : 324 262 003          IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
+    1114/  3.073 :                      
+    1115/  3.073 :                      ;       SEE IF CHARACTER IS A VALID OCTAL VALUE
+    1116/  3.073 :                      ;
+    1117/  3.073 : 376 060                      CPI     '0'             ; LESS THAN ZERO?
+    1118/  3.075 : 332 135 003                  JC      IOB2            ; IF (A) < 0, SEE IF A TERMINATING CHARACTER
+    1119/  3.100 : 376 070                      CPI     '8'             ; GREATER THAN 7?
+    1120/  3.102 : 322 070 003                  JNC     IOB1            ; IF TOO LARGE, TRY AGAIN
+    1121/  3.105 :                      
+    1122/  3.105 :                      ;       HAVE AN OCTAL DIGIT
+    1123/  3.105 :                      ;
+    1124/  3.105 : 315 302 003                  CALL    WCC             ; ECHO CHARACTER
+    1125/  3.110 : 346 007                      ANI     00000111B       ; MASK FOR BINARY VALUE
+    1126/  3.112 : 137                          MOV     E,A             ; (E) = VALUE
+    1127/  3.113 : 176                          MOV     A,M             ; GET OLD VALUE
+    1128/  3.114 : 007                          RLC                     ; SHIFT 3
+    1129/  3.115 : 007                          RLC
+    1130/  3.116 : 007                          RLC
+    1131/  3.117 : 303 126 003                  JMP     IOB1.5          ; JUMP AROUND AN H88/H89 TO H8 FAKE ROUTINE
+    1132/  3.122 :                      
+    1133/  3.122 :                      ;       FAKE OUT ROUTINE FOR CALLERS OF *DOD* FROM THE H8 FRONT PANEL
+    1134/  3.122 :                      
+    1135/  3.122 : (MACRO)                      ERRNZ    *-3122Q
+    1135/  3.122 :                      ;       IF (*-3122Q) != 0
+    1135/  3.122 :                      ;         ERROR Expression is not zero
+    1135/  3.122 :                      ;       ENDIF
+    1136/  3.122 :                      
+    1137/  3.122 : 043                  DOD     INX      H
+    1138/  3.123 : 043                          INX      H
+    1139/  3.124 : 043                          INX      H
+    1140/  3.125 : 311                          RET
+    1141/  3.126 :                      
+    1142/  3.126 :                      ;       CONTINUE
+    1143/  3.126 :                      
+    1144/  3.126 : 346 370              IOB1.5  ANI     11111000B       ; TOSS OLD LSB DIGIT
+    1145/  3.130 : 263                          ORA     E               ; REPLACE WITH NEW VALUE
+    1146/  3.131 : 167                          MOV     M,A
+    1147/  3.132 : 303 070 003                  JMP     IOB1            ; INPUT ANOTHER CHARACTER
+    1148/  3.135 :                      
+    1149/  3.135 :                      ;       CHECK FOR A CARRIAGE RETURN TO TERMINATE BYTE
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 24 - 2024-04-04 05:54:22 PM
+
+
+    1150/  3.135 :                      ;
+    1151/  3.135 : 376 015              IOB2    CPI     A.CR            ; CARRIAGE RETURN?
+    1152/  3.137 : 310                          RZ                      ; RETURN IF CARRIAGE RETURN         /JWT 790507/
+    1153/  3.140 : 257                          XRA     A               ; CLEAR CARRY                       /JWT 790507/
+    1154/  3.141 :                              CPU     Z80
+    1155/  3.141 : 030 325                      JR      IOB1            ; GET A NEW CHARACTER               /JWT 790507/
+    1156/  3.143 :                              CPU     8080
+    1157/  3.143 :                      
+    1158/  3.143 :                      ;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
+    1159/  3.143 :                      
+    1160/  3.143 : 010 333 355 346 040          DB      010Q, 333Q, 355Q, 346Q, 040Q, 312Q, 144Q, 003Q
+           3.150 : 312 144 003        
+    1161/  3.153 : 010 323 350 375 351          DB      010Q, 323Q, 350Q, 375Q, 351Q, 117Q, 346Q, 300Q
+           3.160 : 117 346 300        
+    1162/  3.163 : 017 017 017 017 017          DB      017Q, 017Q, 017Q, 017Q, 017Q, 017Q, 366Q, 060Q
+           3.170 : 017 366 060        
+    1163/  3.173 : 375 041 202 003 303          DB      375Q, 041Q, 202Q, 003Q, 303Q, 143Q, 003Q, 171Q
+           3.200 : 143 003 171        
+    1164/  3.203 : 346 070 017 017 017          DB      346Q, 070Q, 017Q, 017Q, 017Q, 366Q, 060Q, 375Q
+           3.210 : 366 060 375        
+    1165/  3.213 : 041 221 003 303 143          DB      041Q, 221Q, 003Q, 303Q, 143Q, 003Q, 171Q, 346Q
+           3.220 : 003 171 346        
+    1166/  3.223 : 007 366 060 375 041          DB      007Q, 366Q, 060Q, 375Q, 041Q, 235Q, 003Q, 303Q
+           3.230 : 235 003 303        
+    1167/  3.233 : 143 003 335 351 015          DB      143Q, 003Q, 335Q, 351Q, 015Q, 012Q, 011Q, 120Q
+           3.240 : 012 011 120        
+    1168/  3.243 : 141 163 163 040 075          DB      141Q, 163Q, 163Q, 040Q, 075Q, 040Q, 040Q, 040Q
+           3.250 : 040 040 040        
+    1169/  3.253 : 040 000 122 116 102          DB      040Q, 000Q, 122Q, 116Q, 102Q
+    1170/  3.260 :                      
+    1171/  3.260 :                      ;       RCK - READ CONSOLE KEYPAD
+    1172/  3.260 :                      ;
+    1173/  3.260 :                      ;       RCK IS CALLED TO READ A KEYSTROKE FROM THE CONSOLE FRONT PANEL KEYPAD.
+    1174/  3.260 :                      ;       SINCE THE H88/H89 DOES NOT HAVE A FRONT PANEL, THIS ROUTINE IS PROVIDED
+    1175/  3.260 :                      ;       ONLY TO MAINTAIN COMPATIBILITY WITH PAM-8.
+    1176/  3.260 :                      ;       RCK WILL IMMEDIATELY RETURN WITH A VALUE OF 0 (ZERO) IN THE ACCUMULATOR.
+    1177/  3.260 :                      ;
+    1178/  3.260 :                      ;       ENTRY   NONE
+    1179/  3.260 :                      ;       EXIT    (A) = 0
+    1180/  3.260 :                      ;       USES    A,F
+    1181/  3.260 :                      
+    1182/  3.260 :                      ;       RCK MUST HAVE SAME ENTRY AS RCK IN PAM-8
+    1183/  3.260 : (MACRO)                      ERRNZ   *-3260Q
+    1183/  3.260 :                      ;       IF (*-3260Q) != 0
+    1183/  3.260 :                      ;         ERROR Expression is not zero
+    1183/  3.260 :                      ;       ENDIF
+    1184/  3.260 :                      
+    1185/  3.260 : 257                  RCK     XRA     A
+    1186/  3.261 : 311                          RET
+    1187/  3.262 :                      
+    1188/  3.262 :                      
+    1189/  3.262 :                      ;       RCC - READ CONSOLE CHARACTER.
+    1190/  3.262 :                      ;
+    1191/  3.262 :                      ;       RCC IS CALLED TO READ A KEYSTROKE FROM THE CONSOLE.
+    1192/  3.262 :                      ;       IF A RUBOUT/DELETE IS RECEIVED, EXIT IT TO *ERROR*.
+    1193/  3.262 :                      ;
+    1194/  3.262 :                      ;       ENTRY   NONE
+    1195/  3.262 :                      ;       EXIT    TO ERROR - IF A DELETE OR RUBOUT IS ENCOUNTERED
+    1196/  3.262 :                      ;               TO CALLER - WHEN A KEY IS HIT
+    1197/  3.262 :                      ;               (A) = ASCII KEY VALUE
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 25 - 2024-04-04 05:54:22 PM
+
+
+    1198/  3.262 :                      ;       USES    A,F
+    1199/  3.262 :                      
+    1200/  3.262 :                      RCC
+    1201/  3.262 :                      
+    1202/  3.262 : 333 355              RCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE LINE STATUS REGISTER
+    1203/  3.264 : 346 001                      ANI     UC.DR           ; SEE IF THERE IS A DATA READY
+    1204/  3.266 :                              CPU     Z80
+    1205/  3.266 : 050 372                      JR      Z,RCC1
+    1206/  3.270 :                              CPU     8080
+    1207/  3.270 :                      
+    1208/  3.270 : 333 350                      IN      SC.ACE+UR.RBR   ; ELSE, INPUT CHARACTER
+    1209/  3.272 : 346 177                      ANI     01111111B       ; TOSS ANY PARITY
+    1210/  3.274 : 376 177                      CPI     A.DEL
+    1211/  3.276 : 312 322 000                  JZ      ERROR           ; IF RUBOUT, EXIT TO CALLER
+    1212/  3.301 :                      
+    1213/  3.301 : 311                          RET                     ; ELSE, EXIT TO CALLER
+    1214/  3.302 :                      
+    1215/  3.302 :                      ;       WCC - WRITE CONSOLE CHARACTER
+    1216/  3.302 :                      ;
+    1217/  3.302 :                      ;       WRITE A CHARACTER TO THE CONSOLE UART PORT
+    1218/  3.302 :                      ;
+    1219/  3.302 :                      ;       ENTRY   (A) = ASCII CHARACTER TI OUTPUT
+    1220/  3.302 :                      ;       EXIT    NONE
+    1221/  3.302 :                      ;       USES    NONE
+    1222/  3.302 :                      
+    1223/  3.302 : 365                  WCC     PUSH    PSW             ; SAVE CHARACTER
+    1224/  3.303 : 333 355              WCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE STATUS
+    1225/  3.305 : 346 040                      ANI     UC.THE          ; SEE IF TRANSMITTER HOLDING IS EMPTY
+    1226/  3.307 :                              CPU     Z80
+    1227/  3.307 : 050 372                      JR      Z,WCC1
+    1228/  3.311 :                              CPU     8080
+    1229/  3.311 :                      
+    1230/  3.311 : 361                          POP     PSW             ; GET CHARACTER
+    1231/  3.312 : 323 350                      OUT     SC.ACE+UR.THR   ; OUTPUT TO CONSOLE
+    1232/  3.314 : 311                          RET
+    1233/  3.315 :                      
+    1234/  3.315 :                      ;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
+    1235/  3.315 :                      
+    1236/  3.315 : 353 174 335 041 326          DB    353Q, 174Q, 335Q, 041Q, 326Q, 003Q, 303Q, 160Q
+           3.322 : 003 303 160        
+    1237/  3.325 : 003 175 335 041 335          DB    003Q, 175Q, 335Q, 041Q, 335Q, 003Q, 030Q, 223Q
+           3.332 : 003 030 223        
+    1238/  3.335 : 353 041 362 007 335          DB    353Q, 041Q, 362Q, 007Q, 335Q, 041Q, 350Q, 003Q
+           3.342 : 041 350 003        
+    1239/  3.345 : 303 306 007 032 335          DB    303Q, 306Q, 007Q, 032Q, 335Q, 041Q, 360Q, 003Q
+           3.352 : 041 360 003        
+    1240/  3.355 : 303 160 003 076 007          DB    303Q, 160Q, 003Q, 076Q, 007Q, 375Q, 041Q, 265Q
+           3.362 : 375 041 265        
+    1241/  3.365 : 007 303 143 003              DB    007Q, 303Q, 143Q, 003Q
+    1242/  3.371 :                      
+    1243/  3.371 :                      ;       IO ROUTINES TO BE COPIED INTO AND USED IN RAM.
+    1244/  3.371 :                      ;
+    1245/  3.371 :                      ;       MUST CONTINUE TO 3777A FOR PROPER COPY.
+    1246/  3.371 :                      ;       THE TABLE MUST ALSO BE BACKWARDS TO THE FINAL RAM
+    1247/  3.371 :                      
+    1248/  3.371 : (MACRO)                      ERRNZ   4000Q-7-*
+    1248/  3.371 :                      ;       IF (4000Q-7-*) != 0
+    1248/  3.371 :                      ;         ERROR Expression is not zero
+    1248/  3.371 :                      ;       ENDIF
+    1249/  3.371 :                      
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 26 - 2024-04-04 05:54:22 PM
+
+
+    1250/  3.371 :                      PRSROM
+    1251/  3.371 : 001                          DB      1               ; REFIND
+    1252/  3.372 : 000                          DB      0               ; CTLFLG
+    1253/  3.373 : 000                          DB      0               ; MFLAG
+    1254/  3.374 : 000                          DB      0               ; DSPMOD
+    1255/  3.375 : 000                          DB      0               ; DSPROT
+    1256/  3.376 : 012                          DB      10              ; REGI
+    1257/  3.377 : 311                          DB      MI.RET
+    1258/  4.000 :                      
+    1259/  4.000 : (MACRO)                      ERRNZ   *-4000Q
+    1259/  4.000 :                      ;       IF (*-4000Q) != 0
+    1259/  4.000 :                      ;         ERROR Expression is not zero
+    1259/  4.000 :                      ;       ENDIF
+    1260/  4.000 :                      
+    1261/  4.000 :                      ;       INIT0X - EXTENSION OF INIT0 TO SUPPORT H88
+    1262/  4.000 :                      
+    1263/  4.000 : 076 002              INIT0X  MVI     A,00000010B
+    1264/  4.002 : 323 362                      OUT     H88.CTL
+    1265/  4.004 :                      
+    1266/  4.004 :                      ;       SET UP ACE FOR CONSOLE COMMUNICATIONS
+    1267/  4.004 :                      ;
+    1268/  4.004 : 076 200                      MVI     A,UC.DLA        ; SET DIVISOR LATCH ACCESS BIT
+    1269/  4.006 : 323 353                      OUT     SC.ACE+UR.LCR
+    1270/  4.010 : 041 075 004                  LXI     H,BRTAB         ; (H,L) = BEGINNING OF BAUD RATE TABLE
+    1271/  4.013 : 333 362                      IN      H88.SW          ; INPUT SWITCHES FOR DESIRED BAUD RATE
+    1272/  4.015 : 346 300                      ANI     H88S.BR         ; MASK FOR BAUD RATE SWITCHES ONLY
+    1273/  4.017 : 017                          RRC                     ; SHIFT FOR A *2 FOR TABLE
+    1274/  4.020 : 017                          RRC
+    1275/  4.021 : 017                          RRC
+    1276/  4.022 : 017                          RRC
+    1277/  4.023 : 017                          RRC
+    1278/  4.024 : 205                          ADD     L               ; ADD DISPLACEMENT FROM BEGINNING OF TABLE
+    1279/  4.025 : 157                          MOV     L,A
+    1280/  4.026 : 176                          MOV     A,M             ; GET MSB OF DIVISOR
+    1281/  4.027 : 323 351                      OUT     SC.ACE+UR.DLM
+    1282/  4.031 : 043                          INX     H               ; GET LSB
+    1283/  4.032 : 176                          MOV     A,M
+    1284/  4.033 : 323 350                      OUT     SC.ACE+UR.DLL
+    1285/  4.035 : 076 003                      MVI     A,UC.8BW        ; SET 8 BITS, 1 STOP BIT, NO PARITY
+    1286/  4.037 : 323 353                      OUT     SC.ACE+UR.LCR
+    1287/  4.041 : 076 000                      MVI     A,0             ; SET NO INTERRUPTS
+    1288/  4.043 : 323 351                      OUT     SC.ACE+UR.IER
+    1289/  4.045 :                      
+    1290/  4.045 :                      ;       WAIT A WHILE TO ALLOW THE CONSOLE RESET TO FINISH SO IT CAN
+    1291/  4.045 :                      ;       ACCEPT THE FIRST PROMPT
+    1292/  4.045 :                      ;
+    1293/  4.045 : 001 000 065                  LXI     B,32400Q        ; APPROX. 100 MS
+    1294/  4.050 : 015                  INIT0X1 DCR     C
+    1295/  4.051 : 302 050 004                  JNZ     INIT0X1
+    1296/  4.054 :                      
+    1297/  4.054 : 005                          DCR     B
+    1298/  4.055 : 302 050 004                  JNZ     INIT0X1
+    1299/  4.060 :                      
+    1300/  4.060 :                      ;       INPUT SWITCH TO SEE IF TO BEGIN OPERATION OF MEMORY TEST
+    1301/  4.060 :                      ;
+    1302/  4.060 : 333 362                      IN      H88.SW          ; GET SWITCHES
+    1303/  4.062 : 346 040                      ANI     H88S.M          ; MASK FOR MEMORY TEST ONLY
+    1304/  4.064 : 312 116 007                  JZ      DYMEM           ; IF TO PERFORM MEMORY TESTS
+    1305/  4.067 :                      
+    1306/  4.067 :                      ;       REPLACE WHAT WAS ORIGINALLY AT THE JUMP WHICH GOT US HERE
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 27 - 2024-04-04 05:54:22 PM
+
+
+    1307/  4.067 :                      ;
+    1308/  4.067 : 021 371 003                  LXI     D,PRSROM        ; (DE) = ROM COPY OF PRS CODE
+    1309/  4.072 : 303 003 000                  JMP     INIT0.0         ; RETURN TO ORIGINAL CODE
+    1310/  4.075 :                      
+    1311/  4.075 :                      ;       BRTAB - BAUD RATE DIVISOR TABLE
+    1312/  4.075 :                      ;
+    1313/  4.075 :                      BRTAB
+    1314/  4.075 :                      
+    1315/  4.075 : 000 014              BR96    DB      0,12            ;   9600 BAUD
+    1316/  4.077 : 000 006              BR19.2  DB      0,6             ; 19,200 BAUD
+    1317/  4.101 : 000 003              BR38.4  DB      0,3             ; 38,400 BAUD
+    1318/  4.103 : 000 002              BR56.0  DB      0,2             ; 56,000 BAUD
+    1319/  4.105 :                      
+    1320/  4.105 :                      ;       SET     */256
+    1321/  4.105 : (MACRO)                      ERRNZ   ERTAB/256-.     ; TABLE MUST BE IN ONE PAGE
+    1321/  4.105 :                      ;       IF (ERTAB/256-.) != 0
+    1321/  4.105 :                      ;         ERROR Expression is not zero
+    1321/  4.105 :                      ;       ENDIF
+    1322/  4.105 :                      
+    1323/  4.105 :                      ;       SAVALLX - SAVALL EXTENSION TO MAKE ROOM FOR A JUMP TO THE NMI HANDLER
+    1324/  4.105 :                      
+    1325/  4.105 :                      SAVALLX                         ; REPLACE OLD CODE
+    1326/  4.105 : 345                          PUSH     H              ; SET ON STACK AS 'REGISTER'
+    1327/  4.106 : 325                          PUSH     D              ; SET RETURN ADDRESS
+    1328/  4.107 : 021 011 040                  LXI      D,CTLFLG
+    1329/  4.112 : 032                          LDAX     D
+    1330/  4.113 : 303 151 000                  JMP      SAVALLR        ; RETURN TO OLD CODE
+    1331/  4.116 :                      
+    1332/  4.116 :                      ;       NMI - NON MASKABLE INTERRUPT
+    1333/  4.116 :                      ;
+    1334/  4.116 :                      ;       NMI IS USED AS THE TRAP FOR ALL ILLEGAL PORT REQUESTS
+    1335/  4.116 :                      ;
+    1336/  4.116 :                      ;       PORT ADDRESSES TRAPPED ARE:
+    1337/  4.116 :                      ;
+    1338/  4.116 :                      ;                       IN 360Q FRONT PANEL KEYBOARD INPUT
+    1339/  4.116 :                      ;                      OUT 360Q FRONT PANEL CONTROL
+    1340/  4.116 :                      ;                      OUT 361Q FRONT PANEL DISPLAY CONTROL
+    1341/  4.116 :                      ;                   IN/OUT 372Q CONSOLE DATA FOR AN 8251A
+    1342/  4.116 :                      ;                      OUT 373Q CONSOLE CONTROL FOR AN 8251A
+    1343/  4.116 :                      ;
+    1344/  4.116 :                      ;
+    1345/  4.116 :                      ;               THESE PORT REQUESTS ARE RESPONDED TO AS FOLLOWS:
+    1346/  4.116 :                      ;
+    1347/  4.116 :                      ;                       IN 360Q RETURNS WITH (A) = 377Q TO SHOW THAT
+    1348/  4.116 :                      ;                               NO FRONT PANEL SWITCHES ARE PRESSED
+    1349/  4.116 :                      ;
+    1350/  4.116 :                      ;                      OUT 360Q MOVES BIT 6 (CB.CLI) TO BIT 1, AND
+    1351/  4.116 :                      ;                              BIT 4 (CB.SSI) INVERTED, TO BIT 0. AND
+    1352/  4.116 :                      ;                              OUTPUTS THESE BITS TO PORT 362Q TO
+    1353/  4.116 :                      ;                              CONTROL THE CLOCK AND SINGLE STEP INTERRUPTS
+    1354/  4.116 :                      ;
+    1355/  4.116 :                      ;                      OUTPUTS TO 361Q, 372Q, AND 373Q JUST RETURN
+    1356/  4.116 :                      ;
+    1357/  4.116 :                      ;                      INPUTS FROM 361Q, 372Q, AND 373Q RETURN WITH (A) = 0
+    1358/  4.116 :                      ;                              TO INDICATE AN EMPTY BUSS
+    1359/  4.116 :                      ;
+    1360/  4.116 :                      ;
+    1361/  4.116 :                      ;       ENTRY   NONE
+    1362/  4.116 :                      ;
+    1363/  4.116 :                      ;       EXIT    NONE
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 28 - 2024-04-04 05:54:22 PM
+
+
+    1364/  4.116 :                      ;
+    1365/  4.116 :                      ;       USES    (A) ONLY IF 'FAKING' AN INPUT
+    1366/  4.116 :                      
+    1367/  4.116 : 343                  NMI     XTHL                    ; GET RETURN ADDRESS FROM STACK
+    1368/  4.117 : 042 064 040                  SHLD    NMIRET          ; SAVE FOR LATER USE
+    1369/  4.122 : 343                          XTHL                    ; PUT RETURN ADDRESS BACK ON STACK
+    1370/  4.123 :                      
+    1371/  4.123 : 345                          PUSH    H               ; SAVE REGISTERS
+    1372/  4.124 : 305                          PUSH    B
+    1373/  4.125 : 365                          PUSH    PSW
+    1374/  4.126 : 107                          MOV     B,A             ; SAVE (A) PRIOR TO I/O
+    1375/  4.127 : 052 064 040                  LHLD    NMIRET          ; GET RETURN ADDRESS
+    1376/  4.132 : 053                          DCX     H               ; BACK UP TO PORT # WHICH GOT US HERE
+    1377/  4.133 : 176                          MOV     A,M             ; GET PORT #
+    1378/  4.134 :                      
+    1379/  4.134 : 376 360                      CPI     360Q            ; PORT 360?
+    1380/  4.136 : 312 202 004                  JZ      NMI1            ; IF PORT WAS 360Q
+    1381/  4.141 :                      
+    1382/  4.141 :                      ;       PORT REFERENCED WAS 361Q, 372Q, OR 373Q
+    1383/  4.141 :                      ;
+    1384/  4.141 : 376 361                      CPI     361Q            ; MAKE SURE PORT IS LEGAL
+    1385/  4.143 : 312 160 004                  JZ      NMI0.5          ; IF LEGAL
+    1386/  4.146 :                      
+    1387/  4.146 : 376 372                      CPI     372Q
+    1388/  4.150 : 312 160 004                  JZ      NMI0.5
+    1389/  4.153 :                      
+    1390/  4.153 : 376 373                      CPI     373Q
+    1391/  4.155 : 302 251 004                  JNZ     NMI2.5          ; IF NONE OF THE ABOVE, EXIT
+    1392/  4.160 :                      
+    1393/  4.160 : 053                  NMI0.5  DCX     H               ; POINT TO IN/OUT INSTRUCTION
+    1394/  4.161 : 176                          MOV     A,M             ; SEE IF INPUT OR OUTPUT
+    1395/  4.162 : 376 323                      CPI     MI.OUT
+    1396/  4.164 : 312 251 004                  JZ      NMI2.5          ; IF OUTPUT, JUST EXIT
+    1397/  4.167 :                      
+    1398/  4.167 : 376 333                      CPI     MI.IN
+    1399/  4.171 : 302 251 004                  JNZ     NMI2.5          ; IF NOT INPUT EITHER, ILLEGAL SO EXIT
+    1400/  4.174 :                      
+    1401/  4.174 : 361                          POP     PSW             ; RESTORE FLAGS
+    1402/  4.175 : 076 000                      MVI     A,0             ; ELSE, RETURN LIKE AN EMPTY BUSS
+    1403/  4.177 : 303 252 004                  JMP     NMI3            ; EXIT
+    1404/  4.202 :                      
+    1405/  4.202 : 053                  NMI1    DCX     H               ; POINT TO IN/OUT INSTRUCTION
+    1406/  4.203 : 176                          MOV     A,M             ; GET I/O INSTRUCTION
+    1407/  4.204 : 376 333                      CPI     MI.IN           ; INPUT?
+    1408/  4.206 : 302 217 004                  JNZ     NMI1.5          ; IF NOT 'IN'
+    1409/  4.211 :                      
+    1410/  4.211 : 361                          POP     PSW             ; RESTORE FLAGS
+    1411/  4.212 : 076 377                      MVI     A,11111111B     ; SHOW 'NO KEYS PRESSED'
+    1412/  4.214 : 303 252 004                  JMP     NMI3            ; EXIT
+    1413/  4.217 :                      
+    1414/  4.217 : 376 323              NMI1.5  CPI     MI.OUT          ; MAKE SURE INSTRUCTION IF AN 'OUT'
+    1415/  4.221 : 302 251 004                  JNZ     NMI2.5          ; IF NOT
+    1416/  4.224 :                      
+    1417/  4.224 : 170                  NMI2    MOV     A,B             ; GET OUTPUT DATA AGAIN
+    1418/  4.225 : 346 100                      ANI     CB.CLI          ; MOVE CLOCK INFO TO BIT 1
+    1419/  4.227 : 017                          RRC
+    1420/  4.230 : 017                          RRC
+    1421/  4.231 : 017                          RRC
+    1422/  4.232 : 017                          RRC
+    1423/  4.233 : 017                          RRC
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 29 - 2024-04-04 05:54:22 PM
+
+
+    1424/  4.234 : 117                          MOV     C,A             ; SAVE IN C
+    1425/  4.235 : 170                          MOV     A,B             ; GET OUTPUT DATA AGAIN
+    1426/  4.236 : 346 020                      ANI     CB.SSI          ; GET SINGLE STEP INFO
+    1427/  4.240 : 017                          RRC                     ; MOVE TO BIT 1
+    1428/  4.241 : 017                          RRC
+    1429/  4.242 : 017                          RRC
+    1430/  4.243 : 017                          RRC
+    1431/  4.244 : 261                          ORA     C               ; ADD TO CLOCK DATA
+    1432/  4.245 : 356 001                      XRI     00000001B       ; INVERT THIS BIT PRIOR TO OUTPUT
+    1433/  4.247 : 323 362                      OUT     H88.CTL         ; SET IN HARDWARE
+    1434/  4.251 :                      
+    1435/  4.251 : 361                  NMI2.5  POP     PSW             ; RESTORE (A,F)
+    1436/  4.252 :                      
+    1437/  4.252 : 301                  NMI3    POP     B
+    1438/  4.253 : 341                          POP     H
+    1439/  4.254 :                      ;       RET                     ; Z80 RETURN FROM NMI
+    1440/  4.254 : 355 105                      DB      355Q,105Q
+    1441/  4.256 :                      
+    1442/  4.256 :                      ;               BOOT HDOS ENTRY POINT FOR H88
+    1443/  4.256 :                      ;
+    1444/  4.256 :                      ;       ENTRY   NONE
+    1445/  4.256 :                      ;       EXIT    TO HDOS BOOT ROM
+    1446/  4.256 :                      ;       USES    ALL
+    1447/  4.256 :                      
+    1448/  4.256 : 041 234 006          BOOT    LXI     H,MSG.BT        ; COMPLETE BOOT MESSAGE
+    1449/  4.261 : 315 100 006                  CALL    TYPMSG
+    1450/  4.264 : 315 003 006                  CALL    WCR             ; WAIT FOR A CARRIAGE RETURN
+    1451/  4.267 : 076 012                      MVI     A,10
+    1452/  4.271 : 315 052 003                  CALL    LRA.            ; GET LOCATION OF USER PC
+    1453/  4.274 : 021 000 030                  LXI     D,ROMDD         ; SET ITS VALUE TO THE BOOT ROM
+    1454/  4.277 : 163                          MOV     M,E
+    1455/  4.300 : 043                          INX     H
+    1456/  4.301 : 162                          MOV     M,D
+    1457/  4.302 :                      
+    1458/  4.302 :                      ;       TELL USER TO "TYPE SPACES TO DETERMINE BAUD RATE"
+    1459/  4.302 :                      ;
+    1460/  4.302 : 041 122 006                  LXI     H,MSG.SP
+    1461/  4.305 : 315 100 006                  CALL    TYPMSG
+    1462/  4.310 :                      
+    1463/  4.310 : 303 063 000                  JMP     GO.             ; DO IT
+    1464/  4.313 :                      
+    1465/  4.313 :                      ;       SWMEM - SET UP FOR WMEM TO DUMP A CASSETTE FROM THE MONITOR LEVEL
+    1466/  4.313 :                      ;
+    1467/  4.313 :                      ;       SWMEM ALLOWS THE USER TO EITHER ENTER A NEW STARTING AND
+    1468/  4.313 :                      ;       ENDING ADDRESS FOR THIS DUMP OR USE THE ADDRESS OF THE
+    1469/  4.313 :                      ;       PREVIOUS LOAD OR DUMP.  THE PREVIOUS ADDRESSES ARE USED IF
+    1470/  4.313 :                      ;       THE FIRST CHARACTER IS AN ASCII CARRIAGE RETURN.  IF THE
+    1471/  4.313 :                      ;       FIRST CHARACTER IS AN OCTAL CHARACTER, BOTH BEGINNING AND
+    1472/  4.313 :                      ;       ENDING ADDRESSES MUST BE ENTERED SEPARATED BY A DASH AND
+    1473/  4.313 :                      ;       FOLLOWED BY A CARRIAGE RETURN.
+    1474/  4.313 :                      ;
+    1475/  4.313 :                      ;       ENTRY   USER PC VALUE ON STACK = PROGRAM START ADDRESS FOR THIS TAPE
+    1476/  4.313 :                      ;       EXIT    TO WMEM
+    1477/  4.313 :                      ;       USES    ALL
+    1478/  4.313 :                      
+    1479/  4.313 : 041 174 006          SWMEM   LXI     H,MSG.DMP       ; COMPLETE DUMP MESSAGE
+    1480/  4.316 : 315 100 006                  CALL    TYPMSG
+    1481/  4.321 : 315 150 005                  CALL    IROC            ; INPUT FIRST CHARACTER
+    1482/  4.324 : 322 351 004                  JNC     SWMEM4          ; IF FIRST CHARACTER IS OCTAL
+    1483/  4.327 :                      
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 30 - 2024-04-04 05:54:22 PM
+
+
+    1484/  4.327 : 041 001 040                  LXI     H,START+1       ; ELSE, INPUT STARTING ADDRESS
+    1485/  4.332 : 026 055                      MVI     D,'-'           ; FIRST BYTE MUST END WITH A DASH
+    1486/  4.334 : 315 062 003                  CALL    IOA
+    1487/  4.337 : 041 025 040          SWMEM2  LXI     H,ABUSS+1       ; ENTER ENDING ADDRESS
+    1488/  4.342 : 067                          STC                     ; SHOW NO CHARACTER IN (A)
+    1489/  4.343 : 077                          CMC
+    1490/  4.344 : 026 015                      MVI     D,A.CR          ; LAST CHARACTER MUST BE A RETURN
+    1491/  4.346 : 315 062 003                  CALL    IOA
+    1492/  4.351 : 076 012              SWMEM4  MVI     A,10            ; GET USER PC VALUE FOR DISPLAY
+    1493/  4.353 : 315 052 003                  CALL    LRA.
+    1494/  4.356 : 136                          MOV     E,M
+    1495/  4.357 : 043                          INX     H
+    1496/  4.360 : 126                          MOV     D,M
+    1497/  4.361 : 353                          XCHG                    ; (H,L) = USER PC VALUE
+    1498/  4.362 : 315 313 005                  CALL    TOA             ; TYPE OCTAL ADDRESS
+    1499/  4.365 : 303 374 001                  JMP     WMEM            ; DO THE DUMP
+    1500/  4.370 :                      
+    1501/  4.370 :                      ;       SUBM - SUBSTITUTE MEMORY
+    1502/  4.370 :                      ;
+    1503/  4.370 :                      ;       SUBM INPUTS A MEMORY ADDRESS FROM THE CONSOLE AND THEN DISPLAYS
+    1504/  4.370 :                      ;       THAT ADDRESS AND ITS CONTENTS.  IF A CARRIAGE RETURN IS THEN TYPED,
+    1505/  4.370 :                      ;       CONTROL RETURNS TO THE MONITOR.  IF A SPACE IS TYPED, THE NEXT
+    1506/  4.370 :                      ;       MEMORY LOCATION AND CONTENTS ARE DISPLAYED.  IF A MINUS SIGN IS
+    1507/  4.370 :                      ;       TYPED, THE PREVIOUS MEMORY LOCATION AND CONTENTS ARE DISPLAYED.
+    1508/  4.370 :                      ;       IF AN OCTAL CHARACTER IS TYPED, A BYTE IS ENTERED AN PLACED AT THE
+    1509/  4.370 :                      ;       CURRENT MEMORY LOCATION.
+    1510/  4.370 :                      ;
+    1511/  4.370 :                      ;       ENTRY   NONE
+    1512/  4.370 :                      ;       EXIT    NONE
+    1513/  4.370 :                      ;       USES    A,E,H,L,F
+    1514/  4.370 :                      
+    1515/  4.370 : 041 201 006          SUBM    LXI     H,MSG.SUB       ; COMPLETE SUBSTITUTE MESSAGE
+    1516/  4.373 : 315 100 006                  CALL    TYPMSG
+    1517/  4.376 : 315 150 005                  CALL    IROC            ; INPUT FIRST CHARACTER
+    1518/  5.001 : 320                          RNC                     ; IF A RETURN EXIT
+    1519/  5.002 :                      
+    1520/  5.002 : 041 003 040                  LXI     H,IOWRK+1       ; ELSE, INPUT A STARTING ADDRESS
+    1521/  5.005 : 026 015                      MVI     D,A.CR          ; ENDING WITH A RETURN
+    1522/  5.007 : 315 062 003                  CALL    IOA
+    1523/  5.012 : 353                          XCHG                    ; (H,L) = INPUT ADDRESS
+    1524/  5.013 :                      
+    1525/  5.013 : 315 313 005          SUBM1   CALL    TOA             ; TYPE CRLF, ADDRESS, AND A SPACE
+    1526/  5.016 : 176                          MOV     A,M             ; GET MEMORY CONTENTS FOR DISPLAY
+    1527/  5.017 : 315 343 005                  CALL    TOB
+    1528/  5.022 : 076 040                      MVI     A,' '           ; SPACE
+    1529/  5.024 : 315 302 003                  CALL    WCC
+    1530/  5.027 :                      
+    1531/  5.027 : 315 301 005          SUBM2   CALL    IOC             ; INPUT FIRST CHARACTER
+    1532/  5.032 : 322 075 005                  JNC     SUBM7           ; IF FIRST CHARACTER IS OCTAL
+    1533/  5.035 :                      
+    1534/  5.035 : 376 040                      CPI     ' '             ; SPACE?
+    1535/  5.037 : 302 046 005                  JNZ     SUBM4           ; IF NOT A SPACE
+    1536/  5.042 :                      
+    1537/  5.042 : 043                  SUBM3   INX     H               ; POINT TO NEXT ADDRESS
+    1538/  5.043 : 303 013 005                  JMP     SUBM1           ; DISPLAY NEXT
+    1539/  5.046 :                      
+    1540/  5.046 : 376 055              SUBM4   CPI     '-'             ; MINUS?
+    1541/  5.050 : 302 062 005                  JNZ     SUBM6           ; IF NOT
+    1542/  5.053 :                      
+    1543/  5.053 : 315 302 003          SUBM5   CALL    WCC             ; ECHO HYPHEN
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 31 - 2024-04-04 05:54:22 PM
+
+
+    1544/  5.056 : 053                          DCX     H               ; POINT TO PREVIOUS ADDRESS
+    1545/  5.057 : 303 013 005                  JMP     SUBM1           ; DISPLAY PREVIOUS
+    1546/  5.062 :                      
+    1547/  5.062 : 376 015              SUBM6   CPI     A.CR            ; RETURN?
+    1548/  5.064 : 310                          RZ                      ; IF RETURN, EXIT
+    1549/  5.065 :                      
+    1550/  5.065 : 076 007                      MVI     A,A.BEL         ; ELSE, DING BELL
+    1551/  5.067 : 315 302 003                  CALL    WCC
+    1552/  5.072 : 303 027 005                  JMP     SUBM2           ; TRY AGAIN
+    1553/  5.075 :                      
+    1554/  5.075 : 066 000              SUBM7   MVI     M,0             ; ZERO BYTE TO BE BUILT
+    1555/  5.077 :                      
+    1556/  5.077 : 315 302 003          SUBM8   CALL    WCC             ; ECHO OCTAL CHARACTER
+    1557/  5.102 : 346 007                      ANI     00000111B       ; GET BINARY VALUE
+    1558/  5.104 : 137                          MOV     E,A             ; SAVE PARTIAL
+    1559/  5.105 : 176                          MOV     A,M             ; GET CURRENT
+    1560/  5.106 : 007                          RLC                     ; MAKE ROOM FOR NEW CHARACTER
+    1561/  5.107 : 007                          RLC
+    1562/  5.110 : 007                          RLC
+    1563/  5.111 : 346 370                      ANI     11111000B       ; TOSS PREVIOUS LSB
+    1564/  5.113 : 263                          ORA     E               ; ADD NEW
+    1565/  5.114 : 167                          MOV     M,A             ; SAVE NEW TOTAL
+    1566/  5.115 : 315 301 005          SUBM9   CALL    IOC             ; INPUT NEXT CHARACTER
+    1567/  5.120 : 322 077 005                  JNC     SUBM8           ; IF OCTAL
+    1568/  5.123 :                      
+    1569/  5.123 : 376 040                      CPI     ' '             ; SPACE?
+    1570/  5.125 : 312 042 005                  JZ      SUBM3           ; IF SPACE, DISPLAY NEXT BYTE
+    1571/  5.130 :                      
+    1572/  5.130 : 376 055                      CPI     '-'             ; MINUS?
+    1573/  5.132 : 312 053 005                  JZ      SUBM5           ; IF MINUS, DISPLAY PREVIOUS
+    1574/  5.135 :                      
+    1575/  5.135 : 376 015                      CPI     A.CR            ; RETURN?
+    1576/  5.137 : 310                          RZ                      ; IF RETURN, EXIT
+    1577/  5.140 :                      
+    1578/  5.140 : 076 007                      MVI     A,A.BEL         ; ELSE, DING BELL
+    1579/  5.142 : 315 302 003                  CALL    WCC
+    1580/  5.145 : 303 115 005                  JMP     SUBM9           ; TRY AGAIN
+    1581/  5.150 :                      
+    1582/  5.150 :                      ;       IROC - INPUT A RETURN OR AN OCTAL CHARACTER
+    1583/  5.150 :                      ;
+    1584/  5.150 :                      ;       IROC INPUTS A CHARACTER FROM THE CONSOLE AND WAITS UNTIL IT
+    1585/  5.150 :                      ;       RECEIVES EITHER A VALID OCTAL CHARACTER OR A CARRIAGE RETURN
+    1586/  5.150 :                      ;
+    1587/  5.150 :                      ;       ENTRY   NONE
+    1588/  5.150 :                      ;       EXIT    (A) = INPUT CHARACTER
+    1589/  5.150 :                      ;               'C' = SET IF CHARACTER IS OCTAL
+    1590/  5.150 :                      ;       USES    A,F
+    1591/  5.150 :                      
+    1592/  5.150 : 315 262 003          IROC    CALL    RCC             ; INPUT CHARACTER
+    1593/  5.153 : 376 015                      CPI     A.CR            ; RETURN?
+    1594/  5.155 : 310                          RZ                      ; IF A CR
+    1595/  5.156 :                      
+    1596/  5.156 : 376 060                      CPI     '0'             ; < 0?
+    1597/  5.160 : 332 166 005                  JC      IROC1           ; IF < OCTAL
+    1598/  5.163 :                      
+    1599/  5.163 : 376 070                      CPI     '8'             ; > 8?
+    1600/  5.165 : 330                          RC                      ; IF OCTAL
+    1601/  5.166 :                      
+    1602/  5.166 : 076 007              IROC1   MVI     A,A.BEL         ; ELSE, RING BELL
+    1603/  5.170 : 315 302 003                  CALL    WCC
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 32 - 2024-04-04 05:54:22 PM
+
+
+    1604/  5.173 : 303 150 005                  JMP     IROC            ; TRY AGAIN
+    1605/  5.176 :                      
+    1606/  5.176 :                      ;       IOA1 - INPUT OCTAL ADDRESS
+    1607/  5.176 :                      ;
+    1608/  5.176 :                      ;       IOA1 IS A CONTINUATION OF *IOA* AND INPUTS A SPLIT OCTAL ADDRESS
+    1609/  5.176 :                      ;       WITHOUT REQUIRING LEADING ZEROS
+    1610/  5.176 :                      ;
+    1611/  5.176 :                      ;       ENTRY   (H,L) = ADDRESS + 1 WHERE INPUT ADDRESS IS TO BE PLACED
+    1612/  5.176 :                      ;               (A) = FIRST OCTAL CHARACTER IF 'C' IS SET
+    1613/  5.176 :                      ;       EXIT    (D,E) = INPUT ADDRESS
+    1614/  5.176 :                      ;               (A) = LAST INPUT CHARACTER
+    1615/  5.176 :                      ;       USES    A,D,E,H,L,F
+    1616/  5.176 :                      
+    1617/  5.176 : 305                  IOA1    PUSH    B               ; SAVE (B,C)
+    1618/  5.177 : 102                          MOV     B,D             ; (B) = TERMINATION CHARACTER
+    1619/  5.200 : 345                          PUSH    H               ; SAVE ADDRESS WHERE INPUT IS TO BE PLACED
+    1620/  5.201 : 041 000 000                  LXI     H,0             ; SET NEW VALUE TO ZERO
+    1621/  5.204 : 324 262 003          IOA2    CNC     RCC             ; IF CARRY SET, FIRST CHARACTER IS IN ACC
+    1622/  5.207 : 376 060                      CPI     '0'             ; MAKE SURE CHARACTER IS OCTAL
+    1623/  5.211 : 332 242 005                  JC      IOA3            ; IF < OCTAL
+    1624/  5.214 :                      
+    1625/  5.214 : 376 070                      CPI     '8'
+    1626/  5.216 : 322 242 005                  JNC     IOA3            ; IF > OCTAL
+    1627/  5.221 :                      
+    1628/  5.221 : 315 302 003                  CALL    WCC             ; ECHO OCTAL CHARACTER
+    1629/  5.224 : 346 007                      ANI     00000111B       ; GET BINARY VALUE
+    1630/  5.226 : 365                          PUSH    PSW             ; SAVE NEW CHARACTER VALUE
+    1631/  5.227 : 051                          DAD     H               ; SHIFT THREE TO MAKE ROOM FOR NEW CHARACTER
+    1632/  5.230 : 051                          DAD     H
+    1633/  5.231 : 051                          DAD     H
+    1634/  5.232 : 365                          PUSH    PSW             ; SAVE CARRY FORM DAD
+    1635/  5.233 : 321                          POP     D               ; SAVE FLAG RESULT IN E
+    1636/  5.234 : 361                          POP     PSW             ; RETURN NEW CHARACTER VALUE TO (A)
+    1637/  5.235 : 205                          ADD     L
+    1638/  5.236 : 157                          MOV     L,A
+    1639/  5.237 : 303 204 005                  JMP     IOA2            ; SEE IF MORE CHARACTERS
+    1640/  5.242 :                      
+    1641/  5.242 : 270                  IOA3    CMP     B               ; TERMINATING CHARACTER?
+    1642/  5.243 : 312 260 005                  JZ      IOA4            ; IF EQUAL
+    1643/  5.246 :                      
+    1644/  5.246 : 076 007                      MVI     A,A.BEL         ; ELSE, DING BELL
+    1645/  5.250 : 315 302 003                  CALL    WCC
+    1646/  5.253 : 067                          STC                     ; TRY AGAIN
+    1647/  5.254 : 077                          CMC
+    1648/  5.255 : 303 204 005                  JMP     IOA2
+    1649/  5.260 :                      
+    1650/  5.260 :                      ;       END OF INPUT, PUT VALUE IN MEMORY AND EXIT
+    1651/  5.260 :                      
+    1652/  5.260 : 315 302 003          IOA4    CALL    WCC             ; ECHO CHARACTER
+    1653/  5.263 : 127                          MOV     D,A             ; LAST CHARACTER TO D
+    1654/  5.264 : 325                          PUSH    D
+    1655/  5.265 : 361                          POP     PSW             ; (PSW) = RESULT OF DAD
+    1656/  5.266 : 174                          MOV     A,H             ; MAKE (A) INTO SPLIT OCTAL
+    1657/  5.267 : 037                          RAR
+    1658/  5.270 : 147                          MOV     H,A
+    1659/  5.271 : 172                          MOV     A,D             ; RESTORE LAST INPUT CHARACTER
+    1660/  5.272 : 353                          XCHG                    ; (D,E) = INPUT ADDRESS
+    1661/  5.273 : 341                          POP     H               ; (H,L) = LOCATION TO PLACE THIS ADDRESS
+    1662/  5.274 : 162                          MOV     M,D
+    1663/  5.275 : 053                          DCX     H
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 33 - 2024-04-04 05:54:22 PM
+
+
+    1664/  5.276 : 163                          MOV     M,E
+    1665/  5.277 : 301                          POP     B               ; RESTORE (B,C)
+    1666/  5.300 : 311                          RET
+    1667/  5.301 :                      
+    1668/  5.301 :                      ;       IOC - INPUT OCTAL CHARACTER
+    1669/  5.301 :                      ;
+    1670/  5.301 :                      ;
+    1671/  5.301 :                      ;       ENTRY   NONE
+    1672/  5.301 :                      ;       EXIT    (A) = INPUT CHARACTER
+    1673/  5.301 :                      ;               'X' SET IF CHARACTER IS NOT OCTAL
+    1674/  5.301 :                      ;       USES    A,F
+    1675/  5.301 :                      
+    1676/  5.301 : 315 262 003          IOC     CALL    RCC             ; INPUT CHARACTER
+    1677/  5.304 : 376 060                      CPI     '0'
+    1678/  5.306 : 330                          RC                      ; IF CHARACTER < OCTAL
+    1679/  5.307 :                      
+    1680/  5.307 : 376 070                      CPI     '8'             ; CHARACTER > OCTAL?
+    1681/  5.311 : 077                          CMC                     ; 'C' IF GREATER THAN
+    1682/  5.312 : 311                          RET
+    1683/  5.313 :                      
+    1684/  5.313 :                      ;       TOA - TYPE OCTAL ADDRESS
+    1685/  5.313 :                      ;
+    1686/  5.313 :                      ;       TOA OUTPUTS TO THE CONSOLE A CRLF, THE SPECIFIED ADDRESS AND A SPACE
+    1687/  5.313 :                      ;
+    1688/  5.313 :                      ;       ENTRY   (H,L) = ADDRESS TO BE DISPLAYED
+    1689/  5.313 :                      ;       EXIT    NONE
+    1690/  5.313 :                      ;       USES    A,B,C,F
+    1691/  5.313 :                      
+    1692/  5.313 : 076 015              TOA     MVI     A,A.CR          ; CRLF
+    1693/  5.315 : 315 302 003                  CALL    WCC
+    1694/  5.320 : 076 012                      MVI     A,A.LF
+    1695/  5.322 : 315 302 003                  CALL    WCC
+    1696/  5.325 :                      
+    1697/  5.325 : 174                  TOA.    MOV     A,H             ; ADDRESS
+    1698/  5.326 : 315 343 005                  CALL    TOB
+    1699/  5.331 : 175                          MOV     A,L
+    1700/  5.332 : 315 343 005                  CALL    TOB
+    1701/  5.335 :                      
+    1702/  5.335 : 076 040                      MVI     A,' '           ; SPACE
+    1703/  5.337 : 315 302 003                  CALL    WCC
+    1704/  5.342 : 311                          RET
+    1705/  5.343 :                      
+    1706/  5.343 :                      ;       TOB - TYPE OCTAL BYTE
+    1707/  5.343 :                      ;
+    1708/  5.343 :                      ;       TOB OUTPUTS TO THE CONSOLE IN OCTAL, THE BYTE IN A
+    1709/  5.343 :                      ;
+    1710/  5.343 :                      ;       ENTRY   (A) = BYTE TO BE OUTPUT
+    1711/  5.343 :                      ;       EXIT    NONE
+    1712/  5.343 :                      ;       USES    A,F
+    1713/  5.343 :                      
+    1714/  5.343 : 305                  TOB     PUSH    B
+    1715/  5.344 : 006 002                      MVI     B,2             ; NUMBER OF CHARACTERS - 1
+    1716/  5.346 : 117                          MOV     C,A             ; SAVE ORIGINAL BYTE
+    1717/  5.347 : 267                          ORA     A               ; ASSURE 'C' = ZERO
+    1718/  5.350 : 037                          RAR
+    1719/  5.351 : 037                          RAR                     ; SHIFT TOP BYTE TO LSB
+    1720/  5.352 : 037                          RAR
+    1721/  5.353 : 037                  TOB1    RAR                     ; SHIFT MIDDLE BYTE TO LSB
+    1722/  5.354 : 037                          RAR
+    1723/  5.355 : 037                          RAR
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 34 - 2024-04-04 05:54:22 PM
+
+
+    1724/  5.356 : 346 007                      ANI     00000111B       ; MASK FOR HALF ASCII
+    1725/  5.360 : 366 060                      ORI     00110000B       ; MASK FOR WHOLE ASCII
+    1726/  5.362 : 315 302 003                  CALL    WCC             ; OUTPUT TO CONSOLE
+    1727/  5.365 : 171                          MOV     A,C             ; GET ORIGINAL BYTE
+    1728/  5.366 : 005                          DCR     B
+    1729/  5.367 : 302 353 005                  JNZ     TOB1            ; IF SECOND BYTE STILL NEEDS TO BE OUTPUT
+    1730/  5.372 :                      
+    1731/  5.372 : 346 007                      ANI     00000111B       ; ELSE, OUTPUT LAST CHARACTER
+    1732/  5.374 : 366 060                      ORI     00110000B
+    1733/  5.376 : 315 302 003                  CALL    WCC
+    1734/  6.001 : 301                          POP     B
+    1735/  6.002 : 311                          RET
+    1736/  6.003 :                      
+    1737/  6.003 :                      ;       WCR - WAIT FOR A CARRIAGE RETURN
+    1738/  6.003 :                      ;
+    1739/  6.003 :                      ;       WCR INPUTS CHARACTERS FROM THE CONSOLE UNTIL A CARRIAGE RETURN
+    1740/  6.003 :                      ;       IS RECEIVED AND THEN ECHOS A CRLF
+    1741/  6.003 :                      ;
+    1742/  6.003 :                      ;       ENTRY   NONE
+    1743/  6.003 :                      ;       EXIT    NONE
+    1744/  6.003 :                      ;       USES    A,F
+    1745/  6.003 :                      
+    1746/  6.003 : 315 262 003          WCR     CALL    RCC             ; INPUT CHARACTER
+    1747/  6.006 : 376 015                      CPI     A.CR
+    1748/  6.010 : 302 003 006                  JNZ     WCR             ; IF NOT A CR
+    1749/  6.013 :                      
+    1750/  6.013 : 315 302 003                  CALL    WCC             ; ELSE ECHO CR
+    1751/  6.016 : 076 012                      MVI     A,A.LF          ; LINE FEED
+    1752/  6.020 : 315 302 003                  CALL    WCC
+    1753/  6.023 : 311                          RET
+    1754/  6.024 :                      
+    1755/  6.024 :                      ;       TPDSP - TAPE DISPLAY
+    1756/  6.024 :                      ;
+    1757/  6.024 :                      ;       SHOW H88 USER THAT THERE IS SOME ACTIVITY DURING A LOAD OR A DUMP
+    1758/  6.024 :                      ;
+    1759/  6.024 : 042 024 040          TPDSP   SHLD    ABUSS           ; UPDATE ABUSS
+    1760/  6.027 :                      
+    1761/  6.027 : 076 015                      MVI     A,A.CR          ; RETURN
+    1762/  6.031 : 315 302 003                  CALL    WCC
+    1763/  6.034 :                      
+    1764/  6.034 : 174                          MOV     A,H             ; ADDRESS
+    1765/  6.035 : 315 343 005                  CALL    TOB
+    1766/  6.040 : 175                          MOV     A,L
+    1767/  6.041 : 315 343 005                  CALL    TOB
+    1768/  6.044 : 311                          RET
+    1769/  6.045 :                      
+    1770/  6.045 :                      ;       HRNX - HORN EXTENSION ROUTINE
+    1771/  6.045 :                      ;
+    1772/  6.045 :                      ;       THIS IS AN EXTENSION TO *HORN* TO MAKE ROOM FOR A JUMP
+    1773/  6.045 :                      ;
+    1774/  6.045 :                      
+    1775/  6.045 : 056 011              HRNX    MVI     L,CTLFLG#256
+    1776/  6.047 : 163                          MOV     M,E             ; TURN OFF HORN
+    1777/  6.050 : 321                          POP     D
+    1778/  6.051 : 341                          POP     H
+    1779/  6.052 : 311                          RET
+    1780/  6.053 :                      
+    1781/  6.053 :                      ;       NOISE - DING BELL ON CONSOLE
+    1782/  6.053 :                      ;
+    1783/  6.053 :                      ;       THIS IS A MODIFICATION TO ALLOW THE H88/H89 TO USE THE CONSOLE BELL
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 35 - 2024-04-04 05:54:22 PM
+
+
+    1784/  6.053 :                      ;
+    1785/  6.053 :                      
+    1786/  6.053 : 076 007              NOISE   MVI     A,A.BEL
+    1787/  6.055 : 315 302 003                  CALL    WCC
+    1788/  6.060 : 303 140 002                  JMP     HORN            ; CONTINUE WITH NORMAL HORN DELAY
+    1789/  6.063 :                      
+    1790/  6.063 :                      ;       TPERMSG - TAPE ERROR MESSAGE
+    1791/  6.063 :                      ;
+    1792/  6.063 :                      ;       DISPLAY THE TAPE ERROR NUMBER ON THE CONSOLE
+    1793/  6.063 :                      
+    1794/  6.063 : 062 024 040          TPERMSG STA     ABUSS          ; SAVE ERROR NUMBER
+    1795/  6.066 : 076 040                      MVI     A,' '          ; OUTPUT A SPACE
+    1796/  6.070 : 315 302 003                  CALL    WCC
+    1797/  6.073 : 170                          MOV     A,B            ; OUTPUT NUMBER
+    1798/  6.074 : 315 343 005                  CALL    TOB
+    1799/  6.077 : 311                          RET
+    1800/  6.100 :                      
+    1801/  6.100 :                      ;       TYPMSG - TYPE MESSAGE TO CONSOLE
+    1802/  6.100 :                      ;
+    1803/  6.100 :                      ;       TYPMSG OUTPUTS AN ASCII MESSAGE FROM MEMORY TO THE CONSOLE
+    1804/  6.100 :                      ;       UNTIL A NULL IS SENSED
+    1805/  6.100 :                      ;
+    1806/  6.100 :                      ;       ENTRY   (H,L) = ADDRESS OF MESSAGE
+    1807/  6.100 :                      ;       EXIT    NONE
+    1808/  6.100 :                      ;       USES    A,H,L,F
+    1809/  6.100 :                      
+    1810/  6.100 : 176                  TYPMSG  MOV     A,M             ; GET CHARACTER
+    1811/  6.101 : 267                          ORA     A               ; SEE IF NULL
+    1812/  6.102 : 310                          RZ                      ; IF NULL, EXIT
+    1813/  6.103 :                      
+    1814/  6.103 : 315 302 003                  CALL    WCC             ; ELSE OUTPUT CHARACTER TO CONSOLE
+    1815/  6.106 : 043                          INX     H               ; POINT TO NEXT CHARACTER
+    1816/  6.107 : 303 100 006                  JMP     TYPMSG          ; OUTPUT IT
+    1817/  6.112 :                      
+    1818/  6.112 :                      ;       MSG.PR - MESSAGE FOR MONITOR PROMPT
+    1819/  6.112 :                      ;
+    1820/  6.112 :                      ;       CRLF, "  H: "
+    1821/  6.112 :                      
+    1822/  6.112 : 015 012 040 040 110  MSG.PR  DB      A.CR,A.LF,"  H: ",0
+           6.117 : 072 040 000        
+    1823/  6.122 :                      
+    1824/  6.122 :                      ;       MSG.SP - MESSAGE TO TELL USER TO TYPE SPACES
+    1825/  6.122 :                      ;
+    1826/  6.122 :                      ;       "Type spaces to determine baud rate"
+    1827/  6.122 :                      
+    1828/  6.122 : 124 171 160 145 040  MSG.SP  DB      "Type SPACES to determine baud rate",0
+           6.127 : 123 120 101 103 105
+           6.134 : 123 040 164 157 040
+           6.141 : 144 145 164 145 162
+           6.146 : 155 151 156 145 040
+           6.153 : 142 141 165 144 040
+           6.160 : 162 141 164 145 000
+    1829/  6.165 :                      
+    1830/  6.165 :                      ;       MSG.GO - (G)O
+    1831/  6.165 :                      ;
+    1832/  6.165 :                      ;       "GO"
+    1833/  6.165 :                      
+    1834/  6.165 : 157 040 000          MSG.GO  DB      "o ",0
+    1835/  6.170 :                      
+    1836/  6.170 :                      ;;      MSG.LD - (L)OAD
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 36 - 2024-04-04 05:54:22 PM
+
+
+    1837/  6.170 :                      ;
+    1838/  6.170 :                      ;       "LOAD"
+    1839/  6.170 :                      
+    1840/  6.170 : 157 141 144 000      MSG.LD  DB      "oad",0
+    1841/  6.174 :                      
+    1842/  6.174 :                      ;       MSG.DMP - (D)UMP
+    1843/  6.174 :                      ;
+    1844/  6.174 :                      ;       "DUMP"
+    1845/  6.174 :                      
+    1846/  6.174 : 165 155 160 040 000  MSG.DMP DB      "ump ",0
+    1847/  6.201 :                      
+    1848/  6.201 :                      ;       MSG.SUB - (S)UBSTITUTE
+    1849/  6.201 :                      ;
+    1850/  6.201 :                      ;       "SUBSTITUTE"
+    1851/  6.201 :                      
+    1852/  6.201 : 165 142 163 164 151  MSG.SUB DB      "ubstitute ",0
+           6.206 : 164 165 164 145 040
+           6.213 : 000                
+    1853/  6.214 :                      
+    1854/  6.214 :                      ;       MSG.PC - (P)ROGRAM COUNTER
+    1855/  6.214 :                      ;
+    1856/  6.214 :                      ;       "PROGRAM COUNTER"
+    1857/  6.214 :                      
+    1858/  6.214 : 162 157 147 162 141  MSG.PC  DB       "rogram Counter ",0
+           6.221 : 155 040 103 157 165
+           6.226 : 156 164 145 162 040
+           6.233 : 000                
+    1859/  6.234 :                      
+    1860/  6.234 :                      ;       MSG.BT - (B)OOT
+    1861/  6.234 :                      ;
+    1862/  6.234 :                      ;       "BOOT"
+    1863/  6.234 :                      
+    1864/  6.234 : 157 157 164 000      MSG.BT  DB      "oot",0
+    1865/  6.240 :                      
+    1866/  6.240 :                      ;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
+    1867/  6.240 :                      
+    1868/  6.240 : 041 371 006 315 100  SPEED   DB      041Q, 371Q, 006Q, 315Q, 100Q, 006Q, 076Q, 000Q
+           6.245 : 006 076 000        
+    1869/  6.250 : 062 002 040 076 022          DB      062Q, 002Q, 040Q, 076Q, 022Q, 323Q, 177Q, 052Q
+           6.255 : 323 177 052        
+    1870/  6.260 : 033 040 174 057 127          DB      033Q, 040Q, 174Q, 057Q, 127Q, 175Q, 057Q, 074Q
+           6.265 : 175 057 074        
+    1871/  6.270 : 137 322 275 006 024          DB      137Q, 322Q, 275Q, 006Q, 024Q, 001Q, 000Q, 000Q
+           6.275 : 001 000 000        
+    1872/  6.300 : 333 177 346 001 312          DB      333Q, 177Q, 346Q, 001Q, 312Q, 300Q, 006Q, 333Q
+           6.305 : 300 006 333        
+    1873/  6.310 : 177 346 001 302 307          DB      177Q, 346Q, 001Q, 302Q, 307Q, 006Q, 004Q, 170Q
+           6.315 : 006 004 170        
+    1874/  6.320 : 376 070 302 300 006          DB      376Q, 070Q, 302Q, 300Q, 006Q, 052Q, 033Q, 040Q
+           6.325 : 052 033 040        
+    1875/  6.330 : 031 021 214 376 031          DB      031Q, 021Q, 214Q, 376Q, 031Q, 345Q, 041Q, 062Q
+           6.335 : 345 041 062        
+    1876/  6.340 : 007 072 002 040 356          DB      007Q, 072Q, 002Q, 040Q, 356Q, 001Q, 062Q, 002Q
+           6.345 : 001 062 002        
+    1877/  6.350 : 040 302 357 006 041          DB      040Q, 302Q, 357Q, 006Q, 041Q, 100Q, 007Q, 315Q
+           6.355 : 100 007 315        
+    1878/  6.360 : 100 006 341 315 325          DB      100Q, 006Q, 341Q, 315Q, 325Q, 005Q, 303Q, 257Q
+           6.365 : 005 303 257        
+    1879/  6.370 : 006 033 105 012 011          DB      006Q, 033Q, 105Q, 012Q, 011Q, 104Q, 151Q, 163Q
+           6.375 : 104 151 163        
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 37 - 2024-04-04 05:54:22 PM
+
+
+    1880/  7.000 : 153 040 144 162 151          DB      153Q, 040Q, 144Q, 162Q, 151Q, 166Q, 145Q, 040Q
+           7.005 : 166 145 040        
+    1881/  7.010 : 162 157 164 141 164          DB      162Q, 157Q, 164Q, 141Q, 164Q, 151Q, 157Q, 156Q
+           7.015 : 151 157 156        
+    1882/  7.020 : 141 154 040 163 160          DB      141Q, 154Q, 040Q, 163Q, 160Q, 145Q, 145Q, 144Q
+           7.025 : 145 145 144        
+    1883/  7.030 : 040 164 145 163 164          DB      040Q, 164Q, 145Q, 163Q, 164Q, 056Q, 015Q, 012Q
+           7.035 : 056 015 012        
+    1884/  7.040 : 012 011 011 104 162          DB      012Q, 011Q, 011Q, 104Q, 162Q, 151Q, 166Q, 145Q
+           7.045 : 151 166 145        
+    1885/  7.050 : 040 163 160 145 145          DB      040Q, 163Q, 160Q, 145Q, 145Q, 144Q, 040Q, 075Q
+           7.055 : 144 040 075        
+    1886/  7.060 : 040 000 033 110 127          DB      040Q, 000Q, 033Q, 110Q, 127Q, 157Q, 162Q, 153Q
+           7.065 : 157 162 153        
+    1887/  7.070 : 151 156 147 033 131          DB      151Q, 156Q, 147Q, 033Q, 131Q, 043Q, 076Q, 000Q
+           7.075 : 043 076 000        
+    1888/  7.100 : 033 110 040 040 040          DB      033Q, 110Q, 040Q, 040Q, 040Q, 040Q, 040Q, 040Q
+           7.105 : 040 040 040        
+    1889/  7.110 : 040 033 131 043 076          DB      040Q, 033Q, 131Q, 043Q, 076Q, 000Q
+           7.115 : 000                
+    1890/  7.116 : 076 000 323 362 041  DYMEM   DB      076Q, 000Q, 323Q, 362Q, 041Q, 000Q, 040Q, 076Q
+           7.123 : 000 040 076        
+    1891/  7.126 : 001 066 000 064 276          DB      001Q, 066Q, 000Q, 064Q, 276Q, 040Q, 003Q, 043Q
+           7.133 : 040 003 043        
+    1892/  7.136 : 030 367 053 353 041          DB      030Q, 367Q, 053Q, 353Q, 041Q, 324Q, 007Q, 335Q
+           7.143 : 324 007 335        
+    1893/  7.146 : 041 153 007 030 133          DB      041Q, 153Q, 007Q, 030Q, 133Q, 172Q, 335Q, 041Q
+           7.153 : 172 335 041        
+    1894/  7.156 : 163 007 303 160 003          DB      163Q, 007Q, 303Q, 160Q, 003Q, 173Q, 335Q, 041Q
+           7.163 : 173 335 041        
+    1895/  7.166 : 173 007 303 160 003          DB      173Q, 007Q, 303Q, 160Q, 003Q, 023Q, 006Q, 001Q
+           7.173 : 023 006 001        
+    1896/  7.176 : 041 237 003 335 041          DB      041Q, 237Q, 003Q, 335Q, 041Q, 207Q, 007Q, 030Q
+           7.203 : 207 007 030        
+    1897/  7.206 : 077 041 000 040 176          DB      077Q, 041Q, 000Q, 040Q, 176Q, 270Q, 302Q, 307Q
+           7.213 : 270 302 307        
+    1898/  7.216 : 000 074 167 276 302          DB      000Q, 074Q, 167Q, 276Q, 302Q, 307Q, 000Q, 043Q
+           7.223 : 307 000 043        
+    1899/  7.226 : 175 273 040 360 174          DB      175Q, 273Q, 040Q, 360Q, 174Q, 272Q, 040Q, 354Q
+           7.233 : 272 040 354        
+    1900/  7.236 : 046 003 076 010 375          DB      046Q, 003Q, 076Q, 010Q, 375Q, 041Q, 251Q, 007Q
+           7.243 : 041 251 007        
+    1901/  7.246 : 303 143 003 045 040          DB      303Q, 143Q, 003Q, 045Q, 040Q, 366Q, 004Q, 170Q
+           7.253 : 366 004 170        
+    1902/  7.256 : 335 041 273 000 303          DB      335Q, 041Q, 273Q, 000Q, 303Q, 160Q, 003Q, 041Q
+           7.263 : 160 003 041        
+    1903/  7.266 : 000 000 006 002 045          DB      000Q, 000Q, 006Q, 002Q, 045Q, 040Q, 375Q, 055Q
+           7.273 : 040 375 055        
+    1904/  7.276 : 040 372 005 040 367          DB      040Q, 372Q, 005Q, 040Q, 367Q, 303Q, 360Q, 003Q
+           7.303 : 303 360 003        
+    1905/  7.306 : 176 375 041 316 007          DB      176Q, 375Q, 041Q, 316Q, 007Q, 303Q, 143Q, 003Q
+           7.313 : 303 143 003        
+    1906/  7.316 : 267 043 040 364 335          DB      267Q, 043Q, 040Q, 364Q, 335Q, 351Q, 033Q, 105Q
+           7.323 : 351 033 105        
+    1907/  7.326 : 104 171 156 141 155          DB      104Q, 171Q, 156Q, 141Q, 155Q, 151Q, 143Q, 040Q
+           7.333 : 151 143 040        
+    1908/  7.336 : 122 101 115 040 164          DB      122Q, 101Q, 115Q, 040Q, 164Q, 145Q, 163Q, 164Q
+           7.343 : 145 163 164        
+    1909/  7.346 : 015 012 012 011 040          DB      015Q, 012Q, 012Q, 011Q, 040Q, 114Q, 127Q, 101Q
+           7.353 : 114 127 101        
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 38 - 2024-04-04 05:54:22 PM
+
+
+    1910/  7.356 : 040 075 040 000 040          DB      040Q, 075Q, 040Q, 000Q, 040Q, 075Q, 040Q, 000Q
+           7.363 : 075 040 000        
+    1911/  7.366 : 107 101 103 056              DB      107Q, 101Q, 103Q, 056Q
+    1912/  7.372 :                      
+    1913/  7.372 :                      ;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
+    1914/  7.372 :                      ;
+    1915/  7.372 : (MACRO)                      ERRNZ   10000A-6-*      ; MUST BE 6 BYTES BEFORE END
+    1915/  7.372 :                      ;       IF (10000A-6-*) != 0
+    1915/  7.372 :                      ;         ERROR Expression is not zero
+    1915/  7.372 :                      ;       ENDIF
+    1916/  7.372 :                      
+    1917/  7.372 : 303 240 006          ESPEED  JMP     SPEED
+    1918/  7.375 :                      
+    1919/  7.375 :                      ;       ENTRY POINT FOR DYNAMIC MEMORY TEST
+    1920/  7.375 :                      ;
+    1921/  7.375 : (MACRO)                      ERRNZ   10000A-3-*      ; MUST BE 3 BYTES BEFORE END
+    1921/  7.375 :                      ;       IF (10000A-3-*) != 0
+    1921/  7.375 :                      ;         ERROR Expression is not zero
+    1921/  7.375 :                      ;       ENDIF
+    1922/  7.375 :                      
+    1923/  7.375 : 303 116 007          EDTMEM  JMP     DYMEM
+    1924/ 10.000 :                      
+    1925/ 10.000 : (MACRO)                      ERRNZ   *-10000A        ; MUST NOT EXCEED 2K BYTES
+    1925/ 10.000 :                      ;       IF (*-10000A) != 0
+    1925/ 10.000 :                      ;         ERROR Expression is not zero
+    1925/ 10.000 :                      ;       ENDIF
+    1926/ 10.000 :                      
+    1927/ 10.000 :                      ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET
+    1928/ 10.000 :                      ;       MONITOR.
+    1929/ 10.000 :                      
+    1930/ 40.000 :                              ORG     20000Q          ; 8192
+    1931/ 40.000 :                      
+    1932/ 40.000 :                      START   DS      2               ; DUMP STARTING ADDRESS
+    1933/ 40.002 :                      IOWRK   DS      2               ; IN OUR OUT INSTRUCTION
+    1934/ 40.004 :                      PRSRAM                          ; FOLLOWING CELLS INITIALIZED FROM ROM
+    1935/ 40.004 :                              DS      1               ; RET
+    1936/ 40.005 :                      REGI    DS      1               ; INDEX OF REGISTER UNDER DISPLAY
+    1937/ 40.006 :                      DSPROT  DS      1               ; PERIOD FLAG BYTE
+    1938/ 40.007 :                      DSPMOD  DS      1               ; DISPLAY MODE
+    1939/ 40.010 :                      
+    1940/ 40.010 :                      MFLAG   DS      1               ; USER FLAG OPTIONS
+    1941/ 40.011 :                                                      ; SEE *UO.XXX* BITS DESCRIBED AT FRONT
+    1942/ 40.011 :                      
+    1943/ 40.011 :                      CTLFLG  DS      1               ; FRONT PANEL CONTROL BITS
+    1944/ 40.012 :                      REFIND  DS      1               ; REFRESH INDEX (0 TO 7)
+    1945/ 40.013 : =7O                  PRSL    EQU     7               ; END OF AREA INITIALIZED FROM ROM
+    1946/ 40.013 :                      
+    1947/ 40.013 :                      FPLEDS                          ; FRONT PANEL LEDS PATTERNS
+    1948/ 40.013 :                      ALEDS   DS      1               ; ADDR 0
+    1949/ 40.014 :                              DS      1               ; ADDR 1
+    1950/ 40.015 :                              DS      1               ; ADDR 2
+    1951/ 40.016 :                      
+    1952/ 40.016 :                              DS      1               ; ADDR 3
+    1953/ 40.017 :                              DS      1               ; ADDR 4
+    1954/ 40.020 :                              DS      1               ; ADDR 5
+    1955/ 40.021 :                      
+    1956/ 40.021 :                      DLEDS   DS      1               ; DATA 0
+    1957/ 40.022 :                              DS      1               ; DATA 1
+    1958/ 40.023 :                              DS      1               ; DATA 2
+    1959/ 40.024 :                      
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 39 - 2024-04-04 05:54:22 PM
+
+
+    1960/ 40.024 :                      ABUSS   DS      2               ; ADDRESS BUSS
+    1961/ 40.026 :                      RCCA    DS      1               ; RCC SAVE AREA
+    1962/ 40.027 :                      CRCSUM  DS      2               ; CRC-16 CHECKSUM
+    1963/ 40.031 :                      TPERRX  DS      2               ; TAPE ERROR EXIT ADDRESS
+    1964/ 40.033 :                      TICCNT  DS      2               ; CLOCK TIC COUNTER
+    1965/ 40.035 :                      
+    1966/ 40.035 :                      REGPTR  DS      2               ; REGISTER CONTENTS POINTER
+    1967/ 40.037 :                      
+    1968/ 40.037 :                      UIVEC                           ; USER INTERRUPT VECTORS
+    1969/ 40.037 :                              DS      3               ; JUMP TO CLOCK PROCESSOR
+    1970/ 40.042 :                              DS      3               ; JUMP TO SINGLE STEP PROCESSOR
+    1971/ 40.045 :                              DS      3               ; JUMP TO I/O 3
+    1972/ 40.050 :                              DS      3               ; JUMP TO I/O 3
+    1973/ 40.053 :                              DS      3               ; JUMP TO I/O 5
+    1974/ 40.056 :                              DS      3               ; JUMP TO I/O 6
+    1975/ 40.061 :                              DS      3               ; JUMP TO I/O 7
+    1976/ 40.064 :                      
+    1977/ 40.064 :                      ;       H88/H89 RAM USAGE BEYOND THAT OF H8MTRF
+    1978/ 40.064 :                      ;
+    1979/ 40.064 :                      NMIRET  DS      2
+    1980/ 40.066 :                      
+    1981/ 40.066 :                              END
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 40 - 2024-04-04 05:54:22 PM
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+ A.BEL :                          7 - | *A.BKS :                         10 - |
+ A.CR :                          15 - |  A.DEL :                        177 - |
+*A.ESC :                         33 - |  A.LF :                          12 - |
+ A.STX :                          2 - |  A.SYN :                         26 - |
+ ABUSS :                     40.024 C |  ALARM :                      2.136 C |
+ ALARMB :                     2.167 C | *ALEDS :                     40.013 C |
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*BLKSIZ :                     2.000 - |  BOOT :                       4.256 C |
+*BR19.2 :                     4.077 C | *BR38.4 :                     4.101 C |
+*BR56.0 :                     4.103 C | *BR96 :                       4.075 C |
+ BRTAB :                      4.075 C | *CASESENSITIVE :                  0 - |
+ CB.CLI :                       100 - |  CB.MTL :                        40 - |
+ CB.SPK :                       200 - |  CB.SSI :                        20 - |
+ CLK4 :                         270 C |  CLOCK :                        201 C |
+*CONSTPI :        3.141592653589793 - |  CRC :                        2.347 C |
+ CRC1 :                       2.356 C |  CRC2 :                       3.004 C |
+ CRCSUM :                    40.027 C |  CTC :                        2.172 C |
+ CTLFLG :                    40.011 C |  CUI1 :                         165 C |
+*DATE :                "2024-04-04" - | *DLEDS :                     40.021 C |
+*DLY :                           53 C | *DM.MR :                          0 - |
+*DM.MW :                          1 - | *DM.RR :                          2 - |
+*DM.RW :                          3 - | *DOD :                        3.122 C |
+*DSPMOD :                    40.007 C | *DSPROT :                    40.006 C |
+*DUMP :                       2.002 C |  DYMEM :                      7.116 C |
+*EDTMEM :                     7.375 C |  ERROR :                        322 C |
+*ESPEED :                     7.372 C | *FALSE :                          0 - |
+*FPLEDS :                    40.013 C |  GO :                         1.222 C |
+ GO. :                           63 C |  GO88 :                       1.146 C |
+ GO88.1 :                     1.177 C |  H88.CTL :                      362 - |
+ H88.SW :                       362 - | *H88B.CK :                        2 - |
+*H88B.SS :                        1 - |  H88S.BR :                      300 - |
+ H88S.M :                        40 - | *HAS64 :                          1 - |
+ HORN :                       2.140 C |  HRN0 :                       2.143 C |
+ HRN2 :                       2.160 C |  HRNX :                       6.045 C |
+ INIT :                          73 C | *INIT0 :                          0 C |
+ INIT0.0 :                        3 C |  INIT0X :                     4.000 C |
+ INIT0X1 :                    4.050 C |  INIT1 :                        107 C |
+*INIT2 :                        117 C | *INT1 :                          10 - |
+*INT2 :                          20 - | *INT3 :                          30 C |
+*INT4 :                          40 C | *INT5 :                          50 C |
+*INT6 :                          60 C | *INT7 :                          70 C |
+ INTXIT :                       172 C |  IOA :                        3.062 C |
+ IOA1 :                       5.176 C |  IOA2 :                       5.204 C |
+ IOA3 :                       5.242 C |  IOA4 :                       5.260 C |
+*IOB :                        3.066 C |  IOB1 :                       3.070 C |
+ IOB1.5 :                     3.126 C |  IOB2 :                       3.135 C |
+ IOC :                        5.301 C |  IOWRK :                     40.002 C |
+ IP.PAD :                       360 - |  IP.TPC :                       371 - |
+ IP.TPD :                       370 - |  IROC :                       5.150 C |
+ IROC1 :                      5.166 C | *LISTON :                         1 - |
+ LOA0 :                       1.272 C |  LOA1 :                       1.342 C |
+*LOAD :                       1.267 C | *LRA :                        3.047 C |
+ LRA. :                       3.052 C | *MACEXP :                         7 - |
+ MFLAG :                     40.010 C |  MI.ANI :                       346 - |
+*MI.EXAF :                       10 - |  MI.HLT :                       166 - |
+ MI.IN :                        333 - | *MI.JIXA :                      335 - |
+*MI.JIXB :                      351 - | *MI.JIYA :                      375 - |
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 41 - 2024-04-04 05:54:22 PM
+
+
+*MI.JIYB :                      371 - | *MI.JMP :                       303 - |
+*MI.LDA :                        72 - | *MI.LDXA :                      335 - |
+*MI.LDXB :                       41 - | *MI.LDYA :                      375 - |
+*MI.LDYB :                       41 - | *MI.LXID :                       21 - |
+ MI.OUT :                       323 - |  MI.RET :                       311 - |
+*MOMCPU :                   200.200 - | *MOMCPUNAME :                "8080" - |
+ MSG.BT :                     6.234 C |  MSG.DMP :                    6.174 C |
+ MSG.GO :                     6.165 C |  MSG.LD :                     6.170 C |
+ MSG.PC :                     6.214 C |  MSG.PR :                     6.112 C |
+ MSG.SP :                     6.122 C |  MSG.SUB :                    6.201 C |
+ MTR :                          344 C |  MTR.2 :                        357 C |
+ MTR.3 :                        371 C |  MTR.4 :                      1.014 C |
+ MTR1 :                         345 C |  MTRA :                       1.025 C |
+ MTRAL :                          6 - | *NESTMAX :                    1.000 - |
+ NMI :                        4.116 C |  NMI0.5 :                     4.160 C |
+ NMI1 :                       4.202 C |  NMI1.5 :                     4.217 C |
+*NMI2 :                       4.224 C |  NMI2.5 :                     4.251 C |
+ NMI3 :                       4.252 C | *NMIENT :                       146 C |
+ NMIRET :                    40.064 C |  NOISE :                      6.053 C |
+ OP.CTL :                       360 - | *OP.DIG :                       360 - |
+*OP.SEQ :                       361 - |  OP.TPC :                       371 - |
+ OP.TPD :                       370 - |  PCA :                        1.103 C |
+ PCA1 :                       1.137 C |  PRSL :                           7 - |
+ PRSRAM :                    40.004 C |  PRSROM :                     3.371 C |
+ RCC :                        3.262 C |  RCC1 :                       3.262 C |
+*RCCA :                      40.026 C | *RCK :                        3.260 C |
+*REFIND :                    40.012 C |  REGI :                      40.005 C |
+ REGPTR :                    40.035 C | *RELAXED :                        0 - |
+ RMEM :                       1.261 C |  RNB :                        2.331 C |
+ RNB1 :                       2.335 C |  RNP :                        2.325 C |
+ ROMDD :                     30.000 - | *RT.BP :                          2 - |
+*RT.CT :                          3 - | *RT.MI :                          1 - |
+*SAE :                        1.063 C |  SAVALL :                       132 C |
+ SAVALLR :                      151 C |  SAVALLX :                    4.105 C |
+ SC.ACE :                       350 - |  SINCR :                      4.000 - |
+ SPEED :                      6.240 C |  SRMEM :                      1.067 C |
+ SRS :                        2.265 C |  SRS1 :                       2.265 C |
+ SRS2 :                       2.271 C |  SST1 :                       1.235 C |
+*SSTEP :                      1.225 C |  START :                     40.000 C |
+ STPRTN :                     1.244 C |  SUBM :                       4.370 C |
+ SUBM1 :                      5.013 C |  SUBM2 :                      5.027 C |
+ SUBM3 :                      5.042 C |  SUBM4 :                      5.046 C |
+ SUBM5 :                      5.053 C |  SUBM6 :                      5.062 C |
+ SUBM7 :                      5.075 C |  SUBM8 :                      5.077 C |
+ SUBM9 :                      5.115 C |  SWMEM :                      4.313 C |
+*SWMEM2 :                     4.337 C |  SWMEM4 :                     4.351 C |
+ TER1 :                       2.220 C |  TER3 :                       2.215 C |
+ TFT :                        2.133 C |  TICCNT :                    40.033 C |
+*TIME :               "05:54:22 PM" - |  TOA :                        5.313 C |
+*TOA. :                       5.325 C |  TOB :                        5.343 C |
+ TOB1 :                       5.353 C |  TPABT :                      2.244 C |
+ TPDSP :                      6.024 C |  TPERMSG :                    6.063 C |
+ TPERR :                      2.205 C |  TPERRX :                    40.031 C |
+ TPXIT :                      2.252 C | *TRUE :                           1 - |
+ TYPMSG :                     6.100 C |  UC.8BW :                         3 - |
+ UC.DLA :                       200 - |  UC.DR :                          1 - |
+ UC.THE :                        40 - |  UCI.ER :                        20 - |
+*UCI.IE :                         2 - | *UCI.IR :                       100 - |
+ UCI.RE :                         4 - |  UCI.RO :                        40 - |
+ UCI.TE :                         1 - |  UIVEC :                     40.037 C |
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 42 - 2024-04-04 05:54:22 PM
+
+
+ UMI.16X :                        2 - |  UMI.1B :                       100 - |
+*UMI.1X :                         1 - | *UMI.2B :                       300 - |
+*UMI.64X :                        3 - | *UMI.HB :                       200 - |
+*UMI.L5 :                         0 - | *UMI.L6 :                         4 - |
+*UMI.L7 :                        10 - |  UMI.L8 :                        14 - |
+*UMI.PA :                        20 - | *UMI.PE :                        40 - |
+*UO.CLK :                         1 - |  UO.DDU :                         2 - |
+*UO.HLT :                       200 - |  UO.NFR :                       100 - |
+ UR.DLL :                         0 - |  UR.DLM :                         1 - |
+ UR.IER :                         1 - |  UR.LCR :                         3 - |
+ UR.LSR :                         5 - |  UR.RBR :                         0 - |
+ UR.THR :                         0 - | *USR.FE :                        40 - |
+*USR.OE :                        20 - | *USR.PE :                        10 - |
+ USR.RXR :                        2 - | *USR.TXE :                        4 - |
+ USR.TXR :                        1 - | *VERSION :                   24.057 - |
+ WCC :                        3.302 C |  WCC1 :                       3.303 C |
+ WCR :                        6.003 C |  WME1 :                       2.012 C |
+ WME2 :                       2.104 C |  WMEM :                       1.374 C |
+ WNB :                        3.024 C |  WNB1 :                       3.025 C |
+ WNP :                        3.017 C | *Z80SYNTAX :                      0 - |
+
+  1.017 symbols
+     94 unused symbols
+
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 43 - 2024-04-04 05:54:22 PM
+
+
+  Defined Macros:
+  ---------------
+
+ERRMI                                 | ERRNZ                                
+ERRPL                                 | ERRZR                                
+
+      4 macros
+
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 44 - 2024-04-04 05:54:22 PM
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.02 seconds assembly time
+
+  8.028 lines source file
+  8.181 lines incl. macro expansions
+      2 passes
+      0 errors
+      0 warnings

@@ -116,7 +116,7 @@ A.STX   EQU     002Q            ; STX CHARACTER
 A.BEL   EQU     007Q            ; BELL CHARACTER
 A.BKS   EQU     010Q            ; BACKSPACE CHARACTER
 A.LF    EQU     012Q            ; LINE FEED CHARACTER
-A.CR    EQU     0150            ; CARRIAGE RETURN CHARACTER
+A.CR    EQU     015Q            ; CARRIAGE RETURN CHARACTER
 A.ESC   EQU     033Q            ; ESCAPE CHARACTER
 A.DEL   EQU     177Q            ; DELETE OR RUBOUT CHARACTER
 
@@ -223,7 +223,7 @@ INT3    JMP     UIVEC+6         ; JUMP TO USER ROUTINE
 
 INT4    JMP     UIVEC+9         ; JUMP TO USER ROUTINE
 
-        DB      40Q,122Q,116Q,102Q,44Q ; SUPPORT CODE
+        DB      44Q,122Q,116Q,102Q,44Q ; SUPPORT CODE
 
         ORG     50Q
 
@@ -272,7 +272,7 @@ INIT    LDAX    D               ; COPY *PRSROM* INTO RAM
         INR     E               ; INCREMENT SOURCE
         JNZ     INIT            ; IF NOT DONE
 
-SINCR   EQU     4000Q           ; SEARCH INCREMENT
+SINCR   EQU     2000Q           ; SEARCH INCREMENT
 
         MVI     D,SINCR/256     ; (DE) = SEARCH INCREMENT
         LXI     H,START-SINCR   ; (HL) = FIRST RAM - SEARCH INCREMENT
@@ -426,11 +426,11 @@ CLOCK   LHLD    TICCNT
 
 CLK4    JMP     CUI1            ; ALLOW USER PROCESSING OF CLOCK
 
-;       NOTE: SOURCE CODE FOR THE FOLLOWING WAS NOT PUBLISHED.
-;       PRESUMABLY IT WAS PART OF THE MEMORY TEST AND FLOPPY DISK
-;       ROTATIONAL SPEED TEST ROUTINES MENTIONED IN THE MANUAL.
+;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
 
-        ORG        322Q
+        DB      041Q, 000Q, 000Q, 053Q, 174Q, 265Q, 302Q, 276Q
+        DB      000Q, 303Q, 207Q, 007Q, 353Q, 041Q, 047Q, 001Q
+        DB      335Q, 041Q, 315Q, 003Q, 303Q, 306Q, 007Q
 
 ;       ERROR - COMMAND ERROR.
 ;
@@ -493,6 +493,7 @@ MTR.4   CALL    WCC             ; WRITE CHARACTER BACK TO CONSOLE
         INX     H               ; GET MSB
         MOV     H,M
         MOV     L,A             ; (H,L) = ROUTINE ADDRESS
+        PCHL                    ; GO TO ROUTINE
 
 MTRA                            ; JUMP TABLE
 
@@ -511,11 +512,15 @@ MTRA                            ; JUMP TABLE
         DB      'P'             ; PROGRAM COUNTER ALTER MODE
         DW      PCA
 
-        DW      'B'             ; BOOT HDOS
+        DB      'B'             ; BOOT HDOS
         DW      BOOT
 
 MTRAL   EQU     ($-MTRA)/3      ; NUMBER OF TABLE ENTRYS   /JWT 790507/
-;       LON     L
+
+;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
+
+        DB    015Q, 012Q, 012Q, 105Q, 122Q, 122Q, 117Q, 122Q
+        DB    040Q, 100Q, 040Q, 000Q
 
 ;       SAE - STORE ABUSS AND EXIT.
 ;
@@ -592,6 +597,8 @@ GO88.1  CALL    WCC             ; ECHO RETURN
         CALL    WCC
         JMP     GO              ; EXECUTE USER ROUTINE
 
+        DB      110Q,103Q,101Q,046Q,103Q,101Q,107Q,056Q ; DESIGN CODE
+
 ;       GO - RETURN TO USER MODE
 ;
 ;       ENTRY   NONE
@@ -651,8 +658,7 @@ RMEM    LXI     H,TPABT
 
         ERRNZ   *-1267Q
 
-LOAD
-        LXI     B,1000Q-RT.MI*256-256 ; (BC) = - REQUIRED TYPE AND #
+LOAD    LXI     B,177000Q       ; 400Q-RT.MI*256-256 (BC) = - REQUIRED TYPE AND #
 LOA0    CALL    SRS             ; SCAN FOR RECORD COUNT
         MOV     L,A             ; (HL) = COUNT
         XCHG                    ; (DE) = COUNT, (HL) = TYPE AND #
@@ -674,7 +680,7 @@ LOA0    CALL    SRS             ; SCAN FOR RECORD COUNT
         POP     D               ; RESTORE (DE)
         MOV     M,C             ; SET P-REG IN MEM
         INX     H
-        MOV     H,B
+        MOV     M,B
         CALL    RNP             ; READ ADDRESS
         MOV     L,A             ; (HL) = ADDRESS, (DE) = COUNT
         SHLD    START
@@ -730,7 +736,7 @@ WME1    CALL    WNB
         CALL    WNB             ; WRITE STX
         MOV     L,H             ; (HL) = 00
         SHLD    CRCSUM          ; CLEAR CRC 16
-        LXI     H,RT.MI+80H*256+1 ; FIRST AND LAST MI RECORD
+        LXI     H,100401Q       ; RT.MI+80H*256+1 FIRST AND LAST MI RECORD
         CALL    WNP             ; WRITE HEADER
         LHLD    START
         XCHG                    ; (D,E) = START ADDRESS
@@ -811,7 +817,7 @@ HRN0    XTHL                    ; SAVE (HL), (H) = COUNT
         XRA     M
         MOV     E,M             ; (E) = OLD CTLFLG VALUE
         MOV     M,A             ; TURN ON HORN
-        MVI     L,TICCNT/256
+        MVI     L,TICCNT#256
 
         MOV     A,D             ; (A) = CYCLE COUNT
         ADD     M
@@ -834,7 +840,7 @@ ALARMB  JMP     NOISE           ; SEND A BELL TO THE CONSOLE
 
 CTC     CALL    RNP             ; READ NEXT PAIR
         LHLD    CRCSUM
-        MOV     A,M
+        MOV     A,H
         ORA     L
         RZ                      ; RETURN IF OK
         MVI     A,1             ; CHECKSUM ERROR
@@ -899,7 +905,7 @@ TPABT   XRA     A
         ERRNZ   *-2252Q
 
 TPXIT   IN      IP.PAD
-        CPI     00001111B       ; *
+        CPI     01101111B       ; *
         IN      IP.TPC          ; READ TAPE STATUS
         RNZ                     ; NOT '*', RETURN WITH STATUS
         LHLD    TPERRX
@@ -957,7 +963,7 @@ SRS2    CALL    RNB             ; READ NEXT BYTE
         ERRNZ   *-2325Q
 
 RNP     CALL    RNB             ; READ NEXT BYTE
-        MOV     M,A
+        MOV     H,A
 ;       JMP     RNB             ; READ NEXT BYTE
 
 ;       RNB - READ NEXT BYTE
@@ -1149,10 +1155,18 @@ IOB2    CPI     A.CR            ; CARRIAGE RETURN?
         JR      IOB1            ; GET A NEW CHARACTER               /JWT 790507/
         CPU     8080
 
-; MORE CODE BELOW THAT WAS NOT PUBLISHED. REPLACED WITH DISASSEMBLY OF
-; ROM.
+;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
 
-        ORG     1660Q
+        DB      010Q, 333Q, 355Q, 346Q, 040Q, 312Q, 144Q, 003Q
+        DB      010Q, 323Q, 350Q, 375Q, 351Q, 117Q, 346Q, 300Q
+        DB      017Q, 017Q, 017Q, 017Q, 017Q, 017Q, 366Q, 060Q
+        DB      375Q, 041Q, 202Q, 003Q, 303Q, 143Q, 003Q, 171Q
+        DB      346Q, 070Q, 017Q, 017Q, 017Q, 366Q, 060Q, 375Q
+        DB      041Q, 221Q, 003Q, 303Q, 143Q, 003Q, 171Q, 346Q
+        DB      007Q, 366Q, 060Q, 375Q, 041Q, 235Q, 003Q, 303Q
+        DB      143Q, 003Q, 335Q, 351Q, 015Q, 012Q, 011Q, 120Q
+        DB      141Q, 163Q, 163Q, 040Q, 075Q, 040Q, 040Q, 040Q
+        DB      040Q, 000Q, 122Q, 116Q, 102Q
 
 ;       RCK - READ CONSOLE KEYPAD
 ;
@@ -1196,6 +1210,8 @@ RCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE LINE STATUS REGISTER
         CPI     A.DEL
         JZ      ERROR           ; IF RUBOUT, EXIT TO CALLER
 
+        RET                     ; ELSE, EXIT TO CALLER
+
 ;       WCC - WRITE CONSOLE CHARACTER
 ;
 ;       WRITE A CHARACTER TO THE CONSOLE UART PORT
@@ -1215,10 +1231,14 @@ WCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE STATUS
         OUT     SC.ACE+UR.THR   ; OUTPUT TO CONSOLE
         RET
 
-; MORE CODE BELOW THAT WAS NOT PUBLISHED. REPLACED WITH DISASSEMBLY OF
-; ROM.
+;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
 
-        ORG     1771Q
+        DB    353Q, 174Q, 335Q, 041Q, 326Q, 003Q, 303Q, 160Q
+        DB    003Q, 175Q, 335Q, 041Q, 335Q, 003Q, 030Q, 223Q
+        DB    353Q, 041Q, 362Q, 007Q, 335Q, 041Q, 350Q, 003Q
+        DB    303Q, 306Q, 007Q, 032Q, 335Q, 041Q, 360Q, 003Q
+        DB    303Q, 160Q, 003Q, 076Q, 007Q, 375Q, 041Q, 265Q
+        DB    007Q, 303Q, 143Q, 003Q
 
 ;       IO ROUTINES TO BE COPIED INTO AND USED IN RAM.
 ;
@@ -1270,7 +1290,7 @@ INIT0X  MVI     A,00000010B
 ;       WAIT A WHILE TO ALLOW THE CONSOLE RESET TO FINISH SO IT CAN
 ;       ACCEPT THE FIRST PROMPT
 ;
-        LXI     B,65000Q        ; APPROX. 100 MS
+        LXI     B,32400Q        ; APPROX. 100 MS
 INIT0X1 DCR     C
         JNZ     INIT0X1
 
@@ -1400,6 +1420,7 @@ NMI2    MOV     A,B             ; GET OUTPUT DATA AGAIN
         RRC
         RRC
         RRC
+        RRC
         MOV     C,A             ; SAVE IN C
         MOV     A,B             ; GET OUTPUT DATA AGAIN
         ANI     CB.SSI          ; GET SINGLE STEP INFO
@@ -1517,7 +1538,7 @@ SUBM3   INX     H               ; POINT TO NEXT ADDRESS
         JMP     SUBM1           ; DISPLAY NEXT
 
 SUBM4   CPI     '-'             ; MINUS?
-        JNZ     SUBM4           ; IF NOT
+        JNZ     SUBM6           ; IF NOT
 
 SUBM5   CALL    WCC             ; ECHO HYPHEN
         DCX     H               ; POINT TO PREVIOUS ADDRESS
@@ -1556,7 +1577,7 @@ SUBM9   CALL    IOC             ; INPUT NEXT CHARACTER
 
         MVI     A,A.BEL         ; ELSE, DING BELL
         CALL    WCC
-        JMP     SUBM7           ; TRY AGAIN
+        JMP     SUBM9           ; TRY AGAIN
 
 ;       IROC - INPUT A RETURN OR AN OCTAL CHARACTER
 ;
@@ -1572,10 +1593,10 @@ IROC    CALL    RCC             ; INPUT CHARACTER
         CPI     A.CR            ; RETURN?
         RZ                      ; IF A CR
 
-        CPI     'O'             ; < 0?
+        CPI     '0'             ; < 0?
         JC      IROC1           ; IF < OCTAL
 
-        CPI     '0'             ; > 0?
+        CPI     '8'             ; > 8?
         RC                      ; IF OCTAL
 
 IROC1   MVI     A,A.BEL         ; ELSE, RING BELL
@@ -1598,7 +1619,7 @@ IOA1    PUSH    B               ; SAVE (B,C)
         PUSH    H               ; SAVE ADDRESS WHERE INPUT IS TO BE PLACED
         LXI     H,0             ; SET NEW VALUE TO ZERO
 IOA2    CNC     RCC             ; IF CARRY SET, FIRST CHARACTER IS IN ACC
-        CPI     'O'             ; MAKE SURE CHARACTER IS OCTAL
+        CPI     '0'             ; MAKE SURE CHARACTER IS OCTAL
         JC      IOA3            ; IF < OCTAL
 
         CPI     '8'
@@ -1679,6 +1700,7 @@ TOA.    MOV     A,H             ; ADDRESS
         CALL    TOB
 
         MVI     A,' '           ; SPACE
+        CALL    WCC
         RET
 
 ;       TOB - TYPE OCTAL BYTE
@@ -1750,7 +1772,7 @@ TPDSP   SHLD    ABUSS           ; UPDATE ABUSS
 ;       THIS IS AN EXTENSION TO *HORN* TO MAKE ROOM FOR A JUMP
 ;
 
-HRNX    MVI     L,CTLFLG/256
+HRNX    MVI     L,CTLFLG#256
         MOV     M,E             ; TURN OFF HORN
         POP     D
         POP     H
@@ -1803,7 +1825,7 @@ MSG.PR  DB      A.CR,A.LF,"  H: ",0
 ;
 ;       "Type spaces to determine baud rate"
 
-MSG.SP  DB      "Type spaces to determine baud rate" ,0
+MSG.SP  DB      "Type SPACES to determine baud rate",0
 
 ;       MSG.GO - (G)O
 ;
@@ -1821,7 +1843,7 @@ MSG.LD  DB      "oad",0
 ;
 ;       "DUMP"
 
-MSG.DMP DB      "UMP",0
+MSG.DMP DB      "ump ",0
 
 ;       MSG.SUB - (S)UBSTITUTE
 ;
@@ -1841,24 +1863,62 @@ MSG.PC  DB       "rogram Counter ",0
 
 MSG.BT  DB      "oot",0
 
-; MORE CODE BELOW THAT WAS NOT PUBLISHED. REPLACED WITH DISASSEMBLY OF
-; ROM.
+;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
 
-        ORG     3772Q
+SPEED   DB      041Q, 371Q, 006Q, 315Q, 100Q, 006Q, 076Q, 000Q
+        DB      062Q, 002Q, 040Q, 076Q, 022Q, 323Q, 177Q, 052Q
+        DB      033Q, 040Q, 174Q, 057Q, 127Q, 175Q, 057Q, 074Q
+        DB      137Q, 322Q, 275Q, 006Q, 024Q, 001Q, 000Q, 000Q
+        DB      333Q, 177Q, 346Q, 001Q, 312Q, 300Q, 006Q, 333Q
+        DB      177Q, 346Q, 001Q, 302Q, 307Q, 006Q, 004Q, 170Q
+        DB      376Q, 070Q, 302Q, 300Q, 006Q, 052Q, 033Q, 040Q
+        DB      031Q, 021Q, 214Q, 376Q, 031Q, 345Q, 041Q, 062Q
+        DB      007Q, 072Q, 002Q, 040Q, 356Q, 001Q, 062Q, 002Q
+        DB      040Q, 302Q, 357Q, 006Q, 041Q, 100Q, 007Q, 315Q
+        DB      100Q, 006Q, 341Q, 315Q, 325Q, 005Q, 303Q, 257Q
+        DB      006Q, 033Q, 105Q, 012Q, 011Q, 104Q, 151Q, 163Q
+        DB      153Q, 040Q, 144Q, 162Q, 151Q, 166Q, 145Q, 040Q
+        DB      162Q, 157Q, 164Q, 141Q, 164Q, 151Q, 157Q, 156Q
+        DB      141Q, 154Q, 040Q, 163Q, 160Q, 145Q, 145Q, 144Q
+        DB      040Q, 164Q, 145Q, 163Q, 164Q, 056Q, 015Q, 012Q
+        DB      012Q, 011Q, 011Q, 104Q, 162Q, 151Q, 166Q, 145Q
+        DB      040Q, 163Q, 160Q, 145Q, 145Q, 144Q, 040Q, 075Q
+        DB      040Q, 000Q, 033Q, 110Q, 127Q, 157Q, 162Q, 153Q
+        DB      151Q, 156Q, 147Q, 033Q, 131Q, 043Q, 076Q, 000Q
+        DB      033Q, 110Q, 040Q, 040Q, 040Q, 040Q, 040Q, 040Q
+        DB      040Q, 033Q, 131Q, 043Q, 076Q, 000Q
+DYMEM   DB      076Q, 000Q, 323Q, 362Q, 041Q, 000Q, 040Q, 076Q
+        DB      001Q, 066Q, 000Q, 064Q, 276Q, 040Q, 003Q, 043Q
+        DB      030Q, 367Q, 053Q, 353Q, 041Q, 324Q, 007Q, 335Q
+        DB      041Q, 153Q, 007Q, 030Q, 133Q, 172Q, 335Q, 041Q
+        DB      163Q, 007Q, 303Q, 160Q, 003Q, 173Q, 335Q, 041Q
+        DB      173Q, 007Q, 303Q, 160Q, 003Q, 023Q, 006Q, 001Q
+        DB      041Q, 237Q, 003Q, 335Q, 041Q, 207Q, 007Q, 030Q
+        DB      077Q, 041Q, 000Q, 040Q, 176Q, 270Q, 302Q, 307Q
+        DB      000Q, 074Q, 167Q, 276Q, 302Q, 307Q, 000Q, 043Q
+        DB      175Q, 273Q, 040Q, 360Q, 174Q, 272Q, 040Q, 354Q
+        DB      046Q, 003Q, 076Q, 010Q, 375Q, 041Q, 251Q, 007Q
+        DB      303Q, 143Q, 003Q, 045Q, 040Q, 366Q, 004Q, 170Q
+        DB      335Q, 041Q, 273Q, 000Q, 303Q, 160Q, 003Q, 041Q
+        DB      000Q, 000Q, 006Q, 002Q, 045Q, 040Q, 375Q, 055Q
+        DB      040Q, 372Q, 005Q, 040Q, 367Q, 303Q, 360Q, 003Q
+        DB      176Q, 375Q, 041Q, 316Q, 007Q, 303Q, 143Q, 003Q
+        DB      267Q, 043Q, 040Q, 364Q, 335Q, 351Q, 033Q, 105Q
+        DB      104Q, 171Q, 156Q, 141Q, 155Q, 151Q, 143Q, 040Q
+        DB      122Q, 101Q, 115Q, 040Q, 164Q, 145Q, 163Q, 164Q
+        DB      015Q, 012Q, 012Q, 011Q, 040Q, 114Q, 127Q, 101Q
+        DB      040Q, 075Q, 040Q, 000Q, 040Q, 075Q, 040Q, 000Q
+        DB      107Q, 101Q, 103Q, 056Q
 
 ;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
 ;
         ERRNZ   10000A-6-*      ; MUST BE 6 BYTES BEFORE END
-
-SPEED   EQU     6240Q
 
 ESPEED  JMP     SPEED
 
 ;       ENTRY POINT FOR DYNAMIC MEMORY TEST
 ;
         ERRNZ   10000A-3-*      ; MUST BE 3 BYTES BEFORE END
-
-DYMEM   EQU     7116Q
 
 EDTMEM  JMP     DYMEM
 
