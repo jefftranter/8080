@@ -22,7 +22,7 @@
 ;                           BENTON HARBOR, MI.
 ;
 
-ROMADDR EQU     14000Q          ; HDOS BOOT ADDRESS
+ROMDD   EQU     14000Q          ; HDOS BOOT ADDRESS
 
 ;       MTR88 - H88/H89 MONITOR.
 ;
@@ -94,7 +94,7 @@ OP.DIG  EQU     360Q            ; DIGIT SELECT OUTPUT PORT
 OP.SEQ  EQU     361Q            ; SEGMENT SELECT OUTPUT PORT
 
 ;       H88/H89 CONTROL PORT
-H88.CRL EQU     362Q            ; H88/H89 PORT FOR CLOCK AND SINGLE STEP
+H88.CTL EQU     362Q            ; H88/H89 PORT FOR CLOCK AND SINGLE STEP
 H88B.CK EQU     00000010B       ; 2MS CLOCK ENABLE/DISABLE
 H88B.SS EQU     00000001B       ; SINGLE STEP ENABLE/DISABLE
 
@@ -341,7 +341,7 @@ NMIENT  JMP     NMI
 SAVALLR                         ; SAVALL EXTENSION RETURN ADDRESS
 
         CMA
-        ANI     CB+MTL+CB.SSI   ; SAVE REGISTER ADDR IF USER OR SINGLE STEP
+        ANI     CB.MTL+CB.SSI   ; SAVE REGISTER ADDR IF USER OR SINGLE STEP
         RZ                      ; RETURN IF WAS INTERRUPT OF MONITOR LOOP
         LXI     H,2
         DAD     SP              ; (H,L) = ADDRESS OF 'STACKPTR' ON STACK
@@ -424,7 +424,7 @@ CLOCK   LHLD    TICCNT
 
 ;       NONE OF THE ABOVE, SO ALLOW USER PROCESSING OF CLOCK INTERRUPT
 
-CLK     JMP     CUI1            ; ALLOW USER PROCESSING OF CLOCK
+CLK4    JMP     CUI1            ; ALLOW USER PROCESSING OF CLOCK
 
 ;       NOTE: SOURCE CODE FOR THE FOLLOWING WAS NOT PUBLISHED.
 ;       PRESUMABLY IT WAS PART OF THE MEMORY TEST AND FLOPPY DISK
@@ -447,7 +447,7 @@ CLK     JMP     CUI1            ; ALLOW USER PROCESSING OF CLOCK
         ERRNZ   *-322Q
 
 ERROR   LXI     H,MFLAG
-        MVI     A,M             ; (A) = MFLAG
+        MOV     A,M             ; (A) = MFLAG
         ANI     377Q-UO.DDU-UO.NFR ; RE-ENABLE DISPLAYS
         MOV     M,A             ; REPLACE
         INX     H
@@ -531,7 +531,7 @@ SAE     SHLD    ABUSS
 ;       SRMEM - H88/H89 ENTRY POINT FOR A CASSETTE LOAD
 ;
 
-SRMEM   LXI     H,MSO.LD        ; COMPLETE MESSAGE
+SRMEM   LXI     H,MSG.LD        ; COMPLETE MESSAGE
         CALL    TYPMSG
         CALL    WCR             ; WAIT FOR A CARRIAGE RETURN
         JMP     RMEM            ; LOAD TAPE
@@ -608,7 +608,7 @@ GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
 
 SSTEP                           ; SINGLE STEP
         DI                      ; DISABLE INTERRUPTS UNTIL THE RIGHT TIME
-        LDA     CTLGL
+        LDA     CTLFLG
         XRI     CB.SSI          ; CLEAR SINGLE STEP INHIBIT
         OUT     OP.CTL          ; PRIME SINGLE STEP INTERRUPT
 SST1    STA     CTLFLG          ; SET NEW FLAG VALUES
@@ -857,7 +857,7 @@ TPERR   MOV     B,A             ; (B) = CODE
 
 ;       IS #, RETURN (IF PARITY ERROR)
 
-        DB      MI,ANI          ; FALL THROUGH WITH CARRY CLEAR
+        DB      MI.ANI          ; FALL THROUGH WITH CARRY CLEAR
 TER3    MOV     A,B
 
         RRC
@@ -872,7 +872,7 @@ TER1    CC      ALARM           ; ALARM IF PROPER TIME
         JZ      TER3            ; IF #
         LDA     TICCNT+1
         RAR                     ; 'C' SET IF 1/2 SECOND
-        JMP     TER2
+        JMP     TER1
 
 ;       TPABT - ABORT TAPE LOAD OR DUMP.
 ;
@@ -900,7 +900,7 @@ TPABT   XRA     A
 
 TPXIT   IN      IP.PAD
         CPI     00001111B       ; *
-        IN      IP.TPX          ; READ TAPE STATUS
+        IN      IP.TPC          ; READ TAPE STATUS
         RNZ                     ; NOT '*', RETURN WITH STATUS
         LHLD    TPERRX
 
@@ -971,7 +971,7 @@ RNP     CALL    RNB             ; READ NEXT BYTE
 
         ERRNZ   *-2331Q
 
-RNB     MVI     A,UCI.RO+UCI.ER+ICI.RE ; TURN ON READ FOR NEXT BYTE
+RNB     MVI     A,UCI.RO+UCI.ER+UCI.RE ; TURN ON READ FOR NEXT BYTE
         OUT     OP.TPC
 RNB1    CALL    TPXIT           ; CHECK FOR #, READ STATUS
         ANI     USR.RXR
@@ -1057,7 +1057,7 @@ WNB     PUSH    PSW
 WNB1    CALL    TPXIT           ; CHECK FOR *, READ STATUS
         ANI     USR.TXR
         JZ      WNB1            ; IF MORE TO GO
-        MVI     A,UCI.ER+ECI.TE ; ENABLE TRANSMITTER
+        MVI     A,UCI.ER+UCI.TE ; ENABLE TRANSMITTER
         OUT     OP.TPC          ; TURN ON TAPE
         POP     PSW
         OUT     OP.TPD          ; OUTPUT DATA
@@ -1104,7 +1104,7 @@ IOA     JMP     IOA1
         ERRNZ   *-3066Q
 
 IOB     MVI     M,0             ; ZERO OUT OLD VALUE
-        CNC     RCC             ; READ CONSOLE CHARACTER
+IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
 
 ;       SEE IF CHARACTER IS A VALID OCTAL VALUE
 ;
@@ -1227,7 +1227,7 @@ WCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE STATUS
 
         ERRNZ   4000Q-7-*
 
-PRSOM
+PRSROM
         DB      1               ; REFIND
         DB      0               ; CTLFLG
         DB      0               ; MFLAG
@@ -1240,7 +1240,7 @@ PRSOM
 
 ;       INIT0X - EXTENSION OF INIT0 TO SUPPORT H88
 
-INIT0Z  MVI     A,00000010B
+INIT0X  MVI     A,00000010B
         OUT     H88.CTL
 
 ;       SET UP ACE FOR CONSOLE COMMUNICATIONS
@@ -1258,12 +1258,12 @@ INIT0Z  MVI     A,00000010B
         ADD     L               ; ADD DISPLACEMENT FROM BEGINNING OF TABLE
         MOV     L,A
         MOV     A,M             ; GET MSB OF DIVISOR
-        OUT     SC.ACE+VR.DLM
+        OUT     SC.ACE+UR.DLM
         INX     H               ; GET LSB
         MOV     A,M
         OUT     SC.ACE+UR.DLL
-        MVI     A,UC.8B         ; SET 8 BITS, 1 STOP BIT, NO PARITY
-        OUT     SC.ACR+UR.LCR
+        MVI     A,UC.8BW        ; SET 8 BITS, 1 STOP BIT, NO PARITY
+        OUT     SC.ACE+UR.LCR
         MVI     A,0             ; SET NO INTERRUPTS
         OUT     SC.ACE+UR.IER
 
@@ -1850,11 +1850,15 @@ MSG.BT  DB      "oot",0
 ;
         ERRNZ   10000A-6-*      ; MUST BE 6 BYTES BEFORE END
 
+SPEED   EQU     6240Q
+
 ESPEED  JMP     SPEED
 
 ;       ENTRY POINT FOR DYNAMIC MEMORY TEST
 ;
         ERRNZ   10000A-3-*      ; MUST BE 3 BYTES BEFORE END
+
+DYMEM   EQU     7116Q
 
 EDTMEM  JMP     DYMEM
 
