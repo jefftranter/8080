@@ -1,0 +1,61 @@
+ AS V1.42 Beta [Bld 266] - Source File test.asm - Page 1 - 2024-04-14 08:22:03 PM
+
+
+    1/      0 :                         ; Source code for "Computing Test" program in H88 Operation Manual.
+    2/      0 :                         ;
+    3/      0 :                         ; It can be entered as octal numbers from the ROM monitor using the
+    4/      0 :                         ; S(ubstitute) command. It starts at (and begins execution at) address
+    5/      0 :                         ; 040100.
+    6/      0 :                         ;
+    7/      0 :                         ; When run, it continuously prints a series of ASCII characters on the
+    8/      0 :                         ; screen. It can be stopped by pressing <SHIFT><RESET>.
+    9/      0 :                         
+   10/      0 :                         
+   11/      0 : =3.302O                 WCC     EQU     1702Q           ; WRITE CHAR TO CONSOLE
+   12/      0 :                         
+   13/ 40.100 :                                 ORG     20100Q          ; 040.100 in split octal
+   14/ 40.100 :                         
+   15/ 40.100 : 076 011                 START   MVI     A,9
+   16/ 40.102 : 315 302 003             LOOP    CALL    WCC
+   17/ 40.105 : 074                             INR     A
+   18/ 40.106 : 376 155                         CPI     155Q
+   19/ 40.110 : 312 100 040                     JZ      START
+   20/ 40.113 : 303 102 040                     JMP     LOOP
+   21/ 40.116 :                         
+   22/ 40.116 :                                 END
+ AS V1.42 Beta [Bld 266] - Source File test.asm - Page 2 - 2024-04-14 08:22:03 PM
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *CONSTPI :        3.141592653589793 - |
+*DATE :                "2024-04-14" - | *FALSE :                          0 - |
+*HAS64 :                          1 - | *LISTON :                         1 - |
+ LOOP :                      40.102 C | *MACEXP :                         7 - |
+*MOMCPU :                   200.200 - | *MOMCPUNAME :                "8080" - |
+*NESTMAX :                    1.000 - | *RELAXED :                        0 - |
+ START :                     40.100 C | *TIME :               "08:22:03 PM" - |
+*TRUE :                           1 - | *VERSION :                   24.057 - |
+ WCC :                        3.302 - | *Z80SYNTAX :                      0 - |
+
+     19 symbols
+     16 unused symbols
+
+ AS V1.42 Beta [Bld 266] - Source File test.asm - Page 3 - 2024-04-14 08:22:03 PM
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.00 seconds assembly time
+
+     23 lines source file
+      1 pass
+      0 errors
+      0 warnings

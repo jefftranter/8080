@@ -1,4 +1,4 @@
-all: mtr88.hex mtr88.bin demo.hex demo.bin
+all: mtr88.hex mtr88.bin demo.hex demo.bin test.bin
 
 mtr88.hex: mtr88.p
 	p2hex -F Intel mtr88.p
@@ -17,6 +17,15 @@ demo.bin: demo.p
 
 demo.p: demo.asm
 	asl -L -cpu 8080 -listradix 8 -splitbyte . demo.asm
+
+test.hex: test.p
+	p2hex -F Intel test.p
+
+test.bin: test.p
+	p2bin -r '$$-$$' test.p
+
+test.p: test.asm
+	asl -L -cpu 8080 -listradix 8 -splitbyte . test.asm
 
 clean:
 	$(RM) *.p
