@@ -1,0 +1,7 @@
+This is the source code for the Heathkit H89 monitor ROM (MTR89). It
+was based on the published source code with minimal changes to adapt
+it to the ASL assembler. The listing is in split octal, like the
+original Heathkit assembler listing.
+
+I have confirmed that the output matches the published binary for the
+ROM.

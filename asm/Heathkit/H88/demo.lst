@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 266] - Source File demo.asm - Page 1 - 2024-04-07 06:55:58 PM
+ AS V1.42 Beta [Bld 266] - Source File demo.asm - Page 1 - 2024-04-21 12:59:16 PM
 
 
     1/      0 :                         ;                               APPENDIX B
@@ -61,7 +61,7 @@
    58/      0 : =33O                    ESC     EQU     33Q
    59/      0 : =15O                    CR      EQU     15Q
    60/      0 : =12O                    LF      EQU     12Q
- AS V1.42 Beta [Bld 266] - Source File demo.asm - Page 2 - 2024-04-07 06:55:58 PM
+ AS V1.42 Beta [Bld 266] - Source File demo.asm - Page 2 - 2024-04-21 12:59:16 PM
 
 
    61/      0 :                         
@@ -88,7 +88,7 @@
    82/ 40.124 :                         
    83/ 40.124 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    84/ 40.124 :                         ;
-   85/ 40.124 :                         ;       INITIALIZE DERVICE INTERRUPT ROUTINE
+   85/ 40.124 :                         ;       INITIALIZE SERVICE INTERRUPT ROUTINE
    86/ 40.124 :                         ;          LOAD THE USER INTERRUPT VECTOR (UIVEC) WITH A
    87/ 40.124 :                         ;          JUMP INSTRUCTION AND THE ADDRESS OF THE SERVICE
    88/ 40.124 :                         ;          ROUTINE.  ENABLE USER CLOCK INTERRUPT!
@@ -110,7 +110,7 @@
   104/ 40.154 :                         
   105/ 40.154 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   106/ 40.154 :                         ;
-  107/ 40.154 :                         ;       RETURN TO NORMAL INTERRUPT SATTUS & HALT
+  107/ 40.154 :                         ;       RETURN TO NORMAL INTERRUPT STATUS & HALT
   108/ 40.154 :                         ;          DISABLE INTERRUPT & TURN ON SPEAKER
   109/ 40.154 :                         ;
   110/ 40.154 : 076 000                         MVI     A,0
@@ -124,7 +124,7 @@
   118/ 40.165 :                         ;          CLOCK AND DISPLAY INTERRUPT
   119/ 40.165 :                         ;
   120/ 40.165 : 052 232 040             INTRP   LHLD    TICK            ; GET COUNT (BETWEEN 0 & 500)
- AS V1.42 Beta [Bld 266] - Source File demo.asm - Page 3 - 2024-04-07 06:55:58 PM
+ AS V1.42 Beta [Bld 266] - Source File demo.asm - Page 3 - 2024-04-21 12:59:16 PM
 
 
   121/ 40.170 : 053                             DCX     H               ; TICK=TICK-1
@@ -153,7 +153,7 @@
   144/ 40.232 :                         TICK    DS      2
   145/ 40.234 :                         NUMBER  DS      1
   146/ 40.235 :                                 END
- AS V1.42 Beta [Bld 266] - Source File demo.asm - Page 4 - 2024-04-07 06:55:58 PM
+ AS V1.42 Beta [Bld 266] - Source File demo.asm - Page 4 - 2024-04-21 12:59:16 PM
 
 
   Symbol Table (* = unused):
@@ -162,7 +162,7 @@
  ALARM :                      2.136 - |
 *ARCHITECTURE :                                      "x86_64-unknown-linux" - |
 *CASESENSITIVE :                  0 - | *CONSTPI :        3.141592653589793 - |
- CR :                            15 - | *DATE :                "2024-04-07" - |
+ CR :                            15 - | *DATE :                "2024-04-21" - |
  ESC :                           33 - | *FALSE :                          0 - |
 *HAS64 :                          1 - |  INTRP :                     40.165 C |
  IOB :                        3.066 - |  LF :                            12 - |
@@ -172,7 +172,7 @@
 *MOMCPUNAME :                "8080" - | *MTR88 :                     40.100 C |
 *NESTMAX :                    1.000 - |  NUMBER :                    40.234 C |
 *RELAXED :                        0 - |  SETICK :                    40.223 C |
- TICK :                      40.232 C | *TIME :               "06:55:58 PM" - |
+ TICK :                      40.232 C | *TIME :               "12:59:16 PM" - |
  TOB :                        5.343 - | *TRUE :                           1 - |
  UIVEC :                     40.037 - |  UO.CLK :                         1 - |
 *VERSION :                   24.057 - |  WCC :                        3.302 - |
@@ -181,7 +181,7 @@
      33 symbols
      17 unused symbols
 
- AS V1.42 Beta [Bld 266] - Source File demo.asm - Page 5 - 2024-04-07 06:55:58 PM
+ AS V1.42 Beta [Bld 266] - Source File demo.asm - Page 5 - 2024-04-21 12:59:16 PM
 
 
   Code Pages:
@@ -191,7 +191,7 @@ STANDARD (0 changed characters)
 
 1 code page
 
-0.01 seconds assembly time
+0.00 seconds assembly time
 
     147 lines source file
       2 passes

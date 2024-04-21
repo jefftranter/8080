@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 1 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 1 - 2024-04-21 12:59:16 PM
 
 
        1/      0 :                              INCLUDE macros.mac
@@ -61,7 +61,7 @@
       29/      0 :                      ;       THIS PROGRAM RESIDES (IN ROM) IN THE LOW 2048 BYTES OF THE HEATH
       30/      0 :                      ;       H88/H89 COMPUTERS.
       31/      0 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 2 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 2 - 2024-04-21 12:59:16 PM
 
 
       32/      0 :                      ;       INTERRUPTS.
@@ -124,7 +124,7 @@
       89/      0 :                      ;       INFORMATION SEE THE NMI ROUTINE.
       90/      0 :                      ;
       91/      0 : =360O                IP.PAD  EQU     360Q            ; PAD INPUT PORT
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 3 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 3 - 2024-04-21 12:59:16 PM
 
 
       92/      0 : =360O                OP.CTL  EQU     360Q            ; CONTROL OUTPUT PORT
@@ -187,7 +187,7 @@
      139/      0 :                      ;       MACHINE INSTRUCTIONS
      140/      0 :                      
      141/      0 : =166O                MI.HLT  EQU     01110110B       ; HALT
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 4 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 4 - 2024-04-21 12:59:16 PM
 
 
      142/      0 : =311O                MI.RET  EQU     11001001B       ; RETURN
@@ -250,7 +250,7 @@
 (1)   30/      0 : =40O                 USR.FE  EQU     00100000B       ; FRAMING ERROR
 (1)   31/      0 : =20O                 USR.OE  EQU     00010000B       ; OVERRUN ERROR
 (1)   32/      0 : =10O                 USR.PE  EQU     00001000B       ; PARITY ERROR
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm(u8251.asm) - Page 5 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm(u8251.asm) - Page 5 - 2024-04-21 12:59:16 PM
 
 
 (1)   33/      0 : =4O                  USR.TXE EQU     00000100B       ; TRANSMITTER EMPTY
@@ -313,7 +313,7 @@
      195/     21 :                      ;       ENDIF
      196/     21 :                      
      197/     21 :                      ;       LEVEL 2 - SINGLE STEP
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 6 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 6 - 2024-04-21 12:59:16 PM
 
 
      198/     21 :                      
@@ -331,7 +331,7 @@
      207/     30 :                      
      208/     30 :                      ;       I/O INTERRUPT VECTORS.
      209/     30 :                      ;
-     210/     30 :                      ;       INTERRUPTS 3 THROUGH 7 ARE AVAILABLE FOR GENERA I/O USE.
+     210/     30 :                      ;       INTERRUPTS 3 THROUGH 7 ARE AVAILABLE FOR GENERAL I/O USE.
      211/     30 :                      ;
      212/     30 :                      ;       THESE INTERRUPTS ARE NOT SUPPORTED BY MTR88, AND SHOULD
      213/     30 :                      ;       NEVER OCCUR UNLESS THE USER HAS SUPPLIED HANDLER ROUTINES
@@ -376,7 +376,7 @@
      249/     63 : 076 320              GO.     MVI     A,CB.SSI+CB.CLI+CB.SPK ; OFF MONITOR MODE LIGHT
      250/     65 : 303 235 001                  JMP     SST1            ; RETURN TO USER PROGRAM
      251/     70 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 7 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 7 - 2024-04-21 12:59:16 PM
 
 
      252/     70 :                              ORG     70Q
@@ -439,7 +439,7 @@
      306/    132 :                      ;
      307/    132 :                      ;       ENTRY   CALLED DIRECTLY FROM INTERRUPT ROUTINE
      308/    132 :                      ;       EXIT    ALL REGISTERS PUSHED ON STACK.
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 8 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 8 - 2024-04-21 12:59:16 PM
 
 
      309/    132 :                      ;               IF NO YET IN MONITOR MODE, REGPTR = ADDRESS OF REGISTERS
@@ -502,7 +502,7 @@
      356/    165 :                      ;       IF (*-165Q) != 0
      356/    165 :                      ;         ERROR Expression is not zero
      356/    165 :                      ;       ENDIF
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 9 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 9 - 2024-04-21 12:59:16 PM
 
 
      357/    165 :                      
@@ -565,7 +565,7 @@
      401/    230 :                      ;       IF (UO.HLT-200Q) != 0
      401/    230 :                      ;         ERROR Expression is not zero
      401/    230 :                      ;       ENDIF
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 10 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 10 - 2024-04-21 12:59:16 PM
 
 
      402/    230 : 027                          RAL
@@ -628,7 +628,7 @@
      453/    331 : 043                          INX     H
      454/    332 : 066 360                      MVI     M,CB.SSI+CB.MTL+CB.CLI+CB.SPK ; RESTORE *CTLFLG*
      455/    334 : (MACRO)                      ERRNZ   CTLFLG-.MFLAG-1
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 11 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 11 - 2024-04-21 12:59:16 PM
 
 
      455/    334 :                      ;       IF (CTLFLG-.MFLAG-1) != 0
@@ -691,7 +691,7 @@
      507/  1.034 : 313 004                      DW      SWMEM
      508/  1.036 :                      
      509/  1.036 : 123                          DB      'S'             ; SUBSTITUTE MEMORY MODE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 12 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 12 - 2024-04-21 12:59:16 PM
 
 
      510/  1.037 : 370 004                      DW      SUBM
@@ -754,7 +754,7 @@
      563/  1.122 : 315 150 005                  CALL    IROC            ; INPUT NEXT CHARACTER
      564/  1.125 : 332 137 001                  JC      PCA1            ; IF FIRST CHARACTER WAS OCTAL, INPUT NEW PC
      565/  1.130 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 13 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 13 - 2024-04-21 12:59:16 PM
 
 
      566/  1.130 : 315 313 005                  CALL    TOA             ; ELSE, OUTPUT CURRENT VALUE
@@ -817,7 +817,7 @@
      616/  1.225 :                      SSTEP                           ; SINGLE STEP
      617/  1.225 : 363                          DI                      ; DISABLE INTERRUPTS UNTIL THE RIGHT TIME
      618/  1.226 : 072 011 040                  LDA     CTLFLG
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 14 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 14 - 2024-04-21 12:59:16 PM
 
 
      619/  1.231 : 356 020                      XRI     CB.SSI          ; CLEAR SINGLE STEP INHIBIT
@@ -880,7 +880,7 @@
      667/  1.301 : 174                          MOV     A,H
      668/  1.302 : 305                          PUSH    B               ; SAVE TYPE AND #
      669/  1.303 : 365                          PUSH    PSW             ; SAVE TYPE CODE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 15 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 15 - 2024-04-21 12:59:16 PM
 
 
      670/  1.304 : 346 177                      ANI     177Q            ; CLEAR END FLAG BIT
@@ -943,7 +943,7 @@
      724/  1.377 : 042 031 040                  SHLD    TPERRX          ; SETUP ERROR EXIT
      725/  2.002 :                      
      726/  2.002 : (MACRO)                      ERRNZ   *-2002Q
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 16 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 16 - 2024-04-21 12:59:16 PM
 
 
      726/  2.002 :                      ;       IF (*-2002Q) != 0
@@ -1006,7 +1006,7 @@
      781/  2.125 : 315 017 003                  CALL    WNP             ; WRITE IT
      782/  2.130 : 315 017 003                  CALL    WNP             ; FLUSH CHECKSUM
      783/  2.133 :                      ;       JMP     TFT
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 17 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 17 - 2024-04-21 12:59:16 PM
 
 
      784/  2.133 :                      
@@ -1069,7 +1069,7 @@
      832/  2.172 :                      ;       CTC - VERIFY CHECKSUM.
      833/  2.172 :                      ;
      834/  2.172 :                      ;       ENTRY   TAPE JUST BEFORE CRC
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 18 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 18 - 2024-04-21 12:59:16 PM
 
 
      835/  2.172 :                      ;       EXIT    TO CALLER IF OK
@@ -1132,7 +1132,7 @@
      886/  2.244 :                      ;       IS STRUCK.
      887/  2.244 :                      
      888/  2.244 : (MACRO)                      ERRNZ   *-2249Q
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 19 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 19 - 2024-04-21 12:59:16 PM
 
 
      888/  2.244 :                      ;       IF (*-2249Q) != 0
@@ -1195,7 +1195,7 @@
      934/  2.265 :                      
      935/  2.265 :                      SRS
      936/  2.265 : 026 000              SRS1    MVI     D,0
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 20 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 20 - 2024-04-21 12:59:16 PM
 
 
      937/  2.267 : 142                          MOV     H,D
@@ -1258,7 +1258,7 @@
      988/  2.347 :                      ;       CRC - COMPUTE CRC-16
      989/  2.347 :                      ;
      990/  2.347 :                      ;       CRC COMPUTES A CRC-16 CHECKSUM FROM THE POLYNOMIAL
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 21 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 21 - 2024-04-21 12:59:16 PM
 
 
      991/  2.347 :                      ;
@@ -1321,7 +1321,7 @@
     1045/  3.017 : (MACRO)                      ERRNZ   *-3017Q
     1045/  3.017 :                      ;       IF (*-3017Q) != 0
     1045/  3.017 :                      ;         ERROR Expression is not zero
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 22 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 22 - 2024-04-21 12:59:16 PM
 
 
     1045/  3.017 :                      ;       ENDIF
@@ -1384,7 +1384,7 @@
     1096/  3.062 : (MACRO)                      ERRNZ   *-3062Q
     1096/  3.062 :                      ;       IF (*-3062Q) != 0
     1096/  3.062 :                      ;         ERROR Expression is not zero
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 23 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 23 - 2024-04-21 12:59:16 PM
 
 
     1096/  3.062 :                      ;       ENDIF
@@ -1447,7 +1447,7 @@
     1147/  3.132 : 303 070 003                  JMP     IOB1            ; INPUT ANOTHER CHARACTER
     1148/  3.135 :                      
     1149/  3.135 :                      ;       CHECK FOR A CARRIAGE RETURN TO TERMINATE BYTE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 24 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 24 - 2024-04-21 12:59:16 PM
 
 
     1150/  3.135 :                      ;
@@ -1510,7 +1510,7 @@
     1195/  3.262 :                      ;       EXIT    TO ERROR - IF A DELETE OR RUBOUT IS ENCOUNTERED
     1196/  3.262 :                      ;               TO CALLER - WHEN A KEY IS HIT
     1197/  3.262 :                      ;               (A) = ASCII KEY VALUE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 25 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 25 - 2024-04-21 12:59:16 PM
 
 
     1198/  3.262 :                      ;       USES    A,F
@@ -1573,7 +1573,7 @@
     1248/  3.371 :                      ;         ERROR Expression is not zero
     1248/  3.371 :                      ;       ENDIF
     1249/  3.371 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 26 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 26 - 2024-04-21 12:59:16 PM
 
 
     1250/  3.371 :                      PRSROM
@@ -1636,7 +1636,7 @@
     1304/  4.064 : 312 116 007                  JZ      DYMEM           ; IF TO PERFORM MEMORY TESTS
     1305/  4.067 :                      
     1306/  4.067 :                      ;       REPLACE WHAT WAS ORIGINALLY AT THE JUMP WHICH GOT US HERE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 27 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 27 - 2024-04-21 12:59:16 PM
 
 
     1307/  4.067 :                      ;
@@ -1699,7 +1699,7 @@
     1361/  4.116 :                      ;       ENTRY   NONE
     1362/  4.116 :                      ;
     1363/  4.116 :                      ;       EXIT    NONE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 28 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 28 - 2024-04-21 12:59:16 PM
 
 
     1364/  4.116 :                      ;
@@ -1762,7 +1762,7 @@
     1421/  4.231 : 017                          RRC
     1422/  4.232 : 017                          RRC
     1423/  4.233 : 017                          RRC
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 29 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 29 - 2024-04-21 12:59:16 PM
 
 
     1424/  4.234 : 117                          MOV     C,A             ; SAVE IN C
@@ -1825,7 +1825,7 @@
     1481/  4.321 : 315 150 005                  CALL    IROC            ; INPUT FIRST CHARACTER
     1482/  4.324 : 322 351 004                  JNC     SWMEM4          ; IF FIRST CHARACTER IS OCTAL
     1483/  4.327 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 30 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 30 - 2024-04-21 12:59:16 PM
 
 
     1484/  4.327 : 041 001 040                  LXI     H,START+1       ; ELSE, INPUT STARTING ADDRESS
@@ -1888,7 +1888,7 @@
     1541/  5.050 : 302 062 005                  JNZ     SUBM6           ; IF NOT
     1542/  5.053 :                      
     1543/  5.053 : 315 302 003          SUBM5   CALL    WCC             ; ECHO HYPHEN
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 31 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 31 - 2024-04-21 12:59:16 PM
 
 
     1544/  5.056 : 053                          DCX     H               ; POINT TO PREVIOUS ADDRESS
@@ -1951,7 +1951,7 @@
     1601/  5.166 :                      
     1602/  5.166 : 076 007              IROC1   MVI     A,A.BEL         ; ELSE, RING BELL
     1603/  5.170 : 315 302 003                  CALL    WCC
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 32 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 32 - 2024-04-21 12:59:16 PM
 
 
     1604/  5.173 : 303 150 005                  JMP     IROC            ; TRY AGAIN
@@ -2014,7 +2014,7 @@
     1661/  5.273 : 341                          POP     H               ; (H,L) = LOCATION TO PLACE THIS ADDRESS
     1662/  5.274 : 162                          MOV     M,D
     1663/  5.275 : 053                          DCX     H
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 33 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 33 - 2024-04-21 12:59:16 PM
 
 
     1664/  5.276 : 163                          MOV     M,E
@@ -2077,7 +2077,7 @@
     1721/  5.353 : 037                  TOB1    RAR                     ; SHIFT MIDDLE BYTE TO LSB
     1722/  5.354 : 037                          RAR
     1723/  5.355 : 037                          RAR
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 34 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 34 - 2024-04-21 12:59:16 PM
 
 
     1724/  5.356 : 346 007                      ANI     00000111B       ; MASK FOR HALF ASCII
@@ -2140,7 +2140,7 @@
     1781/  6.053 :                      ;       NOISE - DING BELL ON CONSOLE
     1782/  6.053 :                      ;
     1783/  6.053 :                      ;       THIS IS A MODIFICATION TO ALLOW THE H88/H89 TO USE THE CONSOLE BELL
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 35 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 35 - 2024-04-21 12:59:16 PM
 
 
     1784/  6.053 :                      ;
@@ -2203,7 +2203,7 @@
     1834/  6.165 : 157 040 000          MSG.GO  DB      "o ",0
     1835/  6.170 :                      
     1836/  6.170 :                      ;;      MSG.LD - (L)OAD
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 36 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 36 - 2024-04-21 12:59:16 PM
 
 
     1837/  6.170 :                      ;
@@ -2266,7 +2266,7 @@
            6.365 : 005 303 257        
     1879/  6.370 : 006 033 105 012 011          DB      006Q, 033Q, 105Q, 012Q, 011Q, 104Q, 151Q, 163Q
            6.375 : 104 151 163        
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 37 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 37 - 2024-04-21 12:59:16 PM
 
 
     1880/  7.000 : 153 040 144 162 151          DB      153Q, 040Q, 144Q, 162Q, 151Q, 166Q, 145Q, 040Q
@@ -2329,7 +2329,7 @@
            7.343 : 145 163 164        
     1909/  7.346 : 015 012 012 011 040          DB      015Q, 012Q, 012Q, 011Q, 040Q, 114Q, 127Q, 101Q
            7.353 : 114 127 101        
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 38 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 38 - 2024-04-21 12:59:16 PM
 
 
     1910/  7.356 : 040 075 040 000 040          DB      040Q, 075Q, 040Q, 000Q, 040Q, 075Q, 040Q, 000Q
@@ -2392,7 +2392,7 @@
     1957/ 40.022 :                              DS      1               ; DATA 1
     1958/ 40.023 :                              DS      1               ; DATA 2
     1959/ 40.024 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 39 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 39 - 2024-04-21 12:59:16 PM
 
 
     1960/ 40.024 :                      ABUSS   DS      2               ; ADDRESS BUSS
@@ -2417,7 +2417,7 @@
     1979/ 40.064 :                      NMIRET  DS      2
     1980/ 40.066 :                      
     1981/ 40.066 :                              END
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 40 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 40 - 2024-04-21 12:59:16 PM
 
 
   Symbol Table (* = unused):
@@ -2441,7 +2441,7 @@
  CRC1 :                       2.356 C |  CRC2 :                       3.004 C |
  CRCSUM :                    40.027 C |  CTC :                        2.172 C |
  CTLFLG :                    40.011 C |  CUI1 :                         165 C |
-*DATE :                "2024-04-04" - | *DLEDS :                     40.021 C |
+*DATE :                "2024-04-21" - | *DLEDS :                     40.021 C |
 *DLY :                           53 C | *DM.MR :                          0 - |
 *DM.MW :                          1 - | *DM.RR :                          2 - |
 *DM.RW :                          3 - | *DOD :                        3.122 C |
@@ -2480,7 +2480,7 @@
 *MI.EXAF :                       10 - |  MI.HLT :                       166 - |
  MI.IN :                        333 - | *MI.JIXA :                      335 - |
 *MI.JIXB :                      351 - | *MI.JIYA :                      375 - |
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 41 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 41 - 2024-04-21 12:59:16 PM
 
 
 *MI.JIYB :                      371 - | *MI.JMP :                       303 - |
@@ -2531,7 +2531,7 @@
 *SWMEM2 :                     4.337 C |  SWMEM4 :                     4.351 C |
  TER1 :                       2.220 C |  TER3 :                       2.215 C |
  TFT :                        2.133 C |  TICCNT :                    40.033 C |
-*TIME :               "05:54:22 PM" - |  TOA :                        5.313 C |
+*TIME :               "12:59:16 PM" - |  TOA :                        5.313 C |
 *TOA. :                       5.325 C |  TOB :                        5.343 C |
  TOB1 :                       5.353 C |  TPABT :                      2.244 C |
  TPDSP :                      6.024 C |  TPERMSG :                    6.063 C |
@@ -2543,7 +2543,7 @@
 *UCI.IE :                         2 - | *UCI.IR :                       100 - |
  UCI.RE :                         4 - |  UCI.RO :                        40 - |
  UCI.TE :                         1 - |  UIVEC :                     40.037 C |
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 42 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 42 - 2024-04-21 12:59:16 PM
 
 
  UMI.16X :                        2 - |  UMI.1B :                       100 - |
@@ -2570,7 +2570,7 @@
   1.017 symbols
      94 unused symbols
 
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 43 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 43 - 2024-04-21 12:59:16 PM
 
 
   Defined Macros:
@@ -2581,7 +2581,7 @@ ERRPL                                 | ERRZR
 
       4 macros
 
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 44 - 2024-04-04 05:54:22 PM
+ AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 44 - 2024-04-21 12:59:16 PM
 
 
   Code Pages:
