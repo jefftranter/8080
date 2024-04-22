@@ -452,9 +452,9 @@ DYMEM7  DCX     H
 DYMEM9  XCHG
         LXI     H,MSG.ERR       ; DISPLAY ERROR MESSAGE
 
-;       LD      IX,DY9.3        ; RETURN ADDRESS
-        DB      MI.LDXA,MI.LDXB
-        DW      DY9.3
+        CPU     Z80
+        LD      IX,DY9.3        ; RETURN ADDRESS
+        CPU     8080
 
         JMP     DYMSG
 
@@ -738,20 +738,18 @@ START1  CALL    RCC             ; INPUT FROM KB
         CMP     B
         CPU     Z80
         JR      C,BOOT5
-        CPU     8080
-        DB      MI.EXAF         ; SAVE INPUT, CHECK PRIM OR SEC?
-        CPU     Z80
+        EX      AF,AF'          ; SAVE INPUT, CHECK PRIM OR SEC?
         JR      Z,NB7           ; IF PRIMARY, CHECK 'S'
+        EX      AF,AF'          ; RESTORE (Z) FLAG
         CPU     8080
-        DB      MI.EXAF         ; RESTORE (Z) FLAG
 WRONG
         MVI     A,A.BEL         ; NOT THE CASES, BEEP!
         CALL    WCC
         CPU     Z80
         JR      START1          ; AND TRY AGAIN
-        CPU     8080
 
-NB7     DB      MI.EXAF         ; RESTORE INPUT & PRIM, SEC FLAG
+NB7     EX      AF,AF'          ; RESTORE INPUT & PRIM, SEC FLAG
+        CPU     8080
         ANI     01011111B       ; MASK TO UPPER CASE LETTER
         CPI     'S'             ; CHECK THE USER LIKE TO BOOT FROM
         CPU     Z80
@@ -1028,7 +1026,9 @@ H17A    CALL   WNH              ; WAIT FOR NO HOLE
 ;
 ;       USE:    ALL
 
-DEVICE  DB      MI.EXAF         ; SAVE Z FLAG
+        CPU     Z80
+DEVICE  EX      AF,AF'          ; SAVE Z FLAG
+        CPU     8080
 
 ;       INITIAL VARIABLES
 
@@ -1067,13 +1067,13 @@ BOOT2   MVI     M,MI.JMP
         IN      H88.SW          ; READ SWITCH DATA
         PUSH    PSW             ; SAVE IN STACK
         ANI     H88S.DV         ; CHECK PRIMARY DEVICE ADDRESS
-        DB      MI.EXAF         ; SAVE Z FLAG & GET Z' FOR PRIM. SEC. FLAG
         CPU     Z80
+        EX      AF,AF'          ; SAVE Z FLAG & GET Z' FOR PRIM. SEC. FLAG
         JR      NZ,SECOND       ; IT SECONDARY
-        DB      MI.EXAF
+        EX      AF,AF'
         JR      NZ,B170
         JR      B174
-SECOND  DB      MI.EXAF
+SECOND  EX      AF,AF'
         JR      Z,B170          ; BOOT PRIMARY AT 170Q
         CPU     8080
 B174    MVI     A,UP.DP         ; PRIMARY DEVICE IS AT 174Q
@@ -1214,17 +1214,20 @@ IOB2    CPI     A.CR            ; CARRIAGE RETURN?
 ;       USES:   A,C,F
 
 DYASC
-;       EX      AF,AF'          ; SAVE CHARACTER TO OUTPUT
-        DB      MI.EXAF
+        CPU     Z80
+        EX      AF,AF'          ; SAVE CHARACTER TO OUTPUT
+        CPU     8080
 DYASC1  IN      SC.ACE+UR.LSR   ; READ LINE STATUS REGISTER
         ANI     UC.THE
         JZ      DYASC1          ; WAIT IF UART CAN'T HOLD ANOTHER CHARACTER
 
-;       EX      AF,AF'          ; GET CHARACTER TO OUTPUT
-        DB      MI.EXAF
+        CPU     Z80
+        EX      AF,AF'          ; GET CHARACTER TO OUTPUT
+        CPU     8080
         OUT     SC.ACE+UR.THR   ; OUTPUT TO UART
-;       JP      (IY)            ; RETURN TO CALLER
-        DB      MI.JIYA,MI.JIYB
+        CPU     Z80
+        JP      (IY)            ; RETURN TO CALLER
+        CPU     8080
 
 ;       DYBYT - DYNAMIC RAM BYTE OUTPUT
 ;
@@ -1243,9 +1246,9 @@ DYBYT   MOV     C,A             ; SAVE CHARACTER
         RRC
         ORI     00110000B       ; MAKE INTO ASCII
 
-;       LD      IY,DYBYT.2
-        DB      MI.LDYA,MI.LDYB
-        DW      DYBYT.2
+        CPU     Z80
+        LD      IY,DYBYT.2
+        CPU     8080
 
         JMP     DYASC
 
@@ -1256,24 +1259,25 @@ DYBYT.2 MOV     A,C             ; OUTPUT SECOND CHARACTER
         RRC
         ORI     00110000B       ; MAKE INTO ASCII
 
-;       LD      IY,DYBYT.R      ; RETURN ADDRESS
-        DB      MI.LDYA,MI.LDYB
-        DW      DYBYT.4
+        CPU     Z80
+        LD      IY,DYBYT.4      ; RETURN ADDRESS
+        CPU     8080
         JMP     DYASC
 
 DYBYT.4 MOV     A,C             ; OUTPUT LAST CHARACTER
         ANI     00000111B
         ORI     00110000B       ; MAKE ASCII
 
-;       LD      IY,DYBYT.6      ; RETURN ADDRESS
-        DB      MI.LDYA,MI.LDYB
-        DW      DYBYT.6
+        CPU     Z80
+        LD      IY,DYBYT.6      ; RETURN ADDRESS
+        CPU     8080
 
         JMP     DYASC
 
 DYBYT.6
-;       JP      (IX)            ; RETURN TO CALLER
-        DB      MI.JIXA,MI.JIXB
+        CPU     Z80
+        JP      (IX)            ; RETURN TO CALLER
+        CPU     8080
 
 ;       MSQ.PAS - PASS MESSAGE FOR DYNAMIC RAM TEST
 ;
@@ -1352,44 +1356,41 @@ WCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE STATUS
 DY9.3   XCHG
         MOV     A,H             ; OUTPUT MSB
 
-;       LD      IX,DY9.4        ; RETURN ADDRESS
-        DB      MI.LDXA,MI.LDXB
-        DW      DY9.4
+        CPU     Z80
+        LD      IX,DY9.4        ; RETURN ADDRESS
+        CPU     8080
 
         JMP     DYBYT
 
 DY9.4   MOV     A,L             ; OUTPUT LSB
 
-;       LD      IX,DY9.5        ; RETURN ADDRESS
-        DB      MI.LDXA,MI.LDXB
-        DW      DY9.5
-
         CPU     Z80
+        LD      IX,DY9.5        ; RETURN ADDRESS
         JR      DYBYT
         CPU     8080
 
 DY9.5   XCHG                    ; SAVE ERROR ADDRESS
         LXI     H,MSG.EQ        ; OUTPUT ' = '
 
-;       LD      IX,DY9.8        ; RETURN ADDRESS
-        DB      MI.LDXA,MI.LDXB
-        DW      DY9.8
+        CPU     Z80
+        LD      IX,DY9.8        ; RETURN ADDRESS
+        CPU     8080
 
         JMP     DYMSG           ; OUTPUT STRING
 
 DY9.8   LDAX    D               ; OUTPUT RAM CONTENTS
 
-;       LD      IX,DYMEM10      ; RETURN ADDRESS
-        DB      MI.LDXA,MI.LDXB
-        DW      DYMEM10
+        CPU     Z80
+        LD      IX,DYMEM10      ; RETURN ADDRESS
+        CPU     8080
 
         JMP     DYBYT
 
 DYMEM10 MVI     A,A.BEL         ; DING BELL
 
-;       LD      IY,DY10.5       ; RETURN ADDRESS
-        DB      MI.LDYA,MI.LDYB
-        DW      DY10.5
+        CPU     Z80
+        LD      IY,DY10.5       ; RETURN ADDRESS
+        CPU     8080
 
         JMP     DYASC
 
@@ -1684,7 +1685,9 @@ TMOUT   IN      SC.ACE+UR.LSR   ; INPUT ACE LINE STATUS REGISTER
 TMOUT4  LXI     H,TMFG
         MOV     A,M
         ANA     A
-        DB      MI.EXAF         ; SAVE Z FLAG
+        CPU     Z80
+        EX      AF,AF'          ; SAVE Z FLAG
+        CPU     8080
         LDA     TICCNT          ; GET TIC
         ANA     A               ; SET ZERO FLAG
         CPU     Z80
@@ -1700,13 +1703,13 @@ TMOUT1  SBI     7               ; IS IT 3.5 SECONDS?
         CPU     Z80
         JR      C,TMOUT2        ; IF NOT, WAIT
         JR      NZ,TMOUT1       ; CHECK MORE
+        EX      AF,AF'
         CPU     8080
-        DB      MI.EXAF
         JNZ     RETRY           ; IF IT IS Z47, THEN RE-BOOT
         CPU     Z80
         JR      TMOUT3          ; IT IS H-17, CONTINUE IT CLOCK ROUTINE
+TMOUT2  EX      AF,AF'          ; CHECK IT IS Z47 OR H17
         CPU     8080
-TMOUT2  DB      MI.EXAF         ; CHECK IT IS Z47 OR H17
         RNZ                     ; Z47, THEN RETURN
 TMOUT3  JMP     CLOCK17         ; CONTINUE H17 CLOCK ROUTINE
 
@@ -2329,27 +2332,25 @@ DYMEM3  DCX     H               ; POINT TO LAST GOOD LOCATION
         XCHG                    ; PUT ENDING ADDRESS IN D,E
         LXI     H,MSG.RAM       ; OUTPUT ENDING ADDRESS
 
-;       LD      IX,DY3.3        ; RETURN ADDRESS
-        DB      MI.LDXA,MI.LDXB
-        DW      DY3.3
-
         CPU     Z80
+        LD      IX,DY3.3        ; RETURN ADDRESS
+
         JR      DYMSG
         CPU     8080
 
 DY3.3   MOV     A,D             ; OUTPUT ADDRESS MSB
 
-;       LD      IX,DY3.5        ; RETURN ADDRESS
-        DB      MI.LDXA,MI.LDXB
-        DW      DY3.5
+        CPU     Z80
+        LD      IX,DY3.5        ; RETURN ADDRESS
+        CPU     8080
 
         JMP     DYBYT
 
 DY3.5   MOV     A,E             ; LSB
 
-;       LD      IX,DY3.7        ; RETURN ADDRESS
-        DB      MI.LDXA,MI.LDXB
-        DW      DY3.7
+        CPU     Z80
+        LD      IX,DY3.7        ; RETURN ADDRESS
+        CPU     8080
 
         JMP     DYBYT
 
@@ -2360,11 +2361,9 @@ DY3.7   INX     D               ; (D,E) = LAST BYTE OF RAM + 1
         MVI     B,1             ; (B) = CONTENTS OF RAM AFTER SIZING
         LXI     H,MSG.PAS       ; OUTPUT PASS MESSAGE
 
-;       LD      IX,DYMEM4       ; RETURN ADDRESS
-        DB      MI.LDXA,MI.LDXB
-        DW      DYMEM4
-
         CPU     Z80
+        LD      IX,DYMEM4       ; RETURN ADDRESS
+
         JR      DYMSG
         CPU     8080
 
@@ -2401,9 +2400,9 @@ DYMEM5  MOV     A,M             ; READ CURRENT CONTENTS
         MVI     A,A.BKS
 
 DYME5.5
-;       LD      IY,DY5.53       ; RETURN ADDRESS
-        DB      MI.LDYA,MI.LDYB
-        DW      DY5.53
+        CPU     Z80
+        LD      IY,DY5.53       ; RETURN ADDRESS
+        CPU     8080
 
         JMP     DYASC
 
@@ -2414,9 +2413,9 @@ DY5.53  DCR     H
         INR     B               ; SHOW NEXT PASS VALUE
         MOV     A,B             ; VALUE TESTED
 
-;       LD      IX,DYMEM6       ; RETURN ADDRESS
-        DB      MI.LDXA,MI.LDXB
-        DW      DYMEM6
+        CPU     Z80
+        LD      IX,DYMEM6       ; RETURN ADDRESS
+        CPU     8080
 
         JMP     DYBYT
 
@@ -2453,9 +2452,9 @@ DYMEM11 DCR      H
 
 DYMSG   MOV     A,M             ; GET MESSAGE BYTE
 
-;       LD      IY,DYMSG.5      ; RETURN ADDRESS
-        DB      MI.LDYA,MI.LDYB
-        DW      DYMSG.5
+        CPU      Z80
+        LD      IY,DYMSG.5      ; RETURN ADDRESS
+        CPU      8080
 
         JMP     DYASC           ; OUTPUT ASCII
 
@@ -2463,10 +2462,9 @@ DYMSG.5 ORA     A               ; SEE IF NULL TO END STRING
         INX     H               ; POINT TO NEXT CHARACTER
         CPU     Z80
         JR      NZ,DYMSG        ; IF NOT DONE YET
-        CPU     8080
 
-;       JP      (IX)            ; RETURN TO CALLER
-        DB      MI.JIXA,MI.JIXB
+        JP      (IX)            ; RETURN TO CALLER
+        CPU     8080
 
 
 ;       MSG.RAM - RAM TEST MESSAGE
