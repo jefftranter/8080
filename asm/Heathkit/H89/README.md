@@ -5,3 +5,7 @@ original Heathkit assembler listing.
 
 I have confirmed that the output matches the published binary for the
 ROM.
+
+References:
+
+http://www.bitsavers.org/pdf/zenith/z89/595-2508_MTR-89_Monitor_1980.pdf

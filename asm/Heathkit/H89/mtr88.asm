@@ -78,7 +78,7 @@ MI.EXAF EQU     00001000B       ; EX AD,AF'
 MI.JIXA EQU     11011101B       ; JP (IX)  (BYTE A)
 MI.JIXB EQU     11101001B       ; JP (IX)  (BYTE B)
 MI.JIYA EQU     11111101B       ; JP (IY)  (BYTE A)
-MI.JIYB EQU     11111001B       ; JP (IY)  (BYTE B)
+MI.JIYB EQU     11101001B       ; JP (IY)  (BYTE B)
 
 ;       USER OPTION BITS
 ;

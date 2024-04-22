@@ -18,7 +18,7 @@ S.VAL   DS      36              ; SYSTEM VALUES
 S.INT   DS      115             ; SYSTEM INTERNAL WORK AREAS
         DS      16
 S.OVR   DS      2               ; STACK OVERFLOW WARNING
-        DS      20550           ; SYSTEM STACK
+        DS      280             ; SYSTEM STACK
 STACKL  EQU     432Q            ; STACK SIZE
 
 STACK                           ; LWA+1 SYSTEM STACK

@@ -6,7 +6,8 @@ mtr89.hex: mtr89.p
 mtr89.bin: mtr89.p
 	p2bin -r '$$-$$' mtr89.p
 
-mtr89.p: mtr89.asm
+mtr89.p: mtr89.asm h17def.asm hosequ.asm macros.mac misc.asm mtr88.asm u8250.asm tape.asm u8251.asm z47def.asm
+
 	asl -L -cpu 8080 -listradix 8 -splitbyte . mtr89.asm
 
 clean:

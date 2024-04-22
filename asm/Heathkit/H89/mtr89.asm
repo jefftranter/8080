@@ -100,15 +100,15 @@ RAM     EQU     0
 
 ;       ASSEMBLY CONSTANTS
 
-        INCLUDE  mtr88.asm      ; DEFINE MTR88 OLD EQUATES
+        INCLUDE mtr88.asm       ; DEFINE MTR88 OLD EQUATES
 
-        INCLUDE  z47def.asm     ; DEFINE Z47 EQUATES
+        INCLUDE z47def.asm      ; DEFINE Z47 EQUATES
 
-        INCLUDE  h17def.asm     ; EQUATES FOR H17 BOOT ROM
+        INCLUDE h17def.asm      ; EQUATES FOR H17 BOOT ROM
 
-        INCLUDE  hosequ.asm     ; HDOS EQUATES
+        INCLUDE hosequ.asm      ; HDOS EQUATES
 
-        INCLUDE  misc.asm       ; MISCELLANEOUS EQUATES FOR H17 BOOT ROM
+        INCLUDE misc.asm        ; MISCELLANEOUS EQUATES FOR H17 BOOT ROM
 
         INCLUDE u8251.asm       ; DEFINE 8251 USART BITS
 
@@ -450,7 +450,7 @@ DYMEM7  DCX     H
 ;       HAVE A FAILURE PRIOR TO REACHING END OF MEMORY!
 ;
 DYMEM9  XCHG
-        LXI     H,MSG.ERR       ; DISPLAY ERROR MESSGE
+        LXI     H,MSG.ERR       ; DISPLAY ERROR MESSAGE
 
 ;       LD      IX,DY9.3        ; RETURN ADDRESS
         DB      MI.LDXA,MI.LDXB
@@ -499,8 +499,8 @@ MTR     EI
 
 MTR1    LXI     H,MTR1
         PUSH    H               ; SET 'MTR1' AS RETURN ADDRESS
-        LXI     H,MSG.PR        ; TYPE PROMPT MESSAGE
-MTR.15  CALL    TYPMSG
+        JMP     CKAUTO          ; CHECK AUTO BOOT. IF NOT CONTROL BACK TO NEXT
+MTR.15  CALL    TYPMSG          ; PRINT 'H:'
 
 MTR.2   CALL    RCC             ; READ A CONSOLE CHARACTER
         ANI     01011111B       ; MAKE SURE ITS UPPER CASE TO MATCH TABLE
@@ -591,6 +591,8 @@ PIN     CALL    IN.             ; GET STATUS
         CALL    IN1.            ; INPUT A BYTE FROM PORT
         RET
 
+        DB      0               ; UNUSED BYTE
+
         ORG     503Q
 ;       PCA - PROGRAM COUNTER ALTER
 ;
@@ -659,6 +661,8 @@ GO88.1  CALL    WCC             ; ECHO RETURN
 AUTOBO  XRA     A               ; SET TO PRIMARY FLAG
         CALL    DEVICE          ; CHECK DEVICE INFORMATION
         JMP     BOOT0           ; GOTO BOOT IT
+
+        DB      0               ; UNUSED BYTE
 
         ORG     622Q
 ;       GO - RETURN TO USER MODE
@@ -732,6 +736,9 @@ START1  CALL    RCC             ; INPUT FROM KB
         JR      C,WRONG         ;   IF LESS THEN 0, WRONG INPUT
         CPU     8080
         CMP     B
+        CPU     Z80
+        JR      C,BOOT5
+        CPU     8080
         DB      MI.EXAF         ; SAVE INPUT, CHECK PRIM OR SEC?
         CPU     Z80
         JR      Z,NB7           ; IF PRIMARY, CHECK 'S'
@@ -782,8 +789,8 @@ BOOT6   STA     AIO.UNI         ; STORE THE UNIT #
 ;       Z47     -               BOOT FORM Z47 DISK DRIVE
 ;
 ;       Z47 WILL LOAD DATA FROM DISK TRACK 0 SECTOR 1 AND 2 TO
-;       USER FIRST AVAILABLE RAM LOCATION. IF THE BOOT IS SUCCED,
-;       CONTROL OASS TO THAT LOCATION.
+;       USER FIRST AVAILABLE RAM LOCATION. IF THE BOOT IS SUCCEED,
+;       CONTROL PASS TO THAT LOCATION.
 ;
 ;       ENTRY:  (AIO.UNI) = UNIT NUMBER TO BOOT
 ;
@@ -926,7 +933,9 @@ HRN0    XTHL                    ; SAVE (HL), (H) = COUNT
         MOV     A,D             ; (A) = CYCLE COUNT
         ADD     M
 HRN2    CMP     M               ; WAIT REQUIRED TICCOUNTS
-        JNZ     HRN2
+        CPU     Z80
+        JR      NZ,HRN2
+        CPU     8080
 
         JMP     HRNX            ; JUMP TO AN EXTENSION OF HORN SO ROOM
                                 ; CAN BE MADE FOR A JUMP TO NOISE
@@ -952,7 +961,7 @@ NODEV   LXI     H,ERRMSG        ; PRINT ERROR MESSAGE
         CALL    TYPMSG
         STA     MFLAG           ; STOP TIMER
         OUT     DP.DC           ; OFF DISK
-        JMP     ERROR           ; BACK TO MOHITOR LOOP
+        JMP     ERROR           ; BACK TO MONITOR LOOP
 
 
 ;       H17     - BOOT FROM H17 DISK SYSTEM
@@ -1001,7 +1010,7 @@ H17A    CALL   WNH              ; WAIT FOR NO HOLE
 
         LXI   H,CLOCK17         ; LOAD CLOCK ROUTINE ADDRESS
         SHLD  UIVEC+1           ; SET IT INTO VECTOR LOCATION
-        JMP   USERFWA           ; GOTO BOOT OCDE
+        JMP   USERFWA           ; GOTO BOOT CODE
 
 ;      DEVICE - DETERMINE BOOT WHICH DEVICE AT WHICH PORT
 ;
@@ -1038,7 +1047,7 @@ DEVICE  DB      MI.EXAF         ; SAVE Z FLAG
         LXI     H,UIVEC         ; SET ALL VECTOR TO EI/RET ADDRESS
 BOOT2   MVI     M,MI.JMP
         INX     H
-        MVI     H,EIXIT#256     ; STORE LS BYTE
+        MVI     M,EIXIT#256     ; STORE LS BYTE
         INX     H
         MVI     M,EIXIT/256     ; STORE MS BYTE
         INX     H
@@ -1096,7 +1105,7 @@ B170    POP     PSW             ; GET SWITCH DATA
         JR      DEV2
         CPU     8080
 
-
+        ORG     1447Q
 ;       LRA - LOCATE REGISTER ADDRESS
 ;
 ;       ENTRY   NONE.
@@ -1236,7 +1245,7 @@ DYBYT   MOV     C,A             ; SAVE CHARACTER
 
 ;       LD      IY,DYBYT.2
         DB      MI.LDYA,MI.LDYB
-        DW      DYBYT,2
+        DW      DYBYT.2
 
         JMP     DYASC
 
@@ -1338,7 +1347,7 @@ WCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE STATUS
         RET
 
 
-;       THE FOLLOWING IS ONLY A PORTIJ OF THE DYNAMIC RAM TEST!!
+;       THE FOLLOWING IS ONLY A PORTION OF THE DYNAMIC RAM TEST!!
 ;
 DY9.3   XCHG
         MOV     A,H             ; OUTPUT MSB
@@ -1443,10 +1452,11 @@ INIT0X  MVI     A,00000010B
 ;
         LXI     B,32400Q        ; APPROX. 100 MS
 INIT0X1 DCR     C
-        JNZ     INIT0X1
+        CPU     Z80
+        JR      NZ,INIT0X1
 
-        DCR     B
-        JNZ     INIT0X1
+        DJNZ    INIT0X1
+        CPU     8080
 
 ;       INPUT SWITCH TO SEE IF TO BEGIN OPERATION OF MEMORY TEST
 ;
@@ -1457,6 +1467,9 @@ INIT0X1 DCR     C
 ;       REPLACE WHAT WAS ORIGINALLY AT THE JUMP WHICH GOT US HERE
 ;
         LXI     D,PRSROM        ; (DE) = ROM COPY OF PRS CODE
+        XRA     A
+        STA     AUTOB           ; INITIAL AUTO BOOT FLAG
+        STA     DATA            ; INITIAL 362Q PORT DATA SAVE BYTE
         JMP     INIT0.0         ; RETURN TO ORIGINAL CODE
 
 ;       BRTAB - BAUD RATE DIVISOR TABLE
@@ -1465,8 +1478,8 @@ BRTAB
 
 BR96    DB      0,12            ;   9600 BAUD
 BR19.2  DB      0,6             ; 19,200 BAUD
-BR38.4  DB      0,3             ; 38,400 BAUD
-BR56.0  DB      0,2             ; 56,000 BAUD
+;BR38.4 DB      0,3             ; 38,400 BAUD
+;BR56.0 DB      0,2             ; 56,000 BAUD
 
 ;       SET     */256
         ERRNZ   ERTAB/256-.     ; TABLE MUST BE IN ONE PAGE
@@ -1528,60 +1541,79 @@ NMI     XTHL                    ; GET RETURN ADDRESS FROM STACK
         MOV     A,M             ; GET PORT #
 
         CPI     360Q            ; PORT 360?
-        JZ      NMI1            ; IF PORT WAS 360Q
+        CPU     Z80
+        JR      Z,NMI1          ; IF PORT WAS 360Q
+        CPU     8080
 
 ;       PORT REFERENCED WAS 361Q, 372Q, OR 373Q
 ;
         CPI     361Q            ; MAKE SURE PORT IS LEGAL
-        JZ      NMI0.5          ; IF LEGAL
+        CPU     Z80
+        JR      Z,NMI0.5        ; IF LEGAL
+        CPU     8080
 
         CPI     372Q
-        JZ      NMI0.5
+        CPU     Z80
+        JR      Z,NMI0.5
+        CPU     8080
 
         CPI     373Q
-        JNZ     NMI2.5          ; IF NONE OF THE ABOVE, EXIT
+        CPU     Z80
+        JR      NZ,NMI2.5       ; IF NONE OF THE ABOVE, EXIT
+        CPU     8080
 
 NMI0.5  DCX     H               ; POINT TO IN/OUT INSTRUCTION
         MOV     A,M             ; SEE IF INPUT OR OUTPUT
         CPI     MI.OUT
-        JZ      NMI2.5          ; IF OUTPUT, JUST EXIT
+        CPU     Z80
+        JR      Z,NMI2.5        ; IF OUTPUT, JUST EXIT
+        CPU     8080
 
         CPI     MI.IN
-        JNZ     NMI2.5          ; IF NOT INPUT EITHER, ILLEGAL SO EXIT
+        CPU     Z80
+        JR      NZ,NMI2.5       ; IF NOT INPUT EITHER, ILLEGAL SO EXIT
+        CPU     8080
 
         POP     PSW             ; RESTORE FLAGS
         MVI     A,0             ; ELSE, RETURN LIKE AN EMPTY BUSS
-        JMP     NMI3            ; EXIT
+        CPU     Z80
+        JR      NMI3            ; EXIT
+        CPU     8080
 
 NMI1    DCX     H               ; POINT TO IN/OUT INSTRUCTION
         MOV     A,M             ; GET I/O INSTRUCTION
         CPI     MI.IN           ; INPUT?
-        JNZ     NMI1.5          ; IF NOT 'IN'
+        CPU     Z80
+        JR      NZ,NMI1.5       ; IF NOT 'IN'
+        CPU     8080
 
         POP     PSW             ; RESTORE FLAGS
         MVI     A,11111111B     ; SHOW 'NO KEYS PRESSED'
-        JMP     NMI3            ; EXIT
+        CPU     Z80
+        JR      NMI3            ; EXIT
+        CPU     8080
 
 NMI1.5  CPI     MI.OUT          ; MAKE SURE INSTRUCTION IF AN 'OUT'
-        JNZ     NMI2.5          ; IF NOT
+        CPU     Z80
+        JR      NZ,NMI2.5       ; IF NOT
+        CPU     8080
 
 NMI2    MOV     A,B             ; GET OUTPUT DATA AGAIN
-        ANI     CB.CLI          ; MOVE CLOCK INFO TO BIT 1
+        ANI     CB.CLI+CB.SSI   ; MOVE CLOCK INFO TO BIT 1
         RRC
         RRC
         RRC
         RRC
         RRC
-        MOV     C,A             ; SAVE IN C
-        MOV     A,B             ; GET OUTPUT DATA AGAIN
-        ANI     CB.SSI          ; GET SINGLE STEP INFO
-        RRC                     ; MOVE TO BIT 1
-        RRC
-        RRC
-        RRC
-        ORA     C               ; ADD TO CLOCK DATA
-        XRI     00000001B       ; INVERT THIS BIT PRIOR TO OUTPUT
+        CPU     Z80
+        JR      C,NMI2.2
+        CPU     8080
+        INR     A
+NMI2.2  LXI     H,DATA          ; OR WITH THE BYTE IN RAM
+        ORA     M               ; BEFORE OUTPUT IT
         OUT     H88.CTL         ; SET IN HARDWARE
+        ANI     11111100B
+        MOV     M,A
 
 NMI2.5  POP     PSW             ; RESTORE (A,F)
 
@@ -1617,6 +1649,7 @@ BOOT    LXI     H,MSG.BT        ; COMPLETE BOOT MESSAGE
         LXI     D,NBOOT         ; SET ITS VALUE TO THE NORMAL BOOT ROUTINE
 BOOTX   MOV     M,E
         INX     H
+        MOV     M,D
 
         JMP     GO.             ; DO IT
 
@@ -1677,6 +1710,7 @@ TMOUT2  DB      MI.EXAF         ; CHECK IT IS Z47 OR H17
         RNZ                     ; Z47, THEN RETURN
 TMOUT3  JMP     CLOCK17         ; CONTINUE H17 CLOCK ROUTINE
 
+        DB      0,0             ; UNUSED BYTES
 
         ORG     2370Q
 ;       SUBM - SUBSTITUTE MEMORY
@@ -1926,7 +1960,9 @@ TOB1    RAR                     ; SHIFT MIDDLE BYTE TO LSB
 
 WCR     CALL    RCC             ; INPUT CHARACTER
         CPI     A.CR
-        JNZ     WCR             ; IF NOT A CR
+        CPU     Z80
+        JR      NZ,WCR          ; IF NOT A CR
+        CPU     8080
 
         CALL    WCC             ; ELSE ECHO CR
         MVI     A,A.LF          ; LINE FEED
@@ -2010,6 +2046,8 @@ OUT.1   MOV     C,A             ; SET TO REG C
         POP     B
         RET
 
+        DB      0,0             ; UNUSED BYTES
+
         ORG     3100Q
 ;       TYPMSG - TYPE MESSAGE TO CONSOLE
 ;
@@ -2026,7 +2064,9 @@ TYPMSG  MOV     A,M             ; GET CHARACTER
 
         CALL    WCC             ; ELSE OUTPUT CHARACTER TO CONSOLE
         INX     H               ; POINT TO NEXT CHARACTER
-        JMP     TYPMSG          ; OUTPUT IT
+        CPU     Z80
+        JR      TYPMSG          ; OUTPUT IT
+        CPU     8080
 
 ;       MSG.PR - MESSAGE FOR MONITOR PROMPT
 ;
@@ -2115,11 +2155,11 @@ IN.     PUSH    B
         LDA     PRIM            ; GET PORT ADDRESS
 IN.1    MOV     C,A             ; SET ADDR. TO REG C.
 ;       IN      A,(C)
-;       DB      355Q,170Q       ; INPUT BYTE
+        DB      355Q,170Q       ; INPUT BYTE
         POP     B
         RET
 
-        ORG     3101Q
+        ORG     3201Q
 ;       MSG.SUB - (S)UBSTITUTE
 ;
 ;       "SUBSTITUTE"
@@ -2176,7 +2216,7 @@ SPEED   LXI     H,MSG.SPD       ; OUTPUT SPEED MESSAGE
         MVI     A,ONDR0         ; TURN ON DRIVE ZERO
         OUT     OP.DC
 SPEED1  LHLD    TICCNT          ; GET TICK COUNTER
-        MOV     A,M             ; FORM TWO'S COMPLEMENT OF TICK COUNTER
+        MOV     A,H             ; FORM TWO'S COMPLEMENT OF TICK COUNTER
         CMA
         MOV     D,A             ; (D,E) = NEGATIVE TICK COUNTER
         MOV     A,L
@@ -2207,7 +2247,7 @@ SPEED4  IN      IP.DS           ; GET DISK STATUS
         LHLD    TICCNT          ; GET CURRENT TICK VALUE
         DAD     D               ; SUBTRACT START VALUE
         LXI     D,177777Q-500+1+200Q ; SUBTRACT 500 FOR REVS, +200Q FOR OFFSET
-        DAD     B               ; (H,L) = OFFSET RESULT
+        DAD     D               ; (H,L) = OFFSET RESULT
         PUSH    H               ; SAVE RESULT
         LXI     H,MSG.WRK       ; POINT TO 'WORKING' MESSAGE
         LDA     IOWRK           ; GET 'WORKING' FLAG
@@ -2228,8 +2268,8 @@ SPEED5  CALL    TYPMSG          ; OUTPUT MESSAGE
 ;
 ;                       Drive speed = '
 MSG.SPD DB      A.ESC,'E',A.LF
-        DB      '       Disk drive rotational speed test.',A.CR,A.LF,A.LF
-        DB      '               Drive speed = '
+        DB      '	Disk drive rotational speed test.',A.CR,A.LF,A.LF
+        DB      '		Drive speed = '
         DB      0
 
 ;       MSG.WRK - 'WORKING' MESSAGE FOR SPEED TEST
@@ -2333,7 +2373,7 @@ DY3.7   INX     D               ; (D,E) = LAST BYTE OF RAM + 1
 DYMEM4  LXI     H,START         ; POINT BACK TO BEGINNING OF RAM
         ENDIF
 DYMEM5  MOV     A,M             ; READ CURRENT CONTENTS
-        CMP     B               ; SEE OF CORRENT CONTENTS STILL REMAIN
+        CMP     B               ; SEE IF CURRENT CONTENTS STILL REMAIN
         JNZ     DYMEM9          ; FAILURE, SEE IF AT END OF RAM
 
         INR     A
@@ -2426,7 +2466,7 @@ DYMSG.5 ORA     A               ; SEE IF NULL TO END STRING
         CPU     8080
 
 ;       JP      (IX)            ; RETURN TO CALLER
-;       DB      MI.JIXA,MI.JIXB
+        DB      MI.JIXA,MI.JIXB
 
 
 ;       MSG.RAM - RAM TEST MESSAGE
@@ -2435,7 +2475,7 @@ DYMSG.5 ORA     A               ; SEE IF NULL TO END STRING
 MSG.RAM DB      A.ESC,'E'
         DB      'Dynamic RAM test'
         DB      A.CR,A.LF,A.LF
-        DB      '         LWA = '
+        DB      '	 LWA = '
         DB      0
 
 ;       MSG.EQ - EQUALS MESSAGE
@@ -2530,6 +2570,6 @@ MYCNT   DS      1               ; COUNTER FOR TIMER INTERRUPT
 AUTOB   DS      1               ; AUTO BOOT FLAG
 STK     DS      1               ; STACK POINTER FOR RE-BOOT
 
-        ORG     20066
+        ORG     20066Q
 DATA    DS      1               ; OUTPUT 362Q DATA SAVE AREA
         END
