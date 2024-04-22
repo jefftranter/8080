@@ -2213,7 +2213,7 @@ SPEED4  IN      IP.DS           ; GET DISK STATUS
         LDA     IOWRK           ; GET 'WORKING' FLAG
         XRI     1               ; INVERT LOWER BIT
         STA     IOWRK           ; SAVE NEW VALUE
-        JNZ     SPEED5          ; IF TO DISPLAY 'WORKIONG'
+        JNZ     SPEED5          ; IF TO DISPLAY 'WORKING'
 
         LXI     H,MSG.HSS       ; POINT TO 'HOME', 'SPACES', AND SPEED MSG
 SPEED5  CALL    TYPMSG          ; OUTPUT MESSAGE
@@ -2252,12 +2252,199 @@ MSG.HSS DB      A.ESC,'H'       ; CURSOR HOME
 
 ;       DYMEM - DYNAMIC MEMORY TEST
 ;
+;       DYMEM TEST THE DYNAMIC MEMORY IN THE H88/H89 BY PLACING
+;       A KNOWN PATTERN IN EACH DYNAMIC MEMORY CELL AND THEN
+;       PERFORMING A READ, INCREMENT, READ SEQUENCE WITH A DELAY
+;       BETWEEN EACH PASS OF THE TEST.
+;
+;       ENTRY:  NONE
+;
+;       EXIT:   ON RESET
+;
+;       USES:   A,B,C,D,E,H,L,F,A',F',IX,IY
+
+DYMEM   MVI     A,0             ; MAKE SURE CLOCK AND SINGLE STEP ARE OFF
+        OUT     H88.CTL
+
+;       DETERMINE END OF MEMORY
+
+        IF      RAM
+        ELSE
+DYMEM1  LXI     H,START
+        ENDIF
+        MVI     A,1
+DYMEM2  MVI     M,0             ; SET RAM TO ZERO
+        INR     M               ; SET MEMORY TO ONE
+        CMP     M               ; SEE IF (A) = ((H,L))
+        CPU     Z80
+        JR      NZ,DYMEM3       ; IF NOT EQUAL, THE END OF RAM HAS BEEN REACHED
+        CPU     8080     
+
+        INX     H               ; ELSE, POINT TO NEXT LOCATION IN RAM
+        CPU     Z80
+        JR      DYMEM2
+        CPU     8080
+
+DYMEM3  DCX     H               ; POINT TO LAST GOOD LOCATION
+        XCHG                    ; PUT ENDING ADDRESS IN D,E
+        LXI     H,MSG.RAM       ; OUTPUT ENDING ADDRESS
+
+;       LD      IX,DY3.3        ; RETURN ADDRESS
+        DB      MI.LDXA,MI.LDXB
+        DW      DY3.3
+
+        CPU     Z80
+        JR      DYMSG
+        CPU     8080
+
+DY3.3   MOV     A,D             ; OUTPUT ADDRESS MSB
+
+;       LD      IX,DY3.5        ; RETURN ADDRESS
+        DB      MI.LDXA,MI.LDXB
+        DW      DY3.5
+
+        JMP     DYBYT
+
+DY3.5   MOV     A,E             ; LSB
+
+;       LD      IX,DY3.7        ; RETURN ADDRESS
+        DB      MI.LDXA,MI.LDXB
+        DW      DY3.7
+
+        JMP     DYBYT
+
+DY3.7   INX     D               ; (D,E) = LAST BYTE OF RAM + 1
+
+;       TEST MEMORY
+;
+        MVI     B,1             ; (B) = CONTENTS OF RAM AFTER SIZING
+        LXI     H,MSG.PAS       ; OUTPUT PASS MESSAGE
+
+;       LD      IX,DYMEM4       ; RETURN ADDRESS
+        DB      MI.LDXA,MI.LDXB
+        DW      DYMEM4
+
+        CPU     Z80
+        JR      DYMSG
+        CPU     8080
+
+        IF      RAM
+        ELSE
+DYMEM4  LXI     H,START         ; POINT BACK TO BEGINNING OF RAM
+        ENDIF
+DYMEM5  MOV     A,M             ; READ CURRENT CONTENTS
+        CMP     B               ; SEE OF CORRENT CONTENTS STILL REMAIN
+        JNZ     DYMEM9          ; FAILURE, SEE IF AT END OF RAM
+
+        INR     A
+        MOV     M,A             ; INCREMENT RAM
+        CMP     M               ; SEE OF WRITE WAS SUCCESSFUL
+        JNZ     DYMEM9
+
+        INX     H
+        MOV     A,L             ; GET LSB AND TEST FOR REACHING END OF RAM
+        CMP     E
+        CPU     Z80
+        JR      NZ,DYMEM5       ; IF LSB NOT EQUAL
+        CPU     8080
+
+        MOV     A,H             ; CHECK LSB
+        CMP     D
+        CPU     Z80
+        JR      NZ,DYMEM5
+        CPU     8080
+
+;       HAVE REACHED THE END OF MEMORY!
+;       OUTPUT LAST VALUE TESTED
+;
+        MVI     H,3             ; OUTPUT 3 BACKSPACES
+        MVI     A,A.BKS
+
+DYMEM5.5
+;       LD      IY,DY5.53       ; RETURN ADDRESS
+        DB      MI.LDYA,MI.LDYB
+        DW      DY5.53
+
+        JMP     DYASC
+
+DY5.53  DCR     H
+        CPU     Z80
+        JR      NZ,DYME5.5
+        CPU     8080
+        INR     B               ; SHOW NEXT PASS VALUE
+        MOV     A,B             ; VALUE TESTED
+
+;       LD      IX,DYMEM6       ; RETURN ADDRESS
+        DB      MI.LDXA,MI.LDXB
+        DW      DYMEM6
+
+        JMP     DYBYT
+
+;       THE DYNAMIC RAM TEST CONTINUES ELSEWHERE!!
+;       AND THEN RETURNS TO HERE!!!!!!!!!!!!!!!!!!
+
+DY10.5  LXI      H,0            ; DELAY AND DING BELL AGAIN
+        MVI      B,2            ; 2 LOOPS
+DYMEM11 DCR      H
+        CPU      Z80
+        JR       NZ,DYMEM11
+        CPU      8080
+
+        DCR      L
+        CPU      Z80
+        JR       NZ,DYMEM11
+        CPU      8080
+
+        DCR      B
+        CPU      Z80
+        JR       NZ,DYMEM11
+        CPU      8080
+
+        JMP      DYMEM10        ; AGAIN
+
+;       DYMSG - DYNAMIC RAM TEST MESSAGE OUTPUT ROUTINE
+;
+;       ENTRY:  (H,L) = MESSAGE ADDRESS
+;               (IX) = RETURN ADDRESS
+;
+;       EXIT:   TI (IX)
+;
+;       USES:   A,H,L,F,IY
+
+DYMSG   MOV     A,M             ; GET MESSAGE BYTE
+
+;       LD      IY,DYMSG.5      ; RETURN ADDRESS
+        DB      MI.LDYA,MI.LDYB
+        DW      DYMSG.5
+
+        JMP     DYASC           ; OUTPUT ASCII
+
+DYMSG.5 ORA     A               ; SEE IF NULL TO END STRING
+        INX     H               ; POINT TO NEXT CHARACTER
+        CPU     Z80
+        JR      NZ,DYMSG        ; IF NOT DONE YET
+        CPU     8080
+
+;       JP      (IX)            ; RETURN TO CALLER
+;       DB      MI.JIXA,MI.JIXB
 
 
+;       MSG.RAM - RAM TEST MESSAGE
+;
 
+MSG.RAM DB      A.ESC,'E'
+        DB      'Dynamic RAM test'
+        DB      A.CR,A.LF,A.LF
+        DB      '         LWA = '
+        DB      0
 
+;       MSG.EQ - EQUALS MESSAGE
+;
 
+MSG.EQ  DB      ' = '
+        DB      0
 
+        DB      'GAC.'
 
 ;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
 ;
@@ -2336,4 +2523,13 @@ REGPTR  DS      2               ; REGISTER CONTENTS POINTER
 ;
 NMIRET  DS      2
 
+        ORG     20520Q
+PRIM    DS      1               ; PRIMARY DEVICE ADDR. PORT
+TMFG    DS      1               ; TIMER INTERRUPT FLAG, =1 FOR Z47, =0 FOR H17
+MYCNT   DS      1               ; COUNTER FOR TIMER INTERRUPT
+AUTOB   DS      1               ; AUTO BOOT FLAG
+STK     DS      1               ; STACK POINTER FOR RE-BOOT
+
+        ORG     20066
+DATA    DS      1               ; OUTPUT 362Q DATA SAVE AREA
         END
