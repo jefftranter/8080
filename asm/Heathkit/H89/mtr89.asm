@@ -547,7 +547,7 @@ MTRAL   EQU     ($-MTRA)/3      ; NUMBER OF TABLE ENTRYS   /JWT 790507/
 
 BSMSG   DB      ' SD',0         ; 'SECONDARY DEVICE'
 
-ERRMSG  DB      '?',0           ; ERROR MESSGE
+ERRMSG  DB      '?',0           ; ERROR MESSAGE
 
         ORG     447Q
 ;       MSG.ERR - ERROR MESSAGE FOR RAM TEST
@@ -714,16 +714,387 @@ STPRTN
 ;
 ;       ENTRY:  NONE
 ;
-;       EXIT:   (AIO,UNI) = UNIT NUMBER TO BOOT
+;       EXIT:   (AIO.UNI) = UNIT NUMBER TO BOOT
 ;               (PRIM) = PORT ADDRESS OF THE BOOT DEVICE
 ;               (TMFG) = DEVICE TYPE, =1 IS Z47, =0 IS H17
 ;
 ;       USE:    ALL
 
 NBOOT   XRA     A               ; SET Z FLAG TO PRIMARY DEVICE
+NBOOT0  CALL    DEVICE          ; READ SWITCH TO DETERMINE BOOT DEVICE
+START1  CALL    RCC             ; INPUT FROM KB
+        CPI     A.CR            ; IF INPUT IS CR
+        CPU     Z80
+        JR      Z,BOOT0         ;     THEN TAKE IT AS DRIVE 0
+        CPU     8080
+        CPI     '0'             ; CHECK INPUT IS WITHIN DRIVE 0 - (B)
+        CPU     Z80
+        JR      C,WRONG         ;   IF LESS THEN 0, WRONG INPUT
+        CPU     8080
+        CMP     B
+        DB      MI.EXAF         ; SAVE INPUT, CHECK PRIM OR SEC?
+        CPU     Z80
+        JR      Z,NB7           ; IF PRIMARY, CHECK 'S'
+        CPU     8080
+        DB      MI.EXAF         ; RESTORE (Z) FLAG
+WRONG
+        MVI     A,A.BEL         ; NOT THE CASES, BEEP!
+        CALL    WCC
+        CPU     Z80
+        JR      START1          ; AND TRY AGAIN
+        CPU     8080
+
+NB7     DB      MI.EXAF         ; RESTORE INPUT & PRIM, SEC FLAG
+        ANI     01011111B       ; MASK TO UPPER CASE LETTER
+        CPI     'S'             ; CHECK THE USER LIKE TO BOOT FROM
+        CPU     Z80
+        JR      NZ,WRONG        ; BOOT SECONDARY DEVICE
+        CPU     8080
+
+;       USER WISHES TO BOOT FROM SECONDARY DEVICE
+
+BSEC
+        LXI     H,BSMSG         ; PRINT BOOT SECONDARY MESSAGE
+        CALL    TYPMSG
+        INR     A               ; SET (Z)=0 FOR SECONDARY DEVICE
+        CPU     Z80
+        JR      NBOOT0
+        CPU     8080
+
+;       SAVE THE AIO.UNI, CHECK IF THERE IS THE BOOT DEVICE AND GO!
+
+BOOT0   XRA     A               ; TAKE CR OR AUTO BOOT AS DRIVE 0
+        CPU     Z80
+        JR      BOOT6
+        CPU     8080
+
+BOOT5   CALL    WCC             ; PRINT UNIT NUMBER
+        SUI     '0'             ; MAKE IT BINARY
+        MOV     B,A             ; SAVE THE UNIT #
+        CALL    WCR             ; WAIT FOR A CR
+        MOV     A,B             ; GET UNIT NUMBER BACK
+BOOT6   STA     AIO.UNI         ; STORE THE UNIT #
+        MOV     A,H             ; CHECK IF NO DEVICE AT ADDR. PORT
+        ANA     A
+        JZ      NODEV           ; NO DEVICE
+        PCHL                    ; JMP TO THE EXECUTION ROUTINE
+
+;       Z47     -               BOOT FORM Z47 DISK DRIVE
+;
+;       Z47 WILL LOAD DATA FROM DISK TRACK 0 SECTOR 1 AND 2 TO
+;       USER FIRST AVAILABLE RAM LOCATION. IF THE BOOT IS SUCCED,
+;       CONTROL OASS TO THAT LOCATION.
+;
+;       ENTRY:  (AIO.UNI) = UNIT NUMBER TO BOOT
+;
+;       EXIT:   NONE
+;
+;       USE:    ALL
+
+Z47
+;       LD      (STK),SP        ; SAVE STACK POINTER FOR RE-BOOT
+        DB      355Q,163Q
+        DW      STK
+
+Z47A
+        EI                      ; LET THE TIMER FLY
+        LDA     AIO.UNI         ; GET UNIT NUMBER
+        RLC                     ; SET TO SIDE/UNIT/SECTOR FORMAT
+        RLC
+        RLC
+        RLC
+        RLC
+        INR     A               ; SET TO SECTOR 1
+        MOV     C,A             ; SAVE SIDE/UNIT/SECTOR (SIDE=0)
+RESET   MVI     A,W.RES         ; RESET Z47
+        CALL    OUT.
+
+; DETERMINE THE DISK IS SINGLE OR DOUBLE DENSITY
+
+        MVI     A,DC.RAS        ; SEND READ AUX. STATUS COMMAND
+        CALL    COM
+        MOV     A,C             ; GET SIDE/UNIT/SECTOR
+        CALL    DAT             ; SEND SECOND COMMAND BYTE
+        CALL    PIN             ; GET AUX. STATUS BYTE
+        ANI     AS.ODD          ; CHECK IT IS SINGLE OR DOUBLE DENSITY
+        RLC
+        XRI     10000000B       ; REVERSE THE 7TH BIT, MAKE THE SECTOR
+        MOV     B,A             ; # TO 128 OR 256(B=0) BYTES
+
+;       READ BOOT CODE FROM Z47
+
+        LXI     H,USERFWA       ; BOOT DESTINATION
+        PUSH    B               ; SAVE SECTOR SIZE & SIDE/UNIT/SECTOR
+        CALL    RDBLCK          ; READ A SECTOR FROM DISK
+        POP     B               ; GET SECTOR SIZE & SUS BACK
+        INR     C               ; SET TO NEXT SECTOR
+        CALL    RDBLCK          ; READ ANOTHER SECTOR
+
+;       CHECK ANY ERROR DURING BOOT
+
+        CALL    IN.             ; GET INTERFACE STATUS
+        ANI     S.ERR           ; IS THERE ANY ERROR WHEN BOOT
+        CPU     Z80
+        JR      NZ,NODEV        ;      THEN ABORT
+        CPU     8080
+        STA     MFLG            ; STOP TIMER
+        JMP     USERFWA
+
+;       RETRY   -               RE-BOOT Z47
+;
+;       RETRY IS ENTERED WHEN 3.5 SECONDS TIME OUT & BOOT Z47
+;       STILL NO SUCCEED. IT RESTORE STACK & JUMP TO BOOT Z47 ROUTINE
+;
+;       ENTRY:  NONE
+;
+;       EXIT:   (HL) = (SP)
+;
+;       USE:    HL, SP
+
+RETRY   LHLD    STK             ; GET OLD STACK ADDRESS
+        SPHL                    ; SET TO STACK POINTER
+        CPU     Z80
+        JR      Z47A            ; RE-BOOT
+        CPU     8080
 
 
+;       R.SDP   - SET DEVICE PARAMETER, ALLOW TO SET DRIVE 0, 1, AND 2.
+;       (MORE INFORMATION CAN BE FOUND IN H17 ROM CODE 36062A)
 
+R.SDP   MVI     A,ERPTCNT
+        STA     D.OECNT         ; SET MAX ERROR COUNT FOR OPERATION
+        LDA     AIO.UNI         ; LOAD DRIVE NUMBER
+        PUSH    PSW             ; SAVE IT
+        CPI     2               ; IS IT DRIVE 2?
+        CPU     Z80
+        JR      C,R.SDP1        ; IF NOT JMP TO H17 ROM ROUTINE
+        CPU     8080
+        MVI     A,3
+R.SDP1  JMP     SDP3
+
+;       CKAUTO  -       CHECK IF IT IS AUTO BOOT
+;
+;       CKAUTO IS ENTERED FROM MONITOR LOOP. IT WILL CHECK IF AUTO BOOT
+;       CONDITION IS TRUE.IF NOT, BACK TO MONITOR LOOP.
+;               IF AUTO BOOT, JUMP TO BOOT DEVICE ROUTINE.
+;
+;       ENTRY:  NONE
+;
+;       EXIT:   NONE
+;
+;       USE:    ALL
+
+CKAUTO  IN      H88.SW          ; GET SWITCH DATA
+        ANI     H88S.AT         ; CHECK AUTO BOOT SWITCH BIT SET
+        CPU     Z80
+        JR      Z,CHAT2         ; NOT SET
+        CPU     8080
+        LXI     H,AUTOB         ; SET AUTO BOOT FLAG ADDR.
+        CMP     M               ; CHECK AUTO BOOT BEFORE?
+        JNZ     ATB             ; YES, AUTO BOOT
+CHAT2   LXI     H,MSG.PR        ; LOAD 'HI' ADDR.
+        JMP     MTR.15          ; BACK TO MONITOR LOOP
+
+
+;       HORN - MAKE NOISE.
+;
+;       ENTRY   (A) = (MILLISECOND COUNT)/2
+;       EXIT    NONE
+;       USES    A,F
+
+        ERRNZ   *-2136Q
+
+ALARM
+        CPU     Z80
+        JR      ALARMB          ; BRANCH TO A JUMP TO NOISE TO DING BELL
+        CPU     8080
+
+        ERRNZ   *-2140Q
+
+HORN    PUSH    PSW
+        MVI     A,CB.SPK        ; TURN ON SPEAKER
+
+HRN0    XTHL                    ; SAVE (HL), (H) = COUNT
+        PUSH    D               ; SAVE (DE)
+        XCHG                    ; (D) = LOOP COUNT
+        LXI     H,CTLFLG
+        XRA     M
+        MOV     E,M             ; (E) = OLD CTLFLG VALUE
+        MOV     M,A             ; TURN ON HORN
+        MVI     L,TICCNT#256
+
+        MOV     A,D             ; (A) = CYCLE COUNT
+        ADD     M
+HRN2    CMP     M               ; WAIT REQUIRED TICCOUNTS
+        JNZ     HRN2
+
+        JMP     HRNX            ; JUMP TO AN EXTENSION OF HORN SO ROOM
+                                ; CAN BE MADE FOR A JUMP TO NOISE
+
+ALARMB  JMP     NOISE           ; SEND A BELL TO THE CONSOLE
+
+
+;       NODEV   - NO DEVICE AT THE UNIT USER INDICATE
+;
+;       NODEV IS ENTERED WHEN:  1. 15 SECONDS TIME OUT
+;                            OR 2. NO DEVICE IS INDICATED ON SWITCH
+;                            OR 3. USER HIT <DELETE> TO ABORT BOOT
+;                            OR 4. BOOT ERROR
+;       IT WILL EXIT TO 'ERROR' ROUTINE AND MONITOR LOOP
+;
+;       ENTRY:  NONE
+;
+;       EXIT:   (A) = 0
+;
+;       USE:    AF, HL
+
+NODEV   LXI     H,ERRMSG        ; PRINT ERROR MESSAGE
+        CALL    TYPMSG
+        STA     MFLAG           ; STOP TIMER
+        OUT     DP.DC           ; OFF DISK
+        JMP     ERROR           ; BACK TO MOHITOR LOOP
+
+
+;       H17     - BOOT FROM H17 DISK SYSTEM
+;                 (THIS IS THE MODIFICATION OF THE H17 BOOT ROUTINE.
+;                  MORE INFORMATION CAN BE FOUND O H17 BOOT ROM 300008)
+;
+;       ENTRY:  NONE 
+;
+;       USE:    ALL
+
+H17     LXI     B,BOOTAL        ; SET THE COUNT TO MOVE IN CONSTANTS AND VECTORS
+        LXI     D,BOOTA         ; SET THE SOURCE ADDRESS
+        LXI     H,D.CON         ; SET THE DESTINATION ADDRESS
+        CALL    DMOVE           ; MOVE IT
+
+;       SET ADDRESS FOR 'SET DEVICE PARAMETER' ROUTINE
+;       TO HANDLE DISK DRIVE 0, 1, AND 2.
+
+        LXI     H,R.SDP         ; SET THIS ROM ROUTINE ADDRESS
+        SHLD    D.SDP           ; SET INTO RAM JUMP VECTOR
+        EI                      ; RESTORE INTERRUPT
+
+;       WAIT TILL USER INSERT THE DISK AND CLOSE THE DOOR
+;       (TIMER INTERRUPT IS AFFECTED NOW)
+
+        MVI    B,10             ; LOOK FOR SOME HOLE AND NO HOLE
+        CALL   R.SDP            ; SELECT UNIT & MOTOR ON
+H17A    CALL   WNH              ; WAIT FOR NO HOLE
+        CALL   WHD              ; WAIT FOR HOLE
+        CPU    Z80
+        DJNZ   H17A
+        CPU    8080
+
+;       READ BOOT CODE
+
+        CALL   R.ABORT          ; RESET THE DISK DRIVE
+        LXI    D,USERFWA        ; SET THE LOAD LOCATION
+        LXI    B,9*256          ; LOAD 9 SECTORS
+        LXI    H,0              ; LOAD FROM TRACK 0 SECTOR 1
+        CALL   R.READ           ; READ DISK BOOT CODE
+        CPU    Z80
+        JR     C,NODEV          ;   ERROR ON BOOT, BACK TO 'H:'
+        CPU    8080
+
+;       SETUP CLOCK INTERRUPT FOR H17 ONLY
+
+        LXI   H,CLOCK17         ; LOAD CLOCK ROUTINE ADDRESS
+        SHLD  UIVEC+1           ; SET IT INTO VECTOR LOCATION
+        JMP   USERFWA           ; GOTO BOOT OCDE
+
+;      DEVICE - DETERMINE BOOT WHICH DEVICE AT WHICH PORT
+;
+;       ENTRY:  Z FLAG ( Z=1 FOR PRIMARY, Z=0 FOR SECONDARY)
+;
+;       EXIT:   HL = DEVICE BOOT EXECUTION ADDRESS
+;                     IF H=0 THEN NO DEVICE THERE
+;                     (I.E. THE EXEC. ADDR. MUST RESIDENT > 1000A)
+;               REG B = PRIMARY MAXI. DRIVE NUMBER
+;                    IF Z47, #='4'; IF HL7, #='3'
+;               (PRIM) = PRIMARY DEVICE PORT ADDRESS
+;                    IF Z47 THEN THE PORT IS EITHER 170Q OR 174Q
+;                    IF H17 THEN DON'T CARE (H17 BOOT ROM TAKE CARE IT)
+;               (TMFG) = 1 IF BOOT FROM Z47, = 0 IF FROM H17
+;
+;       USE:    ALL
+
+DEVICE  DB      MI.EXAF         ; SAVE Z FLAG
+
+;       INITIAL VARIABLES
+
+        DI                      ; NO INTERRUPT
+        LXI     H,D.RAM         ; CLEAR H17 WORK RAM AREA
+        MVI     B,D.RAML        ; LENGTH TO CLEAR
+        CALL    DZERO
+        OUT     DP.PC           ; OFF DISK
+        STA     TICCNT          ; 0 TIMER COUNTER
+        STA     MYCNT           ; 0.5 SECOND TIMER = 0
+
+        INR     A               ; (A)=1
+        STA     TMFG            ; SET TIMER TO Z47 FLAG
+        ERRNZ   UO.CLK-1        ; TIMER INTERRUPT MUST = 1
+        STA     MFLAG           ; ALLOW TIMER INTERRUPT
+        LXI     H,UIVEC         ; SET ALL VECTOR TO EI/RET ADDRESS
+BOOT2   MVI     M,MI.JMP
+        INX     H
+        MVI     H,EIXIT#256     ; STORE LS BYTE
+        INX     H
+        MVI     M,EICIT/256     ; STORE MS BYTE
+        INX     H
+        ADD     A
+        JP      BOOT2
+
+        LXI     H,TMOUT         ; SET TIMER INTERRUPT VECTOR
+        SHLD    UIVEC+1
+
+        MVI     A,D.STA         ; ASSUME ALL DEVICE ARE Z47 & BOOT AT 170Q
+        STA     PRIM            ; SINCE H17 BOOT ROM WILL TAKE CARE OF ITS MATTER
+        LXI     H,Z47           ; SET Z47 BOOT ADD.
+        MVI     B,'4'           ; SET MAX. UNIT TO 4
+
+;       DETERMINE BOOT DEVICE AND ITS INFORMATION
+
+        IN      H88.SW          ; READ SWITCH DATA
+        PUSH    PSW             ; SAVE IN STACK
+        ANI     H88S.DV         ; CHECK PRIMARY DEVICE ADDRESS
+        DB      MI.EXAF         ; SAVE Z FLAG & GET Z' FOR PRIM. SEC. FLAG
+        CPU     Z80
+        JR      NZ,SECOND       ; IT SECONDARY
+        DB      MI.EXAF
+        JR      NZ,B170
+        JR      B174
+SECOND  DB      MI.EXAF
+        JR      Z,B170          ; BOOT PRIMARY AT 170Q
+        CPU     8080
+B174    MVI     A,UP.DP         ; PRIMARY DEVICE IS AT 174Q
+        STA     PRIM
+        POP     PSW             ; GET SWITCH DATA BACK
+        ANI     H88S.4          ; CHECK THIS IS Z47 OR H17
+        CPU     Z80
+        JR      Z,BH17          ; IT H17
+        CPU     8080
+        DCR     A
+DEV2    RZ                      ; IT IS Z47
+        DCR     H               ; NO DEVICE THERE, Z47 LOCATION MUST ON 1***A
+        RET
+        ERRNZ   Z47/256-1
+
+;       PRIMARY DEVICE IS H17
+
+BH17    LXI     H,H17           ; SET TO H17 EXECUTION LOCATION
+        DCR     B               ; SET TO MAX 3 DRIVE
+        STA     TMFG            ; SET TIMER INTERRUPT = 0 FOR H17
+        RET
+
+;       PRIMARY DEVICE IS AT PORT 170Q
+
+B170    POP     PSW             ; GET SWITCH DATA
+        ANI     H88S.0          ; CHECK ANY DEVICE IN 170Q
+        CPI     00000100B       ; CHECK IF IT IS Z47
+        CPU     Z80
+        JR      DEV2
+        CPU     8080
 
 
 ;       LRA - LOCATE REGISTER ADDRESS
@@ -734,7 +1105,10 @@ NBOOT   XRA     A               ; SET Z FLAG TO PRIMARY DEVICE
 ;               (D,E) = (O,A)
 ;       USES    A,D,E,H,L,F
 
+        IF      RAM
+        ELSE
         ERRNZ   *-3047Q
+        ENDIF
 
 LRA     LDA     REGI
 LRA.    MOV     E,A
@@ -750,7 +1124,10 @@ LRA.    MOV     E,A
 ;       EXIT    NONE
 ;       USES    A,D,E,H,L,F
 
+        IF      RAM
+        ELSE
         ERRNZ   *-3062Q
+        ENDIF
 
 IOA     JMP     IOA1
         NOP                     ; RETAIN H8 ORG
@@ -764,7 +1141,10 @@ IOA     JMP     IOA1
 ;       EXIT    NONE
 ;       USES    A,D,E,H,L,F
 
+        IF      RAM
+        ELSE
         ERRNZ   *-3066Q
+        ENDIF
 
 IOB     MVI     M,0             ; ZERO OUT OLD VALUE
 IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
@@ -789,7 +1169,10 @@ IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
 
 ;       FAKE OUT ROUTINE FOR CALLERS OF *DOD* FROM THE H8 FRONT PANEL
 
+        IF      RAM
+        ELSE
         ERRNZ    *-3122Q
+        ENDIF
 
 DOD     INX      H
         INX      H
@@ -812,18 +1195,84 @@ IOB2    CPI     A.CR            ; CARRIAGE RETURN?
         JR      IOB1            ; GET A NEW CHARACTER               /JWT 790507/
         CPU     8080
 
-;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
 
-        DB      010Q, 333Q, 355Q, 346Q, 040Q, 312Q, 144Q, 003Q
-        DB      010Q, 323Q, 350Q, 375Q, 351Q, 117Q, 346Q, 300Q
-        DB      017Q, 017Q, 017Q, 017Q, 017Q, 017Q, 366Q, 060Q
-        DB      375Q, 041Q, 202Q, 003Q, 303Q, 143Q, 003Q, 171Q
-        DB      346Q, 070Q, 017Q, 017Q, 017Q, 366Q, 060Q, 375Q
-        DB      041Q, 221Q, 003Q, 303Q, 143Q, 003Q, 171Q, 346Q
-        DB      007Q, 366Q, 060Q, 375Q, 041Q, 235Q, 003Q, 303Q
-        DB      143Q, 003Q, 335Q, 351Q, 015Q, 012Q, 011Q, 120Q
-        DB      141Q, 163Q, 163Q, 040Q, 075Q, 040Q, 040Q, 040Q
-        DB      040Q, 000Q, 122Q, 116Q, 102Q
+;       DYASC - DYNAMIC RAM ASCII OUTPUT TO CONSOLE
+;
+;       ENTRY:  (A) = CHARACTER TO OUTPUT
+;               (IY) = RETURN ADDRESS
+;
+;       EXIT:   TO (IY)
+;       USES:   A,C,F
+
+DYASC
+;       EX      AF,AF'          ; SAVE CHARACTER TO OUTPUT
+        DB      MI.EXAF
+DYASC1  IN      SC.ACE+UR.LSR   ; READ LINE STATUS REGISTER
+        ANI     UC.THE
+        JZ      DYASC1          ; WAIT IF UART CAN'T HOLD ANOTHER CHARACTER
+
+;       EX      AF,AF'          ; GET CHARACTER TO OUTPUT
+        DB      MI.EXAF
+        OUT     SC.ARC+UR.THR   ; OUTPUT TO UART
+;       JP      (IY)            ; RETURN TO CALLER
+        DB      MI.JIYA,MI.JIYB
+
+;       DYBYT - DYNAMIC RAM BYTE OUTPUT
+;
+;       ENTRY:  (A) = BYTE TO OUTPUT AS OCTAL
+;               (IX) = RETURN ADDRESS
+;       EXIT:   TO (IX)
+;       USES    A,C,IF.F
+
+DYBYT   MOV     C,A             ; SAVE CHARACTER
+        ANI     11000000B       ; OUTPUT FIRST CHARACTER OF OCTAL VALUE
+        RRC
+        RRC
+        RRC
+        RRC
+        RRC
+        RRC
+        ORI     00110000B       ; MAKE INTO ASCII
+
+;       LD      IY,DYBYT.2
+        DB      MI.LDYA,MI.LDYB
+        DW      DYBYT,2
+
+        JMP     DYASC
+
+DYBYT.2 MOV     A,C             ; OUTPUT SECOND CHARACTER
+        ANI     00111000B
+        RRC
+        RRC
+        RRC
+        ORI     00110000B       ; MAKE INTO ASCII
+
+;       LD      IY,DYBYT.R      ; RETURN ADDRESS
+        DB      MI.LDYA,MI.LDYB
+        DW      DYBYT.4
+        JMP     DYASC
+
+DYBYT.4 MOV     A,C             ; OUTPUT LAST CHARACTER
+        ANI     00000111B
+        ORI     00110000B       ; MAKE ASCII
+
+;       LD      IY,DYBYT.6      ; RETURN ADDRESS
+        DB      MI.LDYA,MI.LDYB
+        DW      DYBYT.6
+
+        JMP     DYASC
+
+DYBYT.6
+;       JP      (IX)            ; RETURN TO CALLER
+        DB      MI.JIXA,MI.JIXB
+
+;       MSQ.PAS - PASS MESSAGE FOR DYNAMIC RAM TEST
+;
+
+MSG.PAS DB      A.CR,A.LF
+        DB      '     Pass =   '
+        DB      0
+
 
 ;       RCK - READ CONSOLE KEYPAD
 ;
@@ -888,21 +1337,63 @@ WCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE STATUS
         OUT     SC.ACE+UR.THR   ; OUTPUT TO CONSOLE
         RET
 
-;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
 
-        DB    353Q, 174Q, 335Q, 041Q, 326Q, 003Q, 303Q, 160Q
-        DB    003Q, 175Q, 335Q, 041Q, 335Q, 003Q, 030Q, 223Q
-        DB    353Q, 041Q, 362Q, 007Q, 335Q, 041Q, 350Q, 003Q
-        DB    303Q, 306Q, 007Q, 032Q, 335Q, 041Q, 360Q, 003Q
-        DB    303Q, 160Q, 003Q, 076Q, 007Q, 375Q, 041Q, 265Q
-        DB    007Q, 303Q, 143Q, 003Q
+;       THE FOLLOWING IS ONLY A PORTIJ OF THE DYNAMIC RAM TEST!!
+;
+DY9.3   XCHG
+        MOV     A,H             ; OUTPUT MSB
+
+;       LD      IX,DY9.4        ; RETURN ADDRESS
+        DB      MI.LDXA,MI.LDXB
+        DW      DY9.4
+
+        JMP     DYBYT
+
+DY9.4   MOV     A,L             ; OUTPUT LSB
+
+;       LD      IX,DY9.5        ; RETURN ADDRESS
+        DB      MI.LDXA,MI.LDXB
+        DW      DY9.5
+
+        CPU     Z80
+        JR      DYBYT
+        CPU     8080
+
+DY9.5   XCHG                    ; SAVE ERROR ADDRESS
+        LXI     H,MSG.EQ        ; OUTPUT ' = '
+
+;       LD      IX,DY9.8        ; RETURN ADDRESS
+        DB      MI.LDXA,MI.LDXB
+        DW      DY9.8
+
+        JMP     DYMSG           ; OUTPUT STRING
+
+DY9.8   LDAX    D               ; OUTPUT RAM CONTENTS
+
+;       LD      IX,DYMEM10      ; RETURN ADDRESS
+        DB      MI.LDXY,MI.LDXB
+        DW      DYMEM10
+
+        JMP     DYBYT
+
+DYMEM10 MVI     A,A.BEL         ; DING BELL
+
+;       LD      IY,DY10.5       ; RETURN ADDRESS
+        DB      MI.LDYA,MI.LDYB
+        DW      DY10.5
+
+        JMP     DYASC
+
 
 ;       IO ROUTINES TO BE COPIED INTO AND USED IN RAM.
 ;
 ;       MUST CONTINUE TO 3777A FOR PROPER COPY.
 ;       THE TABLE MUST ALSO BE BACKWARDS TO THE FINAL RAM
 
+        IF      RAM
+        ELSE
         ERRNZ   4000Q-7-*
+        ENDIF
 
 PRSROM
         DB      1               ; REFIND
@@ -913,7 +1404,10 @@ PRSROM
         DB      10              ; REGI
         DB      MI.RET
 
+        IF      RAM
+        ELSE
         ERRNZ   *-4000Q
+        ENDIF
 
 ;       INIT0X - EXTENSION OF INIT0 TO SUPPORT H88
 
@@ -1096,65 +1590,95 @@ NMI3    POP     B
 ;       RET                     ; Z80 RETURN FROM NMI
         DB      355Q,105Q
 
-;               BOOT HDOS ENTRY POINT FOR H88
+
+;       ATB     - AUTO BOOT ROUTINE CONTINUE
+
+ATB     MOV     M,A             ; SET AUTO BOOT FLAG
+        MVI     A,10            ; SET TO AUTO BOOT ROUTINE
+        CALL    LRA.
+        LXI     D,AUTOBO        ; SET AUTO BOOT ROUTINE
+        CPU     Z80
+        JR      BOOTX
+        CPU     8080
+
+        ORG     2256Q
+;       BOOT H-17 OR Z47 ENTRY POINT FOR H88
 ;
 ;       ENTRY   NONE
-;       EXIT    TO HDOS BOOT ROM
+;
+;       EXIT    (DE) = NORMAL BOOT ROUTINE ADDRESS
+;
 ;       USES    ALL
 
 BOOT    LXI     H,MSG.BT        ; COMPLETE BOOT MESSAGE
         CALL    TYPMSG
-        CALL    WCR             ; WAIT FOR A CARRIAGE RETURN
         MVI     A,10
         CALL    LRA.            ; GET LOCATION OF USER PC
-;        LXI     D,ROMDD         ; SET ITS VALUE TO THE BOOT ROM
-        MOV     M,E
+        LXI     D,RNBOOT        ; SET ITS VALUE TO THE NORMAL BOOT ROUTINE
+BOOTX   MOV     M,E
         INX     H
-        MOV     M,D
-
-;       TELL USER TO "TYPE SPACES TO DETERMINE BAUD RATE"
-;
-        LXI     H,MSG.SP
-        CALL    TYPMSG
 
         JMP     GO.             ; DO IT
 
-;       SWMEM - SET UP FOR WMEM TO DUMP A CASSETTE FROM THE MONITOR LEVEL
+
+;       TMOUT   - BOOT CODE TIME OUT ROUTINE
 ;
-;       SWMEM ALLOWS THE USER TO EITHER ENTER A NEW STARTING AND
-;       ENDING ADDRESS FOR THIS DUMP OR USE THE ADDRESS OF THE
-;       PREVIOUS LOAD OR DUMP.  THE PREVIOUS ADDRESSES ARE USED IF
-;       THE FIRST CHARACTER IS AN ASCII CARRIAGE RETURN.  IF THE
-;       FIRST CHARACTER IS AN OCTAL CHARACTER, BOTH BEGINNING AND
-;       ENDING ADDRESSES MUST BE ENTERED SEPARATED BY A DASH AND
-;       FOLLOWED BY A CARRIAGE RETURN.
+;       TMOUT IS ENTERED FROM TIMER INTERRUPT EVER 100MS. AND IT WILL
+;       EXIT:   IF BOOT SUCCESS THEN TIMER OFF.
+;               IF 15 SECONDS TIME OUT AND BOOT IS NOT SUCCESS YES
+;                  THEN ABORT BOOT Z47 & TO MONITOR LOOP
+;               IF < 15S & 3.5S THEN RE-BOOT
 ;
-;       ENTRY   USER PC VALUE ON STACK = PROGRAM START ADDRESS FOR THIS TAPE
-;       EXIT    TO WMEM
-;       USES    ALL
+;       ENTRY:  (TMFG)  = 1 IF THE TIME OUT IS FOR Z47
+;                       = 0 IF THE TIME OUT IS FOR H17
+;
+;       EXIT:   NONE
+;
+;       USE:    ALL (WHEN RETURN, ALL REGISTERS ARE RESTORED)
 
-SWMEM   LXI     H,MSG.DMP       ; COMPLETE DUMP MESSAGE
-        CALL    TYPMSG
-        CALL    IROC            ; INPUT FIRST CHARACTER
-        JNC     SWMEM4          ; IF FIRST CHARACTER IS OCTAL
+TMOUT   IN      SC.ACR+UR.LSR   ; INPUT ACE LINE STATUS REGISTER
+        ANI     UC.DR           ; SEE IF THERE IS A DATA READY
+        CPU     Z80
+        JR      Z,TMOUT4        ; CHECK IF IT IS <DELETE>
+        CPU     8080
 
-        LXI     H,START+1       ; ELSE, INPUT STARTING ADDRESS
-        MVI     D,'-'           ; FIRST BYTE MUST END WITH A DASH
-        CALL    IOA
-SWMEM2  LXI     H,ABUSS+1       ; ENTER ENDING ADDRESS
-        STC                     ; SHOW NO CHARACTER IN (A)
-        CMC
-        MVI     D,A.CR          ; LAST CHARACTER MUST BE A RETURN
-        CALL    IOA
-SWMEM4  MVI     A,10            ; GET USER PC VALUE FOR DISPLAY
-        CALL    LRA.
-        MOV     E,M
-        INX     H
-        MOV     D,M
-        XCHG                    ; (H,L) = USER PC VALUE
-        CALL    TOA             ; TYPE OCTAL ADDRESS
-        JMP     WMEM            ; DO THE DUMP
+        IN      SC.ACE+UR.RBR   ; INPUT DATA FROM KB
+        ANI     01111111B       ; IS IT <DEL>?
+        CPI     A.DEL
+        JZ      NODEV           ; IF IT, ABORT THE BOOT
+                                ; ELSE IGNORE THE INPUT
 
+TMOUT4  LXI     H,TMFG
+        MOV     A,M
+        ANA     A
+        DB      MI.EXAF         ; SAVE Z FLAG
+        LDA     TICCNT          ; GET TIC
+        ANA     A               ; SET ZERO FLAG
+        CPU     Z80
+        JR      NZ,TMOUT2       ; NOT IN 0.5 SECOND
+        CPU     8080
+        INX     H               ; SET TO MYCNT
+        ERRNZ   MYCNT-TMFG-1    ; MYCNT MUST FOLLOW TMFG
+        INR     M               ; INCREASE THE COUNT FOR 0.5 SECOND
+        MOV     A,M
+        CPI     30              ; CHECK IF MORE THAN 15 SECONDS
+        JNC     NODEV           ; NO DEVICE?
+TMOUT1  SBI     7               ; IS IT 3.5 SECONDS?
+        CPU     Z80
+        JR      C,TMOUT2        ; IF NOT, WAIT
+        JR      NZ,TMOUT1       ; CHECK MORE
+        CPU     8080
+        DB      MI.EXAF
+        JNZ     RETRY           ; IF IT IS Z47, THEN RE-BOOT
+        CPU     Z80
+        JR      TMOUT3          ; IT IS H-17, CONTINUE IT CLOCK ROUTINE
+        CPU     8080
+TMOUT2  DB      MI.EXAF         ; CHECK IT IS Z47 OR H17
+        RNZ                     ; Z47, THEN RETURN
+TMOUT3  JMP     CLOCK17         ; CONTINUE H17 CLOCK ROUTINE
+
+
+        ORG     2370Q
 ;       SUBM - SUBSTITUTE MEMORY
 ;
 ;       SUBM INPUTS A MEMORY ADDRESS FROM THE CONSOLE AND THEN DISPLAYS
@@ -1409,21 +1933,44 @@ WCR     CALL    RCC             ; INPUT CHARACTER
         CALL    WCC
         RET
 
-;       TPDSP - TAPE DISPLAY
-;
-;       SHOW H88 USER THAT THERE IS SOME ACTIVITY DURING A LOAD OR A DUMP
-;
-TPDSP   SHLD    ABUSS           ; UPDATE ABUSS
 
-        MVI     A,A.CR          ; RETURN
-        CALL    WCC
+;       DAT     - DATA BYTE OUTPUT TO Z-47
+;
+;       ENTRY:  (A) = BYTE TO OUTPUT
+;
+;       EXIT:   (A) = BYTE TO OUTPUT
+;               (D) = S.DTR
+;
+;       USES:   AF, D
 
-        MOV     A,H             ; ADDRESS
-        CALL    TOB
-        MOV     A,L
-        CALL    TOB
+DAT     MVI     D,S.DTR         ; SET MATCH CONDITION TO DATA TRANSFER
+        CPU     Z80
+        JR      COM1            ; REQUEST BIT
+        CPU     8080
+
+
+;       COM      - OUTPUT COMMAND BYTE TO Z-47
+;
+;       ENTRY:  (A) = COMMAND BYTE
+;
+;       EXIT:   (A) = COMMAND BYTE
+;               (D) = S.DON
+;
+;       USES:   AF, D
+
+COM     MVI     D,S.DON         ; SET MATCH CONDITION TO DONE BIT
+COM1    PUSH    PSW
+WTDON1  CALL    IN.             ; READ CONTROLLER STATUS REGISTER
+        ANA     D               ; GET MATCH BIT ONLY
+        CPU     Z80
+        JR      Z,WTDON1        ; IF NO MATCH, WAIT
+        CPU     8080
+        POP     PSW
+        CALL    OUT1.           ; OUTPUT THE BYTE TO THE DATA PORT
         RET
 
+
+        ORG     3045Q
 ;       HRNX - HORN EXTENSION ROUTINE
 ;
 ;       THIS IS AN EXTENSION TO *HORN* TO MAKE ROOM FOR A JUMP
@@ -1444,17 +1991,26 @@ NOISE   MVI     A,A.BEL
         CALL    WCC
         JMP     HORN            ; CONTINUE WITH NORMAL HORN DELAY
 
-;       TPERMSG - TAPE ERROR MESSAGE
-;
-;       DISPLAY THE TAPE ERROR NUMBER ON THE CONSOLE
 
-TPERMSG STA     ABUSS          ; SAVE ERROR NUMBER
-        MVI     A,' '          ; OUTPUT A SPACE
-        CALL    WCC
-        MOV     A,B            ; OUTPUT NUMBER
-        CALL    TOB
+;       OUT.    - OUTPUT BYTE TO Z-47
+;
+;       ENTRY:  (A) = OUTPUT BYTE
+;
+;       EXIT:   NONE
+;
+;       USES:   NONE
+
+OUT.    PUSH    B
+        MOV     B,A             ; SAVE THE OUTPUT DATA
+        LDA     PRIM            ; GET PORT ADDRESS
+OUT.1   MOV     C,A             ; SET TO REG C
+        MOV     A,B             ; GET OUTPUT BYTE DATA BACK
+;       OUT     (C),A           ; OUTPUT BYTE
+        DB      355Q,171Q
+        POP     B
         RET
 
+        ORG     30500Q
 ;       TYPMSG - TYPE MESSAGE TO CONSOLE
 ;
 ;       TYPMSG OUTPUTS AN ASCII MESSAGE FROM MEMORY TO THE CONSOLE
@@ -1478,30 +2034,92 @@ TYPMSG  MOV     A,M             ; GET CHARACTER
 
 MSG.PR  DB      A.CR,A.LF,"  H: ",0
 
-;       MSG.SP - MESSAGE TO TELL USER TO TYPE SPACES
+
+;       RDBLCK  - INPUT A BLOCK FROM Z-47
 ;
-;       "Type spaces to determine baud rate"
+;       RDBLCK READS IN A BLOCK FROM THE DISK CONTROLLER
+;
+;       ENTRY:
+;               HL = LOAD ADDRESS
+;               B  = COUNT
+;               C  = SIDE/UNIT/SECTOR
+;
+;       EXIT:   NONE
+;
+;       USE:    ALL
 
-MSG.SP  DB      "Type SPACES to determine baud rate",0
+RDBLCK
+RD1     MVI     A,DC.REAB
+        CALL    COM             ; SEND THE COMMAND
+        XRA     A               ; FOR TRACK 0
+        CALL    DAT             ; SEND IT TO DISK
+        MOV     A,C             ; LOAD SIDE/UNIT/SECTOR
+        CALL    DAT             ; SEND IT TO DISK
 
+RD2     CALL    PIN             ; INPUT A BYTE FROM DISK
+        MOV     M,A             ; STORE IN BUFFER
+        INX     H               ; BUFFER TO NEXT ADDRESS
+        CPU     Z80
+        DJNZ    RD2
+        CPU     8080
+        RET                     ; CONTINUE
+
+
+;       OUT1.   - OUTPUT A BYTE TO PORT (PRIM+1)
+;
+;       ENTRY:  (A) = OUTPUT PORT
+;
+;       EXIT:   NONE
+;
+;       USE:    NONE
+
+OUT1.   PUSH    B
+        MOV     B,A             ; SAVE THE OUTPUT DATA
+        LDA     PRIM            ; GET PORT ADDRESS
+        INR     A               ; SET TO (PRIM+1)
+        CPU     Z80
+        JR      OUT.1           ; GO TO OUTPUT ROUTINE
+        CPU     8080
+
+;       IN1.    - INPUT BYTE FROM (PRIM+1) PORT
+;
+;       ENTRY:  NONE
+;
+;       EXIT:   (A) = INPUT BYTE
+;
+;       USES:   A
+
+IN1.    PUSH    B
+        LDA     PRIM            ; GET PORT ADDRESS
+        INR     A               ; SET TO (PRIM+1)
+        CPU     Z80
+        JR      IN.1
+        CPU     8080
+
+        ORG     3165Q
 ;       MSG.GO - (G)O
 ;
 ;       "GO"
 
 MSG.GO  DB      "o ",0
 
-;;      MSG.LD - (L)OAD
+;       IN.     - INPUT BYTE FROM PORT (PRIM)
 ;
-;       "LOAD"
-
-MSG.LD  DB      "oad",0
-
-;       MSG.DMP - (D)UMP
+;       ENTRY:  NONE
 ;
-;       "DUMP"
+;       EXIT:   (A) = INPUT BYTE
+;
+;       USES:   A
 
-MSG.DMP DB      "ump ",0
+IN.     PUSH    B
+        LDA     PRIM            ; GET PORT ADDRESS
+IN.1    MOV     C,A             ; SET ADDR. TO REG C.
+;       IN      A,(C)
+;       DB      355Q,170Q       ; INPUT BYTE
+        POP     B
+        RET
 
+        ORG     3101Q
 ;       MSG.SUB - (S)UBSTITUTE
 ;
 ;       "SUBSTITUTE"
@@ -1520,66 +2138,149 @@ MSG.PC  DB       "rogram Counter ",0
 
 MSG.BT  DB      "oot",0
 
-;       NOTE: SOURCE FOR THE CODE BELOW WAS NOT PUBLISHED.
 
-SPEED   DB      041Q, 371Q, 006Q, 315Q, 100Q, 006Q, 076Q, 000Q
-        DB      062Q, 002Q, 040Q, 076Q, 022Q, 323Q, 177Q, 052Q
-        DB      033Q, 040Q, 174Q, 057Q, 127Q, 175Q, 057Q, 074Q
-        DB      137Q, 322Q, 275Q, 006Q, 024Q, 001Q, 000Q, 000Q
-        DB      333Q, 177Q, 346Q, 001Q, 312Q, 300Q, 006Q, 333Q
-        DB      177Q, 346Q, 001Q, 302Q, 307Q, 006Q, 004Q, 170Q
-        DB      376Q, 070Q, 302Q, 300Q, 006Q, 052Q, 033Q, 040Q
-        DB      031Q, 021Q, 214Q, 376Q, 031Q, 345Q, 041Q, 062Q
-        DB      007Q, 072Q, 002Q, 040Q, 356Q, 001Q, 062Q, 002Q
-        DB      040Q, 302Q, 357Q, 006Q, 041Q, 100Q, 007Q, 315Q
-        DB      100Q, 006Q, 341Q, 315Q, 325Q, 005Q, 303Q, 257Q
-        DB      006Q, 033Q, 105Q, 012Q, 011Q, 104Q, 151Q, 163Q
-        DB      153Q, 040Q, 144Q, 162Q, 151Q, 166Q, 145Q, 040Q
-        DB      162Q, 157Q, 164Q, 141Q, 164Q, 151Q, 157Q, 156Q
-        DB      141Q, 154Q, 040Q, 163Q, 160Q, 145Q, 145Q, 144Q
-        DB      040Q, 164Q, 145Q, 163Q, 164Q, 056Q, 015Q, 012Q
-        DB      012Q, 011Q, 011Q, 104Q, 162Q, 151Q, 166Q, 145Q
-        DB      040Q, 163Q, 160Q, 145Q, 145Q, 144Q, 040Q, 075Q
-        DB      040Q, 000Q, 033Q, 110Q, 127Q, 157Q, 162Q, 153Q
-        DB      151Q, 156Q, 147Q, 033Q, 131Q, 043Q, 076Q, 000Q
-        DB      033Q, 110Q, 040Q, 040Q, 040Q, 040Q, 040Q, 040Q
-        DB      040Q, 033Q, 131Q, 043Q, 076Q, 000Q
-DYMEM   DB      076Q, 000Q, 323Q, 362Q, 041Q, 000Q, 040Q, 076Q
-        DB      001Q, 066Q, 000Q, 064Q, 276Q, 040Q, 003Q, 043Q
-        DB      030Q, 367Q, 053Q, 353Q, 041Q, 324Q, 007Q, 335Q
-        DB      041Q, 153Q, 007Q, 030Q, 133Q, 172Q, 335Q, 041Q
-        DB      163Q, 007Q, 303Q, 160Q, 003Q, 173Q, 335Q, 041Q
-        DB      173Q, 007Q, 303Q, 160Q, 003Q, 023Q, 006Q, 001Q
-        DB      041Q, 237Q, 003Q, 335Q, 041Q, 207Q, 007Q, 030Q
-        DB      077Q, 041Q, 000Q, 040Q, 176Q, 270Q, 302Q, 307Q
-        DB      000Q, 074Q, 167Q, 276Q, 302Q, 307Q, 000Q, 043Q
-        DB      175Q, 273Q, 040Q, 360Q, 174Q, 272Q, 040Q, 354Q
-        DB      046Q, 003Q, 076Q, 010Q, 375Q, 041Q, 251Q, 007Q
-        DB      303Q, 143Q, 003Q, 045Q, 040Q, 366Q, 004Q, 170Q
-        DB      335Q, 041Q, 273Q, 000Q, 303Q, 160Q, 003Q, 041Q
-        DB      000Q, 000Q, 006Q, 002Q, 045Q, 040Q, 375Q, 055Q
-        DB      040Q, 372Q, 005Q, 040Q, 367Q, 303Q, 360Q, 003Q
-        DB      176Q, 375Q, 041Q, 316Q, 007Q, 303Q, 143Q, 003Q
-        DB      267Q, 043Q, 040Q, 364Q, 335Q, 351Q, 033Q, 105Q
-        DB      104Q, 171Q, 156Q, 141Q, 155Q, 151Q, 143Q, 040Q
-        DB      122Q, 101Q, 115Q, 040Q, 164Q, 145Q, 163Q, 164Q
-        DB      015Q, 012Q, 012Q, 011Q, 040Q, 114Q, 127Q, 101Q
-        DB      040Q, 075Q, 040Q, 000Q, 040Q, 075Q, 040Q, 000Q
-        DB      107Q, 101Q, 103Q, 056Q
+;       SPEED - ROTATIONAL SPEED TEST FOR 5.25 INCH DISK DRIVE
+;
+;       *SPEED* IS USED ONLY FOR GROSS ADJUSTMENT OF DRIVE ROTATIONAL
+;       SPEED IF THE FIRST READ/WRITE TEST OF THE UNIT FAILS DURING SETUP.
+;
+;               USE OF *SPEED* IS AS FOLLOWS:
+;
+;                        1.  ENTER 'GO AND THE ENTRY ADDRESS OF *SPEED*
+;                        2.  ADJUST DRIVE SPEED UNTIL DATA AT DISPLAYED
+;                            EQUALS 200
+;                                A,  IF SPEED < 200, TURN ADJUSTMENT CLOCKWISE
+;                                B,  IF SPEED < 200, TURN COUNTERCLOCKWISE
+;
+;       THE ABOVE TEST ADJUSTS SY0:.  TO ADJUST SY1:, USE HDOS
+
+;       LABLE EQUIVALENCES
+;
+;       I/O PORTS
+OP.DC   EQU     177Q            ; DRIVE CONTROL OUTPUT PORT
+IP.DS   EQU     177Q            ; DRIVE STATUS INPUT PORT
+
+;       MASKS
+;
+DS.HOLD EQU     00000001B       ; DRIVE STATUS SECTOR/INDEX HOLD
+
+;       CONSTANTS
+;
+ONDR0   EQU     022Q            ; TURN ON SY0:
+
+
+SPEED   LXI     H,MSG.SPD       ; OUTPUT SPEED MESSAGE
+        CALL    TYPMSG
+        MVI     A,0             ; SET FLAG AT IOWRK FOR "WORKING" MESSAGE
+        STA     IOWRK
+        MVI     A,ONRO          ; TURN ON DRIVE ZERO
+        OUT     OP.DC
+SPEED1  LHLD    TICCNT          ; GET TICK COUNTER
+        MOV     A,M             ; FORM TWO'S COMPLEMENT OF TICK COUNTER
+        CMA
+        MOV     D,A             ; (D,E) = NEGATIVE TICK COUNTER
+        MOV     A,L
+        CMA
+        INR     A
+        MOV     E,A
+        JNC     SPEED2          ; IF NO CARRY FROM LSB
+
+        INR     D               ; ELSE, INCREMENT MSB
+SPEED2  LXI     B,0             ; ZERO REV COUNTERS
+SPEED3  IN      IP.DS           ; INPUT DISK STATUS
+        ANI     DS.HOLE         ; MASK FOR SECTOR/INDEX PULSES
+        JZ      SPEED3          ; IF NO HOLE PRESENT
+
+; HOLE PRESENT, WAIT FOR IT TO LEAVE
+;
+SPEED4  IN      IP.DS           ; GET DISK STATUS
+        ANI     DS.HOLE         ; GET HOLE PULSES
+        JNZ     SPEED4          ; WAIT UNTIL HOLE IS GONE AND WE HAVE MEDIA
+
+        INR     B               ; INCREMENT HOLE COUNTER
+        MOV     A,B             ; TEST FOR FIVE REVOLUTIONS
+        CPI     56
+        JNZ     SPEED3          ; NOT FIVE, WAIT FOR MORE HOLES
+
+;       HAVE FIVE REVS, DISPLAY DIFFERENCE OF TICK COUNTER AND EXPECTED TIME DIF
+
+        LHLD    TICCNT          ; GET CURRENT TICK VALUE
+        DAD     D               ; SUBTRACT START VALUE
+        LXI     D,177777Q-500+1+200Q ; SUBTRACT 500 FOR REVS, +200Q FOR OFFSET
+        DAD     B               ; (H,L) = OFFSET RESULT
+        PUSH    H               ; SAVE RESULT
+        LXI     H,MSG.WRK       ; POINT TO 'WORKING' MESSAGE
+        LDA     IOWRK           ; GET 'WORKING' FLAG
+        XRI     1               ; INVERT LOWER BIT
+        STA     IOWRK           ; SAVE NEW VALUE
+        JNZ     SPEED5          ; IF TO DISPLAY 'WORKIONG'
+
+        LXI     H,MSG.HSS       ; POINT TO 'HOME', 'SPACES', AND SPEED MSG
+SPEED5  CALL    TYPMSG          ; OUTPUT MESSAGE
+        POP     H               ; GET TEST RESULT
+        CALL    TOA.            ; OUTPUT RESULT TO CONSOLE
+        JMP     SPEED1          ; PERFORM ANOTHER SAMPLE
+
+;       MSG.SPD - SPEED TEST MESSAGE
+;
+;       '       Disk drive rotational speed test.
+;
+;
+;                       Drive speed = '
+MSG.SPD DB      A.ESC,'E',A.LF
+        DB      '       Disk drive rotational speed test.',A.CR,A.LF,A.LF
+        DB      '               Drive speed = '
+        DB      0
+
+;       MSG.WRK - 'WORKING' MESSAGE FOR SPEED TEST
+;
+;       DISPLAYS 'WORKING' AT HOME POSITION AND RETURNS CURSOR TO SPEED =
+
+MSG.WRK DB      A.ESC,'H'       ; CURSOR HOME
+        DB      'Working'
+        DB      A.ESC,'Y#>'     ; CURSOR ADDRESS OF SPEED = VALUE
+        DB      0               ; END MESSAGE
+
+;       MSG.HSS - BLANKS 'WORKING' MESSAGE
+;
+
+MSG.HSS DB      A.ESC,'H'       ; CURSOR HOME
+        DB      '       '       ; BLANKS
+        DB      A.ESC,'Y#>'     ; CURSOR ADDRESS OF SPEED = VALUE
+        DB      0               ; END MESSAGE
+
+
+;       DYMEM - DYNAMIC MEMORY TEST
+;
+
+
+
+
+
+
 
 ;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
 ;
+        IF      RAM
+        ELSE
         ERRNZ   10000A-6-*      ; MUST BE 6 BYTES BEFORE END
+        ENDIF
 
 ESPEED  JMP     SPEED
 
 ;       ENTRY POINT FOR DYNAMIC MEMORY TEST
 ;
+        IF      RAM
+        ELSE
         ERRNZ   10000A-3-*      ; MUST BE 3 BYTES BEFORE END
+        ENDIF
 
 EDTMEM  JMP     DYMEM
 
+        IF      RAM
+        ELSE
         ERRNZ   *-10000A        ; MUST NOT EXCEED 2K BYTES
+        ENDIF
 
 ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET
 ;       MONITOR.
