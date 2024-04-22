@@ -31,7 +31,7 @@ DC.LSC  EQU     3               ; LOAD SECTOR COUNT
 DC.RAD  EQU     4               ; READ ADDR. OF LAST SECTOR ADDRESSED
 DC.REA  EQU     5               ; READ SECTORS
 DC.WRI  EQU     6               ; WRITE SECTORS
-DC.READ EQU     7               ; READ SECTORS BUFFERED
+DC.REAB EQU     7               ; READ SECTORS BUFFERED
 DC.WRIB EQU     8               ; WRITE SECTORS BUFFERED
 DC.WRD  EQU     9               ; WRITE SECTORS & DELETE
 DC.WRDB EQU     10              ; WRITE SECTORS BUFFERED & DELETE

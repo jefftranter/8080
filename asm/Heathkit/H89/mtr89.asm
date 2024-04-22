@@ -500,7 +500,7 @@ MTR     EI
 MTR1    LXI     H,MTR1
         PUSH    H               ; SET 'MTR1' AS RETURN ADDRESS
         LXI     H,MSG.PR        ; TYPE PROMPT MESSAGE
-        CALL    TYPMSG
+MTR.15  CALL    TYPMSG
 
 MTR.2   CALL    RCC             ; READ A CONSOLE CHARACTER
         ANI     01011111B       ; MAKE SURE ITS UPPER CASE TO MATCH TABLE
@@ -816,7 +816,7 @@ RESET   MVI     A,W.RES         ; RESET Z47
         MOV     A,C             ; GET SIDE/UNIT/SECTOR
         CALL    DAT             ; SEND SECOND COMMAND BYTE
         CALL    PIN             ; GET AUX. STATUS BYTE
-        ANI     AS.ODD          ; CHECK IT IS SINGLE OR DOUBLE DENSITY
+        ANI     AS.0DD          ; CHECK IT IS SINGLE OR DOUBLE DENSITY
         RLC
         XRI     10000000B       ; REVERSE THE 7TH BIT, MAKE THE SECTOR
         MOV     B,A             ; # TO 128 OR 256(B=0) BYTES
@@ -837,7 +837,7 @@ RESET   MVI     A,W.RES         ; RESET Z47
         CPU     Z80
         JR      NZ,NODEV        ;      THEN ABORT
         CPU     8080
-        STA     MFLG            ; STOP TIMER
+        STA     MFLAG           ; STOP TIMER
         JMP     USERFWA
 
 ;       RETRY   -               RE-BOOT Z47
@@ -1027,7 +1027,7 @@ DEVICE  DB      MI.EXAF         ; SAVE Z FLAG
         LXI     H,D.RAM         ; CLEAR H17 WORK RAM AREA
         MVI     B,D.RAML        ; LENGTH TO CLEAR
         CALL    DZERO
-        OUT     DP.PC           ; OFF DISK
+        OUT     DP.DC           ; OFF DISK
         STA     TICCNT          ; 0 TIMER COUNTER
         STA     MYCNT           ; 0.5 SECOND TIMER = 0
 
@@ -1040,7 +1040,7 @@ BOOT2   MVI     M,MI.JMP
         INX     H
         MVI     H,EIXIT#256     ; STORE LS BYTE
         INX     H
-        MVI     M,EICIT/256     ; STORE MS BYTE
+        MVI     M,EIXIT/256     ; STORE MS BYTE
         INX     H
         ADD     A
         JP      BOOT2
@@ -1213,7 +1213,7 @@ DYASC1  IN      SC.ACE+UR.LSR   ; READ LINE STATUS REGISTER
 
 ;       EX      AF,AF'          ; GET CHARACTER TO OUTPUT
         DB      MI.EXAF
-        OUT     SC.ARC+UR.THR   ; OUTPUT TO UART
+        OUT     SC.ACE+UR.THR   ; OUTPUT TO UART
 ;       JP      (IY)            ; RETURN TO CALLER
         DB      MI.JIYA,MI.JIYB
 
@@ -1371,7 +1371,7 @@ DY9.5   XCHG                    ; SAVE ERROR ADDRESS
 DY9.8   LDAX    D               ; OUTPUT RAM CONTENTS
 
 ;       LD      IX,DYMEM10      ; RETURN ADDRESS
-        DB      MI.LDXY,MI.LDXB
+        DB      MI.LDXA,MI.LDXB
         DW      DYMEM10
 
         JMP     DYBYT
@@ -1614,7 +1614,7 @@ BOOT    LXI     H,MSG.BT        ; COMPLETE BOOT MESSAGE
         CALL    TYPMSG
         MVI     A,10
         CALL    LRA.            ; GET LOCATION OF USER PC
-        LXI     D,RNBOOT        ; SET ITS VALUE TO THE NORMAL BOOT ROUTINE
+        LXI     D,NBOOT         ; SET ITS VALUE TO THE NORMAL BOOT ROUTINE
 BOOTX   MOV     M,E
         INX     H
 
@@ -1636,7 +1636,7 @@ BOOTX   MOV     M,E
 ;
 ;       USE:    ALL (WHEN RETURN, ALL REGISTERS ARE RESTORED)
 
-TMOUT   IN      SC.ACR+UR.LSR   ; INPUT ACE LINE STATUS REGISTER
+TMOUT   IN      SC.ACE+UR.LSR   ; INPUT ACE LINE STATUS REGISTER
         ANI     UC.DR           ; SEE IF THERE IS A DATA READY
         CPU     Z80
         JR      Z,TMOUT4        ; CHECK IF IT IS <DELETE>
@@ -2010,7 +2010,7 @@ OUT.1   MOV     C,A             ; SET TO REG C
         POP     B
         RET
 
-        ORG     30500Q
+        ORG     3100Q
 ;       TYPMSG - TYPE MESSAGE TO CONSOLE
 ;
 ;       TYPMSG OUTPUTS AN ASCII MESSAGE FROM MEMORY TO THE CONSOLE
@@ -2162,7 +2162,7 @@ IP.DS   EQU     177Q            ; DRIVE STATUS INPUT PORT
 
 ;       MASKS
 ;
-DS.HOLD EQU     00000001B       ; DRIVE STATUS SECTOR/INDEX HOLD
+DS.HOLE EQU     00000001B       ; DRIVE STATUS SECTOR/INDEX HOLD
 
 ;       CONSTANTS
 ;
@@ -2173,7 +2173,7 @@ SPEED   LXI     H,MSG.SPD       ; OUTPUT SPEED MESSAGE
         CALL    TYPMSG
         MVI     A,0             ; SET FLAG AT IOWRK FOR "WORKING" MESSAGE
         STA     IOWRK
-        MVI     A,ONRO          ; TURN ON DRIVE ZERO
+        MVI     A,ONDR0         ; TURN ON DRIVE ZERO
         OUT     OP.DC
 SPEED1  LHLD    TICCNT          ; GET TICK COUNTER
         MOV     A,M             ; FORM TWO'S COMPLEMENT OF TICK COUNTER
@@ -2360,7 +2360,7 @@ DYMEM5  MOV     A,M             ; READ CURRENT CONTENTS
         MVI     H,3             ; OUTPUT 3 BACKSPACES
         MVI     A,A.BKS
 
-DYMEM5.5
+DYME5.5
 ;       LD      IY,DY5.53       ; RETURN ADDRESS
         DB      MI.LDYA,MI.LDYB
         DW      DY5.53
