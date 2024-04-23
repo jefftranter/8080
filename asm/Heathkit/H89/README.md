@@ -9,3 +9,5 @@ ROM.
 References:
 
 http://www.bitsavers.org/pdf/zenith/z89/595-2508_MTR-89_Monitor_1980.pdf
+
+http://john.ccac.rwth-aachen.de:8000/as/
