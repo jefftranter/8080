@@ -458,3 +458,92 @@ AKI1.75 IN      AP.LSR          ; SEE IF UART CAN TAKJE A CHARACTER TO OUTPUT
 
         MVI     A,XOFF          ; ELSE, SEND CTL-S
         OUT     AP.THR
+        LDA     MODEI           ; GET MODE FLAGS
+        ORI     MI.XOFF         ; SET XOFF SENT
+        STA     MODEI
+
+AKI1.8  MOV     A,D             ; GET INPUT CHARACTER
+        CALL    PCIF            ; ELSE, PUT CHARACTER IN INPUT FIFO
+        CPU     Z80
+        JR      C,AKI5          ; IF FIFO IS FULL, TOSS CHARACTER AND DING BELL
+        JR      AK16            ; IF FIFO NOT FULL, EXIT WITHOUT WELL
+        CPU     8080
+
+AKI2    CPI     AB.TREI         ; SEE IF INTERRUPT WAS FROM XMIT BUFFER EMPTY
+        CPU     Z80
+        JR      NZ,AKI4         ; IF NOT FROM ACE TRANSMITTER
+
+;       INTERRUPT CAUSED BY ACE TRANSMITTER HOLDING REGISTER EMPTY
+;
+        BIT     IB.ONLN,C       ; SEE IF ON-LINE
+        JR      Z,AKI3          ; IF OFF-LINE, DON'T OUTPUT CHARACTER
+        CPU     8080
+
+        CALL    FCOD            ; ELSE, FETCH A CHARACTER FROM THE OUTPUT FIFO
+        CPU     Z80
+        JR      C,AKI3          ; IF NO CHARACTER IN FIFO
+        CPU     8080
+
+        OUT     AP.THR          ; OUTPUT CHARACTER TO ACE
+        CPU     Z80
+        JR      AKI6            ; EXIT
+        CPU     8080
+
+AK13    IN      IP.IER          ; INPUT ACE INTERRUPT ENABLE REGISTER
+        ANI     377Q-AB.ETRE    ; CLEAR TRANSMITTER REGISTER EMPTY INTERRUPT
+        OUT     AP.IER
+        CPU     Z80
+        JR      AKI6            ; EXIT
+        CPU     8080
+
+AKI4    IN      KP.2            ; READ SECOND KEYBOARD PORT
+        XRI     11110110B       ; INVERT SWITCHES (EXCEPT OFF-LINE)
+        MOV     B,A             ; SAVE INPUT
+        ANI     KB.STB          ; IS A KEYBOARD STROBE PRESENT?
+        CPU     Z80
+        JR      Z.AKI6          ; IF NO STROBE
+        CPU     8080
+
+;       INTERRUPT CAUSED BY A KEY STRIKE ON THE KEYBOARD
+;
+        IN      KP.1            ; INPUT KEY VALUE
+        MOV     B,A
+        IN      KP.2            ; INPUT SECOND PORT
+        XRI     11110110B       ; INVERT SWITCHES (EXCEPT OFF LINE)
+        MOV     C,A
+
+;       SEE IF CHARACTER IS FROM EXTRA KEY #1.  IF SO, INVERT KEYBOARD SIABLE
+;
+        MOV     A,B             ; GET KEY VALUE
+        CPI     KB.CTL+KB.EX1   ; MUST BE CTL-EX1
+        LDA     MODEI           ; GET MODE FLAGS
+        CPU     Z80
+        JR      NZ,AKI4.3       ; IF NOT CONTROL AND EX1
+        CPU     8080
+
+        XRI     MI.KID          ; INVERT KEYBOARD DISABLE FLAG
+        STA     MODEI           ; UPDATE FLAGS
+        CPU     Z80
+        JR      AKI4.4          ; SEE IF TO TICK-ET
+        CPU     8080
+
+;       SEE IF KEYBOARD IS DISABLED
+;
+AKI4.3  ANI     MI.KID          ; MASK FOR KEYBOARD INPUT DISABLED FLAG
+        CPU     Z80
+        JR      NZ,AK16         ; IF DISABLED, EXIT
+        CPU     8080
+
+;       SEE IF TO TICK UPON KEYBOARD INPUT
+;
+AKI4.4  LDA     MODEB           ; GET PROPER FLAGS
+        ANI     MB.NOTK         ; NO TICK?
+        CPU     Z80
+        JR      NZ,AKI4.8
+        CPU     8080
+
+        OUT     MP.TICK         ; TICK TICKER TO INDICATE KEY STRIK
+
+;       CAN PUT CHARACTER IN FIFO TO BE PROCESSED BY KCE
+;
+AKI4.8  LHLD    KBDFP           ; GET KEYBOARD FIFO POINTER
