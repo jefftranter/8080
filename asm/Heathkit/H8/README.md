@@ -6,6 +6,21 @@ original Heathkit assembler listing.
 I have confirmed that the output matches the published binary for the
 ROM.
 
+Some notes on porting to the ASL assembler:
+
+The original code used many split octal constants (suffixed by A).
+This is not supported by ASL and they have been converted to octal
+(suffix Q).
+
+Macros, like ERRNZ, for assembly time assertion checks could not be
+implemented with ASM so I have created macro definitions that simply
+do nothing.
+
+Unused code was filled with zeroes to match the original ROM binaries.
+
+A few obvious spelling and grammatical errors in comments have been
+corrected.
+
 References:
 
 https://heathkit.garlanger.com/software/OSes/HDOS/2.0/Manual/595-2348_Volume-2_Chapter-2_FrontPanelMonitor_PAM-8.pdf

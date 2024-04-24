@@ -37,6 +37,26 @@ memory. The listings of these two routines are not shown. The Memory
 Test entry point is 7.375 and the Floppy Speed Test entry point is
 7.372."
 
+Some notes on porting to the ASL assembler:
+
+The code runs on a Z80, but Heathkit used an 8080 assembler. They
+occasionally used Z80 instructions and entered then using DC/DW
+directives. I've converted these to Z80 instructions by changing the
+CPU type on the fly.
+
+The original code used many split octal constants (suffixed by A).
+This is not supported by ASL and they have been converted to octal
+(suffix Q).
+
+Macros, like ERRNZ, for assembly time assertion checks could not be
+implemented with ASM so I have created macro definitions that simply
+do nothing.
+
+Unused code was filled with zeroes to match the original ROM binaries.
+
+A few obvious spelling and grammatical errors in comments have been
+corrected.
+
 References:
 
 https://sebhc.github.io/sebhc/documentation/software/roms/Heath_595-2349_MTR-88_Listing.pdf

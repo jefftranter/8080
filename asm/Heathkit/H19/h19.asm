@@ -199,13 +199,13 @@ IB.CPLK EQU     1*8             ; CAPS LOCK = BIT 1
 IB.ESC  EQU     7*8             ; ESCAPE CODE FLAG = BIT 7
 IB.ETRE EQU     1               ; ENABLE TRANSMITTER REGISTER EMPTY INTERRUPT
 IB.IFF  EQU     7*8             ; INPUT FIFO FLAG = BIT 7
-IB.KCB  EQU     7*8             ; KEYBOARD CONTROL KEY BIT = BIT 7
+IB.KCB  EQU     7               ; KEYBOARD CONTROL KEY BIT = BIT 7
 IB.KSP  EQU     0*8             ; KEYBOARD SHIFT KEY BIT = BIT 0
 IB.HSM  EQU     0*8             ; HOLD SCREEN MODE = BIT 7
 IB.RV   EQU     7*8             ; REVERSE VIDEO MODE = BIT 7
 IB.ICM  EQU     6*8             ; INSERT CHARACTER MODE = BIT 6
 IB.KPDA EQU     7*8             ; KEYPAD ALTERNATE MODE = BIT 5
-IB.KPDS EQU     6*8             ; KEYPAD SHIFTED MODE = BIT 4
+IB.KPDS EQU     6               ; KEYPAD SHIFTED MODE = BIT 4
 IB.ONLN EQU     3               ; KEYPAD SHIFTED MODE = BIT 3
 IB.BRK  EQU     2*8             ; BREAK KEY = BIT 2
 IB.GRPH EQU     1*8             ; TERMINAL IN GRAPHICS MODE = BIT 1
@@ -599,3 +599,294 @@ KCE     MOV     A,D             ; PLACE KEY VALUE IN ACC
 
 ;       ENCODE KEY VALUES 000Q THROUGH 017Q AND 033Q
 ;
+        CPI     033Q            ; CHECK FOR 'ESC' KEY
+        CPU     Z80
+        JR      Z,KCE3          ; IF KEY WAS THE 'ESC' KEY
+        CPU     8080
+
+        CPI     020Q            ; KEY < 020Q ?
+        JNC     KCE6            ; IF KEY > 017Q
+
+KCE1    PUSH    D               ; SAVE KEYBOARD VALUES
+        LXI     H,KAE1          ; POINT TO ASCII EQUIV.  TABLE #1
+        MVI     D,KAE1L         ; (D) = LENGTH OF TABLE
+        MVI     E,KAE1W         ; (E) = WIDTH OF TABLE IN BYTES
+        CALL    STAB            ; SEARCH TABLE
+        POP     D               ; (D,E) = KEYBOARD VALUES
+        CPU     Z80
+        JR      C,KCE1.5        ; IF NOT ENTRY WAS FOUND
+        CPU     8080
+
+        CPI     ESCF+'J'        ; WAS IT THE ERASE KEY?
+        CPU     Z80
+        JR      NZ,KDE2         ; IF NOT
+
+        BIT     IB.KSB,E        ; ELSE, SEE IF SHIFT KEY ALSO
+        JR      Z,KCE2          ; IF NOT SHIFT KEY, JUST SEND AN ERM
+        CPU     8080
+
+        LDA     MODEB           ; GET MODE FLAGS
+        ANI     MB.ANSI         ; IN ANSI MODE?
+        CPU     Z80
+        JR      Z,KCE1.4        ; IF NOT IN ANSI MODE
+
+        BIT     IB.KCB,D        ; SEE IF CONTROL KEY WAS DOWN
+        JR      Z,KDE1.2        ; IF NO CONTROL KEY
+        CPU     8080
+
+        CALL    PSIF            ; CONTROL DOWN, PUT STRING IN INPUT FIFO
+        DB      ESC,'[','2','J'+200Q
+        RET
+
+KCE1.2  CALL    PSOF            ; NO CONTROL, PUT STRING IN OUTPUT FIFO
+        DB      ESC,'[','2','J'+200Q
+        RET
+
+KCE1.4  MVI     A,ESCF+'E'      ; ELSE SEND A CLR
+        CPU     Z80
+        JR      KCE2
+        CPU     8080
+
+KCE1.5  MOV     A,D             ; ELSE, PLACE ORIGINAL VALUE BACK IN ACC
+        ANI     377Q-KB.CTL     ; NO CONTROL = INPUT FIFO ON CONTROL CODES HERE
+        MOV     D,A             ; UPDATE (D)
+        CPU     Z80
+        JR      KCE3            ; GO PLACE ASCII VALUE IN APPROPRIATE FIFO
+
+;       PLACE ASCII VALUE(S) IN THE APPROPRIATE FIFO
+;       IF BIT 7 IS SET IN VALUE, FIRST PLACE AN 'ESC' FOLLOWED BY THE SEVEN LSB
+;
+KCE2    BIT     IB.ESCF,A       ; SEE IF 'ESC' TO BE SENT BEFORE ALPHA CHARACTER
+        JR      Z,KCE3          ; IF NO 'ESC' IS TO BE SENT
+
+        CPU     8080
+        ANI     377Q-ESCF       ; REMOVE ESCAPE FLAG
+        PUSH    PSW             ; ELSE, SAVE VALUE FROM TABLE
+        MVI     A,ESC           ; SET (A) = 'ESC'
+
+;       CHECK FOR 'CONTROL' KEY.  IF STRUCK, PLACE CHARACTERS IN INPUT FIFO
+;
+        CPU     Z80
+        BIT     IB.KCB,D        ; SEE IF CONTROL KEY WAS STRUCK ON KEYBOARD
+        JR      Z,KCE4          ; IF CONTROL KEY NOT STRUCK
+        CPU     8080
+
+        DI                      ; LOCK OUT OTHER INPUTS (*AKI*)
+        CALL    PCIF            ; PUT CHARACTER IN FIFO
+        EI                      ; ALLOW OTHER INPUTS FROM *AKI*
+        LDA     MODEB           ; GET MODE FLAGS
+        ANI     MB.ANSI         ; SEE IF IN ANSI MODE
+        CPU     Z80
+        JR      Z,KCE2.7        ; IF HEATH MODE IS SELECTED
+        CPU     8080
+
+        POP     PSW             ; GET CHARACTER
+        PUSH    PSW
+        CPI     'P'             ; SEE IF CHAR < P
+        MVI     A,'['           ; IF < P, OUTPUT A '['
+        CPU     Z80
+        JR      C,KCE2.3
+        CPU     8080
+
+        MVI     A,'O'           ; ELSE, OUTPUT AN 'O'
+KCE2.3  DI
+        CALL    PCIF
+        EI
+KCE2.7  POP     PSW             ; GET ASCII VALUE
+        CPU     Z80
+        BIT     IB.KCB,D        ; TEST CONTROL KEY FOR PLACEMENT OF THIS CHARACTER
+        JR      Z,KCE4          ; IF CONTROL KEY NOT STRUCK
+        CPU     8080
+
+        DI                      ; LOCK OUT OTHER INPUTS
+        CALL    PCIF            ; PLACE CHARACTER IN INPUT FIFO
+        EI                      ; ALLOW *AKI* INPUTS
+        RET
+
+KCE4    CALL    PCOFT           ; PLACE CHARACTER IN OUTPUT FIFO
+        LDA     MODEB           ; GET MODE FLAGS
+        ANI     MB.ANSI         ; SEE IF IN ANSI MODE
+        CPU     Z80
+        JR      Z,KCE4.7        ; IF IN HEATH MODE
+        CPU     8080
+
+        POP     PSW             ; GET CHARACTER
+        PUSH    PSW
+        CPI     'P'             ; SEE IF < 'P'
+        MVI     A,'['           ; IF < P, OUTPUT A'['
+        CPU     Z80
+        JR      C,KCE4.3        ; IF < P
+        CPU     8080
+
+        MVI     A,'O'           ; ELSE, OUTPUT AN 'O'
+KCE4.3  CALL    PCOFT
+
+KCE4.7  POP     PSW             ; GET ASCII CHARACTER
+KCE5    JMP     PCOFT           ; PLACE CHARACTER IN OUTPUT FIFO
+
+;       ENCODE KEY VALUES 020Q THRU 034Q (EXCEPT 033Q)
+;       THESE VALUES ARE FROM THE 12 KEY NUMERIC PAD
+;
+KCE6    CPI     035Q            ; KEY < 35Q ?
+        JNC     KCE12           ; IF KEY > 34Q
+
+        PUSH    D               ; SAVE KEYBOARD VALUES
+        LXI     H,KAE2          ; POINT TO SECOND ASCII EQUIVALENCE TABLE
+        MVI     D,KAE2L         ; GET TABLE LENGTH
+        MVI     E,KAE2W         ; GET TABLE WIDTH
+        CALL    STAB            ; SEARCH TABLE
+        POP     D               ; (D,E) = KEYBOARD VALUES
+
+;       CHECK FOR SHIFT KEY AND/OR KEYPAD SHIFT MODE
+;
+        CPU     Z80
+        BIT     IB.KSB,E        ; SHIFT KEY DOWN?
+        CPU     8080
+        LDA     MODEB           ; GET MODE FLAGS
+        CPU     Z80
+        JR      Z,KCE7          ; IF NO SHIFT KEY
+
+        BIT     IB.KPDS,A       ; TEST FOR KEYPAD SHIFT MODE
+        JR      NZ,KCE9         ; IF SHIFT KEY & SHIFT MODE, DON'T SHIFT!
+        JR      KCE8            ; ELSE SHIFT KEY & NO SHIFT MODE, SO SHIFT
+
+KCE7    BIT     IB.KPDS,A       ; TEST FOR KEYPAD SHIFT MODE
+        JR      Z,KCE9          ; NO SHIFT KEY & NO SHIFT MODE
+        CPU     8080
+
+KCE8    INX     H               ; POINT TO SHIFTED BYTE IN TABLE
+
+KCE9    ANI     MB.KPDA         ; TEST FOR KEYPAD IN ALTERNATE MODE
+        CPU     Z80
+        JR      Z,KCE10         ; IF NOT IN ALT MODE
+        CPU     8080
+
+        INX     H               ; ELSE, POINT TO ALT MODE BYTE
+        INX     H
+KCE10   XRA     A               ; CLEAR ACC AND GET BYTE FROM TABLE (SET FLAGS)
+        ADD     M
+        JP      KCE3            ; IF NOT AN ESC FUNCTION, GO PUT IN FIFO
+        CPU     8080
+
+        CPI     ESCF+'M'        ; CHECK FOR ESC-M (COULD BE ESC-M OR ESC-?-M)
+        CPU     Z80
+        JR      Z,KCE10.5
+        CPU     8080
+
+        CPI     11100000B       ; CHECK FOR LOWER CASE WITH 'ESC' (ALT MODE CHAR)
+        CPU     Z80
+        JR      NC,KCE11        ; IF NOT A CURSOR FUNCTION
+        CPU     8080
+
+        CPI     ESCF+'N'        ; SEE IF DELETE CHARACTER
+        CPU     Z80
+        JR      NZ,KE10.07      ; IF NOT THE DC KEY
+        CPU     8080
+
+        MOV     B,A             ; ELSE, SAVE CHARACTER
+        LDA     MODEB           ; GET MODE FLAGS
+        ANI     MB.ANSI         ; SEE IF IN ANSI MODE
+        MOV     A,B             ; (A) = CHARACTER
+        CPU     Z80
+        JR      Z,KE10.07       ; IF NOT IN ANSI MODE
+
+        BIT     IB.KCB,D        ; SEE IF CONTROL KEY PRESSED
+        JR      Z,KE10.03       ; IF NO CONTROL KEY
+        CPU     8080
+
+        CALL    PSIF            ; ELSE, PUT IN INPUT FIFO
+        DB      ESC,'[','P'+0200Q
+        RET
+
+KE10.03 CALL    PSOF            ; PUT STRING IN OUTPUT BUFFER
+        DB      ESC,'[','P'+0200Q
+        RET
+
+KDE10.07
+        CPI     ESCF+'@'        ; CHECK FOR INSERT CHARACTER CODE
+        JNZ     KCE2            ; IF NOT INSERT CHARACTER KEY
+
+        LDA     MODEB           ; GET MODE FLAGS
+        ANI     MB.ANSI         ; SEE IF IN ANSI MODE
+        CPU     Z80
+        JR      Z,KCE10.4       ; IF IN HEATH MODE
+        CPU     8080
+
+        LDA     MODEA           ; ELSE GET MODEA FLAGS
+        ANI     MA.ICM          ; SEE IF IN ICM
+        CPU     Z80
+        JR      Z,KCE10.2       ; IF NOT ALREADY IN INSERT MODE
+
+        BIT     IB.KCB,D        ; SEE IF CONTROL KEY WAS DOWN
+        JR      Z,KDE10.1       ; IF NOT CONTROL KEY
+        CPU     8080
+
+        CALL    PSID            ; ELSE PUT STRING IN INPUT FIFO
+        DB      ESC,'[','4','1'+200Q
+        RET
+
+KCE10.1 CALL    PSOF            ; PUT STRING IN OUTPUT FIFO
+        DB      ESC,'[','4','1'+200Q
+        RET
+
+        CPU     Z80
+KCE10.2 BIT     IB.KCB,D        ; CHECK FOR CONTROL KEY
+        JR      Z,KCE10.3       ; IF NO CONTROL KEY
+        CPU     8080
+
+        CALL    PSIF            ; ELSE PUT STRING IN INPUT FIFO
+        DB      ESC,'[','4','H'+200Q
+        RET
+
+KCE10.3 CALL    PSOD            ; PUT STRING IN OUTPUT FIFO
+        DB      ESC,'[','4','H'+200Q
+        RET
+
+KCE10.4 LDA     MODEA           ; GET MODE FLAGS
+        ANI     MA.ICM          ; SEE IF ALREADY IN INSERT MODE
+        MVI     A,EICSEQ+ESCF   ; ENTER INSERT MODE
+        JZ      KCE2            ; IF NOT ALREADY IN INSERT MODE
+
+        MVI     A,XICSEQ+ESCF   ; ELSE, EXIT INSERT MODE
+        JMP     KCE2
+
+KCE10.5 MOV     A,D             ; WAS 'M', SEE IF FROM THE 3 KEY (DELETE LINE)
+        ANI     01111111B       ; TOSS CONTROL BIT
+        CPI     023Q            ; 3 KEY?
+        MOV     A,M             ; REPLACE TABLE VALUE IN A
+        JZ      KCE2            ; IF FROM 3 KEY GO PLACE 'ESC','M' IN FIFO
+
+;       HAVE A 'KEYPAD ALTERNATE MODE' CHARACTER
+;       PLACE AN 'ESC' A '?' (OR '0' IF IN ANSI MODE) AND 7 LSB
+;       FROM TABLE IN FIFO
+;
+KCE11   PUSH    PSW             ; SAVE TABLE CHARACTER
+        MVI     A,ESC           ; PLACE 'ESC' IN FIFO
+        CALL    PCOFT
+        LDA     MODEB           ; GET MODE FLAGS
+        ANI     MB.ANSI         ; IN ANSI MODE?
+        MVI     A,'?'           ; FOR HEATH
+        CPU     Z80
+        JR      Z,KCE11.5       ; IF IN HEATH MODE
+        CPU     8080
+
+        MVI     A,'O'           ; FOR ANSI
+KCE11.5 CALL    PCOFT           ; PLACE IN FIFO
+        POP     PSW             ; GET TABLE VALUE BACK
+        ANI     01111111B       ; TOSS ESC BIT
+        JMP     PCOST           ; PLACE LAST CHARACTER IN FIFO
+
+;       ENCODE KEY VALUES FOR THE SCROLL KEY (037Q)
+;
+KCE12   CPI     037Q            ; WAS IT THE SCROLL KEY?
+        CPU     Z80
+        JR      NZ,KCE13        ; IF NOT THE SCROLL KEY
+        CPU     8080
+
+        LXI     H,HSMLC         ; ELSE, POINT TO THE HSM LINE COUNTER
+        CPU     Z80
+        BIT     IB.KSB,E        ; SEE IF SHIFTED SCROLL
+        JR      NZ,KCE12.5      ; IF SHIFTED
+        CPU     8080
+
+        
