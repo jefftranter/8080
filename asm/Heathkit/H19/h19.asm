@@ -195,7 +195,7 @@ I.RETNB EQU     01000101B       ; RETURN FROM NMI (BYTE B)
 ;       DEFINED BY THE INSTRUCTION, BBB DEFINES THE BIT, AND RRR DEFINES
 ;       THE REGISTER
 ;
-IB.CPLK EQU     1*8             ; CAPS LOCK = BIT 1
+IB.CPLK EQU     1               ; CAPS LOCK = BIT 1
 IB.ESC  EQU     7*8             ; ESCAPE CODE FLAG = BIT 7
 IB.ETRE EQU     1               ; ENABLE TRANSMITTER REGISTER EMPTY INTERRUPT
 IB.IFF  EQU     7*8             ; INPUT FIFO FLAG = BIT 7
@@ -888,5 +888,66 @@ KCE12   CPI     037Q            ; WAS IT THE SCROLL KEY?
         BIT     IB.KSB,E        ; SEE IF SHIFTED SCROLL
         JR      NZ,KCE12.5      ; IF SHIFTED
         CPU     8080
+        INR     M               ; INCREMENT LINE COUNTER FOR ONE MORE LINE
+        RET                     ; EXIT
 
+KCE12.5 MVI     M,24            ; SET LINE COUNTER TO 24 LINES
+        RET                     ; EXIT
+
+;       AT LAST! SIMPLE ASCII KEYS!!!
+;       ENCODE KEY VALUES FOR 040Q THROUGH 177Q
+;
+        CPU     Z80
+KCE13   BIT     IB.KSB,E        ; SHIFT KEY STRUCK?
+        JR      Z,KDE13.5       ; IF NO SHIFT
+        CPU     8080
+
+        PUSH    D               ; SAVE KEYBOARD VALUES
+        LXI     H,KAE3          ; ELSE POINT TO EQUIV TABLE #3 FOR SPEC SHIFTS
+        MVI     D,KAE3L         ; SET TABLE LENGTH
+        MVI     E,KAE3W         ; SET TABLE WIDTH
+        CALL    STAB            ; SEARCH TABLE
+        POP     D               ; (D,E) = KEYWORD VALUES
+
+        CPU     Z80
+KCE13.5 BIT     IB.CPLK,E       ; TEST FOR 'CAPS LOCK' ON
+        JR      Z,KCE14         ; IF CAP SLOCK NOT ON
+        CPU     8080
+
+        CPI     'A'             ; TEST FOR < LOWER CASE A
+        CPU     Z80
+        JR      C,KCE14         ; IF LESS THAN A LOWER CASE CHARACTER
+        CPU     8080
+
+        CPI     '{'             ; TEST FOR < LEFT BRACE
+        CPU     Z80
+        JR      NC,KCE14        ; IF GREATER THAN A LOWER CASE CHARACTER
+        CPU     8080
+
+        ANI     11011111B       ; IS LOWER CASE, MAKE IT UPPER CASE
+
+        CPU     Z80
+KCE14   BIT     IB.KCB,D        ; TEST FOR CONTROL KEY
+        CPU     8080
+        JZ      PCOFT           ; IF CONTROL NOT STRUCK
+
+        CPI     '@'             ; NO CONTROL IF < 100Q
+        JC      PCOFT           ; IF < 100Q
+
+        CPI     '{'             ; NO CONTROL CODES IF > 172Q
+        JNC     PCOFT           ; IF > 172Q
+
+        ANI     00011111B       ; ELSE FORM CONTROL CODE
+        JMP     PCOFT           ; GOT PLACE CODE IN FIFO
+
+;;      KEYBOARD TO ASCII EQUIVALENCE TABLES
+;
+
+;       *KAE1* IS A LOOK UP TABLE FOR FUNCTION KEY VALUES
+;
+;       TABLE ENTRYS ARE: KEY VALUE FOLLOWED BY ASCII VALUE. *ESCF* IS USED
+;       TO SIGNAL THAT AN ESCAPE CODE IS TO PRECEED THE SEVEN BIT ASCII VALUE
+
+KAE1
+        DB      0,ESCF+'S'      ; KEY VALUE 0 = ESC-S
         
