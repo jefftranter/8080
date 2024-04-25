@@ -187,7 +187,7 @@ INIT0.0 LXI     H,PRSRAM+PRSL-1 ; (HL) = RAM DESTINATION FOR CODE
 
 INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
 
-        ERRNZ   *-110           ; INT0 TAKES UP ONE BYTE
+        ERRNZ   $-110           ; INT0 TAKES UP ONE BYTE
 
         CALL    SAVALL          ; SAVE USER REGISTERS
         MVI     D,0
@@ -198,7 +198,7 @@ INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
 
 INT2    EQU     20Q             ; LEVEL 2 ENTRY
 
-        ERRNZ   *-21Q           ; INT1 TAKES EXTRA BYTE
+        ERRNZ   $-21Q           ; INT1 TAKES EXTRA BYTE
 
         CALL    SAVALL          ; SAVE REGISTERS
         LDAX    D               ; (A) = (CTLFLG)
@@ -236,7 +236,7 @@ INT5    JMP     UIVEC+12        ; JUMP TO USER ROUTINE
 ;       EXIT    NONE
 ;       USES    A,F
 
-        ERRNZ   *-53A
+        ERRNZ   $-53A
 
 DLY     PUSH    PSW             ; SAVE COUNT
         XRA     A               ; DONT SOUND HORN
@@ -264,7 +264,7 @@ INT7    JMP     UIVEC+18        ; JUMP TO USER ROUTINE
 ;       ENTRY   FROM MASTER CLEAR
 ;       EXIT    INTO MTR88 MAIN LOOP
 
-        ERRNZ   *-73Q
+        ERRNZ   $-73Q
 
 INIT    LDAX    D               ; COPY *PRSROM* INTO RAM
         MOV     M,A             ; MOVE BYTE
@@ -310,7 +310,7 @@ INIT2   DCX     H
 ;               ON STACK.
 ;               (DE) = ADDRESS OF CTLFLG
 
-        ERRNZ   *-132Q
+        ERRNZ   $-132Q
 
 SAVALL  XTHL                    ; SET H,L ON STACK TOP
         PUSH    D
@@ -332,7 +332,7 @@ SAVALL  XTHL                    ; SET H,L ON STACK TOP
 ;       ENTRY POINT FOR THE Z80 NMI
 ;
 
-        ERRNZ   *-66H           ; Z80 NMI ADDRESS
+        ERRNZ   $-66H           ; Z80 NMI ADDRESS
 
 NMIENT  JMP     NMI
 
@@ -353,7 +353,7 @@ SAVALLR                         ; SAVALL EXTENSION RETURN ADDRESS
 ;       CUI IS CALLED TO SEE IF THE USER HAS SPECIFIED PROCESSING
 ;       FOR THE CLOCK INTERRUPT.
 
-        ERRNZ   *-165Q
+        ERRNZ   $-165Q
 
 ;       SET     MFLAG           ; REFERENCE TO MFLAG
 CUI1    LDAX    B               ; (A) = MFLAG
@@ -363,7 +363,7 @@ CUI1    LDAX    B               ; (A) = MFLAG
 
 ;       RETURN TO PROGRAM FROM INTERRUPT.
 
-        ERRNZ  *-172Q
+        ERRNZ   $-172Q
 
 INTXIT  POP     PSW             ; REMOVE FAKE 'STACK REGISTER'
         POP     PSW
@@ -380,7 +380,7 @@ INTXIT  POP     PSW             ; REMOVE FAKE 'STACK REGISTER'
 ;
 ;       TICCNT IS INCREMENTED EVERY INTERRUPT.
 
-        ERRNZ   *-201Q
+        ERRNZ   $-201Q
 
 CLOCK   LHLD    TICCNT
         INX     H
@@ -444,7 +444,7 @@ CLK4    JMP     CUI1            ; ALLOW USER PROCESSING OF CLOCK
 ;               MFLAG CLEARED
 ;       USES    ALL
 
-        ERRNZ   *-322Q
+        ERRNZ   $-322Q
 
 ERROR   LXI     H,MFLAG
         MOV     A,M             ; (A) = MFLAG
@@ -461,7 +461,7 @@ ERROR   LXI     H,MFLAG
 ;       MTR - MONITOR LOOP.
 ;
 
-        ERRNZ   *-344Q
+        ERRNZ   $-344Q
 
 MTR     EI
 
@@ -528,7 +528,7 @@ MTRAL   EQU     ($-MTRA)/3      ; NUMBER OF TABLE ENTRYS   /JWT 790507/
 ;       EXIT    TO (RET)
 ;       USES    NONE
 
-        ERRNZ   *-1063Q
+        ERRNZ   $-1063Q
 
 SAE     SHLD    ABUSS
         RET
@@ -603,7 +603,7 @@ GO88.1  CALL    WCC             ; ECHO RETURN
 ;
 ;       ENTRY   NONE
 
-        ERRNZ   *-1222Q
+        ERRNZ   $-1222Q
 
 GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
 
@@ -611,7 +611,7 @@ GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
 ;
 ;       ENTRY   NONE
 
-        ERRNZ   *-1225Q
+        ERRNZ   $-1225Q
 
 SSTEP                           ; SINGLE STEP
         DI                      ; DISABLE INTERRUPTS UNTIL THE RIGHT TIME
@@ -624,7 +624,7 @@ SST1    STA     CTLFLG          ; SET NEW FLAG VALUES
 
 ;       STPRTN - SINGLE STEP RETURN
 
-        ERRNZ   *-1244Q
+        ERRNZ   $-1244Q
 
 STPRTN
         ORI     CB.SSI          ; DISABLE SINGLE STEP INTERRUPTION
@@ -639,7 +639,7 @@ STPRTN
 ;       RMEM - LOAD MEMORY FROM TAPE
 ;
 
-        ERRNZ   *-1261Q
+        ERRNZ   $-1261Q
 
 RMEM    LXI     H,TPABT
         SHLD    TPERRX          ; SETUP ERROR EXIT ADDRESS
@@ -656,7 +656,7 @@ RMEM    LXI     H,TPABT
 ;               TO CALLER IF ALL OK
 ;               TO ERROR EXIT IF TAPE ERRORS DETECTED.
 
-        ERRNZ   *-1267Q
+        ERRNZ   $-1267Q
 
 LOAD    LXI     B,177000Q       ; 400Q-RT.MI*256-256 (BC) = - REQUIRED TYPE AND #
 LOA0    CALL    SRS             ; SCAN FOR RECORD COUNT
@@ -717,13 +717,13 @@ LOA1    CALL    RNB             ; READ BYE
 ;               USER PC = ENTRY POINT ADDRESS
 ;       EXIT    TO CALLER.
 
-        ERRNZ   *-1374Q
+        ERRNZ   $-1374Q
 
 WMEM
         LXI     H,TPABT
         SHLD    TPERRX          ; SETUP ERROR EXIT
 
-        ERRNZ   *-2002Q
+        ERRNZ   $-2002Q
 
 DUMP    MVI     A,UCI.TE
         OUT     OP.TPC          ; SETUP TAPE CONTROL
@@ -787,7 +787,7 @@ WME2    MOV     A,M
 ;       STOP THE TAPE TRANSPORT.
 ;
 
-        ERRNZ   *-2133Q
+        ERRNZ   $-2133Q
 
 TFT     XRA     A
         OUT OP.TPC              ; TURN OFF TAPE
@@ -798,14 +798,14 @@ TFT     XRA     A
 ;       EXIT    NONE
 ;       USES    A,F
 
-        ERRNZ   *-2136Q
+        ERRNZ   $-2136Q
 
 ALARM
         CPU     Z80
         JR      ALARMB          ; BRANCH TO A JUMP TO NOISE TO DING BELL
         CPU     8080
 
-        ERRNZ   *-2140Q
+        ERRNZ   $-2140Q
 
 HORN    PUSH    PSW
         MVI     A,CB.SPK        ; TURN ON SPEAKER
@@ -836,7 +836,7 @@ ALARMB  JMP     NOISE           ; SEND A BELL TO THE CONSOLE
 ;               TO *TPERR* IF BAD
 ;       USES    A,F,H,L
 
-        ERRNZ   *-2172Q
+        ERRNZ   $-2172Q
 
 CTC     CALL    RNP             ; READ NEXT PAIR
         LHLD    CRCSUM
@@ -855,7 +855,7 @@ CTC     CALL    RNP             ; READ NEXT PAIR
 ;
 ;       ENTRY   (B) = PATTERN
 
-        ERRNZ   *-2205Q
+        ERRNZ   $-2205Q
 
 TPERR   MOV     B,A             ; (B) = CODE
         CALL    TPERMSG         ; DISPLAY ERROR NUMBER ON CONSOLE
@@ -885,7 +885,7 @@ TER1    CC      ALARM           ; ALARM IF PROPER TIME
 ;       ENTERED WHEN LOADING OR DUMPING, AND THE '*' KEY
 ;       IS STRUCK.
 
-        ERRNZ   *-2249Q
+        ERRNZ   $-2249Q
 
 TPABT   XRA     A
         OUT     OP.TPC          ; OFF TAPE
@@ -902,7 +902,7 @@ TPABT   XRA     A
 ;               TO (TPERRX) IF '*' DOWN
 ;       USES    A,F
 
-        ERRNZ   *-2252Q
+        ERRNZ   $-2252Q
 
 TPXIT   IN      IP.PAD
         CPI     01101111B       ; *
@@ -910,7 +910,7 @@ TPXIT   IN      IP.PAD
         RNZ                     ; NOT '*', RETURN WITH STATUS
         LHLD    TPERRX
 
-        ERRNZ   *-2264Q
+        ERRNZ   $-2264Q
 
         PCHL                    ; ENTER (TPERRX)
 
@@ -930,7 +930,7 @@ TPXIT   IN      IP.PAD
 ;               (HA) = RECORD COUNT
 ;       USES    A,F,D,E,H,L
 
-        ERRNZ   *-2265Q
+        ERRNZ   $-2265Q
 
 SRS
 SRS1    MVI     D,0
@@ -960,7 +960,7 @@ SRS2    CALL    RNB             ; READ NEXT BYTE
 ;       EXIT    (H,A) = BYTE PAIR
 ;       USES    A,F,H
 
-        ERRNZ   *-2325Q
+        ERRNZ   $-2325Q
 
 RNP     CALL    RNB             ; READ NEXT BYTE
         MOV     H,A
@@ -975,7 +975,7 @@ RNP     CALL    RNB             ; READ NEXT BYTE
 ;       EXIT    (A) = CHARACTER
 ;       USES    A,F
 
-        ERRNZ   *-2331Q
+        ERRNZ   $-2331Q
 
 RNB     MVI     A,UCI.RO+UCI.ER+UCI.RE ; TURN ON READ FOR NEXT BYTE
         OUT     OP.TPC
@@ -1002,7 +1002,7 @@ RNB1    CALL    TPXIT           ; CHECK FOR #, READ STATUS
 ;               (A) UNCHANGED.
 ;       USES    F
 
-        ERRNZ   *-2347Q
+        ERRNZ   $-2347Q
 
 CRC     PUSH    B               ; SAVE (BC)
         MVI     B,8             ; (B) = BIT COUNT
@@ -1042,7 +1042,7 @@ CRC2    MOV     A,C
 ;       EXIT    WRITTEN.
 ;       USES    A,F
 
-        ERRNZ   *-3017Q
+        ERRNZ   $-3017Q
 
 WNP     MOV     A,H
         CALL    WNB
@@ -1057,7 +1057,7 @@ WNP     MOV     A,H
 ;       EXIT    NONE.
 ;       USES    F
 
-        ERRNZ   *-3024A
+        ERRNZ   $-3024A
 
 WNB     PUSH    PSW
 WNB1    CALL    TPXIT           ; CHECK FOR *, READ STATUS
@@ -1077,7 +1077,7 @@ WNB1    CALL    TPXIT           ; CHECK FOR *, READ STATUS
 ;               (D,E) = (O,A)
 ;       USES    A,D,E,H,L,F
 
-        ERRNZ   *-3047Q
+        ERRNZ   $-3047Q
 
 LRA     LDA     REGI
 LRA.    MOV     E,A
@@ -1093,7 +1093,7 @@ LRA.    MOV     E,A
 ;       EXIT    NONE
 ;       USES    A,D,E,H,L,F
 
-        ERRNZ   *-3062Q
+        ERRNZ   $-3062Q
 
 IOA     JMP     IOA1
         NOP                     ; RETAIN H8 ORG
@@ -1107,7 +1107,7 @@ IOA     JMP     IOA1
 ;       EXIT    NONE
 ;       USES    A,D,E,H,L,F
 
-        ERRNZ   *-3066Q
+        ERRNZ   $-3066Q
 
 IOB     MVI     M,0             ; ZERO OUT OLD VALUE
 IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
@@ -1132,7 +1132,7 @@ IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
 
 ;       FAKE OUT ROUTINE FOR CALLERS OF *DOD* FROM THE H8 FRONT PANEL
 
-        ERRNZ    *-3122Q
+        ERRNZ    $-3122Q
 
 DOD     INX      H
         INX      H
@@ -1180,7 +1180,7 @@ IOB2    CPI     A.CR            ; CARRIAGE RETURN?
 ;       USES    A,F
 
 ;       RCK MUST HAVE SAME ENTRY AS RCK IN PAM-8
-        ERRNZ   *-3260Q
+        ERRNZ   $-3260Q
 
 RCK     XRA     A
         RET
@@ -1245,7 +1245,7 @@ WCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE STATUS
 ;       MUST CONTINUE TO 3777A FOR PROPER COPY.
 ;       THE TABLE MUST ALSO BE BACKWARDS TO THE FINAL RAM
 
-        ERRNZ   4000Q-7-*
+        ERRNZ   4000Q-7-$
 
 PRSROM
         DB      1               ; REFIND
@@ -1256,7 +1256,7 @@ PRSROM
         DB      10              ; REGI
         DB      MI.RET
 
-        ERRNZ   *-4000Q
+        ERRNZ   $-4000Q
 
 ;       INIT0X - EXTENSION OF INIT0 TO SUPPORT H88
 
@@ -1912,17 +1912,17 @@ DYMEM   DB      076Q, 000Q, 323Q, 362Q, 041Q, 000Q, 040Q, 076Q
 
 ;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
 ;
-        ERRNZ   10000A-6-*      ; MUST BE 6 BYTES BEFORE END
+        ERRNZ   10000A-6-$      ; MUST BE 6 BYTES BEFORE END
 
 ESPEED  JMP     SPEED
 
 ;       ENTRY POINT FOR DYNAMIC MEMORY TEST
 ;
-        ERRNZ   10000A-3-*      ; MUST BE 3 BYTES BEFORE END
+        ERRNZ   10000A-3-$      ; MUST BE 3 BYTES BEFORE END
 
 EDTMEM  JMP     DYMEM
 
-        ERRNZ   *-10000A        ; MUST NOT EXCEED 2K BYTES
+        ERRNZ   $-10000A        ; MUST NOT EXCEED 2K BYTES
 
 ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET
 ;       MONITOR.

@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 1 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 1 - 2024-04-25 09:32:46 AM
 
 
        1/      0 :                              INCLUDE macros.mac
@@ -61,7 +61,7 @@
       29/      0 :                      ;       THIS PROGRAM RESIDES (IN ROM) IN THE LOW 2048 BYTES OF THE HEATH
       30/      0 :                      ;       H88/H89 COMPUTERS.
       31/      0 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 2 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 2 - 2024-04-25 09:32:46 AM
 
 
       32/      0 :                      ;       INTERRUPTS.
@@ -124,7 +124,7 @@
       89/      0 :                      ;       INFORMATION SEE THE NMI ROUTINE.
       90/      0 :                      ;
       91/      0 : =360O                IP.PAD  EQU     360Q            ; PAD INPUT PORT
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 3 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 3 - 2024-04-25 09:32:46 AM
 
 
       92/      0 : =360O                OP.CTL  EQU     360Q            ; CONTROL OUTPUT PORT
@@ -187,7 +187,7 @@
      139/      0 :                      ;       MACHINE INSTRUCTIONS
      140/      0 :                      
      141/      0 : =166O                MI.HLT  EQU     01110110B       ; HALT
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 4 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 4 - 2024-04-25 09:32:46 AM
 
 
      142/      0 : =311O                MI.RET  EQU     11001001B       ; RETURN
@@ -250,7 +250,7 @@
 (1)   30/      0 : =40O                 USR.FE  EQU     00100000B       ; FRAMING ERROR
 (1)   31/      0 : =20O                 USR.OE  EQU     00010000B       ; OVERRUN ERROR
 (1)   32/      0 : =10O                 USR.PE  EQU     00001000B       ; PARITY ERROR
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm(u8251.asm) - Page 5 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm(u8251.asm) - Page 5 - 2024-04-25 09:32:46 AM
 
 
 (1)   33/      0 : =4O                  USR.TXE EQU     00000100B       ; TRANSMITTER EMPTY
@@ -299,8 +299,8 @@
      187/     11 :                      
      188/     11 : =10O                 INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
      189/     11 :                      
-     190/     11 : (MACRO)                      ERRNZ   *-110           ; INT0 TAKES UP ONE BYTE
-     190/     11 :                      ;       IF (*-110) != 0
+     190/     11 : (MACRO)                      ERRNZ   $-110           ; INT0 TAKES UP ONE BYTE
+     190/     11 :                      ;       IF ($-110) != 0
      190/     11 :                      ;         ERROR Expression is not zero
      190/     11 :                      ;       ENDIF
      191/     11 :                      
@@ -313,14 +313,14 @@
      195/     21 :                      ;       ENDIF
      196/     21 :                      
      197/     21 :                      ;       LEVEL 2 - SINGLE STEP
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 6 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 6 - 2024-04-25 09:32:46 AM
 
 
      198/     21 :                      
      199/     21 : =20O                 INT2    EQU     20Q             ; LEVEL 2 ENTRY
      200/     21 :                      
-     201/     21 : (MACRO)                      ERRNZ   *-21Q           ; INT1 TAKES EXTRA BYTE
-     201/     21 :                      ;       IF (*-21Q) != 0
+     201/     21 : (MACRO)                      ERRNZ   $-21Q           ; INT1 TAKES EXTRA BYTE
+     201/     21 :                      ;       IF ($-21Q) != 0
      201/     21 :                      ;         ERROR Expression is not zero
      201/     21 :                      ;       ENDIF
      202/     21 :                      
@@ -360,8 +360,8 @@
      236/     53 :                      ;       EXIT    NONE
      237/     53 :                      ;       USES    A,F
      238/     53 :                      
-     239/     53 : (MACRO)                      ERRNZ   *-53A
-     239/     53 :                      ;       IF (*-53A) != 0
+     239/     53 : (MACRO)                      ERRNZ   $-53A
+     239/     53 :                      ;       IF ($-53A) != 0
      239/     53 :                      ;         ERROR Expression is not zero
      239/     53 :                      ;       ENDIF
      240/     53 :                      
@@ -376,7 +376,7 @@
      249/     63 : 076 320              GO.     MVI     A,CB.SSI+CB.CLI+CB.SPK ; OFF MONITOR MODE LIGHT
      250/     65 : 303 235 001                  JMP     SST1            ; RETURN TO USER PROGRAM
      251/     70 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 7 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 7 - 2024-04-25 09:32:46 AM
 
 
      252/     70 :                              ORG     70Q
@@ -394,8 +394,8 @@
      264/     73 :                      ;       ENTRY   FROM MASTER CLEAR
      265/     73 :                      ;       EXIT    INTO MTR88 MAIN LOOP
      266/     73 :                      
-     267/     73 : (MACRO)                      ERRNZ   *-73Q
-     267/     73 :                      ;       IF (*-73Q) != 0
+     267/     73 : (MACRO)                      ERRNZ   $-73Q
+     267/     73 :                      ;       IF ($-73Q) != 0
      267/     73 :                      ;         ERROR Expression is not zero
      267/     73 :                      ;       ENDIF
      268/     73 :                      
@@ -439,15 +439,15 @@
      306/    132 :                      ;
      307/    132 :                      ;       ENTRY   CALLED DIRECTLY FROM INTERRUPT ROUTINE
      308/    132 :                      ;       EXIT    ALL REGISTERS PUSHED ON STACK.
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 8 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 8 - 2024-04-25 09:32:46 AM
 
 
      309/    132 :                      ;               IF NO YET IN MONITOR MODE, REGPTR = ADDRESS OF REGISTERS
      310/    132 :                      ;               ON STACK.
      311/    132 :                      ;               (DE) = ADDRESS OF CTLFLG
      312/    132 :                      
-     313/    132 : (MACRO)                      ERRNZ   *-132Q
-     313/    132 :                      ;       IF (*-132Q) != 0
+     313/    132 : (MACRO)                      ERRNZ   $-132Q
+     313/    132 :                      ;       IF ($-132Q) != 0
      313/    132 :                      ;         ERROR Expression is not zero
      313/    132 :                      ;       ENDIF
      314/    132 :                      
@@ -471,8 +471,8 @@
      332/    146 :                      ;       ENTRY POINT FOR THE Z80 NMI
      333/    146 :                      ;
      334/    146 :                      
-     335/    146 : (MACRO)                      ERRNZ   *-66H           ; Z80 NMI ADDRESS
-     335/    146 :                      ;       IF (*-66H) != 0
+     335/    146 : (MACRO)                      ERRNZ   $-66H           ; Z80 NMI ADDRESS
+     335/    146 :                      ;       IF ($-66H) != 0
      335/    146 :                      ;         ERROR Expression is not zero
      335/    146 :                      ;       ENDIF
      336/    146 :                      
@@ -498,11 +498,11 @@
      353/    165 :                      ;       CUI IS CALLED TO SEE IF THE USER HAS SPECIFIED PROCESSING
      354/    165 :                      ;       FOR THE CLOCK INTERRUPT.
      355/    165 :                      
-     356/    165 : (MACRO)                      ERRNZ   *-165Q
-     356/    165 :                      ;       IF (*-165Q) != 0
+     356/    165 : (MACRO)                      ERRNZ   $-165Q
+     356/    165 :                      ;       IF ($-165Q) != 0
      356/    165 :                      ;         ERROR Expression is not zero
      356/    165 :                      ;       ENDIF
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 9 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 9 - 2024-04-25 09:32:46 AM
 
 
      357/    165 :                      
@@ -517,8 +517,8 @@
      363/    172 :                      
      364/    172 :                      ;       RETURN TO PROGRAM FROM INTERRUPT.
      365/    172 :                      
-     366/    172 : (MACRO)                      ERRNZ  *-172Q
-     366/    172 :                      ;       IF (*-172Q) != 0
+     366/    172 : (MACRO)                      ERRNZ   $-172Q
+     366/    172 :                      ;       IF ($-172Q) != 0
      366/    172 :                      ;         ERROR Expression is not zero
      366/    172 :                      ;       ENDIF
      367/    172 :                      
@@ -537,8 +537,8 @@
      380/    201 :                      ;
      381/    201 :                      ;       TICCNT IS INCREMENTED EVERY INTERRUPT.
      382/    201 :                      
-     383/    201 : (MACRO)                      ERRNZ   *-201Q
-     383/    201 :                      ;       IF (*-201Q) != 0
+     383/    201 : (MACRO)                      ERRNZ   $-201Q
+     383/    201 :                      ;       IF ($-201Q) != 0
      383/    201 :                      ;         ERROR Expression is not zero
      383/    201 :                      ;       ENDIF
      384/    201 :                      
@@ -565,7 +565,7 @@
      401/    230 :                      ;       IF (UO.HLT-200Q) != 0
      401/    230 :                      ;         ERROR Expression is not zero
      401/    230 :                      ;       ENDIF
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 10 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 10 - 2024-04-25 09:32:46 AM
 
 
      402/    230 : 027                          RAL
@@ -616,8 +616,8 @@
      444/    322 :                      ;               MFLAG CLEARED
      445/    322 :                      ;       USES    ALL
      446/    322 :                      
-     447/    322 : (MACRO)                      ERRNZ   *-322Q
-     447/    322 :                      ;       IF (*-322Q) != 0
+     447/    322 : (MACRO)                      ERRNZ   $-322Q
+     447/    322 :                      ;       IF ($-322Q) != 0
      447/    322 :                      ;         ERROR Expression is not zero
      447/    322 :                      ;       ENDIF
      448/    322 :                      
@@ -628,7 +628,7 @@
      453/    331 : 043                          INX     H
      454/    332 : 066 360                      MVI     M,CB.SSI+CB.MTL+CB.CLI+CB.SPK ; RESTORE *CTLFLG*
      455/    334 : (MACRO)                      ERRNZ   CTLFLG-.MFLAG-1
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 11 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 11 - 2024-04-25 09:32:46 AM
 
 
      455/    334 :                      ;       IF (CTLFLG-.MFLAG-1) != 0
@@ -642,8 +642,8 @@
      461/    344 :                      ;       MTR - MONITOR LOOP.
      462/    344 :                      ;
      463/    344 :                      
-     464/    344 : (MACRO)                      ERRNZ   *-344Q
-     464/    344 :                      ;       IF (*-344Q) != 0
+     464/    344 : (MACRO)                      ERRNZ   $-344Q
+     464/    344 :                      ;       IF ($-344Q) != 0
      464/    344 :                      ;         ERROR Expression is not zero
      464/    344 :                      ;       ENDIF
      465/    344 :                      
@@ -691,7 +691,7 @@
      507/  1.034 : 313 004                      DW      SWMEM
      508/  1.036 :                      
      509/  1.036 : 123                          DB      'S'             ; SUBSTITUTE MEMORY MODE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 12 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 12 - 2024-04-25 09:32:46 AM
 
 
      510/  1.037 : 370 004                      DW      SUBM
@@ -716,8 +716,8 @@
      528/  1.063 :                      ;       EXIT    TO (RET)
      529/  1.063 :                      ;       USES    NONE
      530/  1.063 :                      
-     531/  1.063 : (MACRO)                      ERRNZ   *-1063Q
-     531/  1.063 :                      ;       IF (*-1063Q) != 0
+     531/  1.063 : (MACRO)                      ERRNZ   $-1063Q
+     531/  1.063 :                      ;       IF ($-1063Q) != 0
      531/  1.063 :                      ;         ERROR Expression is not zero
      531/  1.063 :                      ;       ENDIF
      532/  1.063 :                      
@@ -754,7 +754,7 @@
      563/  1.122 : 315 150 005                  CALL    IROC            ; INPUT NEXT CHARACTER
      564/  1.125 : 332 137 001                  JC      PCA1            ; IF FIRST CHARACTER WAS OCTAL, INPUT NEW PC
      565/  1.130 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 13 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 13 - 2024-04-25 09:32:46 AM
 
 
      566/  1.130 : 315 313 005                  CALL    TOA             ; ELSE, OUTPUT CURRENT VALUE
@@ -798,8 +798,8 @@
      603/  1.222 :                      ;
      604/  1.222 :                      ;       ENTRY   NONE
      605/  1.222 :                      
-     606/  1.222 : (MACRO)                      ERRNZ   *-1222Q
-     606/  1.222 :                      ;       IF (*-1222Q) != 0
+     606/  1.222 : (MACRO)                      ERRNZ   $-1222Q
+     606/  1.222 :                      ;       IF ($-1222Q) != 0
      606/  1.222 :                      ;         ERROR Expression is not zero
      606/  1.222 :                      ;       ENDIF
      607/  1.222 :                      
@@ -809,15 +809,15 @@
      611/  1.225 :                      ;
      612/  1.225 :                      ;       ENTRY   NONE
      613/  1.225 :                      
-     614/  1.225 : (MACRO)                      ERRNZ   *-1225Q
-     614/  1.225 :                      ;       IF (*-1225Q) != 0
+     614/  1.225 : (MACRO)                      ERRNZ   $-1225Q
+     614/  1.225 :                      ;       IF ($-1225Q) != 0
      614/  1.225 :                      ;         ERROR Expression is not zero
      614/  1.225 :                      ;       ENDIF
      615/  1.225 :                      
      616/  1.225 :                      SSTEP                           ; SINGLE STEP
      617/  1.225 : 363                          DI                      ; DISABLE INTERRUPTS UNTIL THE RIGHT TIME
      618/  1.226 : 072 011 040                  LDA     CTLFLG
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 14 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 14 - 2024-04-25 09:32:46 AM
 
 
      619/  1.231 : 356 020                      XRI     CB.SSI          ; CLEAR SINGLE STEP INHIBIT
@@ -828,8 +828,8 @@
      624/  1.244 :                      
      625/  1.244 :                      ;       STPRTN - SINGLE STEP RETURN
      626/  1.244 :                      
-     627/  1.244 : (MACRO)                      ERRNZ   *-1244Q
-     627/  1.244 :                      ;       IF (*-1244Q) != 0
+     627/  1.244 : (MACRO)                      ERRNZ   $-1244Q
+     627/  1.244 :                      ;       IF ($-1244Q) != 0
      627/  1.244 :                      ;         ERROR Expression is not zero
      627/  1.244 :                      ;       ENDIF
      628/  1.244 :                      
@@ -846,8 +846,8 @@
      639/  1.261 :                      ;       RMEM - LOAD MEMORY FROM TAPE
      640/  1.261 :                      ;
      641/  1.261 :                      
-     642/  1.261 : (MACRO)                      ERRNZ   *-1261Q
-     642/  1.261 :                      ;       IF (*-1261Q) != 0
+     642/  1.261 : (MACRO)                      ERRNZ   $-1261Q
+     642/  1.261 :                      ;       IF ($-1261Q) != 0
      642/  1.261 :                      ;         ERROR Expression is not zero
      642/  1.261 :                      ;       ENDIF
      643/  1.261 :                      
@@ -866,8 +866,8 @@
      656/  1.267 :                      ;               TO CALLER IF ALL OK
      657/  1.267 :                      ;               TO ERROR EXIT IF TAPE ERRORS DETECTED.
      658/  1.267 :                      
-     659/  1.267 : (MACRO)                      ERRNZ   *-1267Q
-     659/  1.267 :                      ;       IF (*-1267Q) != 0
+     659/  1.267 : (MACRO)                      ERRNZ   $-1267Q
+     659/  1.267 :                      ;       IF ($-1267Q) != 0
      659/  1.267 :                      ;         ERROR Expression is not zero
      659/  1.267 :                      ;       ENDIF
      660/  1.267 :                      
@@ -880,7 +880,7 @@
      667/  1.301 : 174                          MOV     A,H
      668/  1.302 : 305                          PUSH    B               ; SAVE TYPE AND #
      669/  1.303 : 365                          PUSH    PSW             ; SAVE TYPE CODE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 15 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 15 - 2024-04-25 09:32:46 AM
 
 
      670/  1.304 : 346 177                      ANI     177Q            ; CLEAR END FLAG BIT
@@ -933,8 +933,8 @@
      717/  1.374 :                      ;               USER PC = ENTRY POINT ADDRESS
      718/  1.374 :                      ;       EXIT    TO CALLER.
      719/  1.374 :                      
-     720/  1.374 : (MACRO)                      ERRNZ   *-1374Q
-     720/  1.374 :                      ;       IF (*-1374Q) != 0
+     720/  1.374 : (MACRO)                      ERRNZ   $-1374Q
+     720/  1.374 :                      ;       IF ($-1374Q) != 0
      720/  1.374 :                      ;         ERROR Expression is not zero
      720/  1.374 :                      ;       ENDIF
      721/  1.374 :                      
@@ -942,11 +942,11 @@
      723/  1.374 : 041 244 002                  LXI     H,TPABT
      724/  1.377 : 042 031 040                  SHLD    TPERRX          ; SETUP ERROR EXIT
      725/  2.002 :                      
-     726/  2.002 : (MACRO)                      ERRNZ   *-2002Q
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 16 - 2024-04-21 12:59:16 PM
+     726/  2.002 : (MACRO)                      ERRNZ   $-2002Q
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 16 - 2024-04-25 09:32:46 AM
 
 
-     726/  2.002 :                      ;       IF (*-2002Q) != 0
+     726/  2.002 :                      ;       IF ($-2002Q) != 0
      726/  2.002 :                      ;         ERROR Expression is not zero
      726/  2.002 :                      ;       ENDIF
      727/  2.002 :                      
@@ -1006,7 +1006,7 @@
      781/  2.125 : 315 017 003                  CALL    WNP             ; WRITE IT
      782/  2.130 : 315 017 003                  CALL    WNP             ; FLUSH CHECKSUM
      783/  2.133 :                      ;       JMP     TFT
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 17 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 17 - 2024-04-25 09:32:46 AM
 
 
      784/  2.133 :                      
@@ -1015,8 +1015,8 @@
      787/  2.133 :                      ;       STOP THE TAPE TRANSPORT.
      788/  2.133 :                      ;
      789/  2.133 :                      
-     790/  2.133 : (MACRO)                      ERRNZ   *-2133Q
-     790/  2.133 :                      ;       IF (*-2133Q) != 0
+     790/  2.133 : (MACRO)                      ERRNZ   $-2133Q
+     790/  2.133 :                      ;       IF ($-2133Q) != 0
      790/  2.133 :                      ;         ERROR Expression is not zero
      790/  2.133 :                      ;       ENDIF
      791/  2.133 :                      
@@ -1029,8 +1029,8 @@
      798/  2.136 :                      ;       EXIT    NONE
      799/  2.136 :                      ;       USES    A,F
      800/  2.136 :                      
-     801/  2.136 : (MACRO)                      ERRNZ   *-2136Q
-     801/  2.136 :                      ;       IF (*-2136Q) != 0
+     801/  2.136 : (MACRO)                      ERRNZ   $-2136Q
+     801/  2.136 :                      ;       IF ($-2136Q) != 0
      801/  2.136 :                      ;         ERROR Expression is not zero
      801/  2.136 :                      ;       ENDIF
      802/  2.136 :                      
@@ -1039,8 +1039,8 @@
      805/  2.136 : 030 027                      JR      ALARMB          ; BRANCH TO A JUMP TO NOISE TO DING BELL
      806/  2.140 :                              CPU     8080
      807/  2.140 :                      
-     808/  2.140 : (MACRO)                      ERRNZ   *-2140Q
-     808/  2.140 :                      ;       IF (*-2140Q) != 0
+     808/  2.140 : (MACRO)                      ERRNZ   $-2140Q
+     808/  2.140 :                      ;       IF ($-2140Q) != 0
      808/  2.140 :                      ;         ERROR Expression is not zero
      808/  2.140 :                      ;       ENDIF
      809/  2.140 :                      
@@ -1069,15 +1069,15 @@
      832/  2.172 :                      ;       CTC - VERIFY CHECKSUM.
      833/  2.172 :                      ;
      834/  2.172 :                      ;       ENTRY   TAPE JUST BEFORE CRC
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 18 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 18 - 2024-04-25 09:32:46 AM
 
 
      835/  2.172 :                      ;       EXIT    TO CALLER IF OK
      836/  2.172 :                      ;               TO *TPERR* IF BAD
      837/  2.172 :                      ;       USES    A,F,H,L
      838/  2.172 :                      
-     839/  2.172 : (MACRO)                      ERRNZ   *-2172Q
-     839/  2.172 :                      ;       IF (*-2172Q) != 0
+     839/  2.172 : (MACRO)                      ERRNZ   $-2172Q
+     839/  2.172 :                      ;       IF ($-2172Q) != 0
      839/  2.172 :                      ;         ERROR Expression is not zero
      839/  2.172 :                      ;       ENDIF
      840/  2.172 :                      
@@ -1098,8 +1098,8 @@
      855/  2.205 :                      ;
      856/  2.205 :                      ;       ENTRY   (B) = PATTERN
      857/  2.205 :                      
-     858/  2.205 : (MACRO)                      ERRNZ   *-2205Q
-     858/  2.205 :                      ;       IF (*-2205Q) != 0
+     858/  2.205 : (MACRO)                      ERRNZ   $-2205Q
+     858/  2.205 :                      ;       IF ($-2205Q) != 0
      858/  2.205 :                      ;         ERROR Expression is not zero
      858/  2.205 :                      ;       ENDIF
      859/  2.205 :                      
@@ -1131,11 +1131,11 @@
      885/  2.244 :                      ;       ENTERED WHEN LOADING OR DUMPING, AND THE '*' KEY
      886/  2.244 :                      ;       IS STRUCK.
      887/  2.244 :                      
-     888/  2.244 : (MACRO)                      ERRNZ   *-2249Q
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 19 - 2024-04-21 12:59:16 PM
+     888/  2.244 : (MACRO)                      ERRNZ   $-2249Q
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 19 - 2024-04-25 09:32:46 AM
 
 
-     888/  2.244 :                      ;       IF (*-2249Q) != 0
+     888/  2.244 :                      ;       IF ($-2249Q) != 0
      888/  2.244 :                      ;         ERROR Expression is not zero
      888/  2.244 :                      ;       ENDIF
      889/  2.244 :                      
@@ -1154,8 +1154,8 @@
      902/  2.252 :                      ;               TO (TPERRX) IF '*' DOWN
      903/  2.252 :                      ;       USES    A,F
      904/  2.252 :                      
-     905/  2.252 : (MACRO)                      ERRNZ   *-2252Q
-     905/  2.252 :                      ;       IF (*-2252Q) != 0
+     905/  2.252 : (MACRO)                      ERRNZ   $-2252Q
+     905/  2.252 :                      ;       IF ($-2252Q) != 0
      905/  2.252 :                      ;         ERROR Expression is not zero
      905/  2.252 :                      ;       ENDIF
      906/  2.252 :                      
@@ -1165,8 +1165,8 @@
      910/  2.260 : 300                          RNZ                     ; NOT '*', RETURN WITH STATUS
      911/  2.261 : 052 031 040                  LHLD    TPERRX
      912/  2.264 :                      
-     913/  2.264 : (MACRO)                      ERRNZ   *-2264Q
-     913/  2.264 :                      ;       IF (*-2264Q) != 0
+     913/  2.264 : (MACRO)                      ERRNZ   $-2264Q
+     913/  2.264 :                      ;       IF ($-2264Q) != 0
      913/  2.264 :                      ;         ERROR Expression is not zero
      913/  2.264 :                      ;       ENDIF
      914/  2.264 :                      
@@ -1188,14 +1188,14 @@
      930/  2.265 :                      ;               (HA) = RECORD COUNT
      931/  2.265 :                      ;       USES    A,F,D,E,H,L
      932/  2.265 :                      
-     933/  2.265 : (MACRO)                      ERRNZ   *-2265Q
-     933/  2.265 :                      ;       IF (*-2265Q) != 0
+     933/  2.265 : (MACRO)                      ERRNZ   $-2265Q
+     933/  2.265 :                      ;       IF ($-2265Q) != 0
      933/  2.265 :                      ;         ERROR Expression is not zero
      933/  2.265 :                      ;       ENDIF
      934/  2.265 :                      
      935/  2.265 :                      SRS
      936/  2.265 : 026 000              SRS1    MVI     D,0
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 20 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 20 - 2024-04-25 09:32:46 AM
 
 
      937/  2.267 : 142                          MOV     H,D
@@ -1224,8 +1224,8 @@
      960/  2.325 :                      ;       EXIT    (H,A) = BYTE PAIR
      961/  2.325 :                      ;       USES    A,F,H
      962/  2.325 :                      
-     963/  2.325 : (MACRO)                      ERRNZ   *-2325Q
-     963/  2.325 :                      ;       IF (*-2325Q) != 0
+     963/  2.325 : (MACRO)                      ERRNZ   $-2325Q
+     963/  2.325 :                      ;       IF ($-2325Q) != 0
      963/  2.325 :                      ;         ERROR Expression is not zero
      963/  2.325 :                      ;       ENDIF
      964/  2.325 :                      
@@ -1242,8 +1242,8 @@
      975/  2.331 :                      ;       EXIT    (A) = CHARACTER
      976/  2.331 :                      ;       USES    A,F
      977/  2.331 :                      
-     978/  2.331 : (MACRO)                      ERRNZ   *-2331Q
-     978/  2.331 :                      ;       IF (*-2331Q) != 0
+     978/  2.331 : (MACRO)                      ERRNZ   $-2331Q
+     978/  2.331 :                      ;       IF ($-2331Q) != 0
      978/  2.331 :                      ;         ERROR Expression is not zero
      978/  2.331 :                      ;       ENDIF
      979/  2.331 :                      
@@ -1258,7 +1258,7 @@
      988/  2.347 :                      ;       CRC - COMPUTE CRC-16
      989/  2.347 :                      ;
      990/  2.347 :                      ;       CRC COMPUTES A CRC-16 CHECKSUM FROM THE POLYNOMIAL
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 21 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 21 - 2024-04-25 09:32:46 AM
 
 
      991/  2.347 :                      ;
@@ -1275,8 +1275,8 @@
     1002/  2.347 :                      ;               (A) UNCHANGED.
     1003/  2.347 :                      ;       USES    F
     1004/  2.347 :                      
-    1005/  2.347 : (MACRO)                      ERRNZ   *-2347Q
-    1005/  2.347 :                      ;       IF (*-2347Q) != 0
+    1005/  2.347 : (MACRO)                      ERRNZ   $-2347Q
+    1005/  2.347 :                      ;       IF ($-2347Q) != 0
     1005/  2.347 :                      ;         ERROR Expression is not zero
     1005/  2.347 :                      ;       ENDIF
     1006/  2.347 :                      
@@ -1318,10 +1318,10 @@
     1042/  3.017 :                      ;       EXIT    WRITTEN.
     1043/  3.017 :                      ;       USES    A,F
     1044/  3.017 :                      
-    1045/  3.017 : (MACRO)                      ERRNZ   *-3017Q
-    1045/  3.017 :                      ;       IF (*-3017Q) != 0
+    1045/  3.017 : (MACRO)                      ERRNZ   $-3017Q
+    1045/  3.017 :                      ;       IF ($-3017Q) != 0
     1045/  3.017 :                      ;         ERROR Expression is not zero
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 22 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 22 - 2024-04-25 09:32:46 AM
 
 
     1045/  3.017 :                      ;       ENDIF
@@ -1339,8 +1339,8 @@
     1057/  3.024 :                      ;       EXIT    NONE.
     1058/  3.024 :                      ;       USES    F
     1059/  3.024 :                      
-    1060/  3.024 : (MACRO)                      ERRNZ   *-3024A
-    1060/  3.024 :                      ;       IF (*-3024A) != 0
+    1060/  3.024 : (MACRO)                      ERRNZ   $-3024A
+    1060/  3.024 :                      ;       IF ($-3024A) != 0
     1060/  3.024 :                      ;         ERROR Expression is not zero
     1060/  3.024 :                      ;       ENDIF
     1061/  3.024 :                      
@@ -1362,8 +1362,8 @@
     1077/  3.047 :                      ;               (D,E) = (O,A)
     1078/  3.047 :                      ;       USES    A,D,E,H,L,F
     1079/  3.047 :                      
-    1080/  3.047 : (MACRO)                      ERRNZ   *-3047Q
-    1080/  3.047 :                      ;       IF (*-3047Q) != 0
+    1080/  3.047 : (MACRO)                      ERRNZ   $-3047Q
+    1080/  3.047 :                      ;       IF ($-3047Q) != 0
     1080/  3.047 :                      ;         ERROR Expression is not zero
     1080/  3.047 :                      ;       ENDIF
     1081/  3.047 :                      
@@ -1381,10 +1381,10 @@
     1093/  3.062 :                      ;       EXIT    NONE
     1094/  3.062 :                      ;       USES    A,D,E,H,L,F
     1095/  3.062 :                      
-    1096/  3.062 : (MACRO)                      ERRNZ   *-3062Q
-    1096/  3.062 :                      ;       IF (*-3062Q) != 0
+    1096/  3.062 : (MACRO)                      ERRNZ   $-3062Q
+    1096/  3.062 :                      ;       IF ($-3062Q) != 0
     1096/  3.062 :                      ;         ERROR Expression is not zero
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 23 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 23 - 2024-04-25 09:32:46 AM
 
 
     1096/  3.062 :                      ;       ENDIF
@@ -1401,8 +1401,8 @@
     1107/  3.066 :                      ;       EXIT    NONE
     1108/  3.066 :                      ;       USES    A,D,E,H,L,F
     1109/  3.066 :                      
-    1110/  3.066 : (MACRO)                      ERRNZ   *-3066Q
-    1110/  3.066 :                      ;       IF (*-3066Q) != 0
+    1110/  3.066 : (MACRO)                      ERRNZ   $-3066Q
+    1110/  3.066 :                      ;       IF ($-3066Q) != 0
     1110/  3.066 :                      ;         ERROR Expression is not zero
     1110/  3.066 :                      ;       ENDIF
     1111/  3.066 :                      
@@ -1429,8 +1429,8 @@
     1132/  3.122 :                      
     1133/  3.122 :                      ;       FAKE OUT ROUTINE FOR CALLERS OF *DOD* FROM THE H8 FRONT PANEL
     1134/  3.122 :                      
-    1135/  3.122 : (MACRO)                      ERRNZ    *-3122Q
-    1135/  3.122 :                      ;       IF (*-3122Q) != 0
+    1135/  3.122 : (MACRO)                      ERRNZ    $-3122Q
+    1135/  3.122 :                      ;       IF ($-3122Q) != 0
     1135/  3.122 :                      ;         ERROR Expression is not zero
     1135/  3.122 :                      ;       ENDIF
     1136/  3.122 :                      
@@ -1447,7 +1447,7 @@
     1147/  3.132 : 303 070 003                  JMP     IOB1            ; INPUT ANOTHER CHARACTER
     1148/  3.135 :                      
     1149/  3.135 :                      ;       CHECK FOR A CARRIAGE RETURN TO TERMINATE BYTE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 24 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 24 - 2024-04-25 09:32:46 AM
 
 
     1150/  3.135 :                      ;
@@ -1492,8 +1492,8 @@
     1180/  3.260 :                      ;       USES    A,F
     1181/  3.260 :                      
     1182/  3.260 :                      ;       RCK MUST HAVE SAME ENTRY AS RCK IN PAM-8
-    1183/  3.260 : (MACRO)                      ERRNZ   *-3260Q
-    1183/  3.260 :                      ;       IF (*-3260Q) != 0
+    1183/  3.260 : (MACRO)                      ERRNZ   $-3260Q
+    1183/  3.260 :                      ;       IF ($-3260Q) != 0
     1183/  3.260 :                      ;         ERROR Expression is not zero
     1183/  3.260 :                      ;       ENDIF
     1184/  3.260 :                      
@@ -1510,7 +1510,7 @@
     1195/  3.262 :                      ;       EXIT    TO ERROR - IF A DELETE OR RUBOUT IS ENCOUNTERED
     1196/  3.262 :                      ;               TO CALLER - WHEN A KEY IS HIT
     1197/  3.262 :                      ;               (A) = ASCII KEY VALUE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 25 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 25 - 2024-04-25 09:32:46 AM
 
 
     1198/  3.262 :                      ;       USES    A,F
@@ -1568,12 +1568,12 @@
     1245/  3.371 :                      ;       MUST CONTINUE TO 3777A FOR PROPER COPY.
     1246/  3.371 :                      ;       THE TABLE MUST ALSO BE BACKWARDS TO THE FINAL RAM
     1247/  3.371 :                      
-    1248/  3.371 : (MACRO)                      ERRNZ   4000Q-7-*
-    1248/  3.371 :                      ;       IF (4000Q-7-*) != 0
+    1248/  3.371 : (MACRO)                      ERRNZ   4000Q-7-$
+    1248/  3.371 :                      ;       IF (4000Q-7-$) != 0
     1248/  3.371 :                      ;         ERROR Expression is not zero
     1248/  3.371 :                      ;       ENDIF
     1249/  3.371 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 26 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 26 - 2024-04-25 09:32:46 AM
 
 
     1250/  3.371 :                      PRSROM
@@ -1585,8 +1585,8 @@
     1256/  3.376 : 012                          DB      10              ; REGI
     1257/  3.377 : 311                          DB      MI.RET
     1258/  4.000 :                      
-    1259/  4.000 : (MACRO)                      ERRNZ   *-4000Q
-    1259/  4.000 :                      ;       IF (*-4000Q) != 0
+    1259/  4.000 : (MACRO)                      ERRNZ   $-4000Q
+    1259/  4.000 :                      ;       IF ($-4000Q) != 0
     1259/  4.000 :                      ;         ERROR Expression is not zero
     1259/  4.000 :                      ;       ENDIF
     1260/  4.000 :                      
@@ -1636,7 +1636,7 @@
     1304/  4.064 : 312 116 007                  JZ      DYMEM           ; IF TO PERFORM MEMORY TESTS
     1305/  4.067 :                      
     1306/  4.067 :                      ;       REPLACE WHAT WAS ORIGINALLY AT THE JUMP WHICH GOT US HERE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 27 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 27 - 2024-04-25 09:32:46 AM
 
 
     1307/  4.067 :                      ;
@@ -1699,7 +1699,7 @@
     1361/  4.116 :                      ;       ENTRY   NONE
     1362/  4.116 :                      ;
     1363/  4.116 :                      ;       EXIT    NONE
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 28 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 28 - 2024-04-25 09:32:46 AM
 
 
     1364/  4.116 :                      ;
@@ -1762,7 +1762,7 @@
     1421/  4.231 : 017                          RRC
     1422/  4.232 : 017                          RRC
     1423/  4.233 : 017                          RRC
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 29 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 29 - 2024-04-25 09:32:46 AM
 
 
     1424/  4.234 : 117                          MOV     C,A             ; SAVE IN C
@@ -1825,7 +1825,7 @@
     1481/  4.321 : 315 150 005                  CALL    IROC            ; INPUT FIRST CHARACTER
     1482/  4.324 : 322 351 004                  JNC     SWMEM4          ; IF FIRST CHARACTER IS OCTAL
     1483/  4.327 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 30 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 30 - 2024-04-25 09:32:46 AM
 
 
     1484/  4.327 : 041 001 040                  LXI     H,START+1       ; ELSE, INPUT STARTING ADDRESS
@@ -1888,7 +1888,7 @@
     1541/  5.050 : 302 062 005                  JNZ     SUBM6           ; IF NOT
     1542/  5.053 :                      
     1543/  5.053 : 315 302 003          SUBM5   CALL    WCC             ; ECHO HYPHEN
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 31 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 31 - 2024-04-25 09:32:46 AM
 
 
     1544/  5.056 : 053                          DCX     H               ; POINT TO PREVIOUS ADDRESS
@@ -1951,7 +1951,7 @@
     1601/  5.166 :                      
     1602/  5.166 : 076 007              IROC1   MVI     A,A.BEL         ; ELSE, RING BELL
     1603/  5.170 : 315 302 003                  CALL    WCC
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 32 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 32 - 2024-04-25 09:32:46 AM
 
 
     1604/  5.173 : 303 150 005                  JMP     IROC            ; TRY AGAIN
@@ -2014,7 +2014,7 @@
     1661/  5.273 : 341                          POP     H               ; (H,L) = LOCATION TO PLACE THIS ADDRESS
     1662/  5.274 : 162                          MOV     M,D
     1663/  5.275 : 053                          DCX     H
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 33 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 33 - 2024-04-25 09:32:46 AM
 
 
     1664/  5.276 : 163                          MOV     M,E
@@ -2077,7 +2077,7 @@
     1721/  5.353 : 037                  TOB1    RAR                     ; SHIFT MIDDLE BYTE TO LSB
     1722/  5.354 : 037                          RAR
     1723/  5.355 : 037                          RAR
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 34 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 34 - 2024-04-25 09:32:46 AM
 
 
     1724/  5.356 : 346 007                      ANI     00000111B       ; MASK FOR HALF ASCII
@@ -2140,7 +2140,7 @@
     1781/  6.053 :                      ;       NOISE - DING BELL ON CONSOLE
     1782/  6.053 :                      ;
     1783/  6.053 :                      ;       THIS IS A MODIFICATION TO ALLOW THE H88/H89 TO USE THE CONSOLE BELL
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 35 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 35 - 2024-04-25 09:32:46 AM
 
 
     1784/  6.053 :                      ;
@@ -2203,7 +2203,7 @@
     1834/  6.165 : 157 040 000          MSG.GO  DB      "o ",0
     1835/  6.170 :                      
     1836/  6.170 :                      ;;      MSG.LD - (L)OAD
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 36 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 36 - 2024-04-25 09:32:46 AM
 
 
     1837/  6.170 :                      ;
@@ -2266,7 +2266,7 @@
            6.365 : 005 303 257        
     1879/  6.370 : 006 033 105 012 011          DB      006Q, 033Q, 105Q, 012Q, 011Q, 104Q, 151Q, 163Q
            6.375 : 104 151 163        
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 37 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 37 - 2024-04-25 09:32:46 AM
 
 
     1880/  7.000 : 153 040 144 162 151          DB      153Q, 040Q, 144Q, 162Q, 151Q, 166Q, 145Q, 040Q
@@ -2329,7 +2329,7 @@
            7.343 : 145 163 164        
     1909/  7.346 : 015 012 012 011 040          DB      015Q, 012Q, 012Q, 011Q, 040Q, 114Q, 127Q, 101Q
            7.353 : 114 127 101        
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 38 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 38 - 2024-04-25 09:32:46 AM
 
 
     1910/  7.356 : 040 075 040 000 040          DB      040Q, 075Q, 040Q, 000Q, 040Q, 075Q, 040Q, 000Q
@@ -2338,8 +2338,8 @@
     1912/  7.372 :                      
     1913/  7.372 :                      ;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
     1914/  7.372 :                      ;
-    1915/  7.372 : (MACRO)                      ERRNZ   10000A-6-*      ; MUST BE 6 BYTES BEFORE END
-    1915/  7.372 :                      ;       IF (10000A-6-*) != 0
+    1915/  7.372 : (MACRO)                      ERRNZ   10000A-6-$      ; MUST BE 6 BYTES BEFORE END
+    1915/  7.372 :                      ;       IF (10000A-6-$) != 0
     1915/  7.372 :                      ;         ERROR Expression is not zero
     1915/  7.372 :                      ;       ENDIF
     1916/  7.372 :                      
@@ -2347,15 +2347,15 @@
     1918/  7.375 :                      
     1919/  7.375 :                      ;       ENTRY POINT FOR DYNAMIC MEMORY TEST
     1920/  7.375 :                      ;
-    1921/  7.375 : (MACRO)                      ERRNZ   10000A-3-*      ; MUST BE 3 BYTES BEFORE END
-    1921/  7.375 :                      ;       IF (10000A-3-*) != 0
+    1921/  7.375 : (MACRO)                      ERRNZ   10000A-3-$      ; MUST BE 3 BYTES BEFORE END
+    1921/  7.375 :                      ;       IF (10000A-3-$) != 0
     1921/  7.375 :                      ;         ERROR Expression is not zero
     1921/  7.375 :                      ;       ENDIF
     1922/  7.375 :                      
     1923/  7.375 : 303 116 007          EDTMEM  JMP     DYMEM
     1924/ 10.000 :                      
-    1925/ 10.000 : (MACRO)                      ERRNZ   *-10000A        ; MUST NOT EXCEED 2K BYTES
-    1925/ 10.000 :                      ;       IF (*-10000A) != 0
+    1925/ 10.000 : (MACRO)                      ERRNZ   $-10000A        ; MUST NOT EXCEED 2K BYTES
+    1925/ 10.000 :                      ;       IF ($-10000A) != 0
     1925/ 10.000 :                      ;         ERROR Expression is not zero
     1925/ 10.000 :                      ;       ENDIF
     1926/ 10.000 :                      
@@ -2392,7 +2392,7 @@
     1957/ 40.022 :                              DS      1               ; DATA 1
     1958/ 40.023 :                              DS      1               ; DATA 2
     1959/ 40.024 :                      
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 39 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 39 - 2024-04-25 09:32:46 AM
 
 
     1960/ 40.024 :                      ABUSS   DS      2               ; ADDRESS BUSS
@@ -2417,7 +2417,7 @@
     1979/ 40.064 :                      NMIRET  DS      2
     1980/ 40.066 :                      
     1981/ 40.066 :                              END
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 40 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 40 - 2024-04-25 09:32:46 AM
 
 
   Symbol Table (* = unused):
@@ -2441,7 +2441,7 @@
  CRC1 :                       2.356 C |  CRC2 :                       3.004 C |
  CRCSUM :                    40.027 C |  CTC :                        2.172 C |
  CTLFLG :                    40.011 C |  CUI1 :                         165 C |
-*DATE :                "2024-04-21" - | *DLEDS :                     40.021 C |
+*DATE :                "2024-04-25" - | *DLEDS :                     40.021 C |
 *DLY :                           53 C | *DM.MR :                          0 - |
 *DM.MW :                          1 - | *DM.RR :                          2 - |
 *DM.RW :                          3 - | *DOD :                        3.122 C |
@@ -2480,7 +2480,7 @@
 *MI.EXAF :                       10 - |  MI.HLT :                       166 - |
  MI.IN :                        333 - | *MI.JIXA :                      335 - |
 *MI.JIXB :                      351 - | *MI.JIYA :                      375 - |
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 41 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 41 - 2024-04-25 09:32:46 AM
 
 
 *MI.JIYB :                      371 - | *MI.JMP :                       303 - |
@@ -2531,7 +2531,7 @@
 *SWMEM2 :                     4.337 C |  SWMEM4 :                     4.351 C |
  TER1 :                       2.220 C |  TER3 :                       2.215 C |
  TFT :                        2.133 C |  TICCNT :                    40.033 C |
-*TIME :               "12:59:16 PM" - |  TOA :                        5.313 C |
+*TIME :               "09:32:46 AM" - |  TOA :                        5.313 C |
 *TOA. :                       5.325 C |  TOB :                        5.343 C |
  TOB1 :                       5.353 C |  TPABT :                      2.244 C |
  TPDSP :                      6.024 C |  TPERMSG :                    6.063 C |
@@ -2543,7 +2543,7 @@
 *UCI.IE :                         2 - | *UCI.IR :                       100 - |
  UCI.RE :                         4 - |  UCI.RO :                        40 - |
  UCI.TE :                         1 - |  UIVEC :                     40.037 C |
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 42 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 42 - 2024-04-25 09:32:46 AM
 
 
  UMI.16X :                        2 - |  UMI.1B :                       100 - |
@@ -2561,16 +2561,17 @@
 *USR.OE :                        20 - | *USR.PE :                        10 - |
  USR.RXR :                        2 - | *USR.TXE :                        4 - |
  USR.TXR :                        1 - | *VERSION :                   24.057 - |
- WCC :                        3.302 C |  WCC1 :                       3.303 C |
- WCR :                        6.003 C |  WME1 :                       2.012 C |
- WME2 :                       2.104 C |  WMEM :                       1.374 C |
- WNB :                        3.024 C |  WNB1 :                       3.025 C |
- WNP :                        3.017 C | *Z80SYNTAX :                      0 - |
+*WARNRELATIVE :                   0 - |  WCC :                        3.302 C |
+ WCC1 :                       3.303 C |  WCR :                        6.003 C |
+ WME1 :                       2.012 C |  WME2 :                       2.104 C |
+ WMEM :                       1.374 C |  WNB :                        3.024 C |
+ WNB1 :                       3.025 C |  WNP :                        3.017 C |
+*Z80SYNTAX :                      0 - |
 
-  1.017 symbols
-     94 unused symbols
+  1.018 symbols
+     95 unused symbols
 
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 43 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 43 - 2024-04-25 09:32:46 AM
 
 
   Defined Macros:
@@ -2581,7 +2582,7 @@ ERRPL                                 | ERRZR
 
       4 macros
 
- AS V1.42 Beta [Bld 266] - Source File mtr88.asm - Page 44 - 2024-04-21 12:59:16 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr88.asm - Page 44 - 2024-04-25 09:32:46 AM
 
 
   Code Pages:
@@ -2591,7 +2592,7 @@ STANDARD (0 changed characters)
 
 1 code page
 
-0.02 seconds assembly time
+0.01 seconds assembly time
 
   8.028 lines source file
   8.181 lines incl. macro expansions

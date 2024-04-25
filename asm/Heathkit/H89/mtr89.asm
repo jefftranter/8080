@@ -141,7 +141,7 @@ INIT0.0 LXI     H,PRSRAM+PRSL-1 ; (HL) = RAM DESTINATION FOR CODE
         ELSE
 INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
 
-        ERRNZ   *-110           ; INT0 TAKES UP ONE BYTE
+        ERRNZ   $-110           ; INT0 TAKES UP ONE BYTE
         ENDIF
 
         CALL    SAVALL          ; SAVE USER REGISTERS
@@ -163,7 +163,7 @@ INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
         ELSE
 INT2    EQU     20Q             ; LEVEL 2 ENTRY
 
-        ERRNZ   *-21Q           ; INT1 TAKES EXTRA BYTE
+        ERRNZ   $-21Q           ; INT1 TAKES EXTRA BYTE
         ENDIF
 
         CALL    SAVALL          ; SAVE REGISTERS
@@ -213,7 +213,7 @@ INT5    JMP     UIVEC+12        ; JUMP TO USER ROUTINE
 
         IF      RAM
         ELSE
-        ERRNZ   *-53A
+        ERRNZ   $-53A
         ENDIF
 
 DLY     PUSH    PSW             ; SAVE COUNT
@@ -250,7 +250,7 @@ INT7    JMP     UIVEC+18        ; JUMP TO USER ROUTINE
 
         IF      RAM
         ELSE
-        ERRNZ   *-73Q
+        ERRNZ   $-73Q
         ENDIF
 
 INIT    LDAX    D               ; COPY *PRSROM* INTO RAM
@@ -302,7 +302,7 @@ INIT2   DCX     H
 
         IF      RAM
         ELSE
-        ERRNZ   *-132Q
+        ERRNZ   $-132Q
         ENDIF
 
 SAVALL  XTHL                    ; SET H,L ON STACK TOP
@@ -327,7 +327,7 @@ SAVALL  XTHL                    ; SET H,L ON STACK TOP
 ;       ENTRY POINT FOR THE Z80 NMI
 ;
 
-        ERRNZ   *-66H           ; Z80 NMI ADDRESS
+        ERRNZ   $-66H           ; Z80 NMI ADDRESS
         ENDIF
 
 NMIENT  JMP     NMI
@@ -354,7 +354,7 @@ SAVALLR                         ; SAVALL EXTENSION RETURN ADDRESS
 
         IF      RAM
         ELSE
-        ERRNZ   *-165Q
+        ERRNZ   $-165Q
         ENDIF
 
 ;       SET     MFLAG           ; REFERENCE TO MFLAG
@@ -367,7 +367,7 @@ CUI1    LDAX    B               ; (A) = MFLAG
 
         IF      RAM
         ELSE
-        ERRNZ  *-172Q
+        ERRNZ  $-172Q
         ENDIF
 
 INTXIT  POP     PSW             ; REMOVE FAKE 'STACK REGISTER'
@@ -387,7 +387,7 @@ INTXIT  POP     PSW             ; REMOVE FAKE 'STACK REGISTER'
 
         IF       RAM
         ELSE
-        ERRNZ   *-201Q
+        ERRNZ   $-201Q
         ENDIF
 
 CLOCK   LHLD    TICCNT
@@ -472,7 +472,7 @@ DYMEM9  XCHG
 
         IF      RAM
         ELSE
-        ERRNZ   *-322Q
+        ERRNZ   $-322Q
         ENDIF
 
 ERROR   LXI     H,MFLAG
@@ -492,7 +492,7 @@ ERROR   LXI     H,MFLAG
 
         IF      RAM
         ELSE
-        ERRNZ   *-344Q
+        ERRNZ   $-344Q
         ENDIF
 
 MTR     EI
@@ -567,7 +567,7 @@ MSG.ERR DB      A.CR,A.LF,A.LF
 
         IF      RAM
         ELSE
-        ERRNZ   *-1063Q
+        ERRNZ   $-1063Q
         ENDIF
 
 SAE     SHLD    ABUSS
@@ -671,7 +671,7 @@ AUTOBO  XRA     A               ; SET TO PRIMARY FLAG
 
         IF      RAM
         ELSE
-        ERRNZ   *-1222Q
+        ERRNZ   $-1222Q
         ENDIF
 
 GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
@@ -682,7 +682,7 @@ GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
 
         IF      RAM
         ELSE
-        ERRNZ   *-1225Q
+        ERRNZ   $-1225Q
         ENDIF
 
 SSTEP                           ; SINGLE STEP
@@ -698,7 +698,7 @@ SST1    STA     CTLFLG          ; SET NEW FLAG VALUES
 
         IF      RAM
         ELSE
-        ERRNZ   *-1244Q
+        ERRNZ   $-1244Q
         ENDIF
 
 STPRTN
@@ -907,14 +907,14 @@ CHAT2   LXI     H,MSG.PR        ; LOAD 'HI' ADDR.
 ;       EXIT    NONE
 ;       USES    A,F
 
-        ERRNZ   *-2136Q
+        ERRNZ   $-2136Q
 
 ALARM
         CPU     Z80
         JR      ALARMB          ; BRANCH TO A JUMP TO NOISE TO DING BELL
         CPU     8080
 
-        ERRNZ   *-2140Q
+        ERRNZ   $-2140Q
 
 HORN    PUSH    PSW
         MVI     A,CB.SPK        ; TURN ON SPEAKER
@@ -1116,7 +1116,7 @@ B170    POP     PSW             ; GET SWITCH DATA
 
         IF      RAM
         ELSE
-        ERRNZ   *-3047Q
+        ERRNZ   $-3047Q
         ENDIF
 
 LRA     LDA     REGI
@@ -1135,7 +1135,7 @@ LRA.    MOV     E,A
 
         IF      RAM
         ELSE
-        ERRNZ   *-3062Q
+        ERRNZ   $-3062Q
         ENDIF
 
 IOA     JMP     IOA1
@@ -1152,7 +1152,7 @@ IOA     JMP     IOA1
 
         IF      RAM
         ELSE
-        ERRNZ   *-3066Q
+        ERRNZ   $-3066Q
         ENDIF
 
 IOB     MVI     M,0             ; ZERO OUT OLD VALUE
@@ -1180,7 +1180,7 @@ IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
 
         IF      RAM
         ELSE
-        ERRNZ    *-3122Q
+        ERRNZ    $-3122Q
         ENDIF
 
 DOD     INX      H
@@ -1299,7 +1299,7 @@ MSG.PAS DB      A.CR,A.LF
 ;       USES    A,F
 
 ;       RCK MUST HAVE SAME ENTRY AS RCK IN PAM-8
-        ERRNZ   *-3260Q
+        ERRNZ   $-3260Q
 
 RCK     XRA     A
         RET
@@ -1402,7 +1402,7 @@ DYMEM10 MVI     A,A.BEL         ; DING BELL
 
         IF      RAM
         ELSE
-        ERRNZ   4000Q-7-*
+        ERRNZ   4000Q-7-$
         ENDIF
 
 PRSROM
@@ -1416,7 +1416,7 @@ PRSROM
 
         IF      RAM
         ELSE
-        ERRNZ   *-4000Q
+        ERRNZ   $-4000Q
         ENDIF
 
 ;       INIT0X - EXTENSION OF INIT0 TO SUPPORT H88
@@ -2488,7 +2488,7 @@ MSG.EQ  DB      ' = '
 ;
         IF      RAM
         ELSE
-        ERRNZ   10000A-6-*      ; MUST BE 6 BYTES BEFORE END
+        ERRNZ   10000A-6-$      ; MUST BE 6 BYTES BEFORE END
         ENDIF
 
 ESPEED  JMP     SPEED
@@ -2497,14 +2497,14 @@ ESPEED  JMP     SPEED
 ;
         IF      RAM
         ELSE
-        ERRNZ   10000A-3-*      ; MUST BE 3 BYTES BEFORE END
+        ERRNZ   10000A-3-$      ; MUST BE 3 BYTES BEFORE END
         ENDIF
 
 EDTMEM  JMP     DYMEM
 
         IF      RAM
         ELSE
-        ERRNZ   *-10000A        ; MUST NOT EXCEED 2K BYTES
+        ERRNZ   $-10000A        ; MUST NOT EXCEED 2K BYTES
         ENDIF
 
 ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET

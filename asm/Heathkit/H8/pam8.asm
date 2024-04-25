@@ -145,7 +145,7 @@ INIT0   LXI     D,PRSROM        ; (DE) = ROM COPY OF PRS CODE
 
 INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
 
-        ERRNZ   *-11Q           ; INTO TAKE UP ONE BYTE
+        ERRNZ   $-11Q           ; INTO TAKE UP ONE BYTE
         CALL    SAVALL          ; SAVE USER REGISTERS
         MVI     D,0
         JMP     CLOCK           ; PROCESS CLOCK INTERRUPT
@@ -160,7 +160,7 @@ INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
 
 INT2    EQU     20Q             ; LEVEL 2 ENTRY
 
-        ERRNZ   *-21Q           ; INT1 TAKES EXTRA BYTE
+        ERRNZ   $-21Q           ; INT1 TAKES EXTRA BYTE
         CALL    SAVALL          ; SAVE REGISTERS
         LDAX    D               ; (A) = (CTLFLG)
 ;       SET     CTLFLG
@@ -1304,7 +1304,7 @@ PRSROM  DB      1               ; REFIND
         DB      10              ; REGI
         DB      MI.RET
 
-        ERRNZ   *-4000Q
+        ERRNZ   $-4000Q
 
 ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYPAD
 ;       MONITOR.
