@@ -323,7 +323,7 @@ AKI1    IN      KP.2            ; READ KEYBOARD PORT #2
         LDA     MODEI           ; GET CURRENT MODE
         ANI     377Q-MI.ONLN    ; CLEAR PREVIOUS ON-LINE STATUS
         ORA     C               ; REPLACE WITH NEW STATUS
-        ERRNZ   KB.ONLN-MI.ONLN ; SWITCH AND MODE FLAG MUST BE THE SAME
+;       ERRNZ   KB.ONLN-MI.ONLN ; SWITCH AND MODE FLAG MUST BE THE SAME
         STA     MODEI           ; UPDATE *MODE*
         MOV     A,D             ; GET SWITCH VALUES
         ANI     KB.BRK          ; MASK FOR BREAK SWITCH
@@ -352,7 +352,7 @@ AKI1    IN      KP.2            ; READ KEYBOARD PORT #2
 ;
 ;       USES    NONE
 
-        ERRNZ   $-146A
+        ERRNZ   $-146Q
 
 NMI     PUSH    PSW             ; SAVE REGISTERS
         PUSH    B
@@ -1210,7 +1210,7 @@ IFCP6   MOV     D,A             ; SAVE CHARACTER IN D
         LDA     MODEA           ; GET MODE FLAGS
         ANI     MA.RV           ; MASK FOR REVERSE VIDEO FLAG
         ORA     D               ; ADD FLAG STATUS TO CHARACTER
-        ERRNZ   MA.RV-10000000B ; R.RV MUST BE BIT 7
+;       ERRNZ   MA.RV-10000000B ; R.RV MUST BE BIT 7
         PUSH    PSW             ; SAVE CHARACTER
         LDA     MODEA           ; GET MODE AGAIN
         ANI     MA.ICM          ; CHECK FOR INSERT CHARACTER MODE
@@ -1988,7 +1988,7 @@ ARM     MOV     A,B             ; SEE IF PN WAS INPUT
 
         XCHG                    ; (H,L) = PSDW
         LXI     B,MODEB         ; (B,C) = MODEB
-AMR1    LXI     D,MODEA         ; (D,E) = MODEA
+ARM1    LXI     D,MODEA         ; (D,E) = MODEA
         MOV     A,M             ; GET PN
         CPI     2               ; PN = 2>
         CZ      EKI             ; IF 2, ENABLE KEYBOARD INPUT
@@ -2085,7 +2085,7 @@ ASGM2   POP     H               ; TOSS FORCED RETURN ADDRESS
 ;       ASGMT - ANSI SET GRAPHICS MODE TABLE
 ;
 ;       *ASGMT* CONTAINS THE ADDRESS OF THE ROUTINES WHICH SET
-;       THE REQUESTED GRAPHI OR REVERSE VIDEO MODE
+;       THE REQUESTED GRAPHIC OR REVERSE VIDEO MODE
 
 ASGMT   EQU     $
 
@@ -2120,10 +2120,647 @@ ASM     MOV     A,B             ; SEE IF PN WAS INPUT
         ORA     A
         RZ                      ; IF NO PN
 
+        XCHG                    ; (H,L) = PSDW
+        LXI     B,MODEB         ; (B,C) = MODEB
+ASM1    LXI     D,MODEA         ; (D,E) = MODEA
+        MOV     A,M             ; GET PN
+        CPI     2               ; PN = 2?
+        CZ      DKI             ; IF 2, DISABLE KEYBOARD INPUT
+
+        MOV     A,M             ; GET PN
+        PUSH    H               ; SAVE PN POINTER
+        CPI     4               ; PN = 4?
+        CZ      EICM            ; IF 4, ENTER INSERT CHARACTER MODE
+        POP     H
+
+        MOV     A,M             ; GET PN
+        CPI     20              ; PN = 20?
+        CZ      EACR            ; IF 20, ENTER AUTO CARRIAGE RETURN
+
+        MOV     A,M             ; GET PN
+        CPI     'h'             ; SEE IF PN = FINAL
+        RZ
+
+        INX     H               ; ELSE, POINT TO NEXT PN
+        CPU     Z80
+        JR      ASM1
+        CPU     8080
+
+;;      CDN - CURSOR DOWN
+;
+;       *CDN* MOVES THE CURSOR DOWN ONE LINE ON THE DISPLAY, BUT DOES
+;       NOT CAUSE A SCROLL PAST THE LAST LINE.
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
 
 
+CDN     LDA     CURVP           ; GET CURRENT VERTICAL POSITION
+        CPI     23              ; ON LAST LINE(S)?
+        RNC                     ; IF SO, EXIT
+
+;       JMP     PLF             ; ELSE, DO A LINE FEED
+;       ERRNZ   $-PLF
+
+;;      PLF - PERFORM LINE FEED
+;
+;       *PLF* MOVES THE CURSOR DOWN ONE LINE IN THE DISPLAY MEMORY.  IF
+;       THE CURSOR WAS ON THE 23RD LINE, THE DISPLAYED VIDEO IS SCROLLED
+;       UP ONE LINE AND THE NEW LINE IS WRITTEN FULL OF SPACES.
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
 
 
+PLF     LDA     CURVP           ; GET VERTICAL POSITION
+        CPI     24              ; ON 25TH LINE?
+        RZ                      ; IF SO, EXIT WITHOUT ANY ACTION
+
+PLF0.2  LXI     D,80            ; LINES = 80 CHARACTERS
+        LHLD    CLSA            ; GET CURRENT LINE STARTING ADDRESS
+        DAD     D               ; ADD A LINE
+        MOV     A,H             ; STAY IN VIDEO RAM
+        ORI     VRAMS/256
+        MOV     H,A
+        SHLD    CLSA            ; SET NEW LINE VALUE
+        LDA     CURVP           ; GET CURSOR VERTICAL POSITION
+        CPI     23              ; ON LAST LINE?
+        CPU     Z80
+        JR      NZ,PLF1         ; IF NOT ON LAST LINE
+        CPU     8080
+
+;       SCROLL  VIDEO TO DISPLAY A NEW LINE
+;
+        LDA     MODEI           ; GET MODE FLAGS
+        ANI     MI.25L          ; SEE IF 25TH LINE IS ENABLED
+
+        PUSH    H               ; SAVE NEW LINE STARTING ADDRESS
+        LXI     D,80            ; ADD 80 FOR BEGINNING OF 26TH LINE
+        DAD     D
+        XCHG                    ; (D,E) = BEGINNING OF 26TH LINE
+        POP     H               ; (H,L) = BEGINNING OF 25TH LINE
+        PUSH    H               ; SAVE AGAIN FOR LATER
+        MVI     D,80/16         ; SET MOD 16 COUNT FOR ONE LINE
+        CALL    CPM16           ; COPY LINE
+        POP     H               ; (H,L) = BEGINNING OF 25TH LINE
+
+PLF0.5  MVI     B,80/60         ; SET MOD-16 ERASE COUNT TO 5 (80 CHARACTERS)
+        CALL    WSVA            ; WRITE 80 SPACES TO VIDEO TO BLANK THIS LINE
+        LHLD    SHOME           ; GET OLD HOME POSITION
+        LXI     D,80            ; ADD ONE LINE
+        DAD     D
+        MOV     A,H             ; STAY IN VIDEO RAM
+        ORI     VRAMS/256
+        MOV     H,A
+        SHLD    SHOME           ; UPDATE HOME POSITION
+        MOV     A,H             ; SET VALUE OF HOME POSITION FOR CRTC
+        ANI     HOMAX/256
+        MOV     H,A
+        SHLD    VI.SA
+        CPU     Z80
+        JR      PLF2            ; UPDATE CURSOR ADDRESS
+        CPU     8080
+
+PLF1    INR     A               ; ADD ONE TO LINE COUNTER
+        STA     CURVP
+
+PLF2    LHLD    CURAD           ; GET CURRENT CURSOR POSITION
+        DAD     D               ; ADD ONE LINE
+        MOV     A,H             ; STAY IN VIDEO RAM
+        ORI     VRAMS/256
+        MOV     H,A
+        SHLD    CURAD           ; UPDATE CURSOR ADDRESS
+
+        JMP     UCP.            ; CAUSE NMI TO UPDATE SCREEN IN CASE OF SCROLL
+
+;;      PLFCR - PERFORM LINE FEED AND/OR CARRIAGE RETURN
+;
+;       *PLFCR* PERFORMS A CARRIAGE RETURN PRIOR TO PERFORMING A LINE
+;       FEED IF THE AUTO CARRIAGE RETURN FUNCTION IS SELECTED
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+PLFCR   CALL    PLF             ; DO LINE FEED
+        LDA     MODEB           ; GET MODE FLAGS
+        ANI     MB.ACR          ; SEE IF ACR SELECTED
+        JNZ     PCR             ; IF SELECTED
+
+        RET                     ; ELSE, JUST RETURN
+
+;;      PBS - PERFORM BACKSPACE
+;
+;       CLFT - CURSOR LEFT
+;
+;       *PBS*-*CLFT* STEPS THE CURSOR ONE POSITION TO THE LEFT, BUT DOES NOT
+;       WRAP AROUND TO THE PREVIOUS LINE AFTER REACHING COLUMN ZERO
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,H,L,F
+
+
+PBS     EQU     $
+CLFT    EQU     $
+        LDA     CURHP           ; GET CURRENT POSITION ON LINE
+        ORA     A               ; SEE IF COLUMN ZERO
+        RZ                      ; IF AT BEGINNING OF LINE
+
+        DCR     A               ; ELSE, DECREMENT CURSOR POSITION
+        STA     CURHP
+        LHLD    CURAD           ; GET CURSOR ADDRESS
+        DCX     H               ; DECREMENT ADDRESS
+PBS1    MOV     A,H             ; STAY IN VIDEO RAM
+        ORI     VRAMS/256
+        MOV     H,A
+        SHLD    CURAD
+
+        RET                     ; EXIT WITH OR WITHOUT
+
+;;      CPR - CURSOR POSITION REPORT
+;
+;       *CPR* OUTPUTS THE CURSOR POSITION IN THE HEATH FORMAT
+;               ** ESC Y Pl Pc **
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,H,L,F
+
+CPR     CALL    PSOF            ; OUTPUT FIRST PART OF REPORT
+        DB      ESC,'Y'+200Q    ; ESC Y
+        LDA     CURVP           ; GET CURRENT LINE NUMBER
+        ADI     40Q             ; MAKE ASCII
+        CALL    PCOFT           ; PLACE LINE NUMBER IN FIFO
+        LDA     CURHP           ; GET CURRENT COLUMN NUMBER
+        ADI     40Q
+        CALL    PCOFT           ; PUT IN FIFO
+        RET
+
+;;      CRT - CURSOR RIGHT
+;
+;       *CRT* MOVES THE CURSOR RIGHT ONE COLUMN.  IF ALREADY AT THE LAST
+;       COLUMN, THE CURSOR IS ADVANCED TO THE BEGINNING OF THE NEXT LINE.
+;       *CRT* WILL NOT ADVANCE THE CURSOR PAST COLUMN 79 OF LINE 23.
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,H,L,F
+
+
+CRT     LDA     CURHP           ; GET CURRENT HORIZONTAL POSITION
+        CPI     79              ; CURSOR AT LAST COLUMN?
+        RZ                      ; EXIT IF AT END OF LINE
+
+        INR     A               ; ELSE, INCREMENT CURSOR POSITION
+        STA     CURHP
+        LHLD    CURAD           ; GET CURSOR ADDRESS
+        INX     H               ; INCREMENT ADDRESS
+        MOV     A,H             ; STAY IN VIDEO RAM
+        ORI     VRAMS/256
+        MOV     H,A
+        SHLD    CURAD           ; UPDATE CURAD
+
+        RET                     ; RETURN REGARDLESS
+
+;;      CUP - CURSOR UP
+;
+;       *CUP* MOVES THE CURSOR UP ONE LINE ON THE DISPLAY.  *CUP* WILL
+;       NOT MOVE THE CURSOR PAST LINE ZERO
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT     NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+CUP     LDA     CURVP           ; GET CURRENT VERTICAL POSITION
+        ORA     A               ; CHECK FOR LINE ZERO
+        RZ                      ; IF LINE ZERO, EXIT WITHOUT MOVING CURSOR
+
+;       JMP     PRLF            ; DO A REVERSE LINE FEED
+;       ERRNZ   $-PRLF
+
+;;      PRLF - PERFORM A REVERSE LINE FEED
+;
+;       *PRLF* MOVES THE CURSOR UP ONE LINE IN THE VIDEO MEMORY.  IF THE
+;       CURSOR WAS ALREADY ON THE TOP LINE OF THE DISPLAY, THE DISPLAY IS
+;       SCROLLED DOWN AND THE NEW LINE IS FILLED WITH SPACES.
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+PRLF    LDA     CURVP           ; GET VERTICAL POSITION
+        CPI     24              ; 25TH LINE?
+        RZ                      ; IF SO, FORGET RLF
+
+PRLF0.2 LXI     D,-80           ; (D,E) = TWOS COMPLEMENT OF 80
+        LHLD    CLSA            ; GET CURRENT LINE ADDRESS
+        DAD     D               ; SUBTRACT ONE LINE
+        MOV     A,H             ; STAY IN VIDEO RAM
+        ORI     VRAMS/256
+        MOV     H,A
+        SHLD    CLSA            ; UPDATE LINE ADDRESS
+        LDA     CURVP           ; GET CURRENT DISPLAYED LINE NUMBER
+        ORA     A               ; CHECK FOR LINE ZERO
+        CPU     Z80
+        JR      NZ,PRLF1        ; IF NOT ON LINE ZERO
+        CPU     8080
+
+        LDA     MODEI           ; GET MODE FLAGS
+        ANI     MI.25L          ; IS 25TH LINE ON?
+        CPU     Z80
+        JR      Z,PRLF0.5       ; IF NOT ON
+        CPU     8080
+
+;       25TH LINE IS ON, COPY TO 24TH BEFORE DISPLAY IS MOVED
+;
+        LHLD    SHOME           ; GET HOME ADDRESS
+        LXI     D,23*80         ; FIND ADDRESS OF LINE #23
+        DAD     D
+        XCHG                    ; (D,E) = BEGINNING OF LINE 23
+        LXI     H,80            ; FIND ADDRESS OF LINE #24
+        DAD     D
+        MVI     B,80/16         ; COPY ONE LINE
+        CALL    CPM16
+
+;       ERASE TOP LINE
+;
+PRLF0.5 LHLD    CLSA            ; LINE ZERO ADDRESS TO (H,L) FOR ERASE
+        MVI     B,5             ; ERASE LINE (5*16) SPACES
+        CALL    WSVA
+        LHLD    SHOME           ; GET OLD HOME POSITION
+        LXI     D,-80
+        DAD     D               ; SUBTRACT ONE LINE
+        MOV     A,H             ; STAY IN VIDEO RAM
+        ORI     VRAMS/256
+        MOV     H,A
+        SHLD    SHOME           ; UPDATE HOME POSITION
+        MOV     A,H             ; SET HOME POSITION FOR CRTC
+        ANI     HOMAX/256
+        MOV     H,A
+        SHLD    VI.SA
+        CPU     Z80
+        JR      PRLF2           ; UPDATE CURSOR
+        CPU     8080
+
+PRLF1   DCR     A               ; DECREMENT LINE COUNTER
+        STA     CURVP
+
+PRLF2   LHLD    CURAD           ; GET CURRENT CURSOR ADDRESS
+        DAD     D               ; SUBTRACT ONE LINE
+        MOV     A,H             ; STAY IN VIDEO RAM
+        ORI     VRAMS/256
+        MOV     H,A
+        SHLD    CURAD           ; UPDATE CURSOR ADDRESS
+
+        JMP     UCP.            ; EXIT
+
+;;      EID - ERASE IN DISPLAY
+;
+;       *EID* ERASES THE AMOUNT OF THE SCREEN SPECIFIED BY PN
+;
+;
+;       ENTRY   (B) = ZERO IF NO PN WAS INPUT
+;               (D,E) = PSDW
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+EID     MOV     A,B             ; SEE IF PN WAS INPUT
+        ORA     A
+        JZ      ERM             ; IF NO PN, ERASE TO END OF SCREEN
+
+        XCHG                    ; (H,L) = PSDW
+        MOV     A,M             ; GET PN
+        ORA     A               ; ZERO?
+        JZ      ERM             ; IF ZERO, ERASE TO END OF PAGE
+
+        DCR     A               ; ONE?
+        JZ      EBD             ; IF ONE, ERASE BEGINNING OF DISPLAY
+
+        DCR     A               ; TWO?
+        RNZ                     ; IF NOT TWO, EXIT
+
+;       JMP     CLR             ; ELSE, CLEAR DISPLAY
+;       ERRNZ   $-CLR
+
+;;      CLR - CLEAR
+;
+;       *CLR* PLACES THE SOFTWARE HOME POSITION BACK TO THE HARDWARE
+;       HOME POSITION (BEGINNING OF VIDEO RAM) AND WRITES ASCII SPACES
+;       INTO THE FIRST 1920 BYTES (24 LINES X 80 CHARACTERS)
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+CLR     LDA     CURVP           ; GET VERTICAL POSITION
+        CPI     24              ; SEE IF ON 25TH LINE
+        JZ      EEL             ; IF SO, JUST ERASE LINE
+
+        CALL    SCH             ; SET CURSOR TO HOME POSITION (H,L) = CURAD
+        MVI     B,1920/16       ; ERASE 24 LINES WORTH OF CHARACTERS
+        JMP     WSVA
+
+;;      CPM16 - COPY MEMORY - MODULO SIXTEEN
+;
+;       *CPM16* COPIES SIXTEEN BYTES FROM AND TO VIDEO RAM.  FROM AND TO
+;       ADDRESSES MUST BE AT THE BEGINNING OF A LINE/
+;
+;
+;       ENTRY   (H,L) = ADDRESS TO COPY FROM
+;               (D,E) = ADDRESS TO COPY TO
+;                 (B) = NUMBER OF BYTES TO COPY /16
+;
+;       EXIT    NONE
+;
+;       USES    A,B,D,E,H,L,F
+
+CPM16   MOV     A,D             ; KEEP BOTH ADDRESSES IN VIDEO RAM AREA
+        ORI     VRAMS/256
+        MOV     D,A
+        MOV     A,H
+        ORI     VRAMS/256
+        MOV     H,A
+
+;       COPY SIXTEEN BYTES
+;
+        MOV     A,M             ; GET BYTE FROM FIRST LINE
+        STAX    D               ; PUT IN SAME COLUMN AS OTHER LINE
+        INX     H               ; POINT TO NEXT COLUMN ON BOTH LINES
+        INX     D
+
+        MOV     A,M             ; *2
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *3
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *4
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *5
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *6
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *7
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *8
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *9
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *10
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *11
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *12
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *13
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *14
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *15
+        STAX    D
+        INX     H
+        INX     D
+
+        MOV     A,M             ; *16
+        STAX    D
+        INX     H
+        INX     D
+
+        CPU     Z80
+        DJNZ    CPM16
+        CPU     8080
+        RET                     ; TIL DONE
+
+;;      D25L - DISABLE 25TH LINE
+;
+;       *D25L* DISABLES THE DISPLAY OF THE 25TH LINE
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+D25L    LDA     MODEI           ; GET MODE FLAGS
+        ANI     255-MI.25L      ; CLEAR 25TH LINE FLAG
+        STA     MODEI
+        MVI     A,24
+        STA     VI.VD           ; UPDATE VIDEO DISPLAYED INFO FOR NMI
+        RET
+
+;;      DALF - DISABLE AUTO LINE FEED
+;
+;       *DALF* DISABLES A CARRIAGE RETURN CAUSING AN AUTOMATIC LINE FEED
+;
+;
+;       ENTRY   (B,C) = MODEB
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+DALF    LDAX    B               ; GET MODE FLAGS
+        ANI     255-MB.ALF      ; CLEAR AUTO LINE FEED
+        STAX    B
+        RET
+
+;;      DC - DISABLE CURSOR
+;
+;       *DC* INHIBITS THE DISPLAY OF THE CURSOR.  ALL OTHER FUNCTIONS
+;       PERFORM AS THEY WOULD IF THE CURSOR WERE ON
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A
+
+
+DC      LDA     MODEA           ; GET MODE FLAGS
+        ORI     MA.CD           ; SET CURSOR DISABLED
+        STA     MODEA
+        MVI     H,VB.CND        ; CURSOR NOT DISPLAYED
+        MVI     L,0             ; SET CURSOR END ADDRESS TO ZERO
+        SHLD    VI.CSE
+        RET
+
+;;      DEOL - DISCARD AT END OF LINE
+;
+;       *DEOL* RESETS THE WRAP AROUND AT END OF LINE FLAG.  CHARACTERS
+;       INCOMING CHARACTERS PAST COLUMN 79 ARE PLACED IN COLUMN 79 UNTIL
+;       A CARRIAGE RETURN IS RECEIVED
+;
+;
+;       ENTRY   (B,C) = MODEB
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+DEOL    LDAX    B               ; GET MODE FLAGS
+        ANI     255-MB.WRAP     ; CLEAR WRAP AROUND FLAG
+        STAX    B
+        RET
+
+;;      DING - DING BELL
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    NONE
+
+
+DING    EQU     $
+        OUT     MB.BELL
+        RET
+
+;;      DKI - DISABLE KEYBOARD INPUT
+;
+;       *DKI* CAUSES ALL KEYBOARD ENTRIES TO BE IGNORED
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+DKI     LDA     MODEI           ; GET PROPER MODE FLAGS
+        ORI     MI.KID          ; SET KEYBOARD INPUT DISABLED
+        STA     MODEI
+        RET
+
+;;      E25L - ENABLE 25TH LINE
+;
+;       *E25L* ENABLES THE DISPLAY OF THE 25TH LINE ONLY IF IT HAS NOT
+;       BEEN PREVIOUSLY ENABLED.  THE 25TH LINE IS CLEARED AT THE TIME
+;       IT IS ENABLED.
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+E25L    LDA     MODEI           ; GET MODE FLAGS
+        MOV     B,A             ; SAVE
+        ANI     MI.25L          ; SEE IF 25TH LINE ALREADY ON
+        RNZ                     ; IF ON
+
+        MVI     A,MI.25L        ; ELSE, SET FLAG
+        ORA     B
+        STA     MODEI
+        LHLD    SHOME           ; SET CURRENT HOME POSITION
+        LXI     D,1920          ; ADD 24 LINE SIZE FOR BEGINNING OF 25TH
+        DAD     D               ; (H,L) = STARTING ADDRESS OF LINE 25
+        MVI     B,80/16         ; SET MODULO 16 COUNT FOR ERASE
+        CALL    WSVA.           ; ERASE LINE
+
+        MVI     A,25            ; SET VERTICAL DISPLAYED INFO TO 25 LINES
+        STA     VI.VD
+        RET
+
+;;      EACR - ENTER AUTO CARRIAGE RETURN
+;
+;       *EACR* ENABLES THE TERMINAL TO PERFORM AN AUTOMATIC CARRIAGE
+;       RETURN UPON RECEIPT OF A LINE FEED CHARACTER
+;
+;
+;       ENTRY   (B,C) = MODEB
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+EACR    LDAX    B               ; GET MODE FLAGS
+        ORI     MB.ACR          ; SET AUTO CARRIAGE RETURN
+        STAX    B
+        RET
 
 
 
@@ -2146,12 +2783,12 @@ ASM     MOV     A,B             ; SEE IF PN WAS INPUT
         ORG     40000Q
 RAM     EQU     $               ; 256 BYTE SCRATCHPAD RAM AREA
 INF     DS      128             ; INPUT FIFO
-        ERRNZ   INF&1111111B    ; 7 LSB MUST BE ZERO
-        ERRNZ   $-INF/256       ; FIFO MUST RESIDE IN ONE PAGE
+;       ERRNZ   INF&1111111B    ; 7 LSB MUST BE ZERO
+;       ERRNZ   $-INF/256       ; FIFO MUST RESIDE IN ONE PAGE
 IFMAX   EQU     200Q            ; $-INF
 OUTF    DS      32              ; OUTPUT FIFO
         ERRNZ   OUTF&11111B     ; 5 LSB MUST BE ZERO
-        ERRNZ   $-OUTF/256      ; FIFO MUST RESIDE IN ONE PAGE
+;       ERRNZ   $-OUTF/256      ; FIFO MUST RESIDE IN ONE PAGE
 OFMAX   EQU     $-OUTF
 
 IFP     DS      1               ; INPUT FIFO POINTER
