@@ -1877,9 +1877,248 @@ APCA4   CPI     80              ; SEE IF IN RANGE
 APCA5   STA     CURHP           ; SET COLUMN POSITION
         JMP     SNCP            ; SET NEW CURSOR POSITION
 
+;;      APDC - ANSI PERFORM DELETE CHARACTER
+;
+;       *APDC* DELETES THE SPECIFIED NUMBER OF CHARACTERS FROM THE LINE
+;
+;
+;       ENTRY   (B) = ZERO IF NO PN WAS INPUT
+;               (D,E) = PSDW
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
 
 
+APDC    MOV     A,B             ; SEE IF INPUT PN
+        ORA     A
+        JZ      PDC             ; IF NO PN, DEFAULT TO ONE
 
+        LDAX    D               ; GET PN
+        ORA     A               ; ZERO?
+        JZ      PDC             ; IF ZERO, DEFAULT TO ONE
+
+APDC1   PUSH    PSW             ; SAVE PN
+        CALL    PDC
+        POP     PSW
+        DCR     A
+        CPU     Z80
+        JR      NZ,APDC1        ; 'TIL DONE
+        CPU     8080
+
+        RET
+
+;;      APDL - ANSI PERFORM DELETE LINE
+;
+;       *APDL* DELETES THE SPECIFIED NUMBER OF FOLLOWING LINES
+;
+;
+;       ENTRY   (B) = ZERO IF NO PN WAS INPUT
+;               (D,E) = PSDW
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+APDL    MOV     A,B             ; SEE IF PN WAS INPUT
+        ORA     A
+        JZ      PDL             ; IF NO PN, DEFAULT TO ONE
+
+        LDAX    D               ; GET PN
+        ORA     A               ; ZERO?
+        JZ      FDL             ; IF ZERO, DEFAULT TO ONE
+
+APDL1   PUSH    PSW             ; SAVE COUNT
+        CALL    PDL             ; DELETE ONE LINE
+        POP     PSW
+        DCR     A               ; COUNT -1
+        CPU     Z80
+        JR      NZ,APDL1        ; 'TIL DONE
+        CPU     8080
+
+        RET
+
+;;      APIL - ANSI PERFORM INSERT LINE
+;
+;       *APIL* INSERTS THE SPECIFIED NUMBER OF LINES AT THE CURRENT LINE
+;       OF THE CURSOR POSITION
+;
+;
+;       ENTRY   (B) = ZERO IF NO PN WAS INPUT
+;               (D,E) = PSDW
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+APIL    MOV     A,B             ; SEE IF PN WAS INPUT
+        ORA     A
+        JZ      PIL             ; IF NO PN, INSERT ONE LINE
+
+        LDAX    D               ; GET PN
+        ORA     A               ; ZERO?
+        JZ      PIL             ; IF ZERO, DEFAULT TO ONE LINE
+
+APIL1   PUSH    PSW             ; SAVE COUNT
+        CALL    PIL             ; INSERT ONE LINE
+        POP     PSW
+        DCR     A
+        CPU     Z80
+        JR      NZ,APIL1        ; 'TIL DONE
+        CPU     8080
+
+        RET
+
+;;      ARM - ANSI RESET MODE
+;
+;       *ARM* RESETS THE MODE(S) SPECIFIED BY PN FOR THE SEQUENCE  ESC [ Pn l
+;
+;       ENTRY   (B) = ZERO IF NO PN WAS INPUT
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+ARM     MOV     A,B             ; SEE IF PN WAS INPUT
+        ORA     A
+        RZ                      ; IF NO PN, EXIT
+
+        XCHG                    ; (H,L) = PSDW
+        LXI     B,MODEB         ; (B,C) = MODEB
+AMR1    LXI     D,MODEA         ; (D,E) = MODEA
+        MOV     A,M             ; GET PN
+        CPI     2               ; PN = 2>
+        CZ      EKI             ; IF 2, ENABLE KEYBOARD INPUT
+
+        MOV     A,M             ; GET PN
+        CPI     4               ; PN = 4?
+        PUSH    H               ; SAVE PN POINTER
+        CZ      XICM            ; IF 4, EXIT INSERT CHARACTER MODE
+        POP     H
+
+        MOV     A,M             ; GET PN
+        CPI     20              ; PN = 20?
+        CZ      XACR            ; IF 20, EXIT AUTO CARRIAGE RETURN
+
+        MOV     A,M             ; GET PN
+        CPI     'l'             ; SEE IF PN = FINAL
+        RZ                      ; IF FINAL
+
+        INX     H               ; ELSE POINT TO NEXT PN
+        CPU     Z80
+        JR      ARM1
+        CPU     8080
+
+;;      ASBR - ANSI SET BAUD RATE
+;
+;       *ASBR* SETS THE BAUD RATE TO THAT SPECIFIED BY PN
+;
+;
+;       ENTRY   (B) = ZERO IF NO PN WAS INPUT
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+ASBR    MOV     A,B             ; SEE IF PN WAS INPUT
+        ORA     A
+        CPU     Z80
+        JR      Z,ASBR1         ; IF NON SPECIFIED, DEFAULT 10 110 BAUD
+        CPU     8080
+
+        XCHG                    ; (H,L) = PSDW
+        MOV     A,M             ; GET PN
+        CPI     14              ; IN RANGE?
+        RNC                     ; IF NOT, EXIT
+
+ASBR1   JMP                     SBR.
+
+;;      ASGM - ANSI SET GRAPHICS MODE
+;
+;       *ASGM* SETS OR RESETS THE GRAPHICS MODE AND/OR THE REVERSE VIDEO MODE
+;
+;       ENTRY   (B) = ZERO IF NO PN WAS INPUT
+;               (D,E) = PSDW
+;
+;       EXIT    NONE
+;
+;       USES    A,D,E,H,L,F
+
+
+ASGM    MOV     A,B             ; SEE IF PN WAS INPUT
+        ORA     A
+        CPU     Z80
+        JR      Z,ASGM1.5       ; IF NOT PN, DEFAULT TO REVERSE VIDEO OFF
+        CPU     8080
+
+        PUSH    D               ; SAVE PN POINTER
+
+ASGM1   POP     D               ; GET PN POINTER
+        LDAX    D               ; GET PN
+        INX     D               ; POINT TO NEXT
+        PUSH    D               ; SAVE FOR NEXT PASS(S)
+        LXI     H,ASGM1         ; SET RETURN ADDRESS
+        PUSH    H
+
+ASGM1.5 LXI     H,ASGMT         ; (H,L) = GRAPHIC MODE TABLE ADDRESS
+        MVI     D,ASGMTL        ; (D) = TABLE LENGTH
+        MVI     E,ASGMTW        ; (E) = TABLE WIDTH
+        CALL    STAB            ; SEARCH TABLE FOR PN VALUE
+        CPU     Z80
+        JR      C,ASGM2         ; IF NOT IN TABLE, MUST BE BAD NO. OR FINAL
+        CPU     8080
+
+        INX     H               ; ELSE, IN TABLE, GOT TO ROUTINE
+        MOV     H,M             ; GET MSB
+        MOV     L,A             ; LSB
+        LXI     D,MODEA         ; (D,E) = MODEA FOR ROUTINES
+        PCHL
+
+ASGM2   POP     H               ; TOSS FORCED RETURN ADDRESS
+        POP     D               ; EVEN STACK
+        RET
+
+;       ASGMT - ANSI SET GRAPHICS MODE TABLE
+;
+;       *ASGMT* CONTAINS THE ADDRESS OF THE ROUTINES WHICH SET
+;       THE REQUESTED GRAPHI OR REVERSE VIDEO MODE
+
+ASGMT   EQU     $
+
+        DB      0               ; ZERO
+        DW      XRVM            ; EXIT REVERSE VIDEO MODE
+
+        DB      7               ; SEVEN
+        DW      ERVM            ; ENTER REVERSE VIDEO MODE
+
+        DB      10              ; TEN
+        DW      EGM             ; ENTER GRAPHICS MODE
+
+        DB      11              ; ELEVEN
+        DW      XGM             ; EXIT GRAPHICS MODE
+
+ASGMTW  EQU     3               ; TABLE IS THREE BYTES WIDE
+ASGMTL  EQU     ($-ASGMT)/ASGMTW ; TABLE LENGTH
+
+;;      ASM - ANSI SET MODE
+;
+;       *ASM* SETS THE MODE(S) SPECIFIED BY PN
+;
+;
+;       ENTRY   (B) = ZERO IF NO PN WAS INPUT
+;               (D,E) = PSDW
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+ASM     MOV     A,B             ; SEE IF PN WAS INPUT
+        ORA     A
+        RZ                      ; IF NO PN
 
 
 
