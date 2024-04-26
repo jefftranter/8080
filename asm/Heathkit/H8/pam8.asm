@@ -139,7 +139,7 @@ UI.CLK  EQU     00000001B       ; ALLOW CLOCK INTERRUPT PROCESSING
 INIT0   LXI     D,PRSROM        ; (DE) = ROM COPY OF PRS CODE
         LXI     H,PRSRAM+PRSL-1 ; (HL) = RAM DESTINATION FOR CODE
         JMP     INIT            ; INITIALIZE
-        ERRPL   INIT-1000Q      ; BYTE IN WORD MUST BE 0
+;       ERRPL   INIT-1000Q      ; BYTE IN WORD MUST BE 0
 
 ;       LEVEL 1 - CLOCK
 
@@ -149,7 +149,7 @@ INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
         CALL    SAVALL          ; SAVE USER REGISTERS
         MVI     D,0
         JMP     CLOCK           ; PROCESS CLOCK INTERRUPT
-        ERRPL   CLOCK-1000Q     ; EXTRA BYTE MUST BE 0
+;       ERRPL   CLOCK-1000Q     ; EXTRA BYTE MUST BE 0
 
 ;       LEVEL 2 - SINGLE STEP
 ;
@@ -289,7 +289,7 @@ SAVALL  XTHL                    ; SET H,L ON STACK TOP
 
 ;       SET     MFLAG           ; REFERENCE TO MFLAG
 CUI1    LDAX    B               ; (A) = MFLAG
-        ERRNZ   U0.CLK-1        ; CODE ASSUMED = 01
+;       ERRNZ   U0.CLK-1        ; CODE ASSUMED = 01
         RRC
         CC      UIVEC           ; IF SPECIFIED, TRANSFER TO USER
 
@@ -327,12 +327,12 @@ CLOCK   LHLD    TICCNT
         MOV     B,A             ; (B) = CURRENT FLAG
         ANI     UO.NFR          ; SEE IF FRONT PANEL REFRESH WANTED
         INX     H
-        ERRNZ   CTLFLG-MFLAG-1
+;       ERRNZ   CTLFLG-MFLAG-1
         MOV     A,M             ; (A) = CTLFLG
         MOV     C,D             ; (C) = 0 IN CASE NO PANEL DISPLAY
         JNZ     CLK3            ; IF NOT
         INX     H
-        ERRNZ   REFIND-CTLFLG-1
+;       ERRNZ   REFIND-CTLFLG-1
         DCR     M               ; DECREMENT DIGIT INDEX
         JNZ     CLK2            ; IF NOT WRAP-AROUND
         MVI     M,9             ; WRAP DISPLAY AROUND
@@ -359,9 +359,9 @@ CLK3                            ; (A) = CTLFLG
         ANI     CB.MTL
         JNZ     INTXIT          ; IF IN MONITOR CODE
         DCX     B
-        ERRNZ   CTLFLG-MFLAG01
+ ;      ERRNZ   CTLFLG-MFLAG01
         LDAX    B               ; (A) = MFLAG
-        ERRNZ   UO.HLT-2000     ; ASSUME HIGH-ORDER
+        ERRNZ   UO.HLT-200Q     ; ASSUME HIGH-ORDER
         RAL
         JC      CLK4            ; SKIP IT
 
@@ -402,7 +402,7 @@ ERROR
         MOV     M,A             ; REPLACE
         INX     H
         MVI     M,CB.SSI+CB.MTL+CB.CLI+CB.SPK ; RESTORE *CTLFLG*
-        ERRNZ   CTLFLG-MFLAG-1
+;       ERRNZ   CTLFLG-MFLAG-1
         EI
         LHLD    REGPTR
         SPHL                    ; RESTORE STACK POINTER TO EMPTY STATE
@@ -510,7 +510,7 @@ MTR6    PUSH    PSW             ; SAVE CODE
 REGM    MVI     A,2             ; SET DISPLAY REGISTER MODE
 ;       SET     DSPMOD
         STAX    B               ; SET DISPLAY REGISTER MODE
-        ERRNZ   DSPMOD-DSPROT-1
+;       ERRNZ   DSPMOD-DSPROT-1
         DCX     B               ; (BC) = #DSPROT
         XRA     A
         STAX    B               ; SET ALL PERIODS ON
@@ -580,7 +580,7 @@ LST2    LDAX    D               ; (A) = REGI
 MEMM    XRA     A               ; (A) = 0
 ;       SET     DSPMOD
         STAX    B               ; SET DISPLAY MEMORY MODE
-        ERRNZ   DSPMOD-DSPROT-1
+;       ERRNZ   DSPMOD-DSPROT-1
         DCX     B               ; (BC) = #DSPROT
         STAX    B               ; SET ALL PERIODS ON
         LXI     H,ABUSS+1
@@ -1124,7 +1124,7 @@ UFD     MVI     A,UO.DDU
         MOV     M,A             ; ROTATE PATTERN
         MOV     B,A
         INX     H
-        ERRNZ   DSPMOD-DSPROT-1
+;       ERRNZ   DSPMOD-DSPROT-1
         MOV     A,M             ; (A) = DSPMOD
         ANI     2
         LHLD    ABUSS
@@ -1304,7 +1304,7 @@ PRSROM  DB      1               ; REFIND
         DB      10              ; REGI
         DB      MI.RET
 
-        ERRNZ   $-4000Q
+        ERRNZ   $-2000Q
 
 ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYPAD
 ;       MONITOR.

@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 1 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 1 - 2024-04-26 05:28:23 PM
 
 
        1/      0 :                              INCLUDE macros.mac
@@ -8,27 +8,27 @@
 (1)    4/      0 :                      ; expression must be evaluatable in first pass.
 (1)    5/      0 :                      
 (1)    6/      0 :                      ERRPL   MACRO EXP
-(1)    7/      0 :                      ;       IF (EXP) > 0
-(1)    8/      0 :                      ;         ERROR Expression is positive
-(1)    9/      0 :                      ;       ENDIF
+(1)    7/      0 :                              IF (EXP) > 0
+(1)    8/      0 :                                ERROR Expression is positive
+(1)    9/      0 :                              ENDIF
 (1)   10/      0 :                              ENDM
 (1)   11/      0 :                      
 (1)   12/      0 :                      ERRMI   MACRO EXP
-(1)   13/      0 :                      ;       IF (EXP) < 0
-(1)   14/      0 :                      ;         ERROR Expression is negative
-(1)   15/      0 :                      ;       ENDIF
+(1)   13/      0 :                              IF (EXP) < 0
+(1)   14/      0 :                                ERROR Expression is negative
+(1)   15/      0 :                              ENDIF
 (1)   16/      0 :                              ENDM
 (1)   17/      0 :                      
 (1)   18/      0 :                      ERRNZ   MACRO EXP
-(1)   19/      0 :                      ;       IF (EXP) != 0
-(1)   20/      0 :                      ;         ERROR Expression is not zero
-(1)   21/      0 :                      ;       ENDIF
+(1)   19/      0 :                              IF (EXP) != 0
+(1)   20/      0 :                                ERROR Expression is not zero
+(1)   21/      0 :                              ENDIF
 (1)   22/      0 :                              ENDM
 (1)   23/      0 :                      
 (1)   24/      0 :                      ERRZR   MACRO EXP
-(1)   25/      0 :                      ;       IF (EXP) == 0
-(1)   26/      0 :                      ;         ERROR Expression is zero
-(1)   27/      0 :                      ;       ENDIF
+(1)   25/      0 :                              IF (EXP) == 0
+(1)   26/      0 :                                ERROR Expression is zero
+(1)   27/      0 :                              ENDIF
 (1)   28/      0 :                              ENDM
 (1)   29/      0 :                      
        2/      0 :                      
@@ -61,7 +61,7 @@
       29/      0 :                      ;
       30/      0 :                      ;
       31/      0 :                      ;       COPYRIGHT  05/1976, WINTEK CORPORATION.
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 2 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 2 - 2024-04-26 05:28:23 PM
 
 
       32/      0 :                      ;                           902 N. 9TH ST.
@@ -124,7 +124,7 @@
       89/      0 :                      ;       OF THESE INTERRUPTS MAY OCCUR. RETURN IS VIA *EI* AND THEN *RET*.
       90/      0 :                      ;
       91/      0 :                      ;       3       I/O 3. CAUSES A DIRECT JUMP THROUGH *UIVEC*+6
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 3 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 3 - 2024-04-26 05:28:23 PM
 
 
       92/      0 :                      ;
@@ -187,7 +187,7 @@
 (1)   46/      0 :                      
 (1)   47/      0 :                      ;       FRONT PANEL HARDWARE CONTROL BITS.
 (1)   48/      0 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(mtr88.asm) - Page 4 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(mtr88.asm) - Page 4 - 2024-04-26 05:28:23 PM
 
 
 (1)   49/      0 : =20O                 CB.SSI  EQU     00010000B       ; SINGLE STEP INTERRUPT
@@ -250,7 +250,7 @@
 (1)    2/      0 :                      ;       DISK INTERFACE CONSTANTS
 (1)    3/      0 :                      ;
 (1)    4/      0 : =170O                D.STA   EQU     170Q            ; INTERFACE STATUS PORT
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(z47def.asm) - Page 5 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(z47def.asm) - Page 5 - 2024-04-26 05:28:23 PM
 
 
 (1)    5/      0 : =171O                D.DAT   EQU     D.STA+1         ; INTERFACE DATA PORT
@@ -313,7 +313,7 @@
 (1)    7/      0 : =4O                  DF.WP   EQU     00000100B       ; WRITE PROTECT
 (1)    8/      0 : =10O                 DF.SD   EQU     00001000B       ; SYNC DETECT
 (1)    9/      0 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(h17def.asm) - Page 6 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(h17def.asm) - Page 6 - 2024-04-26 05:28:23 PM
 
 
 (1)   10/      0 : =1O                  DF.WQ   EQU     00000001B       ; WRITE GATE ENABLE
@@ -376,7 +376,7 @@
 (1)    1/ 42.200 :                      ;; MISCELLANEOUS EQUATES FROM H17 BOOT ROM.
 (1)    2/ 42.200 :                      ;  REFER TO H17 BOOT ROM IF MORE INFORMATION REQUIRED
 (1)    3/ 42.200 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(misc.asm) - Page 7 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(misc.asm) - Page 7 - 2024-04-26 05:28:23 PM
 
 
 (1)    4/ 42.200 : =36.235O             WHD     EQU     17235Q          ; WAIT FOR HOLE ROUTINE ENTRY POINT
@@ -439,7 +439,7 @@
 (1)   37/ 42.200 :                      
 (1)   38/ 42.200 : =40O                 USR.FE  EQU     00100000B       ; FRAMING ERROR
 (1)   39/ 42.200 : =20O                 USR.OE  EQU     00010000B       ; OVERRUN ERROR
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(u8251.asm) - Page 8 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(u8251.asm) - Page 8 - 2024-04-26 05:28:23 PM
 
 
 (1)   40/ 42.200 : =10O                 USR.PE  EQU     00001000B       ; PARITY ERROR
@@ -502,7 +502,7 @@
 (1)   51/ 42.200 :                      
 (1)   52/ 42.200 : =6O                  UR.MSR  EQU     6               ; MODEM STATUS REGISTER
 (1)   53/ 42.200 : =1O                  UC.DCS  EQU     00000001B       ;  DELTA CLEAR TO SEND
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(u8250.asm) - Page 9 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(u8250.asm) - Page 9 - 2024-04-26 05:28:23 PM
 
 
 (1)   54/ 42.200 : =2O                  UC.DDR  EQU     00000010B       ;  DELTA DATA SET READY
@@ -532,10 +532,7 @@
      132/     11 :                      
      133/     11 : =>FALSE                      IF      RAM
      134/     11 : =>TRUE                       ELSE
-     135/     11 : (MACRO)                      ERRPL   INIT-1000Q      ; BYTE IN WORD 10A MUST BE 0
-     135/     11 :                      ;       IF (INIT-1000Q) > 0
-     135/     11 :                      ;         ERROR Expression is positive
-     135/     11 :                      ;       ENDIF
+     135/     11 :                      ;       ERRPL   INIT-1000Q      ; BYTE IN WORD 10A MUST BE 0
      136/     11 : [133]                        ENDIF
      137/     11 :                      
      138/     11 :                      ;       LEVEL 1 - CLOCK
@@ -544,10 +541,10 @@
      141/     11 : =>TRUE                       ELSE
      142/     11 : =10O                 INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
      143/     11 :                      
-     144/     11 : (MACRO)                      ERRNZ   $-110           ; INT0 TAKES UP ONE BYTE
-     144/     11 :                      ;       IF ($-110) != 0
-     144/     11 :                      ;         ERROR Expression is not zero
-     144/     11 :                      ;       ENDIF
+     144/     11 : (MACRO)                      ERRNZ   $-11Q           ; INT0 TAKES UP ONE BYTE
+     144/     11 : =>FALSE                      IF ($-11Q) != 0
+     144/     11 :                                ERROR Expression is not zero
+     144/     11 : [144]                        ENDIF
      145/     11 : [140]                        ENDIF
      146/     11 :                      
      147/     11 : 315 132 000                  CALL    SAVALL          ; SAVE USER REGISTERS
@@ -555,30 +552,27 @@
      149/     16 : 303 201 000                  JMP     CLOCK           ; PROCESS CLOCK INTERRUPT
      150/     21 : =>FALSE                      IF      RAM
      151/     21 : =>TRUE                       ELSE
-     152/     21 : (MACRO)                      ERRPL   CLOCK-1000Q     ; EXTRA BYTE MUST BE 0
-     152/     21 :                      ;       IF (CLOCK-1000Q) > 0
-     152/     21 :                      ;         ERROR Expression is positive
-     152/     21 :                      ;       ENDIF
+     152/     21 :                      ;       ERRPL   CLOCK-1000Q     ; EXTRA BYTE MUST BE 0
      153/     21 : [150]                        ENDIF
      154/     21 :                      
      155/     21 :                      ;       LEVEL 2 - SINGLE STEP
      156/     21 :                      ;
      157/     21 :                      ;       IF THIS INTERRUPT IS RECEIVED WHEN NOT IN MONITOR MODE,
      158/     21 :                      ;       THEN IT IS ASSUMED TO BE GENERATED BY A USER PROGRAM
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 10 - 2024-04-25 09:34:57 AM
-
-
      159/     21 :                      ;       (SINGLE STEPPING OR BREAKPOINTING). IN SUCH CASE, THE
      160/     21 :                      ;       USER PROGRAM IS ENTERED THROUGH (UIVEC+3)
      161/     21 :                      
      162/     21 : =>FALSE                      IF      RAM
      163/     21 : =>TRUE                       ELSE
      164/     21 : =20O                 INT2    EQU     20Q             ; LEVEL 2 ENTRY
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 10 - 2024-04-26 05:28:23 PM
+
+
      165/     21 :                      
      166/     21 : (MACRO)                      ERRNZ   $-21Q           ; INT1 TAKES EXTRA BYTE
-     166/     21 :                      ;       IF ($-21Q) != 0
-     166/     21 :                      ;         ERROR Expression is not zero
-     166/     21 :                      ;       ENDIF
+     166/     21 : =>FALSE                      IF ($-21Q) != 0
+     166/     21 :                                ERROR Expression is not zero
+     166/     21 : [166]                        ENDIF
      167/     21 : [162]                        ENDIF
      168/     21 :                      
      169/     21 : 315 132 000                  CALL    SAVALL          ; SAVE REGISTERS
@@ -628,15 +622,15 @@
      213/     53 :                      
      214/     53 : =>FALSE                      IF      RAM
      215/     53 : =>TRUE                       ELSE
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 11 - 2024-04-25 09:34:57 AM
-
-
-     216/     53 : (MACRO)                      ERRNZ   $-53A
-     216/     53 :                      ;       IF ($-53A) != 0
-     216/     53 :                      ;         ERROR Expression is not zero
-     216/     53 :                      ;       ENDIF
+     216/     53 : (MACRO)                      ERRNZ   $-53Q
+     216/     53 : =>FALSE                      IF ($-53Q) != 0
+     216/     53 :                                ERROR Expression is not zero
+     216/     53 : [216]                        ENDIF
      217/     53 : [214]                        ENDIF
      218/     53 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 11 - 2024-04-26 05:28:23 PM
+
+
      219/     53 : 365                  DLY     PUSH    PSW             ; SAVE COUNT
      220/     54 : 257                          XRA     A               ; DONT SOUND HORN
      221/     55 : 303 143 002                  JMP     HRN0            ; PROCESS AS HORN
@@ -672,9 +666,9 @@
      251/     73 : =>FALSE                      IF      RAM
      252/     73 : =>TRUE                       ELSE
      253/     73 : (MACRO)                      ERRNZ   $-73Q
-     253/     73 :                      ;       IF ($-73Q) != 0
-     253/     73 :                      ;         ERROR Expression is not zero
-     253/     73 :                      ;       ENDIF
+     253/     73 : =>FALSE                      IF ($-73Q) != 0
+     253/     73 :                                ERROR Expression is not zero
+     253/     73 : [253]                        ENDIF
      254/     73 : [251]                        ENDIF
      255/     73 :                      
      256/     73 : 032                  INIT    LDAX    D               ; COPY *PRSROM* INTO RAM
@@ -691,15 +685,15 @@
      267/    107 :                      ;       DETERMINE MEMORY LIMIT
      268/    107 :                      
      269/    107 : 167                  INIT1   MOV     M,A             ; RESTORE VALUE READ
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 12 - 2024-04-25 09:34:57 AM
-
-
      270/    110 : 031                          DAD     D               ; INCREMENT TRIAL ADDRESS
      271/    111 : 176                          MOV     A,M             ; (A) = CURRENT MEMORY VALUE
      272/    112 : 065                          DCR     M               ; TRY TO CHANGE IT
      273/    113 : 276                          CMP     M
      274/    114 : 302 107 000                  JNZ     INIT1           ; IF MEMORY CHANGED
      275/    117 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 12 - 2024-04-26 05:28:23 PM
+
+
      276/    117 : 053                  INIT2   DCX     H
      277/    120 :                      
      278/    120 : =>FALSE                      IF      RAM
@@ -730,9 +724,9 @@
      303/    132 : =>FALSE                      IF      RAM
      304/    132 : =>TRUE                       ELSE
      305/    132 : (MACRO)                      ERRNZ   $-132Q
-     305/    132 :                      ;       IF ($-132Q) != 0
-     305/    132 :                      ;         ERROR Expression is not zero
-     305/    132 :                      ;       ENDIF
+     305/    132 : =>FALSE                      IF ($-132Q) != 0
+     305/    132 :                                ERROR Expression is not zero
+     305/    132 : [1.049]                      ENDIF
      306/    132 : [1.047]                      ENDIF
      307/    132 :                      
      308/    132 : 343                  SAVALL  XTHL                    ; SET H,L ON STACK TOP
@@ -754,26 +748,23 @@
      324/    146 :                      
      325/    146 : =>FALSE                      IF      RAM
      326/    146 : =>TRUE                       ELSE
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 13 - 2024-04-25 09:34:57 AM
-
-
      327/    146 :                      ;       ENTRY POINT FOR THE Z80 NMI
      328/    146 :                      ;
      329/    146 :                      
      330/    146 : (MACRO)                      ERRNZ   $-66H           ; Z80 NMI ADDRESS
-     330/    146 :                      ;       IF ($-66H) != 0
-     330/    146 :                      ;         ERROR Expression is not zero
-     330/    146 :                      ;       ENDIF
+     330/    146 : =>FALSE                      IF ($-66H) != 0
+     330/    146 :                                ERROR Expression is not zero
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 13 - 2024-04-26 05:28:23 PM
+
+
+     330/    146 : [1.074]                      ENDIF
      331/    146 : [1.069]                      ENDIF
      332/    146 :                      
      333/    146 : 303 116 004          NMIENT  JMP     NMI
      334/    151 :                      
      335/    151 : =>FALSE                      IF      RAM
      336/    151 : =>TRUE                       ELSE
-     337/    151 : (MACRO)                      ERRNZ   SAVALLR-151Q    ; DO NOT CHANGE ORGANIZATION
-     337/    151 :                      ;       IF (SAVALLR-151Q) != 0
-     337/    151 :                      ;         ERROR Expression is not zero
-     337/    151 :                      ;       ENDIF
+     337/    151 :                      ;       ERRNZ   SAVALLR-151Q    ; DO NOT CHANGE ORGANIZATION
      338/    151 : [1.079]                      ENDIF
      339/    151 :                      
      340/    151 :                      SAVALLR                         ; SAVALL EXTENSION RETURN ADDRESS
@@ -794,17 +785,17 @@
      355/    165 : =>FALSE                      IF      RAM
      356/    165 : =>TRUE                       ELSE
      357/    165 : (MACRO)                      ERRNZ   $-165Q
-     357/    165 :                      ;       IF ($-165Q) != 0
-     357/    165 :                      ;         ERROR Expression is not zero
-     357/    165 :                      ;       ENDIF
+     357/    165 : =>FALSE                      IF ($-165Q) != 0
+     357/    165 :                                ERROR Expression is not zero
+     357/    165 : [1.101]                      ENDIF
      358/    165 : [1.099]                      ENDIF
      359/    165 :                      
      360/    165 :                      ;       SET     MFLAG           ; REFERENCE TO MFLAG
      361/    165 : 012                  CUI1    LDAX    B               ; (A) = MFLAG
      362/    166 : (MACRO)                      ERRNZ   UO.CLK-1        ; CODE ASSUMED = 01
-     362/    166 :                      ;       IF (UO.CLK-1) != 0
-     362/    166 :                      ;         ERROR Expression is not zero
-     362/    166 :                      ;       ENDIF
+     362/    166 : =>FALSE                      IF (UO.CLK-1) != 0
+     362/    166 :                                ERROR Expression is not zero
+     362/    166 : [1.106]                      ENDIF
      363/    166 : 017                          RRC
      364/    167 : 334 037 040                  CC      UIVEC           ; IF SPECIFIED, TRANSFER TO USER
      365/    172 :                      
@@ -813,13 +804,10 @@
      368/    172 : =>FALSE                      IF      RAM
      369/    172 : =>TRUE                       ELSE
      370/    172 : (MACRO)                      ERRNZ  $-172Q
-     370/    172 :                      ;       IF ($-172Q) != 0
-     370/    172 :                      ;         ERROR Expression is not zero
-     370/    172 :                      ;       ENDIF
+     370/    172 : =>FALSE                      IF ($-172Q) != 0
+     370/    172 :                                ERROR Expression is not zero
+     370/    172 : [1.114]                      ENDIF
      371/    172 : [1.112]                      ENDIF
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 14 - 2024-04-25 09:34:57 AM
-
-
      372/    172 :                      
      373/    172 : 361                  INTXIT  POP     PSW             ; REMOVE FAKE 'STACK REGISTER'
      374/    173 : 361                          POP     PSW
@@ -829,6 +817,9 @@
      378/    177 : 373                          EI
      379/    200 : 311                          RET
      380/    201 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 14 - 2024-04-26 05:28:23 PM
+
+
      381/    201 :                      ;       CLOCK - PROCESS CLOCK INTERRUPT
      382/    201 :                      ;
      383/    201 :                      ;       CLOCK IS ENTERED WHENEVER A 2-MILLISECOND CLOCK INTERRUPT IS
@@ -839,9 +830,9 @@
      388/    201 : =>FALSE                      IF       RAM
      389/    201 : =>TRUE                       ELSE
      390/    201 : (MACRO)                      ERRNZ   $-201Q
-     390/    201 :                      ;       IF ($-201Q) != 0
-     390/    201 :                      ;         ERROR Expression is not zero
-     390/    201 :                      ;       ENDIF
+     390/    201 : =>FALSE                      IF ($-201Q) != 0
+     390/    201 :                                ERROR Expression is not zero
+     390/    201 : [1.134]                      ENDIF
      391/    201 : [1.132]                      ENDIF
      392/    201 :                      
      393/    201 : 052 033 040          CLOCK   LHLD    TICCNT
@@ -858,15 +849,12 @@
      404/    221 : 346 040                      ANI     CB.MTL
      405/    223 : 302 172 000                  JNZ     INTXIT          ; IF IN MONITOR MODE
      406/    226 : 013                          DCX     B
-     407/    227 : (MACRO)                      ERRNZ   CTLFLG-MFLAG-1
-     407/    227 :                      ;       IF (CTLFLG-MFLAG-1) != 0
-     407/    227 :                      ;         ERROR Expression is not zero
-     407/    227 :                      ;       ENDIF
+     407/    227 :                      ;       ERRNZ   CTLFLG-MFLAG-1
      408/    227 : 012                          LDAX    B               ; (A) = MFLAG
      409/    230 : (MACRO)                      ERRNZ   UO.HLT-200Q     ; ASSUME HIGH-ORDER
-     409/    230 :                      ;       IF (UO.HLT-200Q) != 0
-     409/    230 :                      ;         ERROR Expression is not zero
-     409/    230 :                      ;       ENDIF
+     409/    230 : =>FALSE                      IF (UO.HLT-200Q) != 0
+     409/    230 :                                ERROR Expression is not zero
+     409/    230 : [1.153]                      ENDIF
      410/    230 : 027                          RAL
      411/    231 : 332 270 000                  JC      CLK4            ; SKIP IT
      412/    234 :                      
@@ -880,9 +868,6 @@
      420/    244 : 033                          DCX     D
      421/    245 : 032                          LDAX    D
      422/    246 : 376 166                      CPI     MI.HLT          ; CHECK FOR HALT
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 15 - 2024-04-25 09:34:57 AM
-
-
      423/    250 : 302 165 000                  JNZ     CUI1
      424/    253 :                      
      425/    253 : 076 007                      MVI     A,A.BEL         ; DING BELL
@@ -895,6 +880,9 @@
      432/    270 :                      
      433/    270 :                      ;       NONE OF THE ABOVE, SO ALLOW USER PROCESSING OF CLOCK INTERRUPT
      434/    270 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 15 - 2024-04-26 05:28:23 PM
+
+
      435/    270 : 303 165 000          CLK4    JMP     CUI1            ; ALLOW USER PROCESSING OF CLOCK
      436/    273 :                      
      437/    273 :                      
@@ -936,24 +924,18 @@
      473/    322 : =>FALSE                      IF      RAM
      474/    322 : =>TRUE                       ELSE
      475/    322 : (MACRO)                      ERRNZ   $-322Q
-     475/    322 :                      ;       IF ($-322Q) != 0
-     475/    322 :                      ;         ERROR Expression is not zero
-     475/    322 :                      ;       ENDIF
+     475/    322 : =>FALSE                      IF ($-322Q) != 0
+     475/    322 :                                ERROR Expression is not zero
+     475/    322 : [1.219]                      ENDIF
      476/    322 : [1.217]                      ENDIF
      477/    322 :                      
      478/    322 : 041 010 040          ERROR   LXI     H,MFLAG
      479/    325 : 176                          MOV     A,M             ; (A) = MFLAG
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 16 - 2024-04-25 09:34:57 AM
-
-
      480/    326 : 346 275                      ANI     377Q-UO.DDU-UO.NFR ; RE-ENABLE DISPLAYS
      481/    330 : 167                          MOV     M,A             ; REPLACE
      482/    331 : 043                          INX     H
      483/    332 : 066 360                      MVI     M,CB.SSI+CB.MTL+CB.CLI+CB.SPK ; RESTORE *CTLFLG*
-     484/    334 : (MACRO)                      ERRNZ   CTLFLG-.MFLAG-1
-     484/    334 :                      ;       IF (CTLFLG-.MFLAG-1) != 0
-     484/    334 :                      ;         ERROR Expression is not zero
-     484/    334 :                      ;       ENDIF
+     484/    334 :                      ;       ERRNZ   CTLFLG-.MFLAG-1
      485/    334 : 373                          EI
      486/    335 : 052 035 040                  LHLD    REGPTR
      487/    340 : 371                          SPHL                    ; RESTORE STACK POINTER TO EMPTY STATE
@@ -961,13 +943,16 @@
      489/    344 :                      
      490/    344 :                      ;       MTR - MONITOR LOOP.
      491/    344 :                      ;
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 16 - 2024-04-26 05:28:23 PM
+
+
      492/    344 :                      
      493/    344 : =>FALSE                      IF      RAM
      494/    344 : =>TRUE                       ELSE
      495/    344 : (MACRO)                      ERRNZ   $-344Q
-     495/    344 :                      ;       IF ($-344Q) != 0
-     495/    344 :                      ;         ERROR Expression is not zero
-     495/    344 :                      ;       ENDIF
+     495/    344 : =>FALSE                      IF ($-344Q) != 0
+     495/    344 :                                ERROR Expression is not zero
+     495/    344 : [1.239]                      ENDIF
      496/    344 : [1.237]                      ENDIF
      497/    344 :                      
      498/    344 : 373                  MTR     EI
@@ -1006,9 +991,6 @@
      531/  1.025 :                      
      532/  1.025 : 107                          DB      'G'             ; GO TO USER ROUTINE
      533/  1.026 : 146 001                      DW      GO88
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 17 - 2024-04-25 09:34:57 AM
-
-
      534/  1.030 :                      
      535/  1.030 : 123                          DB      'S'             ; SUBSTITUTE MEMORY MODE
      536/  1.031 : 370 004                      DW      SUBM
@@ -1024,6 +1006,9 @@
      546/  1.041 :                      ;       BSMSG   - BOOT SECONDARY DEVICE MESSAGE
      547/  1.041 :                      
      548/  1.041 : 040 123 104 000      BSMSG   DB      ' SD',0         ; 'SECONDARY DEVICE'
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 17 - 2024-04-26 05:28:23 PM
+
+
      549/  1.045 :                      
      550/  1.045 : 077 000              ERRMSG  DB      '?',0           ; ERROR MESSAGE
      551/  1.047 :                      
@@ -1046,10 +1031,10 @@
      567/  1.063 :                      
      568/  1.063 : =>FALSE                      IF      RAM
      569/  1.063 : =>TRUE                       ELSE
-     570/  1.063 : (MACRO)                      ERRNZ   $-1063Q
-     570/  1.063 :                      ;       IF ($-1063Q) != 0
-     570/  1.063 :                      ;         ERROR Expression is not zero
-     570/  1.063 :                      ;       ENDIF
+     570/  1.063 : (MACRO)                      ERRNZ   $-463Q
+     570/  1.063 : =>FALSE                      IF ($-463Q) != 0
+     570/  1.063 :                                ERROR Expression is not zero
+     570/  1.063 : [2.058]                      ENDIF
      571/  1.063 : [2.056]                      ENDIF
      572/  1.063 :                      
      573/  1.063 : 042 024 040          SAE     SHLD    ABUSS
@@ -1069,9 +1054,6 @@
      587/  1.072 : 346 200                      ANI     S.DTR           ; CHECK FOR DATA TERMINAL REQUEST
      588/  1.074 :                              CPU     Z80
      589/  1.074 : 050 371                      JR      Z,PIN           ; IF READY, WAIT
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 18 - 2024-04-25 09:34:57 AM
-
-
      590/  1.076 :                              CPU     8080
      591/  1.076 : 315 156 006                  CALL    IN1.            ; INPUT A BYTE FROM PORT
      592/  1.101 : 311                          RET
@@ -1087,6 +1069,9 @@
      602/  1.103 :                      ;
      603/  1.103 :                      ;       ENTRY   NONE
      604/  1.103 :                      ;       EXIT    NONE
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 18 - 2024-04-26 05:28:23 PM
+
+
      605/  1.103 :                      ;       USES    A,D,E,H,L,F
      606/  1.103 :                      
      607/  1.103 : 041 214 006          PCA     LXI     H,MSG.PC        ; COMPLETE PC MESSAGE
@@ -1132,9 +1117,6 @@
      647/  1.174 : 315 062 003                  CALL    IOA             ; INPUT NEW GO ADDRESS
      648/  1.177 : 315 302 003          GO88.1  CALL    WCC             ; ECHO RETURN
      649/  1.202 : 076 012                      MVI     A,A.LF          ; LINE FEED
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 19 - 2024-04-25 09:34:57 AM
-
-
      650/  1.204 : 315 302 003                  CALL    WCC
      651/  1.207 : 303 222 001                  JMP     GO              ; EXECUTE USER ROUTINE
      652/  1.212 :                      
@@ -1150,6 +1132,9 @@
      662/  1.213 : 315 301 002                  CALL    DEVICE          ; CHECK DEVICE INFORMATION
      663/  1.216 : 303 336 001                  JMP     BOOT0           ; GOTO BOOT IT
      664/  1.221 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 19 - 2024-04-26 05:28:23 PM
+
+
      665/  1.221 : 000                          DB      0               ; UNUSED BYTE
      666/  1.222 :                      
      667/  1.222 :                              ORG     622Q
@@ -1159,10 +1144,10 @@
      671/  1.222 :                      
      672/  1.222 : =>FALSE                      IF      RAM
      673/  1.222 : =>TRUE                       ELSE
-     674/  1.222 : (MACRO)                      ERRNZ   $-1222Q
-     674/  1.222 :                      ;       IF ($-1222Q) != 0
-     674/  1.222 :                      ;         ERROR Expression is not zero
-     674/  1.222 :                      ;       ENDIF
+     674/  1.222 : (MACRO)                      ERRNZ   $-622Q
+     674/  1.222 : =>FALSE                      IF ($-622Q) != 0
+     674/  1.222 :                                ERROR Expression is not zero
+     674/  1.222 : [2.162]                      ENDIF
      675/  1.222 : [2.160]                      ENDIF
      676/  1.222 :                      
      677/  1.222 : 303 063 000          GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
@@ -1173,10 +1158,10 @@
      682/  1.225 :                      
      683/  1.225 : =>FALSE                      IF      RAM
      684/  1.225 : =>TRUE                       ELSE
-     685/  1.225 : (MACRO)                      ERRNZ   $-1225Q
-     685/  1.225 :                      ;       IF ($-1225Q) != 0
-     685/  1.225 :                      ;         ERROR Expression is not zero
-     685/  1.225 :                      ;       ENDIF
+     685/  1.225 : (MACRO)                      ERRNZ   $-625Q
+     685/  1.225 : =>FALSE                      IF ($-625Q) != 0
+     685/  1.225 :                                ERROR Expression is not zero
+     685/  1.225 : [2.173]                      ENDIF
      686/  1.225 : [2.171]                      ENDIF
      687/  1.225 :                      
      688/  1.225 :                      SSTEP                           ; SINGLE STEP
@@ -1192,13 +1177,10 @@
      698/  1.244 :                      
      699/  1.244 : =>FALSE                      IF      RAM
      700/  1.244 : =>TRUE                       ELSE
-     701/  1.244 : (MACRO)                      ERRNZ   $-1244Q
-     701/  1.244 :                      ;       IF ($-1244Q) != 0
-     701/  1.244 :                      ;         ERROR Expression is not zero
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 20 - 2024-04-25 09:34:57 AM
-
-
-     701/  1.244 :                      ;       ENDIF
+     701/  1.244 : (MACRO)                      ERRNZ   $-644Q
+     701/  1.244 : =>FALSE                      IF ($-644Q) != 0
+     701/  1.244 :                                ERROR Expression is not zero
+     701/  1.244 : [2.189]                      ENDIF
      702/  1.244 : [2.187]                      ENDIF
      703/  1.244 :                      
      704/  1.244 :                      STPRTN
@@ -1213,6 +1195,9 @@
      713/  1.261 :                      ;       NBOOT   -               NORMAL BOOT
      714/  1.261 :                      ;
      715/  1.261 :                      ;       NBOOT IS ENTERED WHEN USER TYPES 'BOOT:' COMMAND FROM MONITOR.
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 20 - 2024-04-26 05:28:23 PM
+
+
      716/  1.261 :                      ;       IT WILL ACCEPT THE BOOT DEVICE AS WELL AS THE UNIT NUMBER FROM
      717/  1.261 :                      ;       CONSOLE AND GO TO THE BOOT CODE.
      718/  1.261 :                      ;
@@ -1258,9 +1243,6 @@
      758/  1.325 :                      
      759/  1.325 :                      ;       USER WISHES TO BOOT FROM SECONDARY DEVICE
      760/  1.325 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 21 - 2024-04-25 09:34:57 AM
-
-
      761/  1.325 :                      BSEC
      762/  1.325 : 041 041 001                  LXI     H,BSMSG         ; PRINT BOOT SECONDARY MESSAGE
      763/  1.330 : 315 100 006                  CALL    TYPMSG
@@ -1276,6 +1258,9 @@
      773/  1.337 : 030 012                      JR      BOOT6
      774/  1.341 :                              CPU     8080
      775/  1.341 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 21 - 2024-04-26 05:28:23 PM
+
+
      776/  1.341 : 315 302 003          BOOT5   CALL    WCC             ; PRINT UNIT NUMBER
      777/  1.344 : 326 060                      SUI     '0'             ; MAKE IT BINARY
      778/  1.346 : 107                          MOV     B,A             ; SAVE THE UNIT #
@@ -1321,9 +1306,6 @@
      818/  2.010 :                      
      819/  2.010 : 076 002                      MVI     A,DC.RAS        ; SEND READ AUX. STATUS COMMAND
      820/  2.012 : 315 027 006                  CALL    COM
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 22 - 2024-04-25 09:34:57 AM
-
-
      821/  2.015 : 171                          MOV     A,C             ; GET SIDE/UNIT/SECTOR
      822/  2.016 : 315 023 006                  CALL    DAT             ; SEND SECOND COMMAND BYTE
      823/  2.021 : 315 067 001                  CALL    PIN             ; GET AUX. STATUS BYTE
@@ -1339,6 +1321,9 @@
      833/  2.036 : 315 121 006                  CALL    RDBLCK          ; READ A SECTOR FROM DISK
      834/  2.041 : 301                          POP     B               ; GET SECTOR SIZE & SUS BACK
      835/  2.042 : 014                          INR     C               ; SET TO NEXT SECTOR
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 22 - 2024-04-26 05:28:23 PM
+
+
      836/  2.043 : 315 121 006                  CALL    RDBLCK          ; READ ANOTHER SECTOR
      837/  2.046 :                      
      838/  2.046 :                      ;       CHECK ANY ERROR DURING BOOT
@@ -1384,9 +1369,6 @@
      878/  2.110 : 303 073 036          R.SDP1  JMP     SDP3
      879/  2.113 :                      
      880/  2.113 :                      ;       CKAUTO  -       CHECK IF IT IS AUTO BOOT
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 23 - 2024-04-25 09:34:57 AM
-
-
      881/  2.113 :                      ;
      882/  2.113 :                      ;       CKAUTO IS ENTERED FROM MONITOR LOOP. IT WILL CHECK IF AUTO BOOT
      883/  2.113 :                      ;       CONDITION IS TRUE.IF NOT, BACK TO MONITOR LOOP.
@@ -1402,6 +1384,9 @@
      893/  2.115 : 346 200                      ANI     H88S.AT         ; CHECK AUTO BOOT SWITCH BIT SET
      894/  2.117 :                              CPU     Z80
      895/  2.117 : 050 007                      JR      Z,CHAT2         ; NOT SET
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 23 - 2024-04-26 05:28:23 PM
+
+
      896/  2.121 :                              CPU     8080
      897/  2.121 : 041 123 041                  LXI     H,AUTOB         ; SET AUTO BOOT FLAG ADDR.
      898/  2.124 : 276                          CMP     M               ; CHECK AUTO BOOT BEFORE?
@@ -1416,20 +1401,20 @@
      907/  2.136 :                      ;       EXIT    NONE
      908/  2.136 :                      ;       USES    A,F
      909/  2.136 :                      
-     910/  2.136 : (MACRO)                      ERRNZ   $-2136Q
-     910/  2.136 :                      ;       IF ($-2136Q) != 0
-     910/  2.136 :                      ;         ERROR Expression is not zero
-     910/  2.136 :                      ;       ENDIF
+     910/  2.136 : (MACRO)                      ERRNZ   $-1136Q
+     910/  2.136 : =>FALSE                      IF ($-1136Q) != 0
+     910/  2.136 :                                ERROR Expression is not zero
+     910/  2.136 : [3.142]                      ENDIF
      911/  2.136 :                      
      912/  2.136 :                      ALARM
      913/  2.136 :                              CPU     Z80
      914/  2.136 : 030 026                      JR      ALARMB          ; BRANCH TO A JUMP TO NOISE TO DING BELL
      915/  2.140 :                              CPU     8080
      916/  2.140 :                      
-     917/  2.140 : (MACRO)                      ERRNZ   $-2140Q
-     917/  2.140 :                      ;       IF ($-2140Q) != 0
-     917/  2.140 :                      ;         ERROR Expression is not zero
-     917/  2.140 :                      ;       ENDIF
+     917/  2.140 : (MACRO)                      ERRNZ   $-1140Q
+     917/  2.140 : =>FALSE                      IF ($-1140Q) != 0
+     917/  2.140 :                                ERROR Expression is not zero
+     917/  2.140 : [3.149]                      ENDIF
      918/  2.140 :                      
      919/  2.140 : 365                  HORN    PUSH    PSW
      920/  2.141 : 076 200                      MVI     A,CB.SPK        ; TURN ON SPEAKER
@@ -1447,9 +1432,6 @@
      932/  2.157 : 206                          ADD     M
      933/  2.160 : 276                  HRN2    CMP     M               ; WAIT REQUIRED TICCOUNTS
      934/  2.161 :                              CPU     Z80
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 24 - 2024-04-25 09:34:57 AM
-
-
      935/  2.161 : 040 375                      JR      NZ,HRN2
      936/  2.163 :                              CPU     8080
      937/  2.163 :                      
@@ -1465,6 +1447,9 @@
      947/  2.171 :                      ;                            OR 2. NO DEVICE IS INDICATED ON SWITCH
      948/  2.171 :                      ;                            OR 3. USER HIT <DELETE> TO ABORT BOOT
      949/  2.171 :                      ;                            OR 4. BOOT ERROR
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 24 - 2024-04-26 05:28:23 PM
+
+
      950/  2.171 :                      ;       IT WILL EXIT TO 'ERROR' ROUTINE AND MONITOR LOOP
      951/  2.171 :                      ;
      952/  2.171 :                      ;       ENTRY:  NONE
@@ -1510,9 +1495,6 @@
      992/  2.245 :                              CPU    Z80
      993/  2.245 : 020 370                      DJNZ   H17A
      994/  2.247 :                              CPU    8080
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 25 - 2024-04-25 09:34:57 AM
-
-
      995/  2.247 :                      
      996/  2.247 :                      ;       READ BOOT CODE
      997/  2.247 :                      
@@ -1528,6 +1510,9 @@
     1007/  2.270 :                      ;       SETUP CLOCK INTERRUPT FOR H17 ONLY
     1008/  2.270 :                      
     1009/  2.270 : 041 031 034                  LXI   H,CLOCK17         ; LOAD CLOCK ROUTINE ADDRESS
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 25 - 2024-04-26 05:28:23 PM
+
+
     1010/  2.273 : 042 040 040                  SHLD  UIVEC+1           ; SET IT INTO VECTOR LOCATION
     1011/  2.276 : 303 200 042                  JMP   USERFWA           ; GOTO BOOT CODE
     1012/  2.301 :                      
@@ -1564,18 +1549,15 @@
     1043/  2.323 : 074                          INR     A               ; (A)=1
     1044/  2.324 : 062 121 041                  STA     TMFG            ; SET TIMER TO Z47 FLAG
     1045/  2.327 : (MACRO)                      ERRNZ   UO.CLK-1        ; TIMER INTERRUPT MUST = 1
-    1045/  2.327 :                      ;       IF (UO.CLK-1) != 0
-    1045/  2.327 :                      ;         ERROR Expression is not zero
-    1045/  2.327 :                      ;       ENDIF
+    1045/  2.327 : =>FALSE                      IF (UO.CLK-1) != 0
+    1045/  2.327 :                                ERROR Expression is not zero
+    1045/  2.327 : [4.021]                      ENDIF
     1046/  2.327 : 062 010 040                  STA     MFLAG           ; ALLOW TIMER INTERRUPT
     1047/  2.332 : 041 037 040                  LXI     H,UIVEC         ; SET ALL VECTOR TO EI/RET ADDRESS
     1048/  2.335 : 066 303              BOOT2   MVI     M,MI.JMP
     1049/  2.337 : 043                          INX     H
     1050/  2.340 : 066 027                      MVI     M,EIXIT#256     ; STORE LS BYTE
     1051/  2.342 : 043                          INX     H
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 26 - 2024-04-25 09:34:57 AM
-
-
     1052/  2.343 : 066 034                      MVI     M,EIXIT/256     ; STORE MS BYTE
     1053/  2.345 : 043                          INX     H
     1054/  2.346 : 207                          ADD     A
@@ -1591,6 +1573,9 @@
     1064/  2.372 :                      
     1065/  2.372 :                      ;       DETERMINE BOOT DEVICE AND ITS INFORMATION
     1066/  2.372 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 26 - 2024-04-26 05:28:23 PM
+
+
     1067/  2.372 : 333 362                      IN      H88.SW          ; READ SWITCH DATA
     1068/  2.374 : 365                          PUSH    PSW             ; SAVE IN STACK
     1069/  2.375 : 346 020                      ANI     H88S.DV         ; CHECK PRIMARY DEVICE ADDRESS
@@ -1615,9 +1600,9 @@
     1088/  3.026 : 045                          DCR     H               ; NO DEVICE THERE, Z47 LOCATION MUST ON 1***A
     1089/  3.027 : 311                          RET
     1090/  3.030 : (MACRO)                      ERRNZ   Z47/256-1
-    1090/  3.030 :                      ;       IF (Z47/256-1) != 0
-    1090/  3.030 :                      ;         ERROR Expression is not zero
-    1090/  3.030 :                      ;       ENDIF
+    1090/  3.030 : =>FALSE                      IF (Z47/256-1) != 0
+    1090/  3.030 :                                ERROR Expression is not zero
+    1090/  3.030 : [4.066]                      ENDIF
     1091/  3.030 :                      
     1092/  3.030 :                      ;       PRIMARY DEVICE IS H17
     1093/  3.030 :                      
@@ -1636,9 +1621,6 @@
     1106/  3.047 :                              CPU     8080
     1107/  3.047 :                      
     1108/  3.047 :                              ORG     1447Q
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 27 - 2024-04-25 09:34:57 AM
-
-
     1109/  3.047 :                      ;       LRA - LOCATE REGISTER ADDRESS
     1110/  3.047 :                      ;
     1111/  3.047 :                      ;       ENTRY   NONE.
@@ -1649,11 +1631,14 @@
     1116/  3.047 :                      
     1117/  3.047 : =>FALSE                      IF      RAM
     1118/  3.047 : =>TRUE                       ELSE
-    1119/  3.047 : (MACRO)                      ERRNZ   $-3047Q
-    1119/  3.047 :                      ;       IF ($-3047Q) != 0
-    1119/  3.047 :                      ;         ERROR Expression is not zero
-    1119/  3.047 :                      ;       ENDIF
+    1119/  3.047 : (MACRO)                      ERRNZ   $-1447Q
+    1119/  3.047 : =>FALSE                      IF ($-1447Q) != 0
+    1119/  3.047 :                                ERROR Expression is not zero
+    1119/  3.047 : [4.095]                      ENDIF
     1120/  3.047 : [4.093]                      ENDIF
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 27 - 2024-04-26 05:28:23 PM
+
+
     1121/  3.047 :                      
     1122/  3.047 : 072 005 040          LRA     LDA     REGI
     1123/  3.052 : 137                  LRA.    MOV     E,A
@@ -1671,10 +1656,10 @@
     1135/  3.062 :                      
     1136/  3.062 : =>FALSE                      IF      RAM
     1137/  3.062 : =>TRUE                       ELSE
-    1138/  3.062 : (MACRO)                      ERRNZ   $-3062Q
-    1138/  3.062 :                      ;       IF ($-3062Q) != 0
-    1138/  3.062 :                      ;         ERROR Expression is not zero
-    1138/  3.062 :                      ;       ENDIF
+    1138/  3.062 : (MACRO)                      ERRNZ   $-1462Q
+    1138/  3.062 : =>FALSE                      IF ($-1462Q) != 0
+    1138/  3.062 :                                ERROR Expression is not zero
+    1138/  3.062 : [4.114]                      ENDIF
     1139/  3.062 : [4.112]                      ENDIF
     1140/  3.062 :                      
     1141/  3.062 : 303 176 005          IOA     JMP     IOA1
@@ -1691,17 +1676,14 @@
     1152/  3.066 :                      
     1153/  3.066 : =>FALSE                      IF      RAM
     1154/  3.066 : =>TRUE                       ELSE
-    1155/  3.066 : (MACRO)                      ERRNZ   $-3066Q
-    1155/  3.066 :                      ;       IF ($-3066Q) != 0
-    1155/  3.066 :                      ;         ERROR Expression is not zero
-    1155/  3.066 :                      ;       ENDIF
+    1155/  3.066 : (MACRO)                      ERRNZ   $-1466Q
+    1155/  3.066 : =>FALSE                      IF ($-1466Q) != 0
+    1155/  3.066 :                                ERROR Expression is not zero
+    1155/  3.066 : [4.131]                      ENDIF
     1156/  3.066 : [4.129]                      ENDIF
     1157/  3.066 :                      
     1158/  3.066 : 066 000              IOB     MVI     M,0             ; ZERO OUT OLD VALUE
     1159/  3.070 : 324 262 003          IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 28 - 2024-04-25 09:34:57 AM
-
-
     1160/  3.073 :                      
     1161/  3.073 :                      ;       SEE IF CHARACTER IS A VALID OCTAL VALUE
     1162/  3.073 :                      ;
@@ -1717,6 +1699,9 @@
     1172/  3.112 : 137                          MOV     E,A             ; (E) = VALUE
     1173/  3.113 : 176                          MOV     A,M             ; GET OLD VALUE
     1174/  3.114 : 007                          RLC                     ; SHIFT 3
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 28 - 2024-04-26 05:28:23 PM
+
+
     1175/  3.115 : 007                          RLC
     1176/  3.116 : 007                          RLC
     1177/  3.117 : 303 126 003                  JMP     IOB1.5          ; JUMP AROUND AN H88/H89 TO H8 FAKE ROUTINE
@@ -1725,10 +1710,10 @@
     1180/  3.122 :                      
     1181/  3.122 : =>FALSE                      IF      RAM
     1182/  3.122 : =>TRUE                       ELSE
-    1183/  3.122 : (MACRO)                      ERRNZ    $-3122Q
-    1183/  3.122 :                      ;       IF ($-3122Q) != 0
-    1183/  3.122 :                      ;         ERROR Expression is not zero
-    1183/  3.122 :                      ;       ENDIF
+    1183/  3.122 : (MACRO)                      ERRNZ    $-1522Q
+    1183/  3.122 : =>FALSE                      IF ($-1522Q) != 0
+    1183/  3.122 :                                ERROR Expression is not zero
+    1183/  3.122 : [4.159]                      ENDIF
     1184/  3.122 : [4.157]                      ENDIF
     1185/  3.122 :                      
     1186/  3.122 : 043                  DOD     INX      H
@@ -1762,9 +1747,6 @@
     1214/  3.143 :                      ;       USES:   A,C,F
     1215/  3.143 :                      
     1216/  3.143 :                      DYASC
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 29 - 2024-04-25 09:34:57 AM
-
-
     1217/  3.143 :                              CPU     Z80
     1218/  3.143 : 010                          EX      AF,AF'          ; SAVE CHARACTER TO OUTPUT
     1219/  3.144 :                              CPU     8080
@@ -1780,6 +1762,9 @@
     1229/  3.156 : 375 351                      JP      (IY)            ; RETURN TO CALLER
     1230/  3.160 :                              CPU     8080
     1231/  3.160 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 29 - 2024-04-26 05:28:23 PM
+
+
     1232/  3.160 :                      ;       DYBYT - DYNAMIC RAM BYTE OUTPUT
     1233/  3.160 :                      ;
     1234/  3.160 :                      ;       ENTRY:  (A) = BYTE TO OUTPUT AS OCTAL
@@ -1825,9 +1810,6 @@
     1274/  3.232 :                      
     1275/  3.232 : 303 143 003                  JMP     DYASC
     1276/  3.235 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 30 - 2024-04-25 09:34:57 AM
-
-
     1277/  3.235 :                      DYBYT.6
     1278/  3.235 :                              CPU     Z80
     1279/  3.235 : 335 351                      JP      (IX)            ; RETURN TO CALLER
@@ -1843,6 +1825,9 @@
     1287/  3.257 : 000                          DB      0
     1288/  3.260 :                      
     1289/  3.260 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 30 - 2024-04-26 05:28:23 PM
+
+
     1290/  3.260 :                      ;       RCK - READ CONSOLE KEYPAD
     1291/  3.260 :                      ;
     1292/  3.260 :                      ;       RCK IS CALLED TO READ A KEYSTROKE FROM THE CONSOLE FRONT PANEL KEYPAD.
@@ -1855,10 +1840,10 @@
     1299/  3.260 :                      ;       USES    A,F
     1300/  3.260 :                      
     1301/  3.260 :                      ;       RCK MUST HAVE SAME ENTRY AS RCK IN PAM-8
-    1302/  3.260 : (MACRO)                      ERRNZ   $-3260Q
-    1302/  3.260 :                      ;       IF ($-3260Q) != 0
-    1302/  3.260 :                      ;         ERROR Expression is not zero
-    1302/  3.260 :                      ;       ENDIF
+    1302/  3.260 : (MACRO)                      ERRNZ   $-1660Q
+    1302/  3.260 : =>FALSE                      IF ($-1660Q) != 0
+    1302/  3.260 :                                ERROR Expression is not zero
+    1302/  3.260 : [5.022]                      ENDIF
     1303/  3.260 :                      
     1304/  3.260 : 257                  RCK     XRA     A
     1305/  3.261 : 311                          RET
@@ -1888,9 +1873,6 @@
     1329/  3.274 : 376 177                      CPI     A.DEL
     1330/  3.276 : 312 322 000                  JZ      ERROR           ; IF RUBOUT, EXIT TO CALLER
     1331/  3.301 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 31 - 2024-04-25 09:34:57 AM
-
-
     1332/  3.301 : 311                          RET                     ; ELSE, EXIT TO CALLER
     1333/  3.302 :                      
     1334/  3.302 :                      ;       WCC - WRITE CONSOLE CHARACTER
@@ -1906,6 +1888,9 @@
     1344/  3.305 : 346 040                      ANI     UC.THE          ; SEE IF TRANSMITTER HOLDING IS EMPTY
     1345/  3.307 :                              CPU     Z80
     1346/  3.307 : 050 372                      JR      Z,WCC1
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 31 - 2024-04-26 05:28:23 PM
+
+
     1347/  3.311 :                              CPU     8080
     1348/  3.311 :                      
     1349/  3.311 : 361                          POP     PSW             ; GET CHARACTER
@@ -1951,9 +1936,6 @@
     1389/  3.360 : 076 007              DYMEM10 MVI     A,A.BEL         ; DING BELL
     1390/  3.362 :                      
     1391/  3.362 :                              CPU     Z80
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 32 - 2024-04-25 09:34:57 AM
-
-
     1392/  3.362 : 375 041 265 007              LD      IY,DY10.5       ; RETURN ADDRESS
     1393/  3.366 :                              CPU     8080
     1394/  3.366 :                      
@@ -1967,10 +1949,13 @@
     1402/  3.371 :                      
     1403/  3.371 : =>FALSE                      IF      RAM
     1404/  3.371 : =>TRUE                       ELSE
-    1405/  3.371 : (MACRO)                      ERRNZ   4000Q-7-$
-    1405/  3.371 :                      ;       IF (4000Q-7-$) != 0
-    1405/  3.371 :                      ;         ERROR Expression is not zero
-    1405/  3.371 :                      ;       ENDIF
+    1405/  3.371 : (MACRO)                      ERRNZ   2000Q-7-$
+    1405/  3.371 : =>FALSE                      IF (2000Q-7-$) != 0
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 32 - 2024-04-26 05:28:23 PM
+
+
+    1405/  3.371 :                                ERROR Expression is not zero
+    1405/  3.371 : [5.125]                      ENDIF
     1406/  3.371 : [5.123]                      ENDIF
     1407/  3.371 :                      
     1408/  3.371 :                      PRSROM
@@ -1984,10 +1969,10 @@
     1416/  4.000 :                      
     1417/  4.000 : =>FALSE                      IF      RAM
     1418/  4.000 : =>TRUE                       ELSE
-    1419/  4.000 : (MACRO)                      ERRNZ   $-4000Q
-    1419/  4.000 :                      ;       IF ($-4000Q) != 0
-    1419/  4.000 :                      ;         ERROR Expression is not zero
-    1419/  4.000 :                      ;       ENDIF
+    1419/  4.000 : (MACRO)                      ERRNZ   $-2000Q
+    1419/  4.000 : =>FALSE                      IF ($-2000Q) != 0
+    1419/  4.000 :                                ERROR Expression is not zero
+    1419/  4.000 : [5.139]                      ENDIF
     1420/  4.000 : [5.137]                      ENDIF
     1421/  4.000 :                      
     1422/  4.000 :                      ;       INIT0X - EXTENSION OF INIT0 TO SUPPORT H88
@@ -2014,9 +1999,6 @@
     1443/  4.031 : 043                          INX     H               ; GET LSB
     1444/  4.032 : 176                          MOV     A,M
     1445/  4.033 : 323 350                      OUT     SC.ACE+UR.DLL
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 33 - 2024-04-25 09:34:57 AM
-
-
     1446/  4.035 : 076 003                      MVI     A,UC.8BW        ; SET 8 BITS, 1 STOP BIT, NO PARITY
     1447/  4.037 : 323 353                      OUT     SC.ACE+UR.LCR
     1448/  4.041 : 076 000                      MVI     A,0             ; SET NO INTERRUPTS
@@ -2032,6 +2014,9 @@
     1458/  4.053 :                      
     1459/  4.053 : 020 373                      DJNZ    INIT0X1
     1460/  4.055 :                              CPU     8080
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 33 - 2024-04-26 05:28:23 PM
+
+
     1461/  4.055 :                      
     1462/  4.055 :                      ;       INPUT SWITCH TO SEE IF TO BEGIN OPERATION OF MEMORY TEST
     1463/  4.055 :                      ;
@@ -2057,10 +2042,7 @@
     1483/  4.105 :                      ;BR56.0 DB      0,2             ; 56,000 BAUD
     1484/  4.105 :                      
     1485/  4.105 :                      ;       SET     */256
-    1486/  4.105 : (MACRO)                      ERRNZ   ERTAB/256-.     ; TABLE MUST BE IN ONE PAGE
-    1486/  4.105 :                      ;       IF (ERTAB/256-.) != 0
-    1486/  4.105 :                      ;         ERROR Expression is not zero
-    1486/  4.105 :                      ;       ENDIF
+    1486/  4.105 :                      ;       ERRNZ   ERTAB/256-.     ; TABLE MUST BE IN ONE PAGE
     1487/  4.105 :                      
     1488/  4.105 :                      ;       SAVALLX - SAVALL EXTENSION TO MAKE ROOM FOR A JUMP TO THE NMI HANDLER
     1489/  4.105 :                      
@@ -2077,9 +2059,6 @@
     1500/  4.116 :                      ;
     1501/  4.116 :                      ;       PORT ADDRESSES TRAPPED ARE:
     1502/  4.116 :                      ;
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 34 - 2024-04-25 09:34:57 AM
-
-
     1503/  4.116 :                      ;                       IN 360Q FRONT PANEL KEYBOARD INPUT
     1504/  4.116 :                      ;                      OUT 360Q FRONT PANEL CONTROL
     1505/  4.116 :                      ;                      OUT 361Q FRONT PANEL DISPLAY CONTROL
@@ -2098,6 +2077,9 @@
     1518/  4.116 :                      ;                              CONTROL THE CLOCK AND SINGLE STEP INTERRUPTS
     1519/  4.116 :                      ;
     1520/  4.116 :                      ;                      OUTPUTS TO 361Q, 372Q, AND 373Q JUST RETURN
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 34 - 2024-04-26 05:28:23 PM
+
+
     1521/  4.116 :                      ;
     1522/  4.116 :                      ;                      INPUTS FROM 361Q, 372Q, AND 373Q RETURN WITH (A) = 0
     1523/  4.116 :                      ;                              TO INDICATE AN EMPTY BUSS
@@ -2140,9 +2122,6 @@
     1560/  4.150 :                      
     1561/  4.150 : 376 373                      CPI     373Q
     1562/  4.152 :                              CPU     Z80
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 35 - 2024-04-25 09:34:57 AM
-
-
     1563/  4.152 : 040 062                      JR      NZ,NMI2.5       ; IF NONE OF THE ABOVE, EXIT
     1564/  4.154 :                              CPU     8080
     1565/  4.154 :                      
@@ -2161,6 +2140,9 @@
     1578/  4.166 : 361                          POP     PSW             ; RESTORE FLAGS
     1579/  4.167 : 076 000                      MVI     A,0             ; ELSE, RETURN LIKE AN EMPTY BUSS
     1580/  4.171 :                              CPU     Z80
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 35 - 2024-04-26 05:28:23 PM
+
+
     1581/  4.171 : 030 044                      JR      NMI3            ; EXIT
     1582/  4.173 :                              CPU     8080
     1583/  4.173 :                      
@@ -2203,9 +2185,6 @@
     1620/  4.237 :                      
     1621/  4.237 : 301                  NMI3    POP     B
     1622/  4.240 : 341                          POP     H
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 36 - 2024-04-25 09:34:57 AM
-
-
     1623/  4.241 :                      ;       RET                     ; Z80 RETURN FROM NMI
     1624/  4.241 : 355 105                      DB      355Q,105Q
     1625/  4.243 :                      
@@ -2224,6 +2203,9 @@
     1638/  4.256 :                      ;       BOOT H-17 OR Z47 ENTRY POINT FOR H88
     1639/  4.256 :                      ;
     1640/  4.256 :                      ;       ENTRY   NONE
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 36 - 2024-04-26 05:28:23 PM
+
+
     1641/  4.256 :                      ;
     1642/  4.256 :                      ;       EXIT    (DE) = NORMAL BOOT ROUTINE ADDRESS
     1643/  4.256 :                      ;
@@ -2266,9 +2248,6 @@
     1680/  4.312 : 346 177                      ANI     01111111B       ; IS IT <DEL>?
     1681/  4.314 : 376 177                      CPI     A.DEL
     1682/  4.316 : 312 171 002                  JZ      NODEV           ; IF IT, ABORT THE BOOT
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 37 - 2024-04-25 09:34:57 AM
-
-
     1683/  4.321 :                                                      ; ELSE IGNORE THE INPUT
     1684/  4.321 :                      
     1685/  4.321 : 041 121 041          TMOUT4  LXI     H,TMFG
@@ -2283,13 +2262,13 @@
     1694/  4.333 : 040 024                      JR      NZ,TMOUT2       ; NOT IN 0.5 SECOND
     1695/  4.335 :                              CPU     8080
     1696/  4.335 : 043                          INX     H               ; SET TO MYCNT
-    1697/  4.336 : (MACRO)                      ERRNZ   MYCNT-TMFG-1    ; MYCNT MUST FOLLOW TMFG
-    1697/  4.336 :                      ;       IF (MYCNT-TMFG-1) != 0
-    1697/  4.336 :                      ;         ERROR Expression is not zero
-    1697/  4.336 :                      ;       ENDIF
+    1697/  4.336 :                      ;       ERRNZ   MYCNT-TMFG-1    ; MYCNT MUST FOLLOW TMFG
     1698/  4.336 : 064                          INR     M               ; INCREASE THE COUNT FOR 0.5 SECOND
     1699/  4.337 : 176                          MOV     A,M
     1700/  4.340 : 376 036                      CPI     30              ; CHECK IF MORE THAN 15 SECONDS
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 37 - 2024-04-26 05:28:23 PM
+
+
     1701/  4.342 : 322 171 002                  JNC     NODEV           ; NO DEVICE?
     1702/  4.345 : 336 007              TMOUT1  SBI     7               ; IS IT 3.5 SECONDS?
     1703/  4.347 :                              CPU     Z80
@@ -2329,9 +2308,6 @@
     1737/  5.002 :                      
     1738/  5.002 : 041 003 040                  LXI     H,IOWRK+1       ; ELSE, INPUT A STARTING ADDRESS
     1739/  5.005 : 026 015                      MVI     D,A.CR          ; ENDING WITH A RETURN
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 38 - 2024-04-25 09:34:57 AM
-
-
     1740/  5.007 : 315 062 003                  CALL    IOA
     1741/  5.012 : 353                          XCHG                    ; (H,L) = INPUT ADDRESS
     1742/  5.013 :                      
@@ -2353,6 +2329,9 @@
     1758/  5.046 : 376 055              SUBM4   CPI     '-'             ; MINUS?
     1759/  5.050 : 302 062 005                  JNZ     SUBM6           ; IF NOT
     1760/  5.053 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 38 - 2024-04-26 05:28:23 PM
+
+
     1761/  5.053 : 315 302 003          SUBM5   CALL    WCC             ; ECHO HYPHEN
     1762/  5.056 : 053                          DCX     H               ; POINT TO PREVIOUS ADDRESS
     1763/  5.057 : 303 013 005                  JMP     SUBM1           ; DISPLAY PREVIOUS
@@ -2392,9 +2371,6 @@
     1797/  5.142 : 315 302 003                  CALL    WCC
     1798/  5.145 : 303 115 005                  JMP     SUBM9           ; TRY AGAIN
     1799/  5.150 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 39 - 2024-04-25 09:34:57 AM
-
-
     1800/  5.150 :                      ;       IROC - INPUT A RETURN OR AN OCTAL CHARACTER
     1801/  5.150 :                      ;
     1802/  5.150 :                      ;       IROC INPUTS A CHARACTER FROM THE CONSOLE AND WAITS UNTIL IT
@@ -2416,6 +2392,9 @@
     1818/  5.165 : 330                          RC                      ; IF OCTAL
     1819/  5.166 :                      
     1820/  5.166 : 076 007              IROC1   MVI     A,A.BEL         ; ELSE, RING BELL
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 39 - 2024-04-26 05:28:23 PM
+
+
     1821/  5.170 : 315 302 003                  CALL    WCC
     1822/  5.173 : 303 150 005                  JMP     IROC            ; TRY AGAIN
     1823/  5.176 :                      
@@ -2455,9 +2434,6 @@
     1857/  5.237 : 303 204 005                  JMP     IOA2            ; SEE IF MORE CHARACTERS
     1858/  5.242 :                      
     1859/  5.242 : 270                  IOA3    CMP     B               ; TERMINATING CHARACTER?
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 40 - 2024-04-25 09:34:57 AM
-
-
     1860/  5.243 : 312 260 005                  JZ      IOA4            ; IF EQUAL
     1861/  5.246 :                      
     1862/  5.246 : 076 007                      MVI     A,A.BEL         ; ELSE, DING BELL
@@ -2479,6 +2455,9 @@
     1878/  5.272 : 353                          XCHG                    ; (D,E) = INPUT ADDRESS
     1879/  5.273 : 341                          POP     H               ; (H,L) = LOCATION TO PLACE THIS ADDRESS
     1880/  5.274 : 162                          MOV     M,D
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 40 - 2024-04-26 05:28:23 PM
+
+
     1881/  5.275 : 053                          DCX     H
     1882/  5.276 : 163                          MOV     M,E
     1883/  5.277 : 301                          POP     B               ; RESTORE (B,C)
@@ -2518,9 +2497,6 @@
     1917/  5.331 : 175                          MOV     A,L
     1918/  5.332 : 315 343 005                  CALL    TOB
     1919/  5.335 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 41 - 2024-04-25 09:34:57 AM
-
-
     1920/  5.335 : 076 040                      MVI     A,' '           ; SPACE
     1921/  5.337 : 315 302 003                  CALL    WCC
     1922/  5.342 : 311                          RET
@@ -2542,6 +2518,9 @@
     1938/  5.352 : 037                          RAR
     1939/  5.353 : 037                  TOB1    RAR                     ; SHIFT MIDDLE BYTE TO LSB
     1940/  5.354 : 037                          RAR
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 41 - 2024-04-26 05:28:23 PM
+
+
     1941/  5.355 : 037                          RAR
     1942/  5.356 : 346 007                      ANI     00000111B       ; MASK FOR HALF ASCII
     1943/  5.360 : 366 060                      ORI     00110000B       ; MASK FOR WHOLE ASCII
@@ -2581,9 +2560,6 @@
     1977/  6.023 :                      ;
     1978/  6.023 :                      ;       ENTRY:  (A) = BYTE TO OUTPUT
     1979/  6.023 :                      ;
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 42 - 2024-04-25 09:34:57 AM
-
-
     1980/  6.023 :                      ;       EXIT:   (A) = BYTE TO OUTPUT
     1981/  6.023 :                      ;               (D) = S.DTR
     1982/  6.023 :                      ;
@@ -2605,6 +2581,9 @@
     1998/  6.027 :                      ;       USES:   AF, D
     1999/  6.027 :                      
     2000/  6.027 : 026 040              COM     MVI     D,S.DON         ; SET MATCH CONDITION TO DONE BIT
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 42 - 2024-04-26 05:28:23 PM
+
+
     2001/  6.031 : 365                  COM1    PUSH    PSW
     2002/  6.032 : 315 170 006          WTDON1  CALL    IN.             ; READ CONTROLLER STATUS REGISTER
     2003/  6.035 : 242                          ANA     D               ; GET MATCH BIT ONLY
@@ -2644,9 +2623,6 @@
     2037/  6.063 :                      ;
     2038/  6.063 :                      ;       EXIT:   NONE
     2039/  6.063 :                      ;
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 43 - 2024-04-25 09:34:57 AM
-
-
     2040/  6.063 :                      ;       USES:   NONE
     2041/  6.063 :                      
     2042/  6.063 : 305                  OUT.    PUSH    B
@@ -2668,6 +2644,9 @@
     2058/  6.100 :                      ;       UNTIL A NULL IS SENSED
     2059/  6.100 :                      ;
     2060/  6.100 :                      ;       ENTRY   (H,L) = ADDRESS OF MESSAGE
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 43 - 2024-04-26 05:28:23 PM
+
+
     2061/  6.100 :                      ;       EXIT    NONE
     2062/  6.100 :                      ;       USES    A,H,L,F
     2063/  6.100 :                      
@@ -2707,9 +2686,6 @@
     2096/  6.123 : 315 027 006                  CALL    COM             ; SEND THE COMMAND
     2097/  6.126 : 257                          XRA     A               ; FOR TRACK 0
     2098/  6.127 : 315 023 006                  CALL    DAT             ; SEND IT TO DISK
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 44 - 2024-04-25 09:34:57 AM
-
-
     2099/  6.132 : 171                          MOV     A,C             ; LOAD SIDE/UNIT/SECTOR
     2100/  6.133 : 315 023 006                  CALL    DAT             ; SEND IT TO DISK
     2101/  6.136 :                      
@@ -2731,6 +2707,9 @@
     2117/  6.146 :                      ;       USE:    NONE
     2118/  6.146 :                      
     2119/  6.146 : 305                  OUT1.   PUSH    B
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 44 - 2024-04-26 05:28:23 PM
+
+
     2120/  6.147 : 107                          MOV     B,A             ; SAVE THE OUTPUT DATA
     2121/  6.150 : 072 120 041                  LDA     PRIM            ; GET PORT ADDRESS
     2122/  6.153 : 074                          INR     A               ; SET TO (PRIM+1)
@@ -2770,9 +2749,6 @@
     2156/  6.170 :                      
     2157/  6.170 : 305                  IN.     PUSH    B
     2158/  6.171 : 072 120 041                  LDA     PRIM            ; GET PORT ADDRESS
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 45 - 2024-04-25 09:34:57 AM
-
-
     2159/  6.174 : 117                  IN.1    MOV     C,A             ; SET ADDR. TO REG C.
     2160/  6.175 :                      ;       IN      A,(C)
     2161/  6.175 : 355 170                      DB      355Q,170Q       ; INPUT BYTE
@@ -2794,6 +2770,9 @@
     2175/  6.214 :                      
     2176/  6.214 : 162 157 147 162 141  MSG.PC  DB       "rogram Counter ",0
            6.221 : 155 040 103 157 165
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 45 - 2024-04-26 05:28:23 PM
+
+
            6.226 : 156 164 145 162 040
            6.233 : 000                
     2177/  6.234 :                      
@@ -2833,9 +2812,6 @@
     2211/  6.240 :                      ;
     2212/  6.240 : =22O                 ONDR0   EQU     022Q            ; TURN ON SY0:
     2213/  6.240 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 46 - 2024-04-25 09:34:57 AM
-
-
     2214/  6.240 :                      
     2215/  6.240 : 041 371 006          SPEED   LXI     H,MSG.SPD       ; OUTPUT SPEED MESSAGE
     2216/  6.243 : 315 100 006                  CALL    TYPMSG
@@ -2857,6 +2833,9 @@
     2232/  6.275 : 001 000 000          SPEED2  LXI     B,0             ; ZERO REV COUNTERS
     2233/  6.300 : 333 177              SPEED3  IN      IP.DS           ; INPUT DISK STATUS
     2234/  6.302 : 346 001                      ANI     DS.HOLE         ; MASK FOR SECTOR/INDEX PULSES
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 46 - 2024-04-26 05:28:23 PM
+
+
     2235/  6.304 : 312 300 006                  JZ      SPEED3          ; IF NO HOLE PRESENT
     2236/  6.307 :                      
     2237/  6.307 :                      ; HOLE PRESENT, WAIT FOR IT TO LEAVE
@@ -2896,9 +2875,6 @@
     2271/  6.371 :                      ;
     2272/  6.371 :                      ;                       Drive speed = '
     2273/  6.371 : 033 105 012          MSG.SPD DB      A.ESC,'E',A.LF
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 47 - 2024-04-25 09:34:57 AM
-
-
     2274/  6.374 : 011 104 151 163 153          DB      '	Disk drive rotational speed test.',A.CR,A.LF,A.LF
            7.001 : 040 144 162 151 166
            7.006 : 145 040 162 157 164
@@ -2920,6 +2896,9 @@
     2282/  7.062 : 033 110              MSG.WRK DB      A.ESC,'H'       ; CURSOR HOME
     2283/  7.064 : 127 157 162 153 151          DB      'Working'
            7.071 : 156 147            
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 47 - 2024-04-26 05:28:23 PM
+
+
     2284/  7.073 : 033 131 043 076              DB      A.ESC,'Y#>'     ; CURSOR ADDRESS OF SPEED = VALUE
     2285/  7.077 : 000                          DB      0               ; END MESSAGE
     2286/  7.100 :                      
@@ -2959,9 +2938,6 @@
     2319/  7.127 : 066 000              DYMEM2  MVI     M,0             ; SET RAM TO ZERO
     2320/  7.131 : 064                          INR     M               ; SET MEMORY TO ONE
     2321/  7.132 : 276                          CMP     M               ; SEE IF (A) = ((H,L))
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 48 - 2024-04-25 09:34:57 AM
-
-
     2322/  7.133 :                              CPU     Z80
     2323/  7.133 : 040 003                      JR      NZ,DYMEM3       ; IF NOT EQUAL, THE END OF RAM HAS BEEN REACHED
     2324/  7.135 :                              CPU     8080     
@@ -2983,6 +2959,9 @@
     2340/  7.153 :                      
     2341/  7.153 : 172                  DY3.3   MOV     A,D             ; OUTPUT ADDRESS MSB
     2342/  7.154 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 48 - 2024-04-26 05:28:23 PM
+
+
     2343/  7.154 :                              CPU     Z80
     2344/  7.154 : 335 041 163 007              LD      IX,DY3.5        ; RETURN ADDRESS
     2345/  7.160 :                              CPU     8080
@@ -3022,9 +3001,6 @@
     2379/  7.220 : 167                          MOV     M,A             ; INCREMENT RAM
     2380/  7.221 : 276                          CMP     M               ; SEE OF WRITE WAS SUCCESSFUL
     2381/  7.222 : 302 307 000                  JNZ     DYMEM9
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 49 - 2024-04-25 09:34:57 AM
-
-
     2382/  7.225 :                      
     2383/  7.225 : 043                          INX     H
     2384/  7.226 : 175                          MOV     A,L             ; GET LSB AND TEST FOR REACHING END OF RAM
@@ -3046,6 +3022,9 @@
     2400/  7.240 : 076 010                      MVI     A,A.BKS
     2401/  7.242 :                      
     2402/  7.242 :                      DYME5.5
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 49 - 2024-04-26 05:28:23 PM
+
+
     2403/  7.242 :                              CPU     Z80
     2404/  7.242 : 375 041 251 007              LD      IY,DY5.53       ; RETURN ADDRESS
     2405/  7.246 :                              CPU     8080
@@ -3085,9 +3064,6 @@
     2439/  7.301 : 040 367                      JR       NZ,DYMEM11
     2440/  7.303 :                              CPU      8080
     2441/  7.303 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 50 - 2024-04-25 09:34:57 AM
-
-
     2442/  7.303 : 303 360 003                  JMP      DYMEM10        ; AGAIN
     2443/  7.306 :                      
     2444/  7.306 :                      ;       DYMSG - DYNAMIC RAM TEST MESSAGE OUTPUT ROUTINE
@@ -3109,6 +3085,9 @@
     2460/  7.316 :                      
     2461/  7.316 : 267                  DYMSG.5 ORA     A               ; SEE IF NULL TO END STRING
     2462/  7.317 : 043                          INX     H               ; POINT TO NEXT CHARACTER
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 50 - 2024-04-26 05:28:23 PM
+
+
     2463/  7.320 :                              CPU     Z80
     2464/  7.320 : 040 364                      JR      NZ,DYMSG        ; IF NOT DONE YET
     2465/  7.322 :                      
@@ -3141,37 +3120,37 @@
     2488/  7.372 :                      ;
     2489/  7.372 : =>FALSE                      IF      RAM
     2490/  7.372 : =>TRUE                       ELSE
-    2491/  7.372 : (MACRO)                      ERRNZ   10000A-6-$      ; MUST BE 6 BYTES BEFORE END
-    2491/  7.372 :                      ;       IF (10000A-6-$) != 0
-    2491/  7.372 :                      ;         ERROR Expression is not zero
-    2491/  7.372 :                      ;       ENDIF
+    2491/  7.372 : (MACRO)                      ERRNZ   4000Q-6-$       ; MUST BE 6 BYTES BEFORE END
+    2491/  7.372 : =>FALSE                      IF (4000Q-6-$) != 0
+    2491/  7.372 :                                ERROR Expression is not zero
+    2491/  7.372 : [9.187]                      ENDIF
     2492/  7.372 : [9.185]                      ENDIF
     2493/  7.372 :                      
     2494/  7.372 : 303 240 006          ESPEED  JMP     SPEED
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 51 - 2024-04-25 09:34:57 AM
-
-
     2495/  7.375 :                      
     2496/  7.375 :                      ;       ENTRY POINT FOR DYNAMIC MEMORY TEST
     2497/  7.375 :                      ;
     2498/  7.375 : =>FALSE                      IF      RAM
     2499/  7.375 : =>TRUE                       ELSE
-    2500/  7.375 : (MACRO)                      ERRNZ   10000A-3-$      ; MUST BE 3 BYTES BEFORE END
-    2500/  7.375 :                      ;       IF (10000A-3-$) != 0
-    2500/  7.375 :                      ;         ERROR Expression is not zero
-    2500/  7.375 :                      ;       ENDIF
+    2500/  7.375 : (MACRO)                      ERRNZ   4000Q-3-$      ; MUST BE 3 BYTES BEFORE END
+    2500/  7.375 : =>FALSE                      IF (4000Q-3-$) != 0
+    2500/  7.375 :                                ERROR Expression is not zero
+    2500/  7.375 : [9.196]                      ENDIF
     2501/  7.375 : [9.194]                      ENDIF
     2502/  7.375 :                      
     2503/  7.375 : 303 116 007          EDTMEM  JMP     DYMEM
     2504/ 10.000 :                      
     2505/ 10.000 : =>FALSE                      IF      RAM
     2506/ 10.000 : =>TRUE                       ELSE
-    2507/ 10.000 : (MACRO)                      ERRNZ   $-10000A        ; MUST NOT EXCEED 2K BYTES
-    2507/ 10.000 :                      ;       IF ($-10000A) != 0
-    2507/ 10.000 :                      ;         ERROR Expression is not zero
-    2507/ 10.000 :                      ;       ENDIF
+    2507/ 10.000 : (MACRO)                      ERRNZ   $-4000Q        ; MUST NOT EXCEED 2K BYTES
+    2507/ 10.000 : =>FALSE                      IF ($-4000Q) != 0
+    2507/ 10.000 :                                ERROR Expression is not zero
+    2507/ 10.000 : [9.203]                      ENDIF
     2508/ 10.000 : [9.201]                      ENDIF
     2509/ 10.000 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 51 - 2024-04-26 05:28:23 PM
+
+
     2510/ 10.000 :                      ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET
     2511/ 10.000 :                      ;       MONITOR.
     2512/ 10.000 :                      
@@ -3211,9 +3190,6 @@
     2546/ 40.031 :                      TPERRX  DS      2               ; TAPE ERROR EXIT ADDRESS
     2547/ 40.033 :                      TICCNT  DS      2               ; CLOCK TIC COUNTER
     2548/ 40.035 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 52 - 2024-04-25 09:34:57 AM
-
-
     2549/ 40.035 :                      REGPTR  DS      2               ; REGISTER CONTENTS POINTER
     2550/ 40.037 :                      
     2551/ 40.037 :                      ;UIVEC                          ; USER INTERRUPT VECTORS
@@ -3235,11 +3211,14 @@
     2567/ 41.122 :                      MYCNT   DS      1               ; COUNTER FOR TIMER INTERRUPT
     2568/ 41.123 :                      AUTOB   DS      1               ; AUTO BOOT FLAG
     2569/ 41.124 :                      STK     DS      1               ; STACK POINTER FOR RE-BOOT
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 52 - 2024-04-26 05:28:23 PM
+
+
     2570/ 41.125 :                      
     2571/ 40.066 :                              ORG     20066Q
     2572/ 40.066 :                      DATA    DS      1               ; OUTPUT 362Q DATA SAVE AREA
     2573/ 40.067 :                              END
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 53 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 53 - 2024-04-26 05:28:23 PM
 
 
   Symbol Table (* = unused):
@@ -3280,7 +3259,7 @@
  D.RAM :                     40.240 C |  D.RAML :                        37 - |
  D.SDP :                     40.206 - |  D.STA :                        170 - |
 *D.VEC :                     40.130 C |  DAT :                        6.023 C |
- DATA :                      40.066 C | *DATE :                "2024-04-25" - |
+ DATA :                      40.066 C | *DATE :                "2024-04-26" - |
 *DC.BOOT :                        0 - | *DC.CPY :                        13 - |
 *DC.FRM0 :                       14 - | *DC.FRM1 :                       15 - |
 *DC.FRM2 :                       16 - | *DC.FRM3 :                       17 - |
@@ -3302,7 +3281,7 @@
  DMOVE :                     30.252 - | *DOD :                        3.122 C |
  DP.DC :                        177 - |  DS.HOLE :                        1 - |
 *DSPMOD :                    40.007 C | *DSPROT :                    40.006 C |
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 54 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 54 - 2024-04-26 05:28:23 PM
 
 
  DY10.5 :                     7.265 C |  DY3.3 :                      7.153 C |
@@ -3365,7 +3344,7 @@
  MI.OUT :                       323 - |  MI.RET :                       311 - |
 *MOMCPU :                   200.200 - | *MOMCPUNAME :                "8080" - |
  MSG.BT :                     6.234 C |  MSG.EQ :                     7.362 C |
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 55 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 55 - 2024-04-26 05:28:23 PM
 
 
  MSG.ERR :                    1.047 C |  MSG.GO :                     6.165 C |
@@ -3427,8 +3406,8 @@
  SUBM6 :                      5.062 C |  SUBM7 :                      5.075 C |
  SUBM8 :                      5.077 C |  SUBM9 :                      5.115 C |
 *SYDD :                      40.130 C |  TICCNT :                    40.033 C |
-*TIME :               "09:34:57 AM" - |  TMFG :                      41.121 C |
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 56 - 2024-04-25 09:34:57 AM
+*TIME :               "05:28:23 PM" - |  TMFG :                      41.121 C |
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 56 - 2024-04-26 05:28:23 PM
 
 
  TMOUT :                      4.302 C |  TMOUT1 :                     4.345 C |
@@ -3470,8 +3449,8 @@
 *UMI.PA :                        20 - | *UMI.PE :                        40 - |
 *UNT.0 :                          0 - | *UNT.1 :                         40 - |
 *UNT.2 :                        100 - | *UNT.3 :                        140 - |
-*UO.CLK :                         1 - |  UO.DDU :                         2 - |
-*UO.HLT :                       200 - |  UO.NFR :                       100 - |
+ UO.CLK :                         1 - |  UO.DDU :                         2 - |
+ UO.HLT :                       200 - |  UO.NFR :                       100 - |
  UP.DP :                        174 - | *UP.FC :                        175 - |
 *UP.SC :                        176 - | *UP.SR :                        176 - |
 *UP.ST :                        175 - |  UR.DLL :                         0 - |
@@ -3491,13 +3470,13 @@
  Z47 :                        1.364 C |  Z47A :                       1.370 C |
 *Z80SYNTAX :                      0 - |
 
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 57 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 57 - 2024-04-26 05:28:23 PM
 
 
   1.214 symbols
-    203 unused symbols
+    201 unused symbols
 
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 58 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 58 - 2024-04-26 05:28:23 PM
 
 
   Defined Macros:
@@ -3508,7 +3487,7 @@ ERRPL                                 | ERRZR
 
       4 macros
 
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 59 - 2024-04-25 09:34:57 AM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 59 - 2024-04-26 05:28:23 PM
 
 
   Code Pages:
@@ -3521,7 +3500,7 @@ STANDARD (0 changed characters)
 0.02 seconds assembly time
 
  11.131 lines source file
- 11.245 lines incl. macro expansions
+ 11.224 lines incl. macro expansions
       2 passes
       0 errors
       0 warnings

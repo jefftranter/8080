@@ -17,10 +17,6 @@ The original code used many split octal constants (suffixed by A).
 This is not supported by ASL and they have been converted to octal
 (suffix Q).
 
-Macros, like ERRNZ, for assembly time assertion checks could not be
-implemented with ASM so I have created macro definitions that simply
-do nothing.
-
 Unused code was filled with zeroes to match the original ROM binaries.
 
 A few obvious spelling and grammatical errors in comments have been

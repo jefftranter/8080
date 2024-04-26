@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 269] - Source File test.asm - Page 1 - 2024-04-25 09:32:46 AM
+ AS V1.42 Beta [Bld 269] - Source File test.asm - Page 1 - 2024-04-26 05:28:23 PM
 
 
     1/      0 :                         ; Source code for "Computing Test" program in H88 Operation Manual.
@@ -23,7 +23,7 @@
    20/ 40.113 : 303 102 040                     JMP     LOOP
    21/ 40.116 :                         
    22/ 40.116 :                                 END
- AS V1.42 Beta [Bld 269] - Source File test.asm - Page 2 - 2024-04-25 09:32:46 AM
+ AS V1.42 Beta [Bld 269] - Source File test.asm - Page 2 - 2024-04-26 05:28:23 PM
 
 
   Symbol Table (* = unused):
@@ -31,19 +31,19 @@
 
 *ARCHITECTURE :                                      "x86_64-unknown-linux" - |
 *CASESENSITIVE :                  0 - | *CONSTPI :        3.141592653589793 - |
-*DATE :                "2024-04-25" - | *FALSE :                          0 - |
+*DATE :                "2024-04-26" - | *FALSE :                          0 - |
 *HAS64 :                          1 - | *LISTON :                         1 - |
  LOOP :                      40.102 C | *MACEXP :                         7 - |
 *MOMCPU :                   200.200 - | *MOMCPUNAME :                "8080" - |
 *NESTMAX :                    1.000 - | *RELAXED :                        0 - |
- START :                     40.100 C | *TIME :               "09:32:46 AM" - |
+ START :                     40.100 C | *TIME :               "05:28:23 PM" - |
 *TRUE :                           1 - | *VERSION :                   24.057 - |
  WCC :                        3.302 - | *Z80SYNTAX :                      0 - |
 
      19 symbols
      16 unused symbols
 
- AS V1.42 Beta [Bld 269] - Source File test.asm - Page 3 - 2024-04-25 09:32:46 AM
+ AS V1.42 Beta [Bld 269] - Source File test.asm - Page 3 - 2024-04-26 05:28:23 PM
 
 
   Code Pages:

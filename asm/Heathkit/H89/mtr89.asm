@@ -132,7 +132,7 @@ INIT0.0 LXI     H,PRSRAM+PRSL-1 ; (HL) = RAM DESTINATION FOR CODE
 
         IF      RAM
         ELSE
-        ERRPL   INIT-1000Q      ; BYTE IN WORD 10A MUST BE 0
+;       ERRPL   INIT-1000Q      ; BYTE IN WORD 10A MUST BE 0
         ENDIF
 
 ;       LEVEL 1 - CLOCK
@@ -141,7 +141,7 @@ INIT0.0 LXI     H,PRSRAM+PRSL-1 ; (HL) = RAM DESTINATION FOR CODE
         ELSE
 INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
 
-        ERRNZ   $-110           ; INT0 TAKES UP ONE BYTE
+        ERRNZ   $-11Q           ; INT0 TAKES UP ONE BYTE
         ENDIF
 
         CALL    SAVALL          ; SAVE USER REGISTERS
@@ -149,7 +149,7 @@ INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
         JMP     CLOCK           ; PROCESS CLOCK INTERRUPT
         IF      RAM
         ELSE
-        ERRPL   CLOCK-1000Q     ; EXTRA BYTE MUST BE 0
+;       ERRPL   CLOCK-1000Q     ; EXTRA BYTE MUST BE 0
         ENDIF
 
 ;       LEVEL 2 - SINGLE STEP
@@ -213,7 +213,7 @@ INT5    JMP     UIVEC+12        ; JUMP TO USER ROUTINE
 
         IF      RAM
         ELSE
-        ERRNZ   $-53A
+        ERRNZ   $-53Q
         ENDIF
 
 DLY     PUSH    PSW             ; SAVE COUNT
@@ -334,7 +334,7 @@ NMIENT  JMP     NMI
 
         IF      RAM
         ELSE
-        ERRNZ   SAVALLR-151Q    ; DO NOT CHANGE ORGANIZATION
+;       ERRNZ   SAVALLR-151Q    ; DO NOT CHANGE ORGANIZATION
         ENDIF
 
 SAVALLR                         ; SAVALL EXTENSION RETURN ADDRESS
@@ -404,7 +404,7 @@ CLOCK   LHLD    TICCNT
         ANI     CB.MTL
         JNZ     INTXIT          ; IF IN MONITOR MODE
         DCX     B
-        ERRNZ   CTLFLG-MFLAG-1
+;       ERRNZ   CTLFLG-MFLAG-1
         LDAX    B               ; (A) = MFLAG
         ERRNZ   UO.HLT-200Q     ; ASSUME HIGH-ORDER
         RAL
@@ -481,7 +481,7 @@ ERROR   LXI     H,MFLAG
         MOV     M,A             ; REPLACE
         INX     H
         MVI     M,CB.SSI+CB.MTL+CB.CLI+CB.SPK ; RESTORE *CTLFLG*
-        ERRNZ   CTLFLG-.MFLAG-1
+;       ERRNZ   CTLFLG-.MFLAG-1
         EI
         LHLD    REGPTR
         SPHL                    ; RESTORE STACK POINTER TO EMPTY STATE
@@ -567,7 +567,7 @@ MSG.ERR DB      A.CR,A.LF,A.LF
 
         IF      RAM
         ELSE
-        ERRNZ   $-1063Q
+        ERRNZ   $-463Q
         ENDIF
 
 SAE     SHLD    ABUSS
@@ -671,7 +671,7 @@ AUTOBO  XRA     A               ; SET TO PRIMARY FLAG
 
         IF      RAM
         ELSE
-        ERRNZ   $-1222Q
+        ERRNZ   $-622Q
         ENDIF
 
 GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
@@ -682,7 +682,7 @@ GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
 
         IF      RAM
         ELSE
-        ERRNZ   $-1225Q
+        ERRNZ   $-625Q
         ENDIF
 
 SSTEP                           ; SINGLE STEP
@@ -698,7 +698,7 @@ SST1    STA     CTLFLG          ; SET NEW FLAG VALUES
 
         IF      RAM
         ELSE
-        ERRNZ   $-1244Q
+        ERRNZ   $-644Q
         ENDIF
 
 STPRTN
@@ -907,14 +907,14 @@ CHAT2   LXI     H,MSG.PR        ; LOAD 'HI' ADDR.
 ;       EXIT    NONE
 ;       USES    A,F
 
-        ERRNZ   $-2136Q
+        ERRNZ   $-1136Q
 
 ALARM
         CPU     Z80
         JR      ALARMB          ; BRANCH TO A JUMP TO NOISE TO DING BELL
         CPU     8080
 
-        ERRNZ   $-2140Q
+        ERRNZ   $-1140Q
 
 HORN    PUSH    PSW
         MVI     A,CB.SPK        ; TURN ON SPEAKER
@@ -1116,7 +1116,7 @@ B170    POP     PSW             ; GET SWITCH DATA
 
         IF      RAM
         ELSE
-        ERRNZ   $-3047Q
+        ERRNZ   $-1447Q
         ENDIF
 
 LRA     LDA     REGI
@@ -1135,7 +1135,7 @@ LRA.    MOV     E,A
 
         IF      RAM
         ELSE
-        ERRNZ   $-3062Q
+        ERRNZ   $-1462Q
         ENDIF
 
 IOA     JMP     IOA1
@@ -1152,7 +1152,7 @@ IOA     JMP     IOA1
 
         IF      RAM
         ELSE
-        ERRNZ   $-3066Q
+        ERRNZ   $-1466Q
         ENDIF
 
 IOB     MVI     M,0             ; ZERO OUT OLD VALUE
@@ -1180,7 +1180,7 @@ IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
 
         IF      RAM
         ELSE
-        ERRNZ    $-3122Q
+        ERRNZ    $-1522Q
         ENDIF
 
 DOD     INX      H
@@ -1299,7 +1299,7 @@ MSG.PAS DB      A.CR,A.LF
 ;       USES    A,F
 
 ;       RCK MUST HAVE SAME ENTRY AS RCK IN PAM-8
-        ERRNZ   $-3260Q
+        ERRNZ   $-1660Q
 
 RCK     XRA     A
         RET
@@ -1402,7 +1402,7 @@ DYMEM10 MVI     A,A.BEL         ; DING BELL
 
         IF      RAM
         ELSE
-        ERRNZ   4000Q-7-$
+        ERRNZ   2000Q-7-$
         ENDIF
 
 PRSROM
@@ -1416,7 +1416,7 @@ PRSROM
 
         IF      RAM
         ELSE
-        ERRNZ   $-4000Q
+        ERRNZ   $-2000Q
         ENDIF
 
 ;       INIT0X - EXTENSION OF INIT0 TO SUPPORT H88
@@ -1483,7 +1483,7 @@ BR19.2  DB      0,6             ; 19,200 BAUD
 ;BR56.0 DB      0,2             ; 56,000 BAUD
 
 ;       SET     */256
-        ERRNZ   ERTAB/256-.     ; TABLE MUST BE IN ONE PAGE
+;       ERRNZ   ERTAB/256-.     ; TABLE MUST BE IN ONE PAGE
 
 ;       SAVALLX - SAVALL EXTENSION TO MAKE ROOM FOR A JUMP TO THE NMI HANDLER
 
@@ -1694,7 +1694,7 @@ TMOUT4  LXI     H,TMFG
         JR      NZ,TMOUT2       ; NOT IN 0.5 SECOND
         CPU     8080
         INX     H               ; SET TO MYCNT
-        ERRNZ   MYCNT-TMFG-1    ; MYCNT MUST FOLLOW TMFG
+;       ERRNZ   MYCNT-TMFG-1    ; MYCNT MUST FOLLOW TMFG
         INR     M               ; INCREASE THE COUNT FOR 0.5 SECOND
         MOV     A,M
         CPI     30              ; CHECK IF MORE THAN 15 SECONDS
@@ -2488,7 +2488,7 @@ MSG.EQ  DB      ' = '
 ;
         IF      RAM
         ELSE
-        ERRNZ   10000A-6-$      ; MUST BE 6 BYTES BEFORE END
+        ERRNZ   4000Q-6-$       ; MUST BE 6 BYTES BEFORE END
         ENDIF
 
 ESPEED  JMP     SPEED
@@ -2497,14 +2497,14 @@ ESPEED  JMP     SPEED
 ;
         IF      RAM
         ELSE
-        ERRNZ   10000A-3-$      ; MUST BE 3 BYTES BEFORE END
+        ERRNZ   4000Q-3-$      ; MUST BE 3 BYTES BEFORE END
         ENDIF
 
 EDTMEM  JMP     DYMEM
 
         IF      RAM
         ELSE
-        ERRNZ   $-10000A        ; MUST NOT EXCEED 2K BYTES
+        ERRNZ   $-4000Q        ; MUST NOT EXCEED 2K BYTES
         ENDIF
 
 ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET

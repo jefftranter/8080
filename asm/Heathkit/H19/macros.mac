@@ -4,7 +4,7 @@
 ; expression must be evaluatable in first pass.
 
 ERRNZ   MACRO EXP
-;       IF (EXP) != 0
-;         ERROR Expression is not zero
-;       ENDIF
+        IF (EXP) != 0
+          ERROR Expression is not zero
+        ENDIF
         ENDM
