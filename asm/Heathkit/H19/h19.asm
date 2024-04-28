@@ -2762,7 +2762,100 @@ EACR    LDAX    B               ; GET MODE FLAGS
         STAX    B
         RET
 
+;;      EALF - ENABLE AUTO LINE FEED
+;
+;       *EALF* ENABLED THE TERMINAL TO PERFORM AN AUTOMATIC LINE FEED
+;       UPON RECEIPT OF A CARRIAGE RETURN
+;
+;
+;       ENTRY   (B, C) = MODEB
+;
+;       EXIT    NONE
+;
+;       USES    A,F
 
+
+EALF    LDAX    B               ; GET MODE FLAGS
+        ORI     MB.ALF
+        STAX    B
+        RET
+
+;;      EAM - ENTER ANSI MODE
+;
+;       *EAM* PLACES THE TERMINAL IN THE ANSI MODE FOR ESCAPE CODE.
+;
+;
+;       ENTRY   (B,C) = MODEB
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+EAM     LDAX    B               ; GET MODE FLAGS
+        ORI     MB.ANSI         ; GET ANSI MODE FLAG
+        STAX    B
+        RET
+
+;;      EBD - ERASE BEGINNING OF DISPLAY
+;
+;       *EBD* ERASES THE SCREEN FROM 'HOME' TO THE CURRRENT CURSOR POSITION
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+EBD     EQU     $
+        LDA     CURVP           ; GET VERTICAL POSITION
+        CPI     24              ; SEE IF ON 25TH LINE
+        CPU     Z80
+        JR      Z,EBL           ; IF SO, JUST DO BEGINNING OF THIS LINE
+        CPU     8080
+
+;       ERASE ALL LINES ABOVE CURRENT LINE
+;
+        LDA     CURVP           ; GET CURRENT LINE NUMBER
+        ORA     A               ; SEE IF ALREADY ON HOME LINE
+        CPU     Z80
+        JR      Z,EBD1          ; IF SO, NO FULL LINES TO ERASE
+        CPU     8080
+
+        MOV     L,A             ; MULTIPLY LINE COUNT BY 5 FOR MODULO 16 COLUMNS
+        MOV     E,A
+        MVI     H,0
+        MOV     D,A
+        DAD     D               ; *2
+        DAD     D               ; *3
+        DAD     D               ; *4
+        DAD     D               ; *5
+        MOV     B,L             ; (B) = RESULT
+        LHLD    SHOME           ; (H,L) = FIRST ADDRESS TO SPACE
+        CALL    WSVA            ; WRITE SPACES
+
+EBD1    EQU     $
+;       JMP     EBL             ; ERASE BEGINNING OF CURRENT LINE
+;       ERRNZ   $-EBL
+
+;;      EBL - ERASE BEGINNING OF LINE
+;
+;       *EBL* ERASES FROM THE BEGINNING OF THE CURRENT LINE TO THE CURSOR
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,H,L,D
+
+
+EBL     LHLD    CLSA            ; GET ADDRESS OF FIRST COLUMN ON THIS LINE
+        LDA     CURHP           ; GET COLUMN COUNT
+        INR     A               ; ADD ONE FOR THE CURSOR POSITION
+        MOV     B,A             ; (B) = COUNT
 
 
 
