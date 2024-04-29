@@ -203,12 +203,12 @@ IB.KCB  EQU     7               ; KEYBOARD CONTROL KEY BIT = BIT 7
 IB.KSB  EQU     0*8             ; KEYBOARD SHIFT KEY BIT = BIT 0
 IB.HSM  EQU     0*8             ; HOLD SCREEN MODE = BIT 7
 IB.RV   EQU     7*8             ; REVERSE VIDEO MODE = BIT 7
-IB.ICM  EQU     6*8             ; INSERT CHARACTER MODE = BIT 6
+IB.ICM  EQU     6               ; INSERT CHARACTER MODE = BIT 6
 IB.KPDA EQU     7*8             ; KEYPAD ALTERNATE MODE = BIT 5
 IB.KPDS EQU     6               ; KEYPAD SHIFTED MODE = BIT 4
 IB.ONLN EQU     3               ; KEYPAD SHIFTED MODE = BIT 3
 IB.BRK  EQU     2*8             ; BREAK KEY = BIT 2
-IB.GRPH EQU     1*8             ; TERMINAL IN GRAPHICS MODE = BIT 1
+IB.GRPH EQU     1               ; TERMINAL IN GRAPHICS MODE = BIT 1
 IB.PWE  EQU     0*8             ; PREVIOUS CHARACTER WAS AN ESCAPE = BIT 0
 IB.XOFF EQU     4               ; XOFF SENT TO HOST = BIT 4
 IB.XMTG EQU     1*8             ; TRANSMIT MODE = GRAPHICS = BIT 1
@@ -2799,7 +2799,7 @@ EAM     LDAX    B               ; GET MODE FLAGS
 
 ;;      EBD - ERASE BEGINNING OF DISPLAY
 ;
-;       *EBD* ERASES THE SCREEN FROM 'HOME' TO THE CURRRENT CURSOR POSITION
+;       *EBD* ERASES THE SCREEN FROM 'HOME' TO THE CURRENT CURSOR POSITION
 ;
 ;
 ;       ENTRY   NONE
@@ -2857,9 +2857,1045 @@ EBL     LHLD    CLSA            ; GET ADDRESS OF FIRST COLUMN ON THIS LINE
         INR     A               ; ADD ONE FOR THE CURSOR POSITION
         MOV     B,A             ; (B) = COUNT
 
+        MVI     A,' '           ; WRITE SPACES
+EBL1    MOV     M,A             ; PUT SPACE IN DISPLAY
+        INX     H               ; POINT TO NEXT
+        CPU     Z80
+        DJNZ    EBL1            ; UNTIL DONE
+        CPU     8080
+
+        RET
+
+;;      EC - ENABLE CURSOR
+;
+;       *EC* ENABLED THE DISPLAY OF THE CURSOR
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,F
 
 
+EC      LDA     MODEA           ; GET MODE FLAGS
+        ANI     255-MA.CD       ; SHOW CURSOR AS NOT DISABLED
+        STA     MODEA
+        LDA     MODEB           ; GET OTHER MODE FLAGS
+        ANI     MB.CBLK         ; BLOCK CURSOR SELECTED?
+        JNZ     SBC.            ; IF BLOCK SELECTED, SET IT
 
+        JMP     SUC.            ; ELSE, SET UNDERSCORE CURSOR
+
+;;      EDD - ENCODE DECIMAL DIGITS
+;
+;       *EDD* ENCODES TWO DECIMAL DIGITS FROM THE BINARY VALUE SUPPLIED.
+;       THE DECIMAL DIGITS ARE IN THE FORM OF TWO BCD BYTES (NOT ASCII).
+;
+;
+;       ENTRY   (A) = BINARY VALUE TO BE DECODED
+;
+;       EXIT    (D) = DECIMAL TENS DIGIT (IN BCD)
+;               (E) = DECIMAL ONES DIGIT (IN BCD)
+;
+;       USES    A,D,E
+
+
+EDD     MVI     D,0             ; CLEAR DECIMAL COUNTERS
+EDD1    CPI     10              ; SEE IF BINARY IS MORE THAN NINE
+        CPU     Z80
+        JR      C,EDD2          ; IF LESS THAN TEN
+        CPU     8080
+
+        SUI     10              ; ELSE, SUBTRACT TEN FROM BINARY
+        INR     D               ; ADD ONE TO TENS DIGIT
+        CPU     Z80
+        JR      EDD1            ; SEE IF MORE TENS
+        CPU     8080
+
+EDD2    MOV     E,A             ; LEFTOVERS ARE ONES DIGIT
+        RET
+
+;;      EIL - ERASE IN LINE
+;
+;       *EIL* ERASES THE PORTION OF THE CURRENT LINE AS SPECIFIED BY PN
+;
+;
+;       ENTRY   (B) = ZERO IF NO PN WAS INPUT
+;               (D,E) = PSDW
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+EIL     MOV     A,B             ; SEE IF PN WAS INPUT
+        ORA     A
+        JZ      EOL             ; IF NO PN, ERASE TO END OF LINE
+
+        XCHG                    ; (H,L) = PSDW
+        MOV     A,M             ; GET PN
+        ORA     A               ; ZERO?
+        JZ      EOL             ; IF ZERO, ERASE TO END OF LINE
+
+        DCR     A               ; ONE?
+        CPU     Z80
+        JR      Z,EBL           ; IF ONE, ERASE BEGINNING OF LINE
+        CPU     8080
+
+        DCR     A               ; TWO?
+        RNZ                     ; IF NOT TWO, ILLEGAL, EXIT
+
+;       JMP     EEL             ; ELSE, ERASE ENTIRE LINE
+;       ERRNZ   *-EEL
+
+;;      EEL - ERASE ENTIRE LINE
+;
+;       *EEL* WRITE SPACES INTO THE ENTIRE LINE WHERE THE CURSOR RESIDES
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,H,L,F
+
+
+EEL     LHLD    CLSA            ; START ERASING AT BEGINNING OF CURRENT LINE
+        MVI     B,80/16         ; MODULO 16 COUNT FOR NUMBER TO WRITE
+        JMP     WSVA            ; WRITE SPACES AND EXIT
+
+;;      EGM - ENTER GRAPHICS MODE
+;
+;       *EGM* SETS THE GRPAHICS MODE FLAG
+;
+;
+;       ENTRY   (D,E) = MODEA
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+EGM     XCHG                    ; (H,L) = MODE
+        CPU     Z80
+        SET     IB.GRPH,(HL)    ; SET GRAPHICS MODE FLAG
+        CPU     8080
+        RET
+
+;;      EHM - ENTER HEATH MODE
+;
+;       *EHM* TAKES THE TERMINAL OUT OF THE ANSI MODE AND INTO THE HEATH MODE
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+EHM     LDA     MODEB           ; GET MODE FLAGS
+        ANI     255-MB.ANSI
+        STA     MODEB
+        RET
+
+;;      EHSM - ENTER HOLD SCREEN MODE
+;
+;
+;       *EHSM* SETS THE HOLD SCREEN MODE FLAG
+;
+;
+;       ENTRY   (D,E) = MODEA
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+EHSM    XCHG                    ; (H,L) = MODEA
+        CPU     Z80
+        BIT     IB.HSM,(HL)     ; SET HOLD SCREEN MODE FLAG
+        CPU     8080
+        MVI     A,1             ; SET LINE COUNTER TO ONE
+        STA     HSMLC
+        RET
+
+;;      EICM - ENTER INSERT CHARACTER MODE
+;
+;       *EICM* SETS THE INSERT CHARACTER MODE FLAG
+;
+;
+;       ENTRY   (D,E) = MODEA
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+EICM    XCHG                    ; (H,L) = MODEA
+        CPU     Z80
+        BIT     IB.ICM,(HL)     ; SET INSERT CHARACTER MODE FLAG
+        CPU     8080
+        RET
+
+;;      EKAM - ENTER KEYPAD ALTERNATE MODE
+;
+;       *EKAM* SETS THE KEYPAD ALTERNATE MODE FLAG IN *MODE*
+;
+;
+;       ENTRY   (B,C) = MODEB
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+EKAM    LDAX    B               ; GET MODEB FLAGS
+        ORI     MB.KPDA         ; SET KEYPAD ALTERNATE MODE
+        STAX    B
+        RET
+
+;;      EKC - ENABLE KEYPAD CLICK
+;
+;       *EKC* RESETS THE FLAG WHICH INHIBITS KEY CLICK
+;
+;
+;       ENTRY   (BC) = MODEB
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+EKC     LDAX    B               ; GET MODE FLAGS
+        ANI     255-BB.NOTK     ; CLEAR NO TICK FLAG
+        RET
+
+
+;;      EKI - ENABLE KEYBOARD INPUT
+;
+;       *EKI* RESETS THE FLAG WHICH DISABLES INPUT FROM THE KEYBOARD
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+EKI     LDA     MODEI           ; GET MODE FLAGS
+        ANI     255-MI.KID      ; TOSS KEYBOARD DISABLE FLAG
+        STA     MODEI
+        RET
+
+;;      EKSM - ENTER KEYPAD SHIFTED MODE
+;
+;       *EKSM* SETS THE KEYPAD SHIFTED MODE FLAG
+;
+;       ENTRY   (B,C) = MODEB
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+EKSM    LDAX    B               ; GET MODEB FLAGS
+        ORI     MB.KPDS
+        STAX    B
+        RET
+
+;;      ELB - ESCAPE LEFT BRACKET
+;
+;       *ELB: IS A CONTINUATION OF THE ESCAPE SEQUENCE PROCESSING FOR
+;       ANSI ESCAPE SEQUENCES.  THE FINAL CHARACTER OF THE SEQUENCE IS
+;       DECODED WITH OR WITHOUT A PRECEDING PARAMETER STRING AND
+;       CONTROL IS PASSED ON TO THE ASSOCIATED ROUTINE
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    TO REQUESTED ROUTINE WITH
+;                       (B) = ZERO IF NO PARAMETER STRING WAS INPUT
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+ELB     CALL    PSD             ; DECODE PARAMETER STRING
+        PUSH    B               ; SAVE (B)
+
+;       SEARCH TABLE FOR FINAL CHARACTER OF SEQUENCE
+;
+        MVI     D,ELBTBL        ; SET TABLE LENGTH
+        MVI     E,ELBTW         ; SET TABLE WIDTH
+        LXI     H,ELBT          ; SET TABLE ADDRESS
+        CALL    STAB            ; SEARCH TABLE
+        POP     B               ; RESTORE (B)
+        RC                      ; IF CHARACTER NOT FOUND IN TABLE, EXIT NOW
+
+        INX     H               ; ELSE, GET ADDRESS OF ROUTINE
+        MOV     H,M             ; GET MSB
+        MOV     L,A             ; GET LSB
+        LXI     D,PSDW          ; (D,E) = PSD WORK AREA
+        PCHL
+
+;;      ELBT - ESCAPE LEFT BRACKET TABLE
+;
+;       *ELBT* CONTAINS THE THIRD AND/OR FINAL CHARACTERS OF THE ANSI
+;       ESCAPE SEQUENCES
+
+
+ELBT    EQU    $
+
+        DB     '>'              ; ESC [ >
+        DW     A2M              ; ANSI SET MODE #2
+
+        DB     '?'              ; ESC [ ?
+        DW     AIM              ; ANSI SET MODE #1
+
+        DB     'A'              ; ESC [ A
+        DW     ACUP             ; ANSI CURSOR UP
+
+        DB     'B'              ; ESC [ B
+        DW     ACDN             ; ANSI CURSOR DOWN
+
+        DB     'C'              ; ESC [ C
+        DW     ACRT             ; ANSI  CURSOR RIGHT
+
+        DB     'D'              ; ESC [ D
+        DW     ACLFT            ; ANSI CURSOR LEFT
+
+        DB     'H'              ; ESC [ H
+        DW     APCA             ; ANSIR PERFORM CURSOR ADDRESSING
+
+        DB     'J'              ; ESC [ J
+        DW     EID              ; ERASE IN DISPLAY
+
+        DB     'K'              ; ESC [ K
+        DW     EIL              ; ERASE IN LINE
+
+        DB     'L'              ; ESC [ L
+        DW     APIL             ; ANSI PERFORM LINE INSERT
+
+        DB     'M'              ; ESC [ M
+        DW     APDL             ; ANSI PERFORM DELETE LINE
+
+        DB     'P'              ; ESC [ P
+        DW     APDC             ; ANSI PERFORM DELETE CHARACTER
+
+        DB     'f'              ; ESC [ f         (LOWER CASE F)
+        DW     APCA             ; ANSI PERFORM CURSOR ADDRESSING
+
+        DB     'h'              ; ESC [ h         (LOWER CASE H)
+        DW     ASM              ; ANSI SET MODE
+
+        DB     'l'              ; ESC [ l         (LOWER CASE L)
+        DW     ARM              ; ANSI RESET MODE
+
+        DB     'm'              ; ESC [ m         (LOWER CASE M)
+        DW     ASGM             ; ANSI SET GRAPHICS MODE
+
+        DB     'n'              ; ESC [ n         (LOWER CASE N)
+        DW     ACPR             ; ANSIR CURSOR POSITION REPORT
+
+        DB     'p'              ; ESC [ p         (LOWER CASE P)
+        DW     AXMTP            ; ANSI TRANSMIT PAGE
+
+        DB     'q'              ; ESC [ q         (LOWER CASE Q)
+        DW     AXMT25           ; ANSI TRANSMIT 25TH LINE
+
+        DB     'r'              ; ESC [ r         (LOWER CASE R)
+        DW     ASBR             ; ANSI SET BAUD RATE
+
+        DB     's'              ; ESC [ s         (LOWER CASE S)
+        DW     ASCP             ; ANSI SAVE CURSOR POSITION
+
+        DB     'u'              ; ESC [ u         (LOWER CASE U)
+        DW     AUSCP            ; ANSI UNSAVE CURSOR POSITION
+
+        DB     'z'              ; ESC [ z         (LOWER CASE Z)
+        DW     ARAMP            ; ANSI RESET ALL MODES TO POWER UP CONFIGURATION
+
+ELBTW   EQU    3                ; TABLE WIDTH IS 3
+ELBTL   EQU    ($-ELBT)/ELBTW   ; TABLE LENGTH
+
+;;      EOL - ERASE TO END OF LINE
+;
+;       *EOL* PLACES SPACES IN VIDEO RAM FROM THE CURRENT CURSOR POSITION
+;       TO THE END OF THE CURRENT LINE.  CURSOR POSITION DOES NOT CHANGE.
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+EOL     LHLD    CURAD           ; GET CURSOR ADDRESS
+        LDA     CURHP           ; GET CURSOR COLUMN POSITION
+        CPU     Z80
+        NEG                     ; SUBTRACT COLUMN COUNTER FROM 80
+        CPU     8080
+        ADI     80
+        MOV     E,A             ; PLACE COUNT IN D & E
+        MVI     D,0
+        JMP     WSV             ; WRITE SPACES ON REST OF LINE
+
+;;      ERM - ERASE REST OF MEMORY
+;
+;       *ERM* ERASES THE SCREEN FROM THE CURRENT CURSOR POSITION TO
+;       THE END OF THE SCREE
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+ERM     LDA     CURVP           ; GET CURRENT VERTICAL POSITION
+        CPI     24              ; SEE IF ON 25TH LINE
+        CPU     Z80
+        JR      Z,EOL           ; IF SO, JUST SETTLE FOR END OF THIS LINE
+        CPU     8080
+
+        LHLD    SHOME           ; GET HOME ADDRESS
+        LXI     D,1919          ; AND DISPLAY SIZE TO FIND END
+        DAD     D
+        STC                     ; CLEAR CARRY BIT FOR NEXT OPERATION
+        CMC
+        CPU     Z80
+        LD      DE,(CURAD)
+        SBC     HL,DE           ; SUBTRACT CURSOR ADDRESS FROM END OF DISPLAY
+        CPU     8080
+        INX     H               ; ADD ONE TO ERASE CHARACTER AT (CURAD)
+        XCHG                    ; (D,E) = COUNT TO END OF DISPLAY
+        MOV     A,D             ; MASK TO KEEP COUNT UNDER 2K
+        ANI     00000111B
+        MOV     D,A
+        LHLD    CURAD           ; (H,L) = ADDRESS OF FIRST SPACE TO WRITE
+        JMP     WSV             ; WRITE SPACES
+
+;;      ERVM - ENTER REVERSE VIDEO MODE
+;
+;       *ERVM* SETS THE REVERSE VIDEO MODE FLAG
+;
+;
+;       ENTRY   (D,E) = MODEA
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+ERVM    EQU     $
+
+
+        XCHG                    ; (H,L) = MODE
+        MOV     A,M             ; GET MODE FLAGS
+        ORI     MA.RV+MA.RVP    ; SET REVERSE VIDEO AND RV PRESENT FLAGS
+        MOV     M,A
+        RET
+
+;;      FCIF - FETCH CHARACTER FROM INPUT FIFO
+;
+;       *FCIF* IS USED TO FETCH A SINGLE CHARACTER FROM THE INPUT FIFO
+;       IF ANY ARE AVAILABLE.
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    (A) = CHARACTER IF ONE IS AVAILABLE
+;               'C' = SET IF NO CHARACTER
+;               'C' = CLEAR IF CHARACTER IN ACCUMULATOR
+;
+;       USES    A,B,H,L,F
+
+
+FCIF    LDA     IFC             ; GET INPUT FIFO COUNTER
+        ORA     A               ; SEE IF FIFO IS EMPTY
+        STC                     ; SET 'C' FOR NO CHARACTER
+        RZ                      ; IF NOT CHARACTER IN FIFO, EXIT
+
+        DI                      ; LOCK OUT ANY ENTRIES FOR NOW
+        LDA     IFC             ; DECREMENT INPUT FIFO COUNTER
+        DCR     A
+        STA     IFC
+        LDA     IFP             ; GET INPUT FIFO POINTER
+        MOV     B,A             ; SAVE VALUE
+        LXI     H,INFI          ; POINT TO INPUT FIFO
+        ADD     L               ; ADD POINTER
+        MOV     L,A
+        MOV     A,B             ; INCREMENT POINTER
+        INR     A
+        ANI     IFCMSK          ; KEEP POINTER IN FIFO
+        STA     IFP             ; UPDATE POINTER
+        MOV     A,M             ; READ CHARACTER FROM FIFO
+        STC                     ; CLEAR 'C'
+        CMC
+        EI                      ; ALLOW NEW ENTRIES TO FIFO
+        RET
+
+;;      FCOF - FETCH CHARACTER FROM OUTPUT FIFO
+;
+;       *FCOF* FETCHES A CHARACTER FROM THE OUTPUT FIFO IF ANY ARE AVAILABLE
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    (A) = CHARACTER IF AVAILABLE
+;               'C' = SET IF NO CHARACTERS IN FIFO
+;               'C' = CLEAR IF CHARACTER IN ACCUMULATOR
+;
+;       USES    A,B,H,L,F
+
+
+FCOD    LDA     OFC             ; GET OUTPUT FIFO COUNTER
+        ORA     A               ; SEE IF FIFO IS EMPTY
+        STC                     ; SET 'C' FOR NO CHARACTERS
+        RZ                      ; IF NO CHARACTERS IN FIFO
+
+        DCR     A               ; DECREMENT COUNTER
+        STA     OFC
+        LDA     OFP             ; GET OUTPUT FIFO COUNTER
+        MOV     B,A             ; SAVE FOR LATER
+        LXI     H,OUTF          ; POINT TO OUTPUT FIFO
+        ADD     L               ; ADD POINTER
+        MOV     L,A
+        MOV     A,B             ; INCREMENT POINTER
+        INR     A
+        ANI     OFCMASK         ; KEEP POINTER IN FIFO
+        STA     OFP             ; UPDATE OUTPUT FIFO POINTER
+        MOV     A,M             ; READ CHARACTER FROM FIFO
+        STC                     ; CLEAR 'C'
+        CMC
+        RET
+
+;;      FNCP - FETCH NEXT CHARACTER FOR PRIVATE PROCESSING
+;
+;       FNCP GETS THE NEXT CHARACTER AVAILABLE FROM THE INPUT FIFO.
+;       IF NONE ARE AVAILABLE, FNCP CONTINUES TO PROCESS KEYBOARD
+;       CHARACTERS AND OUTPUT FIFO CHARACTERS
+;
+;       ENTRY   NONE
+;
+;       EXIT    (A) = CHARACTER FROM INPUT FIFO
+;               'C' = CLEARED
+;
+;       USES    A,G
+
+
+FNCP    PUSH    B               ; SAVE REGISTERS
+        PUSH    D
+        PUSH    H
+FNCP1   CALL    MAIN.N          ; SERVICE KEYBOARD AND OUTPUT FIFO
+        CALL     FCIF           ; SEE IF THERE IS A CHARACTER IN THE INPUT FIFO
+        CPU      Z80
+        JR       C,FNCP1        ; IF NO CHARACTER YET
+        CPU      8080
+
+        POP      H              ; ELSE, RESTORE REGISTERS AND EXIT
+        POP      D
+        POP      B
+        RET
+
+;;      FVKF - FETCH VALUE FROM KEYBOARD FIFO
+;
+;       *FVKF* FETCHES A TWO BYTE VALUE FROM THE KEYBOARD FIFO
+;       AND THEN DOES A BUBBLE DOWN ON THE REST OF THE CONTENTS OF THE FIFO
+;       AND UPDATES THE KEYBOARD FIFO POINTER
+;
+;       ENTRY   NONE
+;
+;       EXIT    (D,E) = TWO BYTE VALUE FROM KEYBOARD IF AVAILABLE
+;               'C' = SET IF FIFO WAS EMPTY
+;               'C' = CLEAR IF VALUE WAS PLACED IN (D,E)
+;
+;       USES    A,D,E,F
+
+
+FVKF    PUSH    B               ; SAVE (B,C,H,L)
+        PUSH    H
+        DI                      ; INHIBIT ANY NEW ENTRIES WHILE REMOVING OLD
+        LHLD    KBDFP           ; (H,L) = KEYBOARD FIFO POINTER
+        MOV     A,L             ; CHECK LSB TO SEE IF THERE ARE ANY ENTRIES
+        CPI     KBDFMIN&377Q
+        STC                     ; SET CARRY IN CASE NO ENTRY
+        CPU     Z80
+        JR      Z,FVKF1         ; IF FIFO EMPTY
+        CPU     8080
+
+        DCX     H               ; ELSE, UPDATE FIFO POINTER
+        DCX     H
+        SHLD    KBDFP
+        LXI     H,KBDF          ; (H,L) = BEGINNING OF FIFO
+        MOV     D,A             ; (D) = VALUE FROM IP.KBD1
+        INX     H
+        MOV     E,M             ; (E) = VALUE FROM IP.KBD2
+        INX     H               ; POINT TO NEXT ENTRY
+        PUSH    D               ; SAVE KEYBOARD VALUES
+        LXI     D,KBDF          ; (D,E) = BEGINNING OF FIFO FOR BUBBLE DOWN
+        LXI     B,KBDFL-2       ; (B,C) = NUMBER OF BYTES TO BUBBLE
+        CPU     Z80
+        LDIR                    ; BUBBLE UNTIL (BC) = 0
+        CPU     8080
+        STC                     ; CLEAR CARRY BIT TO INDICATE VALUE FOUND
+        CMC
+        POP     D               ; (D,E) = KEYBOARD VALUES
+        POP     B
+        EI
+        RET
+
+;;      SBR - SET BAUD RATE
+;
+;       *SBR* ALLOWS THE BAUD RATE TO BE SENT INDEPENDENT OF THE POWER-UP
+;       SWITCH CONFIGURATION
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+SBR     CALL    FNCP            ; FETCH NEXT CHARACTER
+
+;       INPUT CHARACTER MUST BE AN ASCII A,B,C,D,E,F,G OR H.  (A=110, B=150,
+;       C=300, D=600, E=1200, F=1800, G=2000, H=2400, I=3600, J=4800, K=7200,
+;       L=9600)
+;
+SBR1    CPI     'A'             ; SEE IF CHARACTER IS IN RANGE
+        RC                      ; IF LESS THAN AN 'A'
+
+        CPI     'N'
+        RNC                     ; IF GREATER THAN A 'P'
+
+        ANI     P1.BR           ; MASK FOR LOWER BITS
+
+;       ALTERNATE ENTRY POINT FROM *ASBR*
+;
+SBR.    MOV     B,A             ; SAVE RESULT
+        LDA     MODES           ; GET SERIAL I/O MODE
+        ANI     377Q-MS.BR      ; TOSS OLD BAUD RATE
+        ORA     B               ; REPLACE WITH NEW BAUD RATE
+        STA     MODES           ; UPDATE 'IMAGE'
+;       JMP     IACE            ; SET ACE TO NEW RATE
+;       ERRNZ   $-ACE
+
+
+;;      IACE - INITIALIZE ACE (UART)
+;
+;       *IACE* SETS UP THE DEFAULT I/O PARAMETERS ACCORDING TO THE SWITCH
+;       POSITIONS ON PORT MP.PUP1
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+IACE    MVI     A,AB.DLAB       ; SET DIVISOR LATCH ACCESS BIT
+        OUT     AP.LCR
+
+;       SET BAUD RATE DIVISORS TO DESIRED BAUD RATE
+;
+        LDA     MODES           ; GET SERIAL I/O MODE (POWER-UP SWITCH #1)
+        MOV     C,A             ; SAVE IMAGE
+        ANI     MS.BR           ; MASK FOR BAUD RATE SWITCHES
+        CPU     Z80
+        JR      Z,IACE0.5       ; IF SWITCHES ARE SET TO ZERO KEEP 110 BAUD
+        CPU     8080
+
+        DCR     A               ; ELSE, SWITCHES = SWITCHES-1
+IACE0.5 MOV     B,A
+        RLC                     ; SWITCHES*2 = TABLE VECTOR
+        LXI     H,BRTAB         ; POINT TO BAUD RATE DIVISOR TABLE
+        ADD     L               ; ADD VECTOR
+        MOV     L,A
+        MOV     A,M             ; GET DESIRED DIVISOR LSB
+        OUT     AP.DLL          ; OUTPUT TO ACE
+        INX     H
+        MOV     A,M             ; GET DIVISOR MSB
+        OUT     AP.DLM          ; OUTPUT TO ACE
+
+;       SET WORD CONFIGURATION
+;
+        XRA     A               ; CLEAR ACC
+        ORA     B               ; SEE IF 110 BAUD
+        MVI     B,0             ; SET ONE STOP BIT IF NOT 110 BAUD
+        CPU     Z80
+        JR      NZ,ACE1         ; IF (B) NOT 110 BAUD
+        CPU     8080
+
+        MVI     B,AB.2SB        ; ELSE, SET TWO STOP BITS IN B
+ACE1    MOV     A,C             ; GET PARITY CONFIGURATION
+        ANI     P1.PEN+P1.EPS+P1.SPS
+        RRC                     ; SHIFT INTO POSITION FOR UART
+        ORA     B               ; ADD NUMBER OF STOP BITS
+        MOV     B,A             ; SAVE RESULT
+        ANI     P1.PEN/2        ; SEE IF PARITY WAS ON
+        MVI     A,AB.7BW        ; SET SEVEN BIT WORD IF PARITY ON
+        CPU     Z80
+        JR      NZ,ACES         ; IF PARITY ON
+        CPU     8080
+
+        MVI     A,AB.8BW        ; ELSE, SET AN 8 BIT WORD WITH NO PARITY
+ACE2    ORA     B               ; ADD TO STOP BITS AND PARITY SELECT/TYPE
+        OUT     AP.LCR          ; OUTPUT WORD SIZE AND PARITY SELECTION TO ACE
+
+        MVI     A,AB.ERDA       ; ENABLE RECEIVED DATA AVAILABLE INTERRUPTS
+        OUT     AP.IER
+        MVI     A,AB.DTR+AB.RTS ; SET DATA TERMINAL READY
+        OUT     AP.MCR
+        RET
+
+;;      BRTAB - BAUD RATE DIVISOR TABLE
+;
+;       *BRTAB* CONTAINS THE ACE DIVISOR LSB FOLLOWED BY THE MSB
+;
+;       TABLE MUST RESIDE IN ONE PAGE
+
+
+BRTAB   EQU     $
+BR110   DB      209,6           ; 110 BAUD
+BR150   DB      0,5             ; 150 BAUD
+BR300   DB      123,2           ; 300 BAUD
+BR600   DB      64,1            ; 600 BAUD
+BR1200  DB      160,0           ; 1200 BAUD
+BR1800  DB      107,0           ; 1800 BAUD
+BR2000  DB      96,0            ; 2000 BAUD
+BR2400  DB      80,0            ; 2400 BAUD
+BR3600  DB      53,0            ; 3600 BAUD
+BR4800  DB      40,0            ; 4800 BAUD
+BR7200  DB      27,0            ; 7200 BAUD
+BR9600  DB      20,0            ; 9600 BAUD
+BR19.2K DB      10,0            ; 19,200 BAUD
+        ERRNZ   $/256-BRTAB/256
+
+;;      ICRT - INITIALIZE CRT CONTROLLER
+;
+;       *ICRT* SETS THE CRT CONTROLLER FOR AN 80 COLUMN, 24 LINE
+;       DISPLAY WITH THE DISPLAY HOME ADDRESS AND THE CURSOR ADDRESS
+;       AT *VRAMS*
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,H,L,F
+
+
+ICRT    EQU     $
+
+        IN      MP.PUP2         ; GET CONFIGURATION SWITCH INFO
+
+        ANI     P2.50HZ
+        LXI     H,VPARD50       ; (H,L) = 50 HERTZ VIDEO PARAMETERS
+        CPU     Z80
+        JR      NZ,ICRT0.5      ; IF SET FOR 50 HZ
+        CPU     8080
+
+        LXI     H,VPARD60       ; (H,L) = 60 HERTZ VIDEO PARAMETERS
+
+ICRT0.5 MVI     B,16            ; 16 REGISTERS TO INITIALIZE IN CRTC
+        MVI     C,0             ; START WITH REGISTER 0
+
+ICRT1   MOV     A,C             ; GET REGISTER ADDRESS
+        OUT     VP.AR           ; SET ADDRESS REGISTER IN CRTC
+        MOV     A,M             ; GET DATA FOR CRTC REGISTER
+        OUT     VP.REGO         ; OUTPUT TO REGISTER
+        INR     C               ; POINT TO NEXT REGISTER
+        INX     H               ; POINT TO NEXT REGISTER'S DATA
+        CPU     Z80
+        DJNZ    ICRT1           ; IF NOT DONE WITH ALL REGISTERS
+        CPU     8080
+
+        RET
+
+;;      IDT - IDENTIFY TERMINAL
+;
+;       *IDT* IDENTIFIES THE TERMINAL AS A DEC VT52 SO THAT EXISTING DEC
+;       SOFTWARE WHICH INTERROGATES THE CONSOLE TYPE WILL OPERATE AS IT
+;       WOULD WITH A VT52
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,H,L,F
+
+IDT     CALL    PSOF            ; REPLY WITH 'ESC / K'
+        DB      ESC,'/','K'+200Q
+        RET
+
+;;      ARAMP - ANSI RESET ALL MODES TO POWERUP CONFIGURATION
+;
+;       *ARAMP* RESETS ALL FLAGS ETC., TO THE CONFIGURATION OF THE
+;       POWER UP SWITCHES.
+;
+;
+;       ENTRY   (B) = ZERO IF NO PN WAS INPUT
+;
+;       EXIT    NONE
+;
+;       USES    ALL
+
+
+ARAMP   MOV     A,B             ; SEE IF PN WAS INPUT
+        ORA     A
+        RNZ                     ; IF PN WAS INPUT, ILLEGAL, EXIT
+
+;       JMP     RAMP            ; ELSE, CONTINUE LIKE IN HEATH MODE
+;       ERRNZ   $-RAMP
+
+;;      RAMP - RESET ALL MODES TO POWER UP CONFIGURATION
+;
+;       RAMP PROVIDES THE SAME FUNCTION AS A HARDWARE RESET
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    ALL
+
+
+RAMP    DI                      ; LOCK OUT THE WORLD
+;       JMP     INIT
+;       ERRNZ   $-INIT
+
+
+;;;     INIT - INITIALIZE THE SYSTEM ON POWER UP
+;
+;       INIT INITIALIZES THE SYSTEM BY CLEARING THE I/O PORTS, INITIALIZING
+;       THE SCRATCHPAD, INITIALIZING THE CRT CONTROLLER, INITIALIZING THE
+;       ACE SERIAL PORT, AND JUMPING TO THE MAIN CONTROL LOOP
+
+
+INIT    EQU        $
+;       JMP        IRAM         ; INITIALIZE RAM
+
+
+;;      IRAM - INITIALIZE RAM
+;
+;       *IRAM* SETS ALL RAM LOCATIONS TO ZERO AND THEN COPIES IN THE
+;       DEFAULT DATA FROM PRSTAB
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+
+IRAM    LXI     H,RAM           ; POINT TO BEGINNING OF SCRATCHPAD
+        LXI     D,RAM+1         ; COPY TO NEXT LOCATION
+        LXI     B,255           ; COPY 255 TIMES
+        MVI     M,0             ; PLACE ZERO IN FOR COPY
+        CPU     Z80
+        LDIR
+        CPU     8080
+
+        LXI     H,KBDF          ; KEYBOARD FIFO
+        SHLD    KBDFP
+        MVI     A,24            ; SET VIDEO INFORMATION FOR NMI
+        STA     VI.VD           ; VIDEO DISPLAYED
+        MVI     H,VB.CBE+8      ; FAST BLINKING CURSOR ON LINE 0
+        MVI     L,B             ; END ON LINE 8 TOO
+        SHLD    VI.CSE
+
+        IN      MP.PUP1         ; INPUT POWER-UP SWITCH #1
+
+        STA     MODES           ; SAVE AS SERIAL I/O MODE
+
+        IN      MP.PUP2         ; INPUT POWER SWITCH #2
+        ANI     01111111B       ; TOSS 50HZ BIT
+
+        STA     MODEB           ; SAVE AS SPECIAL SETUP MODE
+
+        IN      MP.PUP2         ; INPUT POWER-UP SWITCH #2
+        ANI     377Q-P2.50HZ    ; GET ALL BUT LINE FREQUENCY SWITCHES
+        STA     MODEB           ; SAVE AS MODEB FLAGS
+        XRA     A               ; CLEAR ALL INTERNAL FLAGS
+        STA     MODEI           ; SAVE AS INTERNAL MODE WITH ALL OTHER FLAGS = ZERO
+
+        LXI     SP,RAM+256      ; SET STACK POINTER TO TOP OF RAM
+
+        LXI     H,VRAMS         ; SET HOME, CURRENT LINE, AND CURSOR ADDRESSES
+        SHLD    SHOME
+        SHLD    CLSA
+        SHLD    CURAD
+        LXI     D,2048          ; WRITE SPACES TO ALL OF VIDEO RAM
+        CALL    WSV
+
+;;      CONTINUE INITIALIZATION OF SYSTEM
+;
+
+INIT1   CALL    ICRT            ; INITIALIZE CRTC
+        CALL    IACE            ; INITIALIZE ACE
+        CALL    EC              ; GET PROPER CURSOR TYPE
+        CPU     Z80
+        IM      1               ; SET INTERRUPT MODE 1
+        CPU     8080
+        MVI     A,0             ; CAUSE FIRST NMI
+        OUT     VP.AR+VB.NMI
+        EI                      ; LET IT ALL BEGIN
+        JMP     MAIN            ; GO TO MAIN LOOP
+
+;;      MPY80 - MULTIPLY BY EIGHTY
+;
+;       MULTIPLY AN 8 BIT NUMBER BY EIGHTY
+;
+;
+;       ENTRY   (A) = MULTIPLICAND
+;
+;       EXIT    (H,L) = (A)*80
+;
+;       USES    D,E,H,L,F
+
+MPY80   MOV     L,A             ; VALUE TO MULTIPLY TO (H,L)
+        MVI     H,0
+        DAD     H               ; *16
+        DAD     H
+        DAD     H
+        DAD     H
+        MOV     D,H             ; *5
+        MOV     E,L
+        DAD     D
+        DAD     D
+        DAD     D
+        DAD     D
+        RET
+
+
+;;      NKC - NO KEYBOARD CLICK
+;
+;       *NKC* SETS THE FLAG WHICH DISABLES THE KEYBOARD CLICK DURING *AKI*
+;
+;
+;       ENTRY   (B,C) = MODEB
+;
+;       EXIT    NONE
+;
+;       USES    A,F
+
+
+NKC     LDAX    B               ; GET CURRENT FLAGS
+        ORI     MB.NOTK         ; SET NO TICK
+        STAX    B
+        RET
+
+;;      PCA - PERFORM CURSOR ADDRESSING
+;
+;       *PCA* SETS THE CURSOR LINE AND COLUMN VALUES ACCORDING TO THE
+;       NEXT TWO BYTES FROM THE INPUT FIFO.  LINE NUMBER 40Q IS THE TOP
+;       LINE OF THE DISPLAY.  COLUMN 40Q IS THE LEFTMOST COLUMN.  AN ILLEGAL
+;       LINE NUMBER WILL CAUSE THE CURSOR TO REMAIN ON THE CURRENT LINE.
+;       AN ILLEGAL COLUMN NUMBER WILL CAUSE THE CURSOR TO BE PLACED AT
+;       THE END OF THE CURRENT LINE.
+;
+;
+;       ENTRY   NONE
+;
+;       EXIT    NONE
+;
+;       USES    A,B,C,D,E,H,L,F
+
+PCA     CALL    FNCP            ; FETCH NEXT INPUT FIFO CHARACTER
+        CPI     CAN             ; SEE IF TO CANCEL THIS SEQUENCE
+        RZ                      ; IF CANCEL
+
+;       HAVE A LINE NUMBER, PROCESS IT
+;
+PCA1    CPI     40Q             ; SEE IF LINE NUMBER IN RANGE
+        CPU     Z80
+        JR      C,PCA2          ; IF LESS THAN LINE ZERO, USE SAME LINE
+        CPU     8080
+
+        CPI     40Q+24
+        CPU     Z80
+        JR      C,PCA1.5        ; IF LINE 23 OR LESS
+
+        JR      NZ,PCA2         ; IF NOT 24, USE SAVE
+        CPU     8080
+
+        MOV     B,A             ; ELSE, SAVE LINE NUMBER
+        LDA     MODEI           ; GET MODE FLAGS
+        ANI     MI.25L          ; SEE IF 25TH LINE IS ENABLED
+        CPU     Z80
+        JR      Z,PCA2          ; IF LINE 24 REQUESTED AND NOT AVAILABLE
+        CPU     8080
+
+        MOV     A,B             ; ELSE, GET LINE 24 VALUE BACK AND USE IT
+
+FCA1.5  SUI     40Q             ; MASK FOR LINE VALUE
+        STA     CURVP           ; SAVE NEW VERTICAL POSITION
+
+FCA2    CALL    FNCP            ; FETCH NEXT INPUT FIFO CHARACTER
+        CPI     CAN             ; SEE IF TO CANCEL NOW
+        CPU     Z80
+        JR      Z,PCA6          ; IF TO CANCEL
+        CPU     8080
+
+;       HAVE A COLUMN NUMBER
+;
+PCA3    CPI     40Q             ; SEE IF IN RANGE
+        CPU     Z80
+        JR      C,PCA4          ; IF LESS THAN COLUMN ZERO
+        CPU     8080
+
+        CPI     40Q+80
+        CPU     Z80
+        JR      C,PCA5          ; IF COLUMN ZERO THRU 79
+        CPU     8080
+
+PCA4    MVI     A,40Q+79        ; OUT OF RANGE, SET CURSOR TO END OF LINE
+FCA5    SUI     40Q             ; MASK FOR COLUMN VALUE
+        STA     CURHP           ; UPDATE COLUMN COUNTER
+
+FCA6    JMP     SNCP            ; SET CURSOR POSITION
+
+;;      PCIF - PLACE CHARACTER IN FIFO
+;
+;       *PCIF* PLACES A SINGLE CHARACTER INTO THE INPUT FIFO
+;
+;
+;       ENTRY   (A) = CHARACTER
+;
+;       EXIT    (A) = CHARACTER
+;               'C' = SET IF NO ROOM IN FIFO
+;
+;       USES    A,B,C,H,L,F
+
+
+PCIF    MOV     C,A             ; SAVE CHARACTER FOR FIFO
+        LDA     IFC             ; GET INPUT FIFO CHARACTER
+        CPI     IFMAX           ; CHECK FOR FIFO ALREADY FULL
+        STC                     ; SET 'C' FOR FIFO FULL
+        JZ      DING            ; DING BELL AND EXIT
+
+        MOV     B,A             ; ELSE, SAVE FIFO COUNTER
+        LDA     IFP             ; GET INPUT FIFO POINTER
+        ADD     B               ; ADD COUNT FOR VECTOR TO NEXT CURSOR ADDRESS
+        ANI     IFCMSK          ; KEEP VECTOR IN FIFO
+        LXI     H,INFI          ; POINT TO INPUT FIFO
+        ADD     L               ; ADD VECTOR
+        MOV     L,A
+        MOV     M,C             ; PLACE CHARACTER IN FIFO
+        MOV     A,B             ; INCREMENT INPUT FIFO COUNTER
+        INR     A
+        STA     IFC
+        STC                     ; CLEAR 'C' TO SHOW THAT CHARACTER WAS PLACED
+        CMC
+        MOV     A,C             ; CHARACTER TO (A)
+        RET
 
 
 
@@ -2875,7 +3911,7 @@ EBL     LHLD    CLSA            ; GET ADDRESS OF FIRST COLUMN ON THIS LINE
 
         ORG     40000Q
 RAM     EQU     $               ; 256 BYTE SCRATCHPAD RAM AREA
-INF     DS      128             ; INPUT FIFO
+INFI    DS      128             ; INPUT FIFO
 ;       ERRNZ   INF&1111111B    ; 7 LSB MUST BE ZERO
 ;       ERRNZ   $-INF/256       ; FIFO MUST RESIDE IN ONE PAGE
 IFMAX   EQU     200Q            ; $-INF
