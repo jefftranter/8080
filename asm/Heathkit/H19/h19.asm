@@ -794,11 +794,11 @@ KCE10   XRA     A               ; CLEAR ACC AND GET BYTE FROM TABLE (SET FLAGS)
         CPU     8080
 
         CALL    PSIF            ; ELSE, PUT IN INPUT FIFO
-        DB      ESC,'[','P'+0200Q
+        DB      ESC,'[','P'+200Q
         RET
 
 KE10.03 CALL    PSOF            ; PUT STRING IN OUTPUT BUFFER
-        DB      ESC,'[','P'+0200Q
+        DB      ESC,'[','P'+200Q
         RET
 
 KE10.07 CPI     ESCF+'@'        ; CHECK FOR INSERT CHARACTER CODE
@@ -820,11 +820,11 @@ KE10.07 CPI     ESCF+'@'        ; CHECK FOR INSERT CHARACTER CODE
         CPU     8080
 
         CALL    PSIF            ; ELSE PUT STRING IN INPUT FIFO
-        DB      ESC,'[','4','1'+200Q
+        DB      ESC,'[','4','l'+200Q
         RET
 
 KCE10.1 CALL    PSOF            ; PUT STRING IN OUTPUT FIFO
-        DB      ESC,'[','4','1'+200Q
+        DB      ESC,'[','4','l'+200Q
         RET
 
         CPU     Z80
@@ -833,11 +833,11 @@ KCE10.2 BIT     IB.KCB,D        ; CHECK FOR CONTROL KEY
         CPU     8080
 
         CALL    PSIF            ; ELSE PUT STRING IN INPUT FIFO
-        DB      ESC,'[','4','H'+200Q
+        DB      ESC,'[','4','h'+200Q
         RET
 
 KCE10.3 CALL    PSOF            ; PUT STRING IN OUTPUT FIFO
-        DB      ESC,'[','4','H'+200Q
+        DB      ESC,'[','4','h'+200Q
         RET
 
 KCE10.4 LDA     MODEA           ; GET MODE FLAGS
@@ -912,7 +912,7 @@ KCE13.5 BIT     IB.CPLK,E       ; TEST FOR 'CAPS LOCK' ON
         JR      Z,KCE14         ; IF CAPS LOCK NOT ON
         CPU     8080
 
-        CPI     'A'             ; TEST FOR < LOWER CASE A
+        CPI     'a'             ; TEST FOR < LOWER CASE A
         CPU     Z80
         JR      C,KCE14         ; IF LESS THAN A LOWER CASE CHARACTER
         CPU     8080
@@ -976,7 +976,7 @@ KAE2    EQU     $
         DB      30Q,'8',ESCF+'A',ESCF+'x',ESCF+'A'      ; X = LOWER CASE X
         DB      31Q,'9',ESCF+'N',ESCF+'y',ESCF+'N'      ; Y = LOWER CASE Y
         DB      32Q,'.','.',ESCF+'n',ESCF+'n'           ; n = LOWER CASE N
-        DB      34Q,CR,CR,ESCF+'M',ESCF+'N'
+        DB      34Q,CR,CR,ESCF+'M',ESCF+'M'
 KAE2W   EQU     5               ; TABLE WIDTH = 5 BYTES
 KAE2L   EQU     ($-KAE2)/KAE2W
 
@@ -987,11 +987,11 @@ KAE2L   EQU     ($-KAE2)/KAE2W
 
 
 KAE3
-        DB      "'",'.'
+        DB      "'",'"'
         DB      '-','_'
-        DB      '0','}'
+        DB      '0',')'
         DB      '2','@'
-        DB      '6','~'
+        DB      '6','^'
         DB      '7','&'
         DB      '8','*'
         DB      '9','('
@@ -1137,7 +1137,7 @@ IFCP1.5 MOV     A,D             ; GET KEY VALUE
         CPU     8080
 
         CALL    KCE             ; ELSE ENCODE THE ASCII VALUE
-        CALL    MAIN1           ; SEE IF THERE IS A CHARACTER TO OUTPUT
+        CALL    MAINA           ; SEE IF THERE IS A CHARACTER TO OUTPUT
         CPU     Z80
         JR      IFCP1.3         ; SEE IF KEYSTRIKE FILLED THE INPUT FIFO
 
@@ -1495,7 +1495,7 @@ A1SM    MOV     A,B             ; SEE IF PN WAS INPUT
         RZ                      ; IF NO PN, EXIT
         XCHG
         LXI     B,MODEB         ; (B,C) = MODEB
-A1SM1   MOV     A,B             ; GET PN
+A1SM1   MOV     A,M             ; GET PN
         CPI     2               ; PN = 2?
         CZ      EHM             ; IF 2, ENTER HEATH MODE
 
@@ -2213,11 +2213,11 @@ PLF0.2  LXI     D,80            ; LINES = 80 CHARACTERS
         XCHG                    ; (D,E) = BEGINNING OF 26TH LINE
         POP     H               ; (H,L) = BEGINNING OF 25TH LINE
         PUSH    H               ; SAVE AGAIN FOR LATER
-        MVI     D,80/16         ; SET MOD 16 COUNT FOR ONE LINE
+        MVI     B,80/16         ; SET MOD 16 COUNT FOR ONE LINE
         CALL    CPM16           ; COPY LINE
         POP     H               ; (H,L) = BEGINNING OF 25TH LINE
 
-PLF0.5  MVI     B,80/60         ; SET MOD-16 ERASE COUNT TO 5 (80 CHARACTERS)
+PLF0.5  MVI     B,80/16         ; SET MOD-16 ERASE COUNT TO 5 (80 CHARACTERS)
         CALL    WSVA            ; WRITE 80 SPACES TO VIDEO TO BLANK THIS LINE
         LHLD    SHOME           ; GET OLD HOME POSITION
         LXI     D,80            ; ADD ONE LINE
@@ -3018,7 +3018,7 @@ EHM     LDA     MODEB           ; GET MODE FLAGS
 
 EHSM    XCHG                    ; (H,L) = MODEA
         CPU     Z80
-        BIT     IB.HSM,(HL)     ; SET HOLD SCREEN MODE FLAG
+        SET     IB.HSM,(HL)     ; SET HOLD SCREEN MODE FLAG
         CPU     8080
         MVI     A,1             ; SET LINE COUNTER TO ONE
         STA     HSMLC
@@ -3038,7 +3038,7 @@ EHSM    XCHG                    ; (H,L) = MODEA
 
 EICM    XCHG                    ; (H,L) = MODEA
         CPU     Z80
-        BIT     IB.ICM,(HL)     ; SET INSERT CHARACTER MODE FLAG
+        SET     IB.ICM,(HL)     ; SET INSERT CHARACTER MODE FLAG
         CPU     8080
         RET
 
@@ -3436,7 +3436,7 @@ FVKF    PUSH    B               ; SAVE (B,C,H,L)
         DCX     H
         SHLD    KBDFP
         LXI     H,KBDF          ; (H,L) = BEGINNING OF FIFO
-        MOV     D,A             ; (D) = VALUE FROM IP.KBD1
+        MOV     D,M             ; (D) = VALUE FROM IP.KBD1
         INX     H
         MOV     E,M             ; (E) = VALUE FROM IP.KBD2
         INX     H               ; POINT TO NEXT ENTRY
@@ -4216,7 +4216,7 @@ PIL     EQU     $
         POP     D               ; (D,E) = END OF LINE 23
 
 PIL1    PUSH    B               ; SAVE (B,C)
-        MOV     A,B             ; KEEP POINTERS IN VIDEO RAM
+        MOV     A,D             ; KEEP POINTERS IN VIDEO RAM
         ORI     VRAMS/256
         MOV     D,A
         MOV     A,H
@@ -4322,7 +4322,7 @@ PSD3.5  CALL    FNCP            ; GET NEXT CHARACTER
         JR      PSD1            ; DECODE CHARACTER
         CPU     8080
 
-PSD4    MOV     B,A             ; SAVE FINAL CHARACTER
+PSD4    MOV     D,A             ; SAVE FINAL CHARACTER
         XRA     A               ; SEE IF PN IS IN MEMORY AT CURRENT ADDRESS
         ORA     C
         CPU     Z80
@@ -4870,7 +4870,7 @@ WSV3    MOV     A,D             ; ROTATE MSB
         MOV     D,A
         MOV     A,E             ; ROTATE LSB
         RAR
-        MOV     E,E
+        MOV     E,A
         CPU     Z80
         DJNZ    WSV3            ; LOOP 4 TIMES
         CPU     8080
@@ -5165,7 +5165,7 @@ XMTL1.1 PUSH    H
 
 ;       CHARACTER IS GRAPHIC
 ;
-        MVI     A,'~'           ; SET PRINTABLE EQUIVALENT OF 177Q
+        MVI     A,'^'           ; SET PRINTABLE EQUIVALENT OF 177Q
         CPU     Z80
         JR      XMTL2
         CPU     8080
@@ -5198,7 +5198,7 @@ XMTL2   PUSH    PSW             ; SAVE CHARACTER TO OUTPUT
         CPU     8080
 
         CALL    XMTS            ; TRANSMIT ANSI 'ENTER GRAPHICS' SEQUENCE
-        DB      ESC,'L','10','m'+200Q
+        DB      ESC,'[','10','m'+200Q
 
         CPU     Z80
         JR      XMTL6           ; GO CHECK FOR REVERSE VIDEO
@@ -5291,7 +5291,7 @@ XMTL7.5 EQU     $
         CPU     8080
 
 XMTL8   CALL    XMTS            ; SEND HEATH 'EXIT RV' SEQUENCE
-        DB      ESC,'a'+200Q
+        DB      ESC,'q'+200Q
 
 XMTL9   POP     PSW             ; GET CHARACTER TO SEND
         CALL    XMTC            ; SEND IT
@@ -5553,4 +5553,4 @@ PSDWE   EQU     $&255           ; LSB OF END ADDRESS +1 OF WORK AREA
 
         ORG     174000Q
 VRAMS   EQU     $               ; VIDEO RAM STARTING ADDRESS
-HOMAX   EQU     177777Q         ; MAXIMUM VIDEO ADDRESS MASK
+HOMAX   EQU     177777Q-VRAMS   ; MAXIMUM VIDEO ADDRESS MASK
