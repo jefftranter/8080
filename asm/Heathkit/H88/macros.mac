@@ -1,8 +1,5 @@
 ; Macros to emulate the Heathkit HDOS assembler.
 
-; Code currently commented out as the assembler enforces that the
-; expression must be evaluatable in first pass.
-
 ERRPL   MACRO EXP
         IF (EXP) > 0
           ERROR Expression is positive
