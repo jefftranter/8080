@@ -18,8 +18,6 @@ The original code used many split octal constants (suffixed by A).
 This is not supported by ASL and they have been converted to octal
 (suffix Q).
 
-Unused code was filled with zeroes to match the original ROM binaries.
-
 A few obvious spelling and grammatical errors in comments have been
 corrected.
 

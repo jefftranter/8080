@@ -1,36 +1,33 @@
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 1 - 2024-04-26 05:28:22 PM
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 1 - 2024-05-01 01:09:38 PM
 
 
        1/      0 :                              INCLUDE macros.mac
 (1)    1/      0 :                      ; Macros to emulate the Heathkit HDOS assembler.
 (1)    2/      0 :                      
-(1)    3/      0 :                      ; Code currently commented out as the assembler enforces that the
-(1)    4/      0 :                      ; expression must be evaluatable in first pass.
-(1)    5/      0 :                      
-(1)    6/      0 :                      ERRPL   MACRO EXP
-(1)    7/      0 :                              IF (EXP) > 0
-(1)    8/      0 :                                ERROR Expression is positive
-(1)    9/      0 :                              ENDIF
-(1)   10/      0 :                              ENDM
-(1)   11/      0 :                      
-(1)   12/      0 :                      ERRMI   MACRO EXP
-(1)   13/      0 :                              IF (EXP) < 0
-(1)   14/      0 :                                ERROR Expression is negative
-(1)   15/      0 :                              ENDIF
-(1)   16/      0 :                              ENDM
-(1)   17/      0 :                      
-(1)   18/      0 :                      ERRNZ   MACRO EXP
-(1)   19/      0 :                              IF (EXP) != 0
-(1)   20/      0 :                                ERROR Expression is not zero
-(1)   21/      0 :                              ENDIF
-(1)   22/      0 :                              ENDM
-(1)   23/      0 :                      
-(1)   24/      0 :                      ERRZR   MACRO EXP
-(1)   25/      0 :                              IF (EXP) == 0
-(1)   26/      0 :                                ERROR Expression is zero
-(1)   27/      0 :                              ENDIF
-(1)   28/      0 :                              ENDM
-(1)   29/      0 :                      
+(1)    3/      0 :                      ERRPL   MACRO EXP
+(1)    4/      0 :                              IF (EXP) > 0
+(1)    5/      0 :                                ERROR Expression is positive
+(1)    6/      0 :                              ENDIF
+(1)    7/      0 :                              ENDM
+(1)    8/      0 :                      
+(1)    9/      0 :                      ERRMI   MACRO EXP
+(1)   10/      0 :                              IF (EXP) < 0
+(1)   11/      0 :                                ERROR Expression is negative
+(1)   12/      0 :                              ENDIF
+(1)   13/      0 :                              ENDM
+(1)   14/      0 :                      
+(1)   15/      0 :                      ERRNZ   MACRO EXP
+(1)   16/      0 :                              IF (EXP) != 0
+(1)   17/      0 :                                ERROR Expression is not zero
+(1)   18/      0 :                              ENDIF
+(1)   19/      0 :                              ENDM
+(1)   20/      0 :                      
+(1)   21/      0 :                      ERRZR   MACRO EXP
+(1)   22/      0 :                              IF (EXP) == 0
+(1)   23/      0 :                                ERROR Expression is zero
+(1)   24/      0 :                              ENDIF
+(1)   25/      0 :                              ENDM
+(1)   26/      0 :                      
        2/      0 :                      
        3/      0 :                      ;       PAM/8 - H8 FRONT PANEL MONITOR
        4/      0 :                      ;
@@ -61,12 +58,12 @@
       29/      0 :                      ;       0       MASTER CLEAR. (NEVER USES FOR I/O OR RESET)
       30/      0 :                      ;
       31/      0 :                      ;       1       CLOCK INTERRUPT. NORMALLY TAKEN BY PAM/8.
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 2 - 2024-04-26 05:28:22 PM
-
-
       32/      0 :                      ;               SETTING BIT *U0.CLK* IN BYTE *MFLAG* ALLOWS
       33/      0 :                      ;               USER PROCESSING (VIA A JUMP THROUGH *UIVEC*).
       34/      0 :                      ;               UPON ENTRY OF THE USER ROUTINE, THE STACK
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 2 - 2024-05-01 01:09:38 PM
+
+
       35/      0 :                      ;               CONTAINS:
       36/      0 :                      ;               (STACK+0)  = RETURN ADDRESS (TO PAM/8)
       37/      0 :                      ;               (STACK+2)  = (STACKPTR+4)
@@ -124,12 +121,12 @@
       89/      0 :                      ;               ASCII CHARACTERS.
       90/      0 :                      
       91/      0 : =26O                 A.SYN   EQU     026Q            ; SYNC CHARACTER
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 3 - 2024-04-26 05:28:22 PM
-
-
       92/      0 : =2O                  A.STX   EQU     002Q            ; STX CHARACTER
       93/      0 :                      
       94/      0 :                      ;               FRONT PANEL HARDWARE CONTROL BITS.
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 3 - 2024-05-01 01:09:38 PM
+
+
       95/      0 :                      
       96/      0 : =20O                 CB.SSI  EQU     00010000B       ; SINGLE STEP INTERRUPT
       97/      0 : =40O                 CB.MTL  EQU     00100000B       ; MONITOR LIGHT
@@ -187,12 +184,12 @@
 (1)   11/      0 : =0O                  UMI.L5  EQU     00000000B       ; 5 BIT CHARACTERS
 (1)   12/      0 : =4O                  UMI.L6  EQU     00000100B       ; 6 BIT CHARACTERS
 (1)   13/      0 : =10O                 UMI.L7  EQU     00001000B       ; 7 BIT CHARACTERS
- AS V1.42 Beta [Bld 269] - Source File pam8.asm(u8251.asm) - Page 4 - 2024-04-26 05:28:22 PM
-
-
 (1)   14/      0 : =14O                 UMI.L8  EQU     00001100B       ; 8 BIT CHARACTERS
 (1)   15/      0 : =1O                  UMI.1X  EQU     00000001B       ; CLOCK X 1
 (1)   16/      0 : =2O                  UMI.16X EQU     00000010B       ; CLOCK X 16
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm(u8251.asm) - Page 4 - 2024-05-01 01:09:38 PM
+
+
 (1)   17/      0 : =3O                  UMI.64X EQU     00000011B       ; CLOCK X 64
 (1)   18/      0 :                      
 (1)   19/      0 :                      ;       COMMAND INSTRUCTION BITS.
@@ -250,12 +247,12 @@
      160/     21 :                      
      161/     21 : =20O                 INT2    EQU     20Q             ; LEVEL 2 ENTRY
      162/     21 :                      
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 5 - 2024-04-26 05:28:22 PM
-
-
      163/     21 : (MACRO)                      ERRNZ   $-21Q           ; INT1 TAKES EXTRA BYTE
      163/     21 : =>FALSE                      IF ($-21Q) != 0
      163/     21 :                                ERROR Expression is not zero
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 5 - 2024-05-01 01:09:38 PM
+
+
      163/     21 : [163]                        ENDIF
      164/     21 : 315 132 000                  CALL    SAVALL          ; SAVE REGISTERS
      165/     24 : 032                          LDAX    D               ; (A) = (CTLFLG)
@@ -313,12 +310,12 @@
      217/     73 :                      ;       ENTER THE MONITOR LOOP.
      218/     73 :                      ;
      219/     73 :                      ;       ENTRY   FROM MASTER CLEAR
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 6 - 2024-04-26 05:28:22 PM
-
-
      220/     73 :                      ;       EXIT    INTO PAM/8 MAIN LOOP
      221/     73 :                      
      222/     73 : 032                  INIT    LDAX    D               ; COPY *PRSROM* INTO RAM
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 6 - 2024-05-01 01:09:38 PM
+
+
      223/     74 : 167                          MOV     M,A             ; MOVE BYTE
      224/     75 : 053                          DCX     H               ; DECREMENT DESTINATION
      225/     76 : 034                          INR     E               ; INCREMENT SOURCE
@@ -376,12 +373,12 @@
      277/    152 : 346 060                      ANI     CB.MTL+CB.SSI   ; SAVE REGISTER ADDR IF USER OR SINGLE-STEP
      278/    154 : 310                          RZ                      ; RETURN IF WAS INTERRUPT OR MONITOR LOOP
      279/    155 : 041 002 000                  LXI     H,2
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 7 - 2024-04-26 05:28:22 PM
-
-
      280/    160 : 071                          DAD     SP              ; (H,L) = ADDRESS OF 'STACKPTR' ON STACK
      281/    161 : 042 035 040                  SHLD    REGPTR
      282/    164 : 311                          RET
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 7 - 2024-05-01 01:09:38 PM
+
+
      283/    165 :                      
      284/    165 :                      
      285/    165 :                      ;       CUI - CHECK FOR USER INTERRUPT PROCESSING.
@@ -439,12 +436,12 @@
      337/    227 : 302 234 000                  JNZ     CLK2            ; IF NOT WRAP-AROUND
      338/    232 : 066 011                      MVI     M,9             ; WRAP DISPLAY AROUND
      339/    234 : 136                  CLK2    MOV     E,M
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 8 - 2024-04-26 05:28:22 PM
-
-
      340/    235 : 031                          DAD     D               ; (H,L) = ADDRESS OF PATTERN
      341/    236 : 113                          MOV     C,E
      342/    237 :                      CLK3                            ; (A) = CTLFLG
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 8 - 2024-05-01 01:09:38 PM
+
+
      343/    237 : 261                          ORA     C               ; (A) = INDEX + FIXED BITS
      344/    240 : 323 360                      OUT     OP.DIG          ; SELECT DIGIT
      345/    242 : 176                          MOV     A,M
@@ -502,12 +499,12 @@
      394/    322 :                      ;               CTLFLG SET
      395/    322 :                      ;               MFLAG CLEARED
      396/    322 :                      ;       USES    ALL
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 9 - 2024-04-26 05:28:22 PM
-
-
      397/    322 :                      
      398/    322 :                      ERROR
      399/    322 : 041 010 040                  LXI     H,MFLAG
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 9 - 2024-05-01 01:09:38 PM
+
+
      400/    325 : 176                          MOV     A,M             ; (A) = MFLAG
      401/    326 : 346 275                      ANI     377Q-UO.DDU-UO.NFR ; RE-ENABLE DISPLAYS
      402/    330 : 167                          MOV     M,A             ; REPLACE
@@ -565,12 +562,12 @@
      454/  1.033 : 012                          LDAX    B               ; (A) = DSPMOD
      455/  1.034 : 311                          RET                     ; JUMP TO PROCESSOR
      456/  1.035 :                      
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 10 - 2024-04-26 05:28:23 PM
-
-
      457/  1.035 :                      MTRA                            ; JUMP TABLE
      458/  1.035 : 165                          DB      GO-$            ; 4 - GO
      459/  1.036 : 141                          DB      IN- $           ; 5 - INPUT
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 10 - 2024-05-01 01:09:38 PM
+
+
      460/  1.037 : 143                          DB      OUT-$           ; 6 - OUTPUT
      461/  1.040 : 165                          DB      SSTEP-$         ; 7 - SINGLE STEP
      462/  1.041 : 220                          DB      RMEM-$          ; 8 - CASSETTE LOAD
@@ -628,12 +625,12 @@
      514/  1.107 : 013                          DCX     B               ; (BC) = #DSPROT
      515/  1.110 : 257                          XRA     A
      516/  1.111 : 002                          STAX    B               ; SET ALL PERIODS ON
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 11 - 2024-04-26 05:28:23 PM
-
-
      517/  1.112 : 315 260 003                  CALL    RCK             ; READ KEY ENTRY
      518/  1.115 : 075                          DCR     A               ; DISPLACE
      519/  1.116 : 376 006                      CPI     6
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 11 - 2024-05-01 01:09:38 PM
+
+
      520/  1.120 : 322 322 000                  JNC     ERROR           ; NOT 1-6
      521/  1.123 : 007                          RLC
      522/  1.124 : 022                          STAX    D               ; SET NEW REG IND
@@ -691,12 +688,12 @@
      574/  1.164 : 311                          RET
      575/  1.165 :                      
      576/  1.165 :                      ;       MEMM - ENTER DISPLAY MEMORY MODE
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 12 - 2024-04-26 05:28:23 PM
-
-
      577/  1.165 :                      ;
      578/  1.165 :                      ;       ENTRY   (BC) = ADDRESS OF DSPMOD
      579/  1.165 :                      
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 12 - 2024-05-01 01:09:38 PM
+
+
      580/  1.165 : 257                  MEMM    XRA     A               ; (A) = 0
      581/  1.166 :                      ;       SET     DSPMOD
      582/  1.166 : 002                          STAX    B               ; SET DISPLAY MEMORY MODE
@@ -754,12 +751,12 @@
      634/  1.253 : 302 344 000                  JNZ     MTR
      635/  1.256 : 303 042 040                  JMP     UIVEC+3         ; TRANSFER TO USER'S ROUTINE
      636/  1.261 :                      
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 13 - 2024-04-26 05:28:23 PM
-
-
      637/  1.261 :                      ;       RMEM - LOAD MEMORY FROM TAPE
      638/  1.261 :                      ;
      639/  1.261 :                      
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 13 - 2024-05-01 01:09:38 PM
+
+
      640/  1.261 : 041 244 002          RMEM    LXI     H,TPABT
      641/  1.264 : 042 031 040                  SHLD    TPERRX          ; SETUP ERROR EXIT ADDRESS
      642/  1.267 :                      ;       JMP     LOAD
@@ -817,12 +814,12 @@
      694/  1.363 :                      
      695/  1.363 : 361                          POP     PSW             ; (A) = FILE TYPE BYTE
      696/  1.364 : 301                          POP     B               ; (BC) = -(LAST TYPE, LAST #0
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 14 - 2024-04-26 05:28:23 PM
-
-
      697/  1.365 : 007                          RLC
      698/  1.366 : 332 133 002                  JC      TFT             ; ALL DONE - TURN OFF TAPE
      699/  1.371 : 303 272 001                  JMP     LOA0            ; READ ANOTHER RECORD
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 14 - 2024-05-01 01:09:38 PM
+
+
      700/  1.374 :                      
      701/  1.374 :                      ;       DUMP - DUMP MEMORY TO MAG TAPE.
      702/  1.374 :                      ;
@@ -880,12 +877,12 @@
      754/  2.114 : 033                          DCX     D
      755/  2.115 : 172                          MOV     A,D
      756/  2.116 : 263                          ORA     E
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 15 - 2024-04-26 05:28:23 PM
-
-
      757/  2.117 : 302 104 002                  JNZ     WME2            ; IF MORE TO GO
      758/  2.122 :                      
      759/  2.122 :                      ;       WRITE CHECKSUM
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 15 - 2024-05-01 01:09:38 PM
+
+
      760/  2.122 :                      
      761/  2.122 : 052 027 040                  LHLD    CRCSUM
      762/  2.125 : 315 017 003                  CALL    WNP             ; WRITE IT
@@ -943,12 +940,12 @@
      814/  2.202 : 310                          RZ                      ; RETURN IF OK
      815/  2.203 : 076 001                      MVI     A,1             ; CHECKSUM ERROR
      816/  2.205 :                      ;       JMP     TPERR           ; (B) = CODE
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 16 - 2024-04-26 05:28:23 PM
-
-
      817/  2.205 :                      
      818/  2.205 :                      ;       TPERR - PROCESS TAPE ERROR.
      819/  2.205 :                      ;
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 16 - 2024-05-01 01:09:38 PM
+
+
      820/  2.205 :                      ;       DISPLAY ERR NUMBER IN LOW BYTE OF ABUSS
      821/  2.205 :                      ;
      822/  2.205 :                      ;       IF ERROR NUMBER EVEN, DON'T ALLOW #
@@ -1006,12 +1003,12 @@
      874/  2.261 : 052 031 040                  LHLD    TPERRX
      875/  2.264 : 351                          PCHL                    ; ENTER (TPERRX)
      876/  2.265 :                      
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 17 - 2024-04-26 05:28:23 PM
-
-
      877/  2.265 :                      ;       SRS - SCAN RECORD START
      878/  2.265 :                      ;
      879/  2.265 :                      ;       SRS READS BYTES UNTIL IT RECOGNIZES THE START OF A RECORD.
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 17 - 2024-05-01 01:09:38 PM
+
+
      880/  2.265 :                      ;
      881/  2.265 :                      ;       THIS REQUIRES
      882/  2.265 :                      ;       AT LEAST 10 SYNC CHARACTERS
@@ -1069,12 +1066,12 @@
      934/  2.331 : 076 064              RNB     MVI     A,UCI.RO+UCI.ER+UCI.RE ; TURN ON READER FOR NEXT BYTE
      935/  2.333 : 323 371                      OUT     OP.TPC
      936/  2.335 : 315 252 002          RNB1    CALL    TPXIT           ; CHECK FOR *, READ STATUS
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 18 - 2024-04-26 05:28:23 PM
-
-
      937/  2.340 : 346 002                      ANI     USR.RXR
      938/  2.342 : 312 335 002                  JZ      RNB1            ; IF NOT READY
      939/  2.345 : 333 370                      IN      IP.TPD          ; INPUT DATA
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 18 - 2024-05-01 01:09:38 PM
+
+
      940/  2.347 :                      ;       JMP     CRC             ; CHECKSUM
      941/  2.347 :                      
      942/  2.347 :                      ;       CRC - COMPUTE CRC-16
@@ -1132,12 +1129,12 @@
      994/  3.017 :                      ;       EXIT    WRITTEN.
      995/  3.017 :                      ;       USES    A,F
      996/  3.017 :                      
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 19 - 2024-04-26 05:28:23 PM
-
-
      997/  3.017 : 174                  WNP     MOV     A,H
      998/  3.020 : 315 024 003                  CALL    WNB
      999/  3.023 : 175                          MOV     A,L
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 19 - 2024-05-01 01:09:38 PM
+
+
     1000/  3.024 :                      ;       JMP     WNB             ; WRITE NEXT BYTE
     1001/  3.024 :                      
     1002/  3.024 :                      ;       WNB - WRITE NEXT BYTE
@@ -1195,12 +1192,12 @@
     1054/  3.066 :                      
     1055/  3.066 : 026 003              IOB     MVI     D,3             ; (D) = DIGIT COUNT
     1056/  3.070 : 324 260 003          IOB1    CNC     RCK             ; READ CONSOLE KEYSET
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 20 - 2024-04-26 05:28:23 PM
-
-
     1057/  3.073 :                      
     1058/  3.073 : 376 010                      CPI     8
     1059/  3.075 : 322 322 000                  JNC     ERROR           ; IF ILLEGAL DIGIT
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 20 - 2024-05-01 01:09:38 PM
+
+
     1060/  3.100 :                      
     1061/  3.100 : 137                          MOV     E,A             ; (E) = VALUE
     1062/  3.101 : 176                          MOV     A,M
@@ -1258,12 +1255,12 @@
     1114/  3.161 :                      ;       EXIT    NONE
     1115/  3.161 :                      ;       USES    ALL
     1116/  3.161 :                      
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 21 - 2024-04-26 05:28:23 PM
-
-
     1117/  3.161 : 076 002              UFD     MVI     A,UO.DDU
     1118/  3.163 : 240                          ANA     B
     1119/  3.164 : 300                          RNZ                     ; IF NOT TO HANDLE UPDATE
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 21 - 2024-05-01 01:09:38 PM
+
+
     1120/  3.165 :                      
     1121/  3.165 : 056 006                      MVI     L,DSPROT#256
     1122/  3.167 : 176                          MOV     A,M
@@ -1321,12 +1318,12 @@
     1174/  3.260 :                      ;       RCK PERFORMS DEBOUNCING, AND AUTO-REPEAT. A *BIP* IS SOUNDED
     1175/  3.260 :                      ;       WHEN A VALUE IS ACCEPTED.
     1176/  3.260 :                      ;
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 22 - 2024-04-26 05:28:23 PM
-
-
     1177/  3.260 :                      ;       KEY PAD VALUES:
     1178/  3.260 :                      ;
     1179/  3.260 :                      ;       1111 1110  -  0
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 22 - 2024-05-01 01:09:38 PM
+
+
     1180/  3.260 :                      ;       1111 1100  -  1
     1181/  3.260 :                      ;       1111 1010  -  2
     1182/  3.260 :                      ;       1111 1000  -  3
@@ -1384,12 +1381,12 @@
     1234/  3.310 : 167                  RCK2    MOV     M,A             ; UPDATE RCKA
     1235/  3.311 : 356 376                      XRI     376Q            ; INVERT ALL BUT GROUP 0 FLAG
     1236/  3.313 : 017                          RRC
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 23 - 2024-04-26 05:28:23 PM
-
-
     1237/  3.314 : 322 326 003                  JNC     RCK3            ; HIT BANK 0
     1238/  3.317 : 017                          RRC
     1239/  3.320 : 017                          RRC
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 23 - 2024-05-01 01:09:38 PM
+
+
     1240/  3.321 : 017                          RRC
     1241/  3.322 : 017                          RRC
     1242/  3.323 : 322 267 003                  JNC     RCK1            ; NO HIT AT ALL
@@ -1447,12 +1444,12 @@
     1294/  3.371 :                      ;       MUST CONTINUE TO 3777A FOR PROPER COPY.
     1295/  3.371 :                      ;       THE TABLE MUST ALSO BE BACKWARDS TO THE FINAL RAM.
     1296/  3.371 :                      
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 24 - 2024-04-26 05:28:23 PM
-
-
     1297/  3.371 :                              ORG     2000Q-7
     1298/  3.371 :                      
     1299/  3.371 : 001                  PRSROM  DB      1               ; REFIND
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 24 - 2024-05-01 01:09:38 PM
+
+
     1300/  3.372 : 000                          DB      0               ; CTLFLG
     1301/  3.373 : 000                          DB      0               ; MFLAG
     1302/  3.374 : 000                          DB      0               ; DSPMOD
@@ -1510,16 +1507,16 @@
     1351/ 40.037 :                              DS      3               ; JUMP TO CLOCK PROCESSOR
     1352/ 40.042 :                              DS      3               ; JUMP TO SINGLE STEP PROCESSOR
     1353/ 40.045 :                              DS      3               ; JUMP TO I/O 3
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 25 - 2024-04-26 05:28:23 PM
-
-
     1354/ 40.050 :                              DS      3               ; JUMP TO I/O 4
     1355/ 40.053 :                              DS      3               ; JUMP TO I/O 5
     1356/ 40.056 :                              DS      3               ; JUMP TO I/O 6
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 25 - 2024-05-01 01:09:38 PM
+
+
     1357/ 40.061 :                              DS      3               ; JUMP TO I/O 7
     1358/ 40.064 :                      
     1359/ 40.064 :                              END
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 26 - 2024-04-26 05:28:23 PM
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 26 - 2024-05-01 01:09:38 PM
 
 
   Symbol Table (* = unused):
@@ -1538,7 +1535,7 @@
  CRC1 :                       2.356 C |  CRC2 :                       3.004 C |
  CRCSUM :                    40.027 C |  CTC :                        2.172 C |
  CTLFLG :                    40.011 C |  CUI1 :                         165 C |
-*DATE :                "2024-04-26" - |  DLEDS :                     40.021 C |
+*DATE :                "2024-05-01" - |  DLEDS :                     40.021 C |
  DLY :                           53 C | *DM.MR :                          0 - |
 *DM.MW :                          1 - | *DM.RR :                          2 - |
 *DM.RW :                          3 - |  DOD :                        3.122 C |
@@ -1582,7 +1579,7 @@
  RCK2 :                       3.310 C |  RCK3 :                       3.326 C |
  RCKA :                      40.026 C | *REFIND :                    40.012 C |
  REGI :                      40.005 C |  REGM :                       1.104 C |
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 27 - 2024-04-26 05:28:23 PM
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 27 - 2024-05-01 01:09:38 PM
 
 
  REGPTR :                    40.035 C | *RELAXED :                        0 - |
@@ -1597,7 +1594,7 @@
  START :                     40.000 C |  STPRTN :                     1.244 C |
  TER1 :                       2.220 C |  TER3 :                       2.215 C |
  TFT :                        2.133 C |  TICCNT :                    40.033 C |
-*TIME :               "05:28:22 PM" - |  TPABT :                      2.244 C |
+*TIME :               "01:09:38 PM" - |  TPABT :                      2.244 C |
  TPERR :                      2.205 C |  TPERRX :                    40.031 C |
  TPXIT :                      2.252 C | *TRUE :                           1 - |
  UCI.ER :                        20 - | *UCI.IE :                         2 - |
@@ -1624,7 +1621,7 @@
     182 symbols
      55 unused symbols
 
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 28 - 2024-04-26 05:28:23 PM
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 28 - 2024-05-01 01:09:38 PM
 
 
   Defined Macros:
@@ -1635,7 +1632,7 @@ ERRPL                                 | ERRZR
 
       4 macros
 
- AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 29 - 2024-04-26 05:28:23 PM
+ AS V1.42 Beta [Bld 269] - Source File pam8.asm - Page 29 - 2024-05-01 01:09:38 PM
 
 
   Code Pages:
@@ -1645,10 +1642,10 @@ STANDARD (0 changed characters)
 
 1 code page
 
-0.00 seconds assembly time
+0.03 seconds assembly time
 
-  5.155 lines source file
-  5.167 lines incl. macro expansions
+  5.152 lines source file
+  5.164 lines incl. macro expansions
       2 passes
       0 errors
       0 warnings
