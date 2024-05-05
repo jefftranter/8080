@@ -1,0 +1,58 @@
+                     Heathkit H89 Quick Reference
+                        For MTR-89 Monitor ROM
+
+                   Jeff Tranter <tranter@pobox.com>
+                              5 May 2024
+
+General
+-------
+
+Monitor prompt is "H:".
+You only type the first letter of each command.
+Addresses are in split octal format.
+<DELETE> will cancel a partially entered command.
+<RIGHT SHIFT><RESET> will reset the machine.
+
+Monitor Commands
+----------------
+
+B[oot] [<drive>] <RETURN>
+
+Boot from floppy drive. Value of <drive> can be 0, 1, 2, or 3 for
+primary boot device or 'S' followed 0, 1, 2, or 3 to boot from drive
+on secondary device.
+
+G[o] [<address>] <RETURN>
+
+Start execution at <address>.
+If <address> is omitted, starts from Program Counter address.
+
+P[rogram Counter] [<address>] <RETURN>
+
+Set program counter address.
+If <address> is omitted, displays current address which can
+subsequently be changed.
+
+S[ubstitute] <address> <RETURN>
+
+Display memory at location <address>.
+Type in a new octal byte value to write to current address,
+<space> moves to next address,
+'-' moves to previous address,
+<RETURN> exits to monitor prompt.
+
+Other Notes
+-----------
+
+Write a HLT instruction (octal 166) to an address to set a breakpoint
+to stop execution and enter monitor during debugging. To continue
+execution, write original byte back to the address, use the P command
+to set the PC to one less than it's current value, then use the G[o]
+command.
+
+Run memory test: G[o] 7375
+
+Run disk speed test: G[o] 7372
+
+With the MTR-88 monitor ROM, there are cassette tape L[oad] and D[ump]
+commands and the B[oot] command does not take any options.
