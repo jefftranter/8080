@@ -1,0 +1,162 @@
+                   Heathkit H89 Hardware Reference
+                   Jeff Tranter <tranter@pobox.com>
+                              9 May 2024
+
+Memory Map:
+
+ Hex                           Octal
+FFFF +-----------------------+ 377.377
+     |                       |
+     | 1/2 of 16K RAM        |
+     | Expansion Board       |
+     |                     8K|
+E000 +-----------------------+ 340.000
+     |                       |
+     | User RAM              |
+     |                    16K|
+A000 +-----------------------+ 240.000
+     |                       |
+     | User RAM              |
+     |                    16K|
+6000 +-----------------------+ 140.000
+     |                       |
+     | User RAM              |
+     |                    16K|
+2000 +-----------------------+ 040.000
+     | CP/M:                 |
+     | User RAM            8K|
+     |         or            |
+     | HDOS:                 |
+     | Floppy Disk ROM     2K|
+     | Floppy Disk RAM     1K|
+     | Reserved RAM        1K|
+     | Reserved ROM        2K|
+     | System ROM          2K|
+0000 +-----------------------+ 000.000
+
+
+I/O Port Usage:
+
+Use                           Hex    Octal
+---------------------------  -----  -------
+Not specified, available      0-77    0-167
+Cassette I/O (if used)       78-79  170-171
+Disk I/O #1                  78-7B  170-173
+Disk I/O #2                  7C-7F  174-177
+Not specified, reserved      80-C7  200-317
+DCE Serial I/O               D0-D7  320-327
+DTE Serial I/O               D8-DF  330-337
+DCE Serial I/O               E0-D7  340-347
+Console I/O                  E8-EF  350-357
+NMI (generated if accessed)  F0-F1  360-361
+General purpose port            F2      362
+NMI (generated if accessed)  FA-FB  372-373
+
+
+Slot Assignments:
+
+P503/P509: Memory Expansion
+P504/P510: Cassette Interface
+P505/P511: Serial Interface (H-88-3, HA-88-3, or Z-89-11)
+P506/P512: Floppy Disk Interface (H-88-1)
+
+
+DIP Switch Settings - TLB Board
+
+S402:
+Switch    Normal    Description
+Position  Setting
+  0         0       0=underscore cursor; 1=block cursor
+  1         0       0=key click; 1=no key click
+  2         0       0=discard past end of line; 1=wrap around
+  3         0       0=no auto LF on CR; 1=auto LF on CR
+  4         0       0=no auto CR on LF; 1=auto CR on LF
+  5         0       0=Heath mode; 1=ANSI mode
+  6         0       0=keypad normal; 1=keypad shifted
+  7         0       0=60 Hz refresh; 1=50 Hz refresh
+
+S401:
+Switch    Normal    Description
+Position  Setting
+  0         0       Baud rate (see below)
+  1         0       Baud rate (see below)
+  2         1       Baud rate (see below)
+  3         1       Baud rate (see below)
+  4         0       Parity enable (0=no parity, 1=parity)
+  5         0       Odd/even parity (0=odd, 1=even)
+  6         0       Normal/stick parity (0=normal, 1=stick)
+  7         1       Duplex (0=half, 1=full)
+
+Baud  Switch Section
+Rate  0  1  2  3
+--------------------
+n/a   0  0  0  0
+110   1  0  0  0
+150   0  1  0  0
+300   1  1  0  0
+600   0  0  1  0
+1200  1  0  1  0
+1800  0  1  1  0
+2000  1  1  1  0
+2400  0  0  0  1
+3600  1  0  0  1
+4800  0  1  0  1
+7200  1  1  0  1
+9600  0  0  1  1
+
+
+DIP Switch Settings - CPU Board
+
+SW501:
+Switch    Normal    Description
+Position  Setting
+  0         0       MTR-88, MTR-89: unused, MTR-90: see table below
+  1         0       MTR-88, MTR-89: unused, MTR-90: see table below
+  2         0       MTR-88, MTR-89: unused, MTR-90: see table below
+  3         0       MTR-88, MTR-89: unused, MTR-90: see table below
+  4         0       MTR-88, MTR-89: unused, MTR-90: see table below
+  5         0       0=normal, 1=perform RAM test
+  6         0       Baud rate (0=9600)
+  7         0       Baud rate (0=9600)
+
+Switch Position  Description
+7 6 5 4 3 2 1 0
+X X X X X X 0 0  Port 174/177=5-1/4" drive
+X X X X X X 0 1  Port 174/177=Z47
+X X X X 0 0 X X  Port 170/173=unused
+X X X X 0 1 X X  Port 174/177=Z47
+X X X 0 X X X X  Boot primary from port 174/177
+X X X 1 X X X X  Boot primary from port 170/173
+
+RAM Decode Jumpers:
+                  J501 J502 J503 J504
+16K RAM installed  0    0    0    0
+32K RAM installed  1    0    0    0
+48K RAM installed  0    1    0    0
+64K RAM installed  1    1    0    0
+
+Note: Newer CPU boards do not have J504.
+
+ROM Decode Jumpers:
+Older Units:    J505 J506 J507 J508
+Newer Units:    J504 J505 J506 J507
+MTR-88, MTR-90   0    0    0    1
+MTR-90           1    X    1    1
+
+
+Jumper Settings - Serial I/O Board
+
+Jumpers for LP, DCE, and DTE control whether the associated port uses
+interrupts. Normal setting is OFF (no interrupts). Can be set for 3,
+4, or 5 to generate RST 30, 40, or 50 instruction for the associated
+port.
+
+
+Jumper Settings - Cassette Interface
+
+Jumper  Normal Setting  Description
+JP701      jumper       jumper=one recorder for record/playback, no jumper=two recorders
+JP702      jumper       jumper=one recorder for record/playback, no jumper=two recorders
+JP703      no jumper    no jumper=normal, +5V=send "1" tone, GND=send "0" tone
+JP704      no jumper    no jumper=normal, jumper=reduce incoming signal level
+JP705      jumper       jumper=normal, no jumper=troubleshootimg
