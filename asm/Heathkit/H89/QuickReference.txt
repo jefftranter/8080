@@ -2,7 +2,7 @@
                         For MTR-89 Monitor ROM
 
                    Jeff Tranter <tranter@pobox.com>
-                              5 May 2024
+                              9 May 2024
 
 General
 -------
@@ -18,9 +18,9 @@ Monitor Commands
 
 B[oot] [<drive>] <RETURN>
 
-Boot from floppy drive. Value of <drive> can be 0, 1, 2, or 3 for
-primary boot device or 'S' followed 0, 1, 2, or 3 to boot from drive
-on secondary device.
+Boot from floppy drive. The optional value of <drive> can be 0, 1, 2,
+or 3 for primary boot device or 'S' followed 0, 1, 2, or 3 to boot
+from drive on secondary device.
 
 G[o] [<address>] <RETURN>
 
@@ -56,3 +56,9 @@ Run disk speed test: G[o] 7372
 
 With the MTR-88 monitor ROM, there are cassette tape L[oad] and D[ump]
 commands and the B[oot] command does not take any options.
+
+With the MTR-90 monitor ROM, there are additional commands C[onvert]
+(converts between hex and octal), I[n] (input from port), O[ut]
+(output to port), R[adix] (set radix to octal or hex), T[est] (test
+memory), and V[iew} (view memory). Commands accept values in the
+currently selected radix (hex or octal).
