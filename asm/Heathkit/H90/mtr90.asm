@@ -47,10 +47,6 @@
 ;       COPYRIGHT  05/1980, ZENITH DATA SYSTEMS INC.
 ;                           ST. JOSEPH, MI.
 
-RAM     EQU     0
-
-        IF      RAM
-        ENDIF
 
 ;       MTR88 - H88/H89 MONITOR.
 ;
@@ -140,36 +136,24 @@ MI.EXX  EQU     331Q            ; Z80 EXX INSTRUCTION
 ;
 ;       THIS 'INTERRUPT' MAY NOT BE PROCESSED BY A USER PROGRAM.
 
-        IF      RAM
-        ELSE
         ORG     00Q
-        ENDIF
 
 INIT0   JMP     INIT0X          ; DO H88 EXTENSION OF INITIALIZATION
 INIT0.0 LXI     H,PRSRAM+PRSL-1 ; (HL) = RAM DESTINATION FOR CODE
         JMP     INIT            ; INITIALIZE
 
-        IF      RAM
-        ELSE
 ;       ERRPL   INIT-1000Q      ; BYTE IN WORD 10A MUST BE 0
-        ENDIF
 
 ;       LEVEL 1 - CLOCK
 
-        IF      RAM
-        ELSE
 INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
 
         ERRNZ   $-11Q           ; INT0 TAKES UP ONE BYTE
-        ENDIF
 
         CALL    SAVALL          ; SAVE USER REGISTERS
         MVI     D,0
         JMP     CLOCK           ; PROCESS CLOCK INTERRUPT
-        IF      RAM
-        ELSE
 ;       ERRPL   CLOCK-1000Q     ; EXTRA BYTE MUST BE 0
-        ENDIF
 
 ;       LEVEL 2 - SINGLE STEP
 ;
@@ -178,12 +162,9 @@ INT1    EQU     10Q             ; INTERRUPT ENTRY POINT
 ;       (SINGLE STEPPING OR BREAKPOINTING). IN SUCH CASE, THE
 ;       USER PROGRAM IS ENTERED THROUGH (UIVEC+3)
 
-        IF      RAM
-        ELSE
 INT2    EQU     20Q             ; LEVEL 2 ENTRY
 
         ERRNZ   $-21Q           ; INT1 TAKES EXTRA BYTE
-        ENDIF
 
         CALL    SAVALL          ; SAVE REGISTERS
         LDAX    D               ; (A) = (CTLFLG)
@@ -198,28 +179,19 @@ INT2    EQU     20Q             ; LEVEL 2 ENTRY
 ;       NEVER OCCUR UNLESS THE USER HAS SUPPLIED HANDLER ROUTINES
 ;       (THROUGH UIVEC).
 
-        IF      RAM
-        ELSE
         ORG     30Q
-        ENDIF
 
 INT3    JMP     UIVEC+6         ; JUMP TO USER ROUTINE
 
         DB      '44440'         ; HEATH PART NUMBER 444-10
 
-        IF      RAM
-        ELSE
         ORG     40Q
-        ENDIF
 
 INT4    JMP     UIVEC+9         ; JUMP TO USER ROUTINE
 
         DB      44Q,122Q,116Q,102Q,44Q ; SUPPORT CODE
 
-        IF      RAM
-        ELSE
         ORG     50Q
-        ENDIF
 
 INT5    JMP     UIVEC+12        ; JUMP TO USER ROUTINE
 
@@ -230,29 +202,20 @@ INT5    JMP     UIVEC+12        ; JUMP TO USER ROUTINE
 ;       EXIT    NONE
 ;       USES    A,F
 
-        IF      RAM
-        ELSE
         ERRNZ   $-53Q
-        ENDIF
 
 DLY     PUSH    PSW             ; SAVE COUNT
         XRA     A               ; DONT SOUND HORN
         JMP     HRN0            ; PROCESS AS HORN
 
-        IF      RAM
-        ELSE
         ORG     60Q
-        ENDIF
 
 INT6    JMP     UIVEC+15        ; JUMP TO USER ROUTINE
 
 GO.     MVI     A,CB.SSI+CB.CLI+CB.SPK ; OFF MONITOR MODE LIGHT
         JMP     SST1            ; RETURN TO USER PROGRAM
 
-        IF      RAM
-        ELSE
         ORG     70Q
-        ENDIF
 
 INT7    JMP     UIVEC+18        ; JUMP TO USER ROUTINE
 
@@ -267,10 +230,7 @@ INT7    JMP     UIVEC+18        ; JUMP TO USER ROUTINE
 ;       ENTRY   FROM MASTER CLEAR
 ;       EXIT    INTO MTR88 MAIN LOOP
 
-        IF      RAM
-        ELSE
         ERRNZ   $-73Q
-        ENDIF
 
 INIT    LDAX    D               ; COPY *PRSROM* INTO RAM
         MOV     M,A             ; MOVE BYTE
@@ -294,19 +254,12 @@ INIT1   MOV     M,A             ; RESTORE VALUE READ
 
 INIT2   DCX     H
 
-        IF      RAM
-        ELSE
         SPHL                    ; SET STACKPOINTER = MEMORY LIMIT -1
-        ENDIF
 
         PUSH    H               ; SET *PC* VALUE ON STACK
         LXI     H,ERROR
         PUSH    H               ; SET 'RETURN ADDRESS'
 
-;       CONFIGURE LOAD/DUMP UART
-
-        MVI     A,UMI.1B+UMI.L8+UMI.16X
-        OUT     OP.TPC          ; SET 8 BIT, NO PARITY, 1 STOP, 16X
 
 ;       SAVALL - SAVE ALL REGISTERS ON STACK.
 ;
@@ -319,10 +272,7 @@ INIT2   DCX     H
 ;               ON STACK.
 ;               (DE) = ADDRESS OF CTLFLG
 
-        IF      RAM
-        ELSE
         ERRNZ   $-132Q
-        ENDIF
 
 SAVALL  XTHL                    ; SET H,L ON STACK TOP
         PUSH    D
@@ -341,22 +291,16 @@ SAVALL  XTHL                    ; SET H,L ON STACK TOP
 
         JMP     SAVALLX         ; GO TO SAVALL EXTENSION
 
-        IF      RAM
-        ELSE
 ;       ENTRY POINT FOR THE Z80 NMI
 ;
 
         ERRNZ   $-66H           ; Z80 NMI ADDRESS
-        ENDIF
 
 NMIENT  JMP     NMI
 
-        IF      RAM
-        ELSE
 ;       ERRNZ   SAVALLR-151Q    ; DO NOT CHANGE ORGANIZATION
-        ENDIF
 
-SAVALLR                         ; SAVALL EXTENSION RETURN ADDRESS
+SAVALLR EQU     $               ; SAVALL EXTENSION RETURN ADDRESS
 
         CMA
         ANI     CB.MTL+CB.SSI   ; SAVE REGISTER ADDR IF USER OR SINGLE STEP
@@ -371,10 +315,7 @@ SAVALLR                         ; SAVALL EXTENSION RETURN ADDRESS
 ;       CUI IS CALLED TO SEE IF THE USER HAS SPECIFIED PROCESSING
 ;       FOR THE CLOCK INTERRUPT.
 
-        IF      RAM
-        ELSE
         ERRNZ   $-165Q
-        ENDIF
 
 ;       SET     MFLAG           ; REFERENCE TO MFLAG
 CUI1    LDAX    B               ; (A) = MFLAG
@@ -384,10 +325,7 @@ CUI1    LDAX    B               ; (A) = MFLAG
 
 ;       RETURN TO PROGRAM FROM INTERRUPT.
 
-        IF      RAM
-        ELSE
         ERRNZ  $-172Q
-        ENDIF
 
 INTXIT  POP     PSW             ; REMOVE FAKE 'STACK REGISTER'
         POP     PSW
@@ -404,10 +342,7 @@ INTXIT  POP     PSW             ; REMOVE FAKE 'STACK REGISTER'
 ;
 ;       TICCNT IS INCREMENTED EVERY INTERRUPT.
 
-        IF       RAM
-        ELSE
         ERRNZ   $-201Q
-        ENDIF
 
 CLOCK   LHLD    TICCNT
         INX     H
@@ -489,10 +424,7 @@ DYMEM9  XCHG
 ;               MFLAG CLEARED
 ;       USES    ALL
 
-        IF      RAM
-        ELSE
         ERRNZ   $-322Q
-        ENDIF
 
 ERROR   LXI     H,MFLAG
         MOV     A,M             ; (A) = MFLAG
@@ -509,10 +441,7 @@ ERROR   LXI     H,MFLAG
 ;       MTR - MONITOR LOOP.
 ;
 
-        IF      RAM
-        ELSE
         ERRNZ   $-344Q
-        ENDIF
 
 MTR     EI
 
@@ -546,37 +475,30 @@ MTR.4   CALL    WCC             ; WRITE CHARACTER BACK TO CONSOLE
         MOV     L,A             ; (H,L) = ROUTINE ADDRESS
         PCHL                    ; GO TO ROUTINE
 
-MTRA                            ; JUMP TABLE
-
-        DB      'G'             ; GO TO USER ROUTINE
-        DW      GO88
-
-        DB      'S'             ; SUBSTITUTE MEMORY MODE
-        DW      SUBM
-
-        DB      'P'             ; PROGRAM COUNTER ALTER MODE
-        DW      PCA
-
-        DB      'B'             ; BOOT H-17 OR Z-47 DRIVE
-        DW      BOOT
-
-MTRAL   EQU     ($-MTRA)/3      ; NUMBER OF TABLE ENTRYS   /JWT 790507/
-
-;       BSMSG   - BOOT SECONDARY DEVICE MESSAGE
-
-BSMSG   DB      ' SD',0         ; 'SECONDARY DEVICE'
-
-ERRMSG  DB      '?',0           ; ERROR MESSAGE
-
-        ORG     447Q
-;       MSG.ERR - ERROR MESSAGE FOR RAM TEST
+;;      GETBND1 - CONTINUATION OF GETBND
 ;
-;       "ERROR @ "
 
-MSG.ERR DB      A.CR,A.LF,A.LF
-        DB      'ERROR @ '
-        DB      0
+GETBND1 LXI     H,IOWRK+1
+        MVI     D,A.CR
+        CALL    IOA
 
+        LHLD    IOWRK
+        MOV     C,L
+        MOV     B,H
+        POP     D
+        POP     H
+        RET
+
+;;      VIEW - VIEW MEMORY BLOCKS
+;
+;       VIEW START,STOP
+
+VIEW    LXI     H,MSG.VEW
+        CALL    TYPMSG
+        JMP     VIEW3A          ; GET START IN DE, STOP IN BC
+
+VIEW1   SHLD    BLKICW          ; SAVE START ADDRESS FOR ASCII STUFF
+        JMP     VIEW2
 
 ;       SAE - STORE ABUSS AND EXIT.
 ;
@@ -584,10 +506,7 @@ MSG.ERR DB      A.CR,A.LF,A.LF
 ;       EXIT    TO (RET)
 ;       USES    NONE
 
-        IF      RAM
-        ELSE
         ERRNZ   $-463Q
-        ENDIF
 
 SAE     SHLD    ABUSS
         RET
@@ -602,13 +521,15 @@ SAE     SHLD    ABUSS
 ;
 ;       USE:    AF
 
-PIN     CALL    IN.             ; GET STATUS
-        ANI     S.DTR           ; CHECK FOR DATA TERMINAL REQUEST
+PIN     EQU     $
+        CALL    IN.             ; GET STATUS
+        ANI     S.DTR+S.DON     ; CHECK FOR DATA TERMINAL REQUEST
         CPU     Z80
-        JR      Z,PIN           ; IF READY, WAIT
+        JR      Z,PIN           ; IF NOT READY, WAIT
         CPU     8080
-        CALL    IN1.            ; INPUT A BYTE FROM PORT
-        RET
+        STC
+        RP
+        JMP     IN1.            ; INPUT A BYTE FROM PORT
 
         DB      0               ; UNUSED BYTE
 
@@ -688,10 +609,7 @@ AUTOBO  XRA     A               ; SET TO PRIMARY FLAG
 ;
 ;       ENTRY   NONE
 
-        IF      RAM
-        ELSE
         ERRNZ   $-622Q
-        ENDIF
 
 GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
 
@@ -699,10 +617,7 @@ GO      JMP     GO.             ; ROUTINE IS IN WASTE SPACE
 ;
 ;       ENTRY   NONE
 
-        IF      RAM
-        ELSE
         ERRNZ   $-625Q
-        ENDIF
 
 SSTEP                           ; SINGLE STEP
         DI                      ; DISABLE INTERRUPTS UNTIL THE RIGHT TIME
@@ -715,10 +630,7 @@ SST1    STA     CTLFLG          ; SET NEW FLAG VALUES
 
 ;       STPRTN - SINGLE STEP RETURN
 
-        IF      RAM
-        ELSE
         ERRNZ   $-644Q
-        ENDIF
 
 STPRTN
         ORI     CB.SSI          ; DISABLE SINGLE STEP INTERRUPTION
@@ -1133,10 +1045,7 @@ B170    POP     PSW             ; GET SWITCH DATA
 ;               (D,E) = (O,A)
 ;       USES    A,D,E,H,L,F
 
-        IF      RAM
-        ELSE
         ERRNZ   $-1447Q
-        ENDIF
 
 LRA     LDA     REGI
 LRA.    MOV     E,A
@@ -1152,10 +1061,7 @@ LRA.    MOV     E,A
 ;       EXIT    NONE
 ;       USES    A,D,E,H,L,F
 
-        IF      RAM
-        ELSE
         ERRNZ   $-1462Q
-        ENDIF
 
 IOA     JMP     IOA1
         NOP                     ; RETAIN H8 ORG
@@ -1169,10 +1075,7 @@ IOA     JMP     IOA1
 ;       EXIT    NONE
 ;       USES    A,D,E,H,L,F
 
-        IF      RAM
-        ELSE
         ERRNZ   $-1466Q
-        ENDIF
 
 IOB     MVI     M,0             ; ZERO OUT OLD VALUE
 IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
@@ -1197,10 +1100,7 @@ IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
 
 ;       FAKE OUT ROUTINE FOR CALLERS OF *DOD* FROM THE H8 FRONT PANEL
 
-        IF      RAM
-        ELSE
         ERRNZ    $-1522Q
-        ENDIF
 
 DOD     INX      H
         INX      H
@@ -1419,10 +1319,7 @@ DYMEM10 MVI     A,A.BEL         ; DING BELL
 ;       MUST CONTINUE TO 3777A FOR PROPER COPY.
 ;       THE TABLE MUST ALSO BE BACKWARDS TO THE FINAL RAM
 
-        IF      RAM
-        ELSE
         ERRNZ   2000Q-7-$
-        ENDIF
 
 PRSROM
         DB      1               ; REFIND
@@ -1433,10 +1330,7 @@ PRSROM
         DB      10              ; REGI
         DB      MI.RET
 
-        IF      RAM
-        ELSE
         ERRNZ   $-2000Q
-        ENDIF
 
 ;       INIT0X - EXTENSION OF INIT0 TO SUPPORT H88
 
@@ -2330,10 +2224,7 @@ DYMEM   MVI     A,0             ; MAKE SURE CLOCK AND SINGLE STEP ARE OFF
 
 ;       DETERMINE END OF MEMORY
 
-        IF      RAM
-        ELSE
 DYMEM1  LXI     H,START
-        ENDIF
         MVI     A,1
 DYMEM2  MVI     M,0             ; SET RAM TO ZERO
         INR     M               ; SET MEMORY TO ONE
@@ -2386,10 +2277,7 @@ DY3.7   INX     D               ; (D,E) = LAST BYTE OF RAM + 1
         JR      DYMSG
         CPU     8080
 
-        IF      RAM
-        ELSE
 DYMEM4  LXI     H,START         ; POINT BACK TO BEGINNING OF RAM
-        ENDIF
 DYMEM5  MOV     A,M             ; READ CURRENT CONTENTS
         CMP     B               ; SEE IF CURRENT CONTENTS STILL REMAIN
         JNZ     DYMEM9          ; FAILURE, SEE IF AT END OF RAM
@@ -2505,26 +2393,17 @@ MSG.EQ  DB      ' = '
 
 ;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
 ;
-        IF      RAM
-        ELSE
         ERRNZ   4000Q-6-$       ; MUST BE 6 BYTES BEFORE END
-        ENDIF
 
 ESPEED  JMP     SPEED
 
 ;       ENTRY POINT FOR DYNAMIC MEMORY TEST
 ;
-        IF      RAM
-        ELSE
         ERRNZ   4000Q-3-$      ; MUST BE 3 BYTES BEFORE END
-        ENDIF
 
 EDTMEM  JMP     DYMEM
 
-        IF      RAM
-        ELSE
         ERRNZ   $-4000Q        ; MUST NOT EXCEED 2K BYTES
-        ENDIF
 
 ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET
 ;       MONITOR.

@@ -4,7 +4,7 @@
 ;       PORT ADDRESSES
 
 UDR     EQU     0               ; DATA REGISTER IS EVEN
-UBR     EQU     1               ; STATUS REGISTER IS NEXT
+USR     EQU     1               ; STATUS REGISTER IS NEXT
 
 SC.UART EQU     372Q            ; CONSOLE USART ADDRESS (IFF 8251)
 
