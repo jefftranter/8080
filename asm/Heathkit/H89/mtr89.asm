@@ -2044,8 +2044,9 @@ OUT.    PUSH    B
         LDA     PRIM            ; GET PORT ADDRESS
 OUT.1   MOV     C,A             ; SET TO REG C
         MOV     A,B             ; GET OUTPUT BYTE DATA BACK
-;       OUT     (C),A           ; OUTPUT BYTE
-        DB      355Q,171Q
+        CPU     Z80
+        OUT     (C),A           ; OUTPUT BYTE
+        CPU     8080
         POP     B
         RET
 
@@ -2157,8 +2158,9 @@ MSG.GO  DB      "o ",0
 IN.     PUSH    B
         LDA     PRIM            ; GET PORT ADDRESS
 IN.1    MOV     C,A             ; SET ADDR. TO REG C.
-;       IN      A,(C)
-        DB      355Q,170Q       ; INPUT BYTE
+        CPU     Z80
+        IN      A,(C)
+        CPU     8080
         POP     B
         RET
 

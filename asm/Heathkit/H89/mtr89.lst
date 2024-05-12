@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 1 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 1 - 2024-05-12 07:02:04 PM
 
 
        1/      0 :                              INCLUDE macros.mac
@@ -61,7 +61,7 @@
       32/      0 :                      ;                           902 N. 9TH ST.
       33/      0 :                      ;                           LAFAYETTE, IND.
       34/      0 :                      ;
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 2 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 2 - 2024-05-12 07:02:04 PM
 
 
       35/      0 :                      ;       COPYRIGHT  01/1979, HEATH COMPANY
@@ -124,7 +124,7 @@
       92/      0 :                      ;
       93/      0 :                      ;       4       I/O 4. CAUSES A DIRECT JUMP THROUGH *UIVEC*+9
       94/      0 :                      ;
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 3 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 3 - 2024-05-12 07:02:04 PM
 
 
       95/      0 :                      ;       5       I/O 5. CAUSES A DIRECT JUMP THROUGH *UIVEC*+12
@@ -187,7 +187,7 @@
 (1)   49/      0 : =20O                 CB.SSI  EQU     00010000B       ; SINGLE STEP INTERRUPT
 (1)   50/      0 : =40O                 CB.MTL  EQU     00100000B       ; MONITOR LIGHT
 (1)   51/      0 : =100O                CB.CLI  EQU     01000000B       ; CLOCK INTERRUPT ENABLE
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(mtr88.asm) - Page 4 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(mtr88.asm) - Page 4 - 2024-05-12 07:02:04 PM
 
 
 (1)   52/      0 : =200O                CB.SPK  EQU     10000000B       ; SPEAKER ENABLE
@@ -250,7 +250,7 @@
 (1)    5/      0 : =171O                D.DAT   EQU     D.STA+1         ; INTERFACE DATA PORT
 (1)    6/      0 :                      ;
 (1)    7/      0 : =1O                  S.ERR   EQU     00000001B       ; ERROR BIT
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(z47def.asm) - Page 5 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(z47def.asm) - Page 5 - 2024-05-12 07:02:04 PM
 
 
 (1)    8/      0 : =40O                 S.DON   EQU     00100000B       ; DONE
@@ -313,7 +313,7 @@
 (1)   10/      0 : =1O                  DF.WQ   EQU     00000001B       ; WRITE GATE ENABLE
 (1)   11/      0 : =2O                  DF.DS0  EQU     00000010B       ; DRIVE SELECT 0
 (1)   12/      0 : =4O                  DF.DS1  EQU     00000100B       ; DRIVE SELECT 1
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(h17def.asm) - Page 6 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(h17def.asm) - Page 6 - 2024-05-12 07:02:04 PM
 
 
 (1)   13/      0 : =10O                 DF.DS2  EQU     00001000B       ; DRIVE SELECT 2
@@ -376,7 +376,7 @@
 (1)    4/ 42.200 : =36.235O             WHD     EQU     17235Q          ; WAIT FOR HOLE ROUTINE ENTRY POINT
 (1)    5/ 42.200 : =36.271O             WNH     EQU     17271Q          ; WAIT FOR NO HOLE ROUTINE ENTRY POINT
 (1)    6/ 42.200 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(misc.asm) - Page 7 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(misc.asm) - Page 7 - 2024-05-12 07:02:04 PM
 
 
 (1)    7/ 42.200 : =130O                BOOTAL  EQU     130Q            ; NUMBER OF RAM TO CLEAR
@@ -439,7 +439,7 @@
 (1)   40/ 42.200 : =10O                 USR.PE  EQU     00001000B       ; PARITY ERROR
 (1)   41/ 42.200 : =4O                  USR.TXE EQU     00000100B       ; TRANSMITTER EMPTY
 (1)   42/ 42.200 : =2O                  USR.RXR EQU     00000010B       ; RECEIVER READY
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(u8251.asm) - Page 8 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(u8251.asm) - Page 8 - 2024-05-12 07:02:04 PM
 
 
 (1)   43/ 42.200 : =1O                  USR.TXR EQU     00000001B       ; TRANSMITTER READY
@@ -502,7 +502,7 @@
 (1)   54/ 42.200 : =2O                  UC.DDR  EQU     00000010B       ;  DELTA DATA SET READY
 (1)   55/ 42.200 : =4O                  UC.TER  EQU     00000100B       ;  TRAILING EDGE OF RING
 (1)   56/ 42.200 : =10O                 UC.DRL  EQU     00001000B       ;  DELTA RECEIVE LINE SIGNAL DETECT
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm(u8250.asm) - Page 9 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm(u8250.asm) - Page 9 - 2024-05-12 07:02:04 PM
 
 
 (1)   57/ 42.200 : =20O                 UC.CTS  EQU     00010000B       ;  CLEAR TO SEND
@@ -565,7 +565,7 @@
      165/     21 :                      
      166/     21 : (MACRO)                      ERRNZ   $-21Q           ; INT1 TAKES EXTRA BYTE
      166/     21 : =>FALSE                      IF ($-21Q) != 0
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 10 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 10 - 2024-05-12 07:02:04 PM
 
 
      166/     21 :                                ERROR Expression is not zero
@@ -628,7 +628,7 @@
      219/     53 : 365                  DLY     PUSH    PSW             ; SAVE COUNT
      220/     54 : 257                          XRA     A               ; DONT SOUND HORN
      221/     55 : 303 143 002                  JMP     HRN0            ; PROCESS AS HORN
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 11 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 11 - 2024-05-12 07:02:04 PM
 
 
      222/     60 :                      
@@ -691,7 +691,7 @@
      276/    117 : 053                  INIT2   DCX     H
      277/    120 :                      
      278/    120 : =>FALSE                      IF      RAM
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 12 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 12 - 2024-05-12 07:02:04 PM
 
 
      279/    120 : =>TRUE                       ELSE
@@ -754,7 +754,7 @@
      330/    146 : [1.074]                      ENDIF
      331/    146 : [1.069]                      ENDIF
      332/    146 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 13 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 13 - 2024-05-12 07:02:04 PM
 
 
      333/    146 : 303 116 004          NMIENT  JMP     NMI
@@ -817,7 +817,7 @@
      381/    201 :                      ;       CLOCK - PROCESS CLOCK INTERRUPT
      382/    201 :                      ;
      383/    201 :                      ;       CLOCK IS ENTERED WHENEVER A 2-MILLISECOND CLOCK INTERRUPT IS
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 14 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 14 - 2024-05-12 07:02:04 PM
 
 
      384/    201 :                      ;       PROCESSED.
@@ -880,7 +880,7 @@
      435/    270 : 303 165 000          CLK4    JMP     CUI1            ; ALLOW USER PROCESSING OF CLOCK
      436/    273 :                      
      437/    273 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 15 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 15 - 2024-05-12 07:02:04 PM
 
 
      438/    273 :                      ;       THIS IS ONLY A PORTION OF THE DYNAMIC RAM TEST!!
@@ -943,7 +943,7 @@
      492/    344 :                      
      493/    344 : =>FALSE                      IF      RAM
      494/    344 : =>TRUE                       ELSE
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 16 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 16 - 2024-05-12 07:02:04 PM
 
 
      495/    344 : (MACRO)                      ERRNZ   $-344Q
@@ -1006,7 +1006,7 @@
      549/  1.045 :                      
      550/  1.045 : 077 000              ERRMSG  DB      '?',0           ; ERROR MESSAGE
      551/  1.047 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 17 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 17 - 2024-05-12 07:02:04 PM
 
 
      552/  1.047 :                              ORG     447Q
@@ -1069,7 +1069,7 @@
      605/  1.103 :                      ;       USES    A,D,E,H,L,F
      606/  1.103 :                      
      607/  1.103 : 041 214 006          PCA     LXI     H,MSG.PC        ; COMPLETE PC MESSAGE
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 18 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 18 - 2024-05-12 07:02:04 PM
 
 
      608/  1.106 : 315 100 006                  CALL    TYPMSG
@@ -1132,7 +1132,7 @@
      665/  1.221 : 000                          DB      0               ; UNUSED BYTE
      666/  1.222 :                      
      667/  1.222 :                              ORG     622Q
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 19 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 19 - 2024-05-12 07:02:04 PM
 
 
      668/  1.222 :                      ;       GO - RETURN TO USER MODE
@@ -1195,7 +1195,7 @@
      716/  1.261 :                      ;       IT WILL ACCEPT THE BOOT DEVICE AS WELL AS THE UNIT NUMBER FROM
      717/  1.261 :                      ;       CONSOLE AND GO TO THE BOOT CODE.
      718/  1.261 :                      ;
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 20 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 20 - 2024-05-12 07:02:04 PM
 
 
      719/  1.261 :                      ;       ENTRY:  NONE
@@ -1258,7 +1258,7 @@
      776/  1.341 : 315 302 003          BOOT5   CALL    WCC             ; PRINT UNIT NUMBER
      777/  1.344 : 326 060                      SUI     '0'             ; MAKE IT BINARY
      778/  1.346 : 107                          MOV     B,A             ; SAVE THE UNIT #
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 21 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 21 - 2024-05-12 07:02:04 PM
 
 
      779/  1.347 : 315 003 006                  CALL    WCR             ; WAIT FOR A CR
@@ -1269,7 +1269,7 @@
      784/  1.360 : 312 171 002                  JZ      NODEV           ; NO DEVICE
      785/  1.363 : 351                          PCHL                    ; JMP TO THE EXECUTION ROUTINE
      786/  1.364 :                      
-     787/  1.364 :                      ;       Z47     -               BOOT FORM Z47 DISK DRIVE
+     787/  1.364 :                      ;       Z47     -               BOOT FROM Z47 DISK DRIVE
      788/  1.364 :                      ;
      789/  1.364 :                      ;       Z47 WILL LOAD DATA FROM DISK TRACK 0 SECTOR 1 AND 2 TO
      790/  1.364 :                      ;       USER FIRST AVAILABLE RAM LOCATION. IF THE BOOT IS SUCCEED,
@@ -1321,7 +1321,7 @@
      836/  2.043 : 315 121 006                  CALL    RDBLCK          ; READ ANOTHER SECTOR
      837/  2.046 :                      
      838/  2.046 :                      ;       CHECK ANY ERROR DURING BOOT
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 22 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 22 - 2024-05-12 07:02:04 PM
 
 
      839/  2.046 :                      
@@ -1384,7 +1384,7 @@
      896/  2.121 :                              CPU     8080
      897/  2.121 : 041 123 041                  LXI     H,AUTOB         ; SET AUTO BOOT FLAG ADDR.
      898/  2.124 : 276                          CMP     M               ; CHECK AUTO BOOT BEFORE?
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 23 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 23 - 2024-05-12 07:02:04 PM
 
 
      899/  2.125 : 302 243 004                  JNZ     ATB             ; YES, AUTO BOOT
@@ -1447,7 +1447,7 @@
      950/  2.171 :                      ;       IT WILL EXIT TO 'ERROR' ROUTINE AND MONITOR LOOP
      951/  2.171 :                      ;
      952/  2.171 :                      ;       ENTRY:  NONE
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 24 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 24 - 2024-05-12 07:02:04 PM
 
 
      953/  2.171 :                      ;
@@ -1510,7 +1510,7 @@
     1010/  2.273 : 042 040 040                  SHLD  UIVEC+1           ; SET IT INTO VECTOR LOCATION
     1011/  2.276 : 303 200 042                  JMP   USERFWA           ; GOTO BOOT CODE
     1012/  2.301 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 25 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 25 - 2024-05-12 07:02:04 PM
 
 
     1013/  2.301 :                      ;      DEVICE - DETERMINE BOOT WHICH DEVICE AT WHICH PORT
@@ -1573,7 +1573,7 @@
     1067/  2.372 : 333 362                      IN      H88.SW          ; READ SWITCH DATA
     1068/  2.374 : 365                          PUSH    PSW             ; SAVE IN STACK
     1069/  2.375 : 346 020                      ANI     H88S.DV         ; CHECK PRIMARY DEVICE ADDRESS
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 26 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 26 - 2024-05-12 07:02:04 PM
 
 
     1070/  2.377 :                              CPU     Z80
@@ -1636,7 +1636,7 @@
     1121/  3.047 :                      
     1122/  3.047 : 072 005 040          LRA     LDA     REGI
     1123/  3.052 : 137                  LRA.    MOV     E,A
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 27 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 27 - 2024-05-12 07:02:04 PM
 
 
     1124/  3.053 : 026 000                      MVI     D,0
@@ -1699,7 +1699,7 @@
     1175/  3.115 : 007                          RLC
     1176/  3.116 : 007                          RLC
     1177/  3.117 : 303 126 003                  JMP     IOB1.5          ; JUMP AROUND AN H88/H89 TO H8 FAKE ROUTINE
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 28 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 28 - 2024-05-12 07:02:04 PM
 
 
     1178/  3.122 :                      
@@ -1762,7 +1762,7 @@
     1232/  3.160 :                      ;       DYBYT - DYNAMIC RAM BYTE OUTPUT
     1233/  3.160 :                      ;
     1234/  3.160 :                      ;       ENTRY:  (A) = BYTE TO OUTPUT AS OCTAL
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 29 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 29 - 2024-05-12 07:02:04 PM
 
 
     1235/  3.160 :                      ;               (IX) = RETURN ADDRESS
@@ -1825,7 +1825,7 @@
     1290/  3.260 :                      ;       RCK - READ CONSOLE KEYPAD
     1291/  3.260 :                      ;
     1292/  3.260 :                      ;       RCK IS CALLED TO READ A KEYSTROKE FROM THE CONSOLE FRONT PANEL KEYPAD.
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 30 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 30 - 2024-05-12 07:02:04 PM
 
 
     1293/  3.260 :                      ;       SINCE THE H88/H89 DOES NOT HAVE A FRONT PANEL, THIS ROUTINE IS PROVIDED
@@ -1888,7 +1888,7 @@
     1347/  3.311 :                              CPU     8080
     1348/  3.311 :                      
     1349/  3.311 : 361                          POP     PSW             ; GET CHARACTER
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 31 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 31 - 2024-05-12 07:02:04 PM
 
 
     1350/  3.312 : 323 350                      OUT     SC.ACE+UR.THR   ; OUTPUT TO CONSOLE
@@ -1951,7 +1951,7 @@
     1405/  3.371 :                                ERROR Expression is not zero
     1405/  3.371 : [5.125]                      ENDIF
     1406/  3.371 : [5.123]                      ENDIF
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 32 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 32 - 2024-05-12 07:02:04 PM
 
 
     1407/  3.371 :                      
@@ -2012,9 +2012,9 @@
     1459/  4.053 : 020 373                      DJNZ    INIT0X1
     1460/  4.055 :                              CPU     8080
     1461/  4.055 :                      
-    1462/  4.055 :                      ;       INPUT SWITCH TO SEE IF TO BEGIN OPERATION OF MEMORY TEST
+    1462/  4.055 :                      ;       INPUT SWITCH TO SEE IF TO BEGIN OPERATION OR MEMORY TEST
     1463/  4.055 :                      ;
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 33 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 33 - 2024-05-12 07:02:04 PM
 
 
     1464/  4.055 : 333 362                      IN      H88.SW          ; GET SWITCHES
@@ -2077,7 +2077,7 @@
     1521/  4.116 :                      ;
     1522/  4.116 :                      ;                      INPUTS FROM 361Q, 372Q, AND 373Q RETURN WITH (A) = 0
     1523/  4.116 :                      ;                              TO INDICATE AN EMPTY BUSS
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 34 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 34 - 2024-05-12 07:02:04 PM
 
 
     1524/  4.116 :                      ;
@@ -2140,7 +2140,7 @@
     1581/  4.171 : 030 044                      JR      NMI3            ; EXIT
     1582/  4.173 :                              CPU     8080
     1583/  4.173 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 35 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 35 - 2024-05-12 07:02:04 PM
 
 
     1584/  4.173 : 053                  NMI1    DCX     H               ; POINT TO IN/OUT INSTRUCTION
@@ -2203,7 +2203,7 @@
     1641/  4.256 :                      ;
     1642/  4.256 :                      ;       EXIT    (DE) = NORMAL BOOT ROUTINE ADDRESS
     1643/  4.256 :                      ;
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 36 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 36 - 2024-05-12 07:02:04 PM
 
 
     1644/  4.256 :                      ;       USES    ALL
@@ -2266,7 +2266,7 @@
     1701/  4.342 : 322 171 002                  JNC     NODEV           ; NO DEVICE?
     1702/  4.345 : 336 007              TMOUT1  SBI     7               ; IS IT 3.5 SECONDS?
     1703/  4.347 :                              CPU     Z80
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 37 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 37 - 2024-05-12 07:02:04 PM
 
 
     1704/  4.347 : 070 010                      JR      C,TMOUT2        ; IF NOT, WAIT
@@ -2329,7 +2329,7 @@
     1761/  5.053 : 315 302 003          SUBM5   CALL    WCC             ; ECHO HYPHEN
     1762/  5.056 : 053                          DCX     H               ; POINT TO PREVIOUS ADDRESS
     1763/  5.057 : 303 013 005                  JMP     SUBM1           ; DISPLAY PREVIOUS
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 38 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 38 - 2024-05-12 07:02:04 PM
 
 
     1764/  5.062 :                      
@@ -2392,7 +2392,7 @@
     1821/  5.170 : 315 302 003                  CALL    WCC
     1822/  5.173 : 303 150 005                  JMP     IROC            ; TRY AGAIN
     1823/  5.176 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 39 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 39 - 2024-05-12 07:02:04 PM
 
 
     1824/  5.176 :                      ;       IOA1 - INPUT OCTAL ADDRESS
@@ -2423,7 +2423,7 @@
     1849/  5.227 : 051                          DAD     H               ; SHIFT THREE TO MAKE ROOM FOR NEW CHARACTER
     1850/  5.230 : 051                          DAD     H
     1851/  5.231 : 051                          DAD     H
-    1852/  5.232 : 365                          PUSH    PSW             ; SAVE CARRY FORM DAD
+    1852/  5.232 : 365                          PUSH    PSW             ; SAVE CARRY FROM DAD
     1853/  5.233 : 321                          POP     D               ; SAVE FLAG RESULT IN E
     1854/  5.234 : 361                          POP     PSW             ; RETURN NEW CHARACTER VALUE TO (A)
     1855/  5.235 : 205                          ADD     L
@@ -2455,7 +2455,7 @@
     1881/  5.275 : 053                          DCX     H
     1882/  5.276 : 163                          MOV     M,E
     1883/  5.277 : 301                          POP     B               ; RESTORE (B,C)
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 40 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 40 - 2024-05-12 07:02:04 PM
 
 
     1884/  5.300 : 311                          RET
@@ -2518,7 +2518,7 @@
     1941/  5.355 : 037                          RAR
     1942/  5.356 : 346 007                      ANI     00000111B       ; MASK FOR HALF ASCII
     1943/  5.360 : 366 060                      ORI     00110000B       ; MASK FOR WHOLE ASCII
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 41 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 41 - 2024-05-12 07:02:04 PM
 
 
     1944/  5.362 : 315 302 003                  CALL    WCC             ; OUTPUT TO CONSOLE
@@ -2581,7 +2581,7 @@
     2001/  6.031 : 365                  COM1    PUSH    PSW
     2002/  6.032 : 315 170 006          WTDON1  CALL    IN.             ; READ CONTROLLER STATUS REGISTER
     2003/  6.035 : 242                          ANA     D               ; GET MATCH BIT ONLY
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 42 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 42 - 2024-05-12 07:02:04 PM
 
 
     2004/  6.036 :                              CPU     Z80
@@ -2627,252 +2627,254 @@
     2044/  6.065 : 072 120 041                  LDA     PRIM            ; GET PORT ADDRESS
     2045/  6.070 : 117                  OUT.1   MOV     C,A             ; SET TO REG C
     2046/  6.071 : 170                          MOV     A,B             ; GET OUTPUT BYTE DATA BACK
-    2047/  6.072 :                      ;       OUT     (C),A           ; OUTPUT BYTE
-    2048/  6.072 : 355 171                      DB      355Q,171Q
-    2049/  6.074 : 301                          POP     B
-    2050/  6.075 : 311                          RET
-    2051/  6.076 :                      
-    2052/  6.076 : 000 000                      DB      0,0             ; UNUSED BYTES
-    2053/  6.100 :                      
-    2054/  6.100 :                              ORG     3100Q
-    2055/  6.100 :                      ;       TYPMSG - TYPE MESSAGE TO CONSOLE
-    2056/  6.100 :                      ;
-    2057/  6.100 :                      ;       TYPMSG OUTPUTS AN ASCII MESSAGE FROM MEMORY TO THE CONSOLE
-    2058/  6.100 :                      ;       UNTIL A NULL IS SENSED
-    2059/  6.100 :                      ;
-    2060/  6.100 :                      ;       ENTRY   (H,L) = ADDRESS OF MESSAGE
-    2061/  6.100 :                      ;       EXIT    NONE
-    2062/  6.100 :                      ;       USES    A,H,L,F
-    2063/  6.100 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 43 - 2024-05-01 01:09:38 PM
+    2047/  6.072 :                              CPU     Z80
+    2048/  6.072 : 355 171                      OUT     (C),A           ; OUTPUT BYTE
+    2049/  6.074 :                              CPU     8080
+    2050/  6.074 : 301                          POP     B
+    2051/  6.075 : 311                          RET
+    2052/  6.076 :                      
+    2053/  6.076 : 000 000                      DB      0,0             ; UNUSED BYTES
+    2054/  6.100 :                      
+    2055/  6.100 :                              ORG     3100Q
+    2056/  6.100 :                      ;       TYPMSG - TYPE MESSAGE TO CONSOLE
+    2057/  6.100 :                      ;
+    2058/  6.100 :                      ;       TYPMSG OUTPUTS AN ASCII MESSAGE FROM MEMORY TO THE CONSOLE
+    2059/  6.100 :                      ;       UNTIL A NULL IS SENSED
+    2060/  6.100 :                      ;
+    2061/  6.100 :                      ;       ENTRY   (H,L) = ADDRESS OF MESSAGE
+    2062/  6.100 :                      ;       EXIT    NONE
+    2063/  6.100 :                      ;       USES    A,H,L,F
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 43 - 2024-05-12 07:02:04 PM
 
 
-    2064/  6.100 : 176                  TYPMSG  MOV     A,M             ; GET CHARACTER
-    2065/  6.101 : 267                          ORA     A               ; SEE IF NULL
-    2066/  6.102 : 310                          RZ                      ; IF NULL, EXIT
-    2067/  6.103 :                      
-    2068/  6.103 : 315 302 003                  CALL    WCC             ; ELSE OUTPUT CHARACTER TO CONSOLE
-    2069/  6.106 : 043                          INX     H               ; POINT TO NEXT CHARACTER
-    2070/  6.107 :                              CPU     Z80
-    2071/  6.107 : 030 367                      JR      TYPMSG          ; OUTPUT IT
-    2072/  6.111 :                              CPU     8080
-    2073/  6.111 :                      
-    2074/  6.111 :                      ;       MSG.PR - MESSAGE FOR MONITOR PROMPT
-    2075/  6.111 :                      ;
-    2076/  6.111 :                      ;       CRLF, "  H: "
-    2077/  6.111 :                      
-    2078/  6.111 : 015 012 040 040 110  MSG.PR  DB      A.CR,A.LF,"  H: ",0
+    2064/  6.100 :                      
+    2065/  6.100 : 176                  TYPMSG  MOV     A,M             ; GET CHARACTER
+    2066/  6.101 : 267                          ORA     A               ; SEE IF NULL
+    2067/  6.102 : 310                          RZ                      ; IF NULL, EXIT
+    2068/  6.103 :                      
+    2069/  6.103 : 315 302 003                  CALL    WCC             ; ELSE OUTPUT CHARACTER TO CONSOLE
+    2070/  6.106 : 043                          INX     H               ; POINT TO NEXT CHARACTER
+    2071/  6.107 :                              CPU     Z80
+    2072/  6.107 : 030 367                      JR      TYPMSG          ; OUTPUT IT
+    2073/  6.111 :                              CPU     8080
+    2074/  6.111 :                      
+    2075/  6.111 :                      ;       MSG.PR - MESSAGE FOR MONITOR PROMPT
+    2076/  6.111 :                      ;
+    2077/  6.111 :                      ;       CRLF, "  H: "
+    2078/  6.111 :                      
+    2079/  6.111 : 015 012 040 040 110  MSG.PR  DB      A.CR,A.LF,"  H: ",0
            6.116 : 072 040 000        
-    2079/  6.121 :                      
     2080/  6.121 :                      
-    2081/  6.121 :                      ;       RDBLCK  - INPUT A BLOCK FROM Z-47
-    2082/  6.121 :                      ;
-    2083/  6.121 :                      ;       RDBLCK READS IN A BLOCK FROM THE DISK CONTROLLER
-    2084/  6.121 :                      ;
-    2085/  6.121 :                      ;       ENTRY:
-    2086/  6.121 :                      ;               HL = LOAD ADDRESS
-    2087/  6.121 :                      ;               B  = COUNT
-    2088/  6.121 :                      ;               C  = SIDE/UNIT/SECTOR
-    2089/  6.121 :                      ;
-    2090/  6.121 :                      ;       EXIT:   NONE
-    2091/  6.121 :                      ;
-    2092/  6.121 :                      ;       USE:    ALL
-    2093/  6.121 :                      
-    2094/  6.121 :                      RDBLCK
-    2095/  6.121 : 076 007              RD1     MVI     A,DC.REAB
-    2096/  6.123 : 315 027 006                  CALL    COM             ; SEND THE COMMAND
-    2097/  6.126 : 257                          XRA     A               ; FOR TRACK 0
-    2098/  6.127 : 315 023 006                  CALL    DAT             ; SEND IT TO DISK
-    2099/  6.132 : 171                          MOV     A,C             ; LOAD SIDE/UNIT/SECTOR
-    2100/  6.133 : 315 023 006                  CALL    DAT             ; SEND IT TO DISK
-    2101/  6.136 :                      
-    2102/  6.136 : 315 067 001          RD2     CALL    PIN             ; INPUT A BYTE FROM DISK
-    2103/  6.141 : 167                          MOV     M,A             ; STORE IN BUFFER
-    2104/  6.142 : 043                          INX     H               ; BUFFER TO NEXT ADDRESS
-    2105/  6.143 :                              CPU     Z80
-    2106/  6.143 : 020 371                      DJNZ    RD2
-    2107/  6.145 :                              CPU     8080
-    2108/  6.145 : 311                          RET                     ; CONTINUE
-    2109/  6.146 :                      
+    2081/  6.121 :                      
+    2082/  6.121 :                      ;       RDBLCK  - INPUT A BLOCK FROM Z-47
+    2083/  6.121 :                      ;
+    2084/  6.121 :                      ;       RDBLCK READS IN A BLOCK FROM THE DISK CONTROLLER
+    2085/  6.121 :                      ;
+    2086/  6.121 :                      ;       ENTRY:
+    2087/  6.121 :                      ;               HL = LOAD ADDRESS
+    2088/  6.121 :                      ;               B  = COUNT
+    2089/  6.121 :                      ;               C  = SIDE/UNIT/SECTOR
+    2090/  6.121 :                      ;
+    2091/  6.121 :                      ;       EXIT:   NONE
+    2092/  6.121 :                      ;
+    2093/  6.121 :                      ;       USE:    ALL
+    2094/  6.121 :                      
+    2095/  6.121 :                      RDBLCK
+    2096/  6.121 : 076 007              RD1     MVI     A,DC.REAB
+    2097/  6.123 : 315 027 006                  CALL    COM             ; SEND THE COMMAND
+    2098/  6.126 : 257                          XRA     A               ; FOR TRACK 0
+    2099/  6.127 : 315 023 006                  CALL    DAT             ; SEND IT TO DISK
+    2100/  6.132 : 171                          MOV     A,C             ; LOAD SIDE/UNIT/SECTOR
+    2101/  6.133 : 315 023 006                  CALL    DAT             ; SEND IT TO DISK
+    2102/  6.136 :                      
+    2103/  6.136 : 315 067 001          RD2     CALL    PIN             ; INPUT A BYTE FROM DISK
+    2104/  6.141 : 167                          MOV     M,A             ; STORE IN BUFFER
+    2105/  6.142 : 043                          INX     H               ; BUFFER TO NEXT ADDRESS
+    2106/  6.143 :                              CPU     Z80
+    2107/  6.143 : 020 371                      DJNZ    RD2
+    2108/  6.145 :                              CPU     8080
+    2109/  6.145 : 311                          RET                     ; CONTINUE
     2110/  6.146 :                      
-    2111/  6.146 :                      ;       OUT1.   - OUTPUT A BYTE TO PORT (PRIM+1)
-    2112/  6.146 :                      ;
-    2113/  6.146 :                      ;       ENTRY:  (A) = OUTPUT PORT
-    2114/  6.146 :                      ;
-    2115/  6.146 :                      ;       EXIT:   NONE
-    2116/  6.146 :                      ;
-    2117/  6.146 :                      ;       USE:    NONE
-    2118/  6.146 :                      
-    2119/  6.146 : 305                  OUT1.   PUSH    B
-    2120/  6.147 : 107                          MOV     B,A             ; SAVE THE OUTPUT DATA
-    2121/  6.150 : 072 120 041                  LDA     PRIM            ; GET PORT ADDRESS
-    2122/  6.153 : 074                          INR     A               ; SET TO (PRIM+1)
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 44 - 2024-05-01 01:09:38 PM
+    2111/  6.146 :                      
+    2112/  6.146 :                      ;       OUT1.   - OUTPUT A BYTE TO PORT (PRIM+1)
+    2113/  6.146 :                      ;
+    2114/  6.146 :                      ;       ENTRY:  (A) = OUTPUT PORT
+    2115/  6.146 :                      ;
+    2116/  6.146 :                      ;       EXIT:   NONE
+    2117/  6.146 :                      ;
+    2118/  6.146 :                      ;       USE:    NONE
+    2119/  6.146 :                      
+    2120/  6.146 : 305                  OUT1.   PUSH    B
+    2121/  6.147 : 107                          MOV     B,A             ; SAVE THE OUTPUT DATA
+    2122/  6.150 : 072 120 041                  LDA     PRIM            ; GET PORT ADDRESS
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 44 - 2024-05-12 07:02:04 PM
 
 
-    2123/  6.154 :                              CPU     Z80
-    2124/  6.154 : 030 312                      JR      OUT.1           ; GO TO OUTPUT ROUTINE
-    2125/  6.156 :                              CPU     8080
-    2126/  6.156 :                      
-    2127/  6.156 :                      ;       IN1.    - INPUT BYTE FROM (PRIM+1) PORT
-    2128/  6.156 :                      ;
-    2129/  6.156 :                      ;       ENTRY:  NONE
-    2130/  6.156 :                      ;
-    2131/  6.156 :                      ;       EXIT:   (A) = INPUT BYTE
-    2132/  6.156 :                      ;
-    2133/  6.156 :                      ;       USES:   A
-    2134/  6.156 :                      
-    2135/  6.156 : 305                  IN1.    PUSH    B
-    2136/  6.157 : 072 120 041                  LDA     PRIM            ; GET PORT ADDRESS
-    2137/  6.162 : 074                          INR     A               ; SET TO (PRIM+1)
-    2138/  6.163 :                              CPU     Z80
-    2139/  6.163 : 030 007                      JR      IN.1
-    2140/  6.165 :                              CPU     8080
-    2141/  6.165 :                      
-    2142/  6.165 :                              ORG     3165Q
-    2143/  6.165 :                      ;       MSG.GO - (G)O
-    2144/  6.165 :                      ;
-    2145/  6.165 :                      ;       "GO"
-    2146/  6.165 :                      
-    2147/  6.165 : 157 040 000          MSG.GO  DB      "o ",0
-    2148/  6.170 :                      
-    2149/  6.170 :                      ;       IN.     - INPUT BYTE FROM PORT (PRIM)
-    2150/  6.170 :                      ;
-    2151/  6.170 :                      ;       ENTRY:  NONE
-    2152/  6.170 :                      ;
-    2153/  6.170 :                      ;       EXIT:   (A) = INPUT BYTE
-    2154/  6.170 :                      ;
-    2155/  6.170 :                      ;       USES:   A
-    2156/  6.170 :                      
-    2157/  6.170 : 305                  IN.     PUSH    B
-    2158/  6.171 : 072 120 041                  LDA     PRIM            ; GET PORT ADDRESS
-    2159/  6.174 : 117                  IN.1    MOV     C,A             ; SET ADDR. TO REG C.
-    2160/  6.175 :                      ;       IN      A,(C)
-    2161/  6.175 : 355 170                      DB      355Q,170Q       ; INPUT BYTE
-    2162/  6.177 : 301                          POP     B
-    2163/  6.200 : 311                          RET
-    2164/  6.201 :                      
-    2165/  6.201 :                              ORG     3201Q
-    2166/  6.201 :                      ;       MSG.SUB - (S)UBSTITUTE
-    2167/  6.201 :                      ;
-    2168/  6.201 :                      ;       "SUBSTITUTE"
-    2169/  6.201 :                      
-    2170/  6.201 : 165 142 163 164 151  MSG.SUB DB      "ubstitute ",0
+    2123/  6.153 : 074                          INR     A               ; SET TO (PRIM+1)
+    2124/  6.154 :                              CPU     Z80
+    2125/  6.154 : 030 312                      JR      OUT.1           ; GO TO OUTPUT ROUTINE
+    2126/  6.156 :                              CPU     8080
+    2127/  6.156 :                      
+    2128/  6.156 :                      ;       IN1.    - INPUT BYTE FROM (PRIM+1) PORT
+    2129/  6.156 :                      ;
+    2130/  6.156 :                      ;       ENTRY:  NONE
+    2131/  6.156 :                      ;
+    2132/  6.156 :                      ;       EXIT:   (A) = INPUT BYTE
+    2133/  6.156 :                      ;
+    2134/  6.156 :                      ;       USES:   A
+    2135/  6.156 :                      
+    2136/  6.156 : 305                  IN1.    PUSH    B
+    2137/  6.157 : 072 120 041                  LDA     PRIM            ; GET PORT ADDRESS
+    2138/  6.162 : 074                          INR     A               ; SET TO (PRIM+1)
+    2139/  6.163 :                              CPU     Z80
+    2140/  6.163 : 030 007                      JR      IN.1
+    2141/  6.165 :                              CPU     8080
+    2142/  6.165 :                      
+    2143/  6.165 :                              ORG     3165Q
+    2144/  6.165 :                      ;       MSG.GO - (G)O
+    2145/  6.165 :                      ;
+    2146/  6.165 :                      ;       "GO"
+    2147/  6.165 :                      
+    2148/  6.165 : 157 040 000          MSG.GO  DB      "o ",0
+    2149/  6.170 :                      
+    2150/  6.170 :                      ;       IN.     - INPUT BYTE FROM PORT (PRIM)
+    2151/  6.170 :                      ;
+    2152/  6.170 :                      ;       ENTRY:  NONE
+    2153/  6.170 :                      ;
+    2154/  6.170 :                      ;       EXIT:   (A) = INPUT BYTE
+    2155/  6.170 :                      ;
+    2156/  6.170 :                      ;       USES:   A
+    2157/  6.170 :                      
+    2158/  6.170 : 305                  IN.     PUSH    B
+    2159/  6.171 : 072 120 041                  LDA     PRIM            ; GET PORT ADDRESS
+    2160/  6.174 : 117                  IN.1    MOV     C,A             ; SET ADDR. TO REG C.
+    2161/  6.175 :                              CPU     Z80
+    2162/  6.175 : 355 170                      IN      A,(C)
+    2163/  6.177 :                              CPU     8080
+    2164/  6.177 : 301                          POP     B
+    2165/  6.200 : 311                          RET
+    2166/  6.201 :                      
+    2167/  6.201 :                              ORG     3201Q
+    2168/  6.201 :                      ;       MSG.SUB - (S)UBSTITUTE
+    2169/  6.201 :                      ;
+    2170/  6.201 :                      ;       "SUBSTITUTE"
+    2171/  6.201 :                      
+    2172/  6.201 : 165 142 163 164 151  MSG.SUB DB      "ubstitute ",0
            6.206 : 164 165 164 145 040
            6.213 : 000                
-    2171/  6.214 :                      
-    2172/  6.214 :                      ;       MSG.PC - (P)ROGRAM COUNTER
-    2173/  6.214 :                      ;
-    2174/  6.214 :                      ;       "PROGRAM COUNTER"
-    2175/  6.214 :                      
-    2176/  6.214 : 162 157 147 162 141  MSG.PC  DB       "rogram Counter ",0
+    2173/  6.214 :                      
+    2174/  6.214 :                      ;       MSG.PC - (P)ROGRAM COUNTER
+    2175/  6.214 :                      ;
+    2176/  6.214 :                      ;       "PROGRAM COUNTER"
+    2177/  6.214 :                      
+    2178/  6.214 : 162 157 147 162 141  MSG.PC  DB       "rogram Counter ",0
            6.221 : 155 040 103 157 165
            6.226 : 156 164 145 162 040
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 45 - 2024-05-12 07:02:04 PM
+
+
            6.233 : 000                
-    2177/  6.234 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 45 - 2024-05-01 01:09:38 PM
-
-
-    2178/  6.234 :                      ;       MSG.BT - (B)OOT
-    2179/  6.234 :                      ;
-    2180/  6.234 :                      ;       "BOOT"
-    2181/  6.234 :                      
-    2182/  6.234 : 157 157 164 000      MSG.BT  DB      "oot",0
-    2183/  6.240 :                      
-    2184/  6.240 :                      
-    2185/  6.240 :                      ;       SPEED - ROTATIONAL SPEED TEST FOR 5.25 INCH DISK DRIVE
-    2186/  6.240 :                      ;
-    2187/  6.240 :                      ;       *SPEED* IS USED ONLY FOR GROSS ADJUSTMENT OF DRIVE ROTATIONAL
-    2188/  6.240 :                      ;       SPEED IF THE FIRST READ/WRITE TEST OF THE UNIT FAILS DURING SETUP.
-    2189/  6.240 :                      ;
-    2190/  6.240 :                      ;               USE OF *SPEED* IS AS FOLLOWS:
+    2179/  6.234 :                      
+    2180/  6.234 :                      ;       MSG.BT - (B)OOT
+    2181/  6.234 :                      ;
+    2182/  6.234 :                      ;       "BOOT"
+    2183/  6.234 :                      
+    2184/  6.234 : 157 157 164 000      MSG.BT  DB      "oot",0
+    2185/  6.240 :                      
+    2186/  6.240 :                      
+    2187/  6.240 :                      ;       SPEED - ROTATIONAL SPEED TEST FOR 5.25 INCH DISK DRIVE
+    2188/  6.240 :                      ;
+    2189/  6.240 :                      ;       *SPEED* IS USED ONLY FOR GROSS ADJUSTMENT OF DRIVE ROTATIONAL
+    2190/  6.240 :                      ;       SPEED IF THE FIRST READ/WRITE TEST OF THE UNIT FAILS DURING SETUP.
     2191/  6.240 :                      ;
-    2192/  6.240 :                      ;                        1.  ENTER 'GO AND THE ENTRY ADDRESS OF *SPEED*
-    2193/  6.240 :                      ;                        2.  ADJUST DRIVE SPEED UNTIL DATA AT DISPLAYED
-    2194/  6.240 :                      ;                            EQUALS 200
-    2195/  6.240 :                      ;                                A,  IF SPEED < 200, TURN ADJUSTMENT CLOCKWISE
-    2196/  6.240 :                      ;                                B,  IF SPEED < 200, TURN COUNTERCLOCKWISE
-    2197/  6.240 :                      ;
-    2198/  6.240 :                      ;       THE ABOVE TEST ADJUSTS SY0:.  TO ADJUST SY1:, USE HDOS
-    2199/  6.240 :                      
-    2200/  6.240 :                      ;       LABLE EQUIVALENCES
-    2201/  6.240 :                      ;
-    2202/  6.240 :                      ;       I/O PORTS
-    2203/  6.240 : =177O                OP.DC   EQU     177Q            ; DRIVE CONTROL OUTPUT PORT
-    2204/  6.240 : =177O                IP.DS   EQU     177Q            ; DRIVE STATUS INPUT PORT
-    2205/  6.240 :                      
-    2206/  6.240 :                      ;       MASKS
-    2207/  6.240 :                      ;
-    2208/  6.240 : =1O                  DS.HOLE EQU     00000001B       ; DRIVE STATUS SECTOR/INDEX HOLD
-    2209/  6.240 :                      
-    2210/  6.240 :                      ;       CONSTANTS
-    2211/  6.240 :                      ;
-    2212/  6.240 : =22O                 ONDR0   EQU     022Q            ; TURN ON SY0:
-    2213/  6.240 :                      
-    2214/  6.240 :                      
-    2215/  6.240 : 041 371 006          SPEED   LXI     H,MSG.SPD       ; OUTPUT SPEED MESSAGE
-    2216/  6.243 : 315 100 006                  CALL    TYPMSG
-    2217/  6.246 : 076 000                      MVI     A,0             ; SET FLAG AT IOWRK FOR "WORKING" MESSAGE
-    2218/  6.250 : 062 002 040                  STA     IOWRK
-    2219/  6.253 : 076 022                      MVI     A,ONDR0         ; TURN ON DRIVE ZERO
-    2220/  6.255 : 323 177                      OUT     OP.DC
-    2221/  6.257 : 052 033 040          SPEED1  LHLD    TICCNT          ; GET TICK COUNTER
-    2222/  6.262 : 174                          MOV     A,H             ; FORM TWO'S COMPLEMENT OF TICK COUNTER
-    2223/  6.263 : 057                          CMA
-    2224/  6.264 : 127                          MOV     D,A             ; (D,E) = NEGATIVE TICK COUNTER
-    2225/  6.265 : 175                          MOV     A,L
-    2226/  6.266 : 057                          CMA
-    2227/  6.267 : 074                          INR     A
-    2228/  6.270 : 137                          MOV     E,A
-    2229/  6.271 : 322 275 006                  JNC     SPEED2          ; IF NO CARRY FROM LSB
-    2230/  6.274 :                      
-    2231/  6.274 : 024                          INR     D               ; ELSE, INCREMENT MSB
-    2232/  6.275 : 001 000 000          SPEED2  LXI     B,0             ; ZERO REV COUNTERS
-    2233/  6.300 : 333 177              SPEED3  IN      IP.DS           ; INPUT DISK STATUS
-    2234/  6.302 : 346 001                      ANI     DS.HOLE         ; MASK FOR SECTOR/INDEX PULSES
-    2235/  6.304 : 312 300 006                  JZ      SPEED3          ; IF NO HOLE PRESENT
-    2236/  6.307 :                      
-    2237/  6.307 :                      ; HOLE PRESENT, WAIT FOR IT TO LEAVE
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 46 - 2024-05-01 01:09:38 PM
+    2192/  6.240 :                      ;               USE OF *SPEED* IS AS FOLLOWS:
+    2193/  6.240 :                      ;
+    2194/  6.240 :                      ;                        1.  ENTER 'GO AND THE ENTRY ADDRESS OF *SPEED*
+    2195/  6.240 :                      ;                        2.  ADJUST DRIVE SPEED UNTIL DATA AT DISPLAYED
+    2196/  6.240 :                      ;                            EQUALS 200
+    2197/  6.240 :                      ;                                A,  IF SPEED < 200, TURN ADJUSTMENT CLOCKWISE
+    2198/  6.240 :                      ;                                B,  IF SPEED < 200, TURN COUNTERCLOCKWISE
+    2199/  6.240 :                      ;
+    2200/  6.240 :                      ;       THE ABOVE TEST ADJUSTS SY0:.  TO ADJUST SY1:, USE HDOS
+    2201/  6.240 :                      
+    2202/  6.240 :                      ;       LABLE EQUIVALENCES
+    2203/  6.240 :                      ;
+    2204/  6.240 :                      ;       I/O PORTS
+    2205/  6.240 : =177O                OP.DC   EQU     177Q            ; DRIVE CONTROL OUTPUT PORT
+    2206/  6.240 : =177O                IP.DS   EQU     177Q            ; DRIVE STATUS INPUT PORT
+    2207/  6.240 :                      
+    2208/  6.240 :                      ;       MASKS
+    2209/  6.240 :                      ;
+    2210/  6.240 : =1O                  DS.HOLE EQU     00000001B       ; DRIVE STATUS SECTOR/INDEX HOLD
+    2211/  6.240 :                      
+    2212/  6.240 :                      ;       CONSTANTS
+    2213/  6.240 :                      ;
+    2214/  6.240 : =22O                 ONDR0   EQU     022Q            ; TURN ON SY0:
+    2215/  6.240 :                      
+    2216/  6.240 :                      
+    2217/  6.240 : 041 371 006          SPEED   LXI     H,MSG.SPD       ; OUTPUT SPEED MESSAGE
+    2218/  6.243 : 315 100 006                  CALL    TYPMSG
+    2219/  6.246 : 076 000                      MVI     A,0             ; SET FLAG AT IOWRK FOR "WORKING" MESSAGE
+    2220/  6.250 : 062 002 040                  STA     IOWRK
+    2221/  6.253 : 076 022                      MVI     A,ONDR0         ; TURN ON DRIVE ZERO
+    2222/  6.255 : 323 177                      OUT     OP.DC
+    2223/  6.257 : 052 033 040          SPEED1  LHLD    TICCNT          ; GET TICK COUNTER
+    2224/  6.262 : 174                          MOV     A,H             ; FORM TWO'S COMPLEMENT OF TICK COUNTER
+    2225/  6.263 : 057                          CMA
+    2226/  6.264 : 127                          MOV     D,A             ; (D,E) = NEGATIVE TICK COUNTER
+    2227/  6.265 : 175                          MOV     A,L
+    2228/  6.266 : 057                          CMA
+    2229/  6.267 : 074                          INR     A
+    2230/  6.270 : 137                          MOV     E,A
+    2231/  6.271 : 322 275 006                  JNC     SPEED2          ; IF NO CARRY FROM LSB
+    2232/  6.274 :                      
+    2233/  6.274 : 024                          INR     D               ; ELSE, INCREMENT MSB
+    2234/  6.275 : 001 000 000          SPEED2  LXI     B,0             ; ZERO REV COUNTERS
+    2235/  6.300 : 333 177              SPEED3  IN      IP.DS           ; INPUT DISK STATUS
+    2236/  6.302 : 346 001                      ANI     DS.HOLE         ; MASK FOR SECTOR/INDEX PULSES
+    2237/  6.304 : 312 300 006                  JZ      SPEED3          ; IF NO HOLE PRESENT
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 46 - 2024-05-12 07:02:04 PM
 
 
-    2238/  6.307 :                      ;
-    2239/  6.307 : 333 177              SPEED4  IN      IP.DS           ; GET DISK STATUS
-    2240/  6.311 : 346 001                      ANI     DS.HOLE         ; GET HOLE PULSES
-    2241/  6.313 : 302 307 006                  JNZ     SPEED4          ; WAIT UNTIL HOLE IS GONE AND WE HAVE MEDIA
-    2242/  6.316 :                      
-    2243/  6.316 : 004                          INR     B               ; INCREMENT HOLE COUNTER
-    2244/  6.317 : 170                          MOV     A,B             ; TEST FOR FIVE REVOLUTIONS
-    2245/  6.320 : 376 070                      CPI     56
-    2246/  6.322 : 302 300 006                  JNZ     SPEED3          ; NOT FIVE, WAIT FOR MORE HOLES
-    2247/  6.325 :                      
-    2248/  6.325 :                      ;       HAVE FIVE REVS, DISPLAY DIFFERENCE OF TICK COUNTER AND EXPECTED TIME DIF
+    2238/  6.307 :                      
+    2239/  6.307 :                      ; HOLE PRESENT, WAIT FOR IT TO LEAVE
+    2240/  6.307 :                      ;
+    2241/  6.307 : 333 177              SPEED4  IN      IP.DS           ; GET DISK STATUS
+    2242/  6.311 : 346 001                      ANI     DS.HOLE         ; GET HOLE PULSES
+    2243/  6.313 : 302 307 006                  JNZ     SPEED4          ; WAIT UNTIL HOLE IS GONE AND WE HAVE MEDIA
+    2244/  6.316 :                      
+    2245/  6.316 : 004                          INR     B               ; INCREMENT HOLE COUNTER
+    2246/  6.317 : 170                          MOV     A,B             ; TEST FOR FIVE REVOLUTIONS
+    2247/  6.320 : 376 070                      CPI     56
+    2248/  6.322 : 302 300 006                  JNZ     SPEED3          ; NOT FIVE, WAIT FOR MORE HOLES
     2249/  6.325 :                      
-    2250/  6.325 : 052 033 040                  LHLD    TICCNT          ; GET CURRENT TICK VALUE
-    2251/  6.330 : 031                          DAD     D               ; SUBTRACT START VALUE
-    2252/  6.331 : 021 214 376                  LXI     D,177777Q-500+1+200Q ; SUBTRACT 500 FOR REVS, +200Q FOR OFFSET
-    2253/  6.334 : 031                          DAD     D               ; (H,L) = OFFSET RESULT
-    2254/  6.335 : 345                          PUSH    H               ; SAVE RESULT
-    2255/  6.336 : 041 062 007                  LXI     H,MSG.WRK       ; POINT TO 'WORKING' MESSAGE
-    2256/  6.341 : 072 002 040                  LDA     IOWRK           ; GET 'WORKING' FLAG
-    2257/  6.344 : 356 001                      XRI     1               ; INVERT LOWER BIT
-    2258/  6.346 : 062 002 040                  STA     IOWRK           ; SAVE NEW VALUE
-    2259/  6.351 : 302 357 006                  JNZ     SPEED5          ; IF TO DISPLAY 'WORKING'
-    2260/  6.354 :                      
-    2261/  6.354 : 041 100 007                  LXI     H,MSG.HSS       ; POINT TO 'HOME', 'SPACES', AND SPEED MSG
-    2262/  6.357 : 315 100 006          SPEED5  CALL    TYPMSG          ; OUTPUT MESSAGE
-    2263/  6.362 : 341                          POP     H               ; GET TEST RESULT
-    2264/  6.363 : 315 325 005                  CALL    TOA.            ; OUTPUT RESULT TO CONSOLE
-    2265/  6.366 : 303 257 006                  JMP     SPEED1          ; PERFORM ANOTHER SAMPLE
-    2266/  6.371 :                      
-    2267/  6.371 :                      ;       MSG.SPD - SPEED TEST MESSAGE
-    2268/  6.371 :                      ;
-    2269/  6.371 :                      ;       '       Disk drive rotational speed test.
+    2250/  6.325 :                      ;       HAVE FIVE REVS, DISPLAY DIFFERENCE OF TICK COUNTER AND EXPECTED TIME DIF
+    2251/  6.325 :                      
+    2252/  6.325 : 052 033 040                  LHLD    TICCNT          ; GET CURRENT TICK VALUE
+    2253/  6.330 : 031                          DAD     D               ; SUBTRACT START VALUE
+    2254/  6.331 : 021 214 376                  LXI     D,177777Q-500+1+200Q ; SUBTRACT 500 FOR REVS, +200Q FOR OFFSET
+    2255/  6.334 : 031                          DAD     D               ; (H,L) = OFFSET RESULT
+    2256/  6.335 : 345                          PUSH    H               ; SAVE RESULT
+    2257/  6.336 : 041 062 007                  LXI     H,MSG.WRK       ; POINT TO 'WORKING' MESSAGE
+    2258/  6.341 : 072 002 040                  LDA     IOWRK           ; GET 'WORKING' FLAG
+    2259/  6.344 : 356 001                      XRI     1               ; INVERT LOWER BIT
+    2260/  6.346 : 062 002 040                  STA     IOWRK           ; SAVE NEW VALUE
+    2261/  6.351 : 302 357 006                  JNZ     SPEED5          ; IF TO DISPLAY 'WORKING'
+    2262/  6.354 :                      
+    2263/  6.354 : 041 100 007                  LXI     H,MSG.HSS       ; POINT TO 'HOME', 'SPACES', AND SPEED MSG
+    2264/  6.357 : 315 100 006          SPEED5  CALL    TYPMSG          ; OUTPUT MESSAGE
+    2265/  6.362 : 341                          POP     H               ; GET TEST RESULT
+    2266/  6.363 : 315 325 005                  CALL    TOA.            ; OUTPUT RESULT TO CONSOLE
+    2267/  6.366 : 303 257 006                  JMP     SPEED1          ; PERFORM ANOTHER SAMPLE
+    2268/  6.371 :                      
+    2269/  6.371 :                      ;       MSG.SPD - SPEED TEST MESSAGE
     2270/  6.371 :                      ;
-    2271/  6.371 :                      ;
-    2272/  6.371 :                      ;                       Drive speed = '
-    2273/  6.371 : 033 105 012          MSG.SPD DB      A.ESC,'E',A.LF
-    2274/  6.374 : 011 104 151 163 153          DB      '	Disk drive rotational speed test.',A.CR,A.LF,A.LF
+    2271/  6.371 :                      ;       '       Disk drive rotational speed test.
+    2272/  6.371 :                      ;
+    2273/  6.371 :                      ;
+    2274/  6.371 :                      ;                       Drive speed = '
+    2275/  6.371 : 033 105 012          MSG.SPD DB      A.ESC,'E',A.LF
+    2276/  6.374 : 011 104 151 163 153          DB      '	Disk drive rotational speed test.',A.CR,A.LF,A.LF
            7.001 : 040 144 162 151 166
            7.006 : 145 040 162 157 164
            7.013 : 141 164 151 157 156
@@ -2880,342 +2882,342 @@
            7.025 : 145 145 144 040 164
            7.032 : 145 163 164 056 015
            7.037 : 012 012            
-    2275/  7.041 : 011 011 104 162 151          DB      '		Drive speed = '
+    2277/  7.041 : 011 011 104 162 151          DB      '		Drive speed = '
            7.046 : 166 145 040 163 160
            7.053 : 145 145 144 040 075
            7.060 : 040                
-    2276/  7.061 : 000                          DB      0
-    2277/  7.062 :                      
-    2278/  7.062 :                      ;       MSG.WRK - 'WORKING' MESSAGE FOR SPEED TEST
-    2279/  7.062 :                      ;
-    2280/  7.062 :                      ;       DISPLAYS 'WORKING' AT HOME POSITION AND RETURNS CURSOR TO SPEED =
-    2281/  7.062 :                      
-    2282/  7.062 : 033 110              MSG.WRK DB      A.ESC,'H'       ; CURSOR HOME
-    2283/  7.064 : 127 157 162 153 151          DB      'Working'
+    2278/  7.061 : 000                          DB      0
+    2279/  7.062 :                      
+    2280/  7.062 :                      ;       MSG.WRK - 'WORKING' MESSAGE FOR SPEED TEST
+    2281/  7.062 :                      ;
+    2282/  7.062 :                      ;       DISPLAYS 'WORKING' AT HOME POSITION AND RETURNS CURSOR TO SPEED =
+    2283/  7.062 :                      
+    2284/  7.062 : 033 110              MSG.WRK DB      A.ESC,'H'       ; CURSOR HOME
+    2285/  7.064 : 127 157 162 153 151          DB      'Working'
            7.071 : 156 147            
-    2284/  7.073 : 033 131 043 076              DB      A.ESC,'Y#>'     ; CURSOR ADDRESS OF SPEED = VALUE
-    2285/  7.077 : 000                          DB      0               ; END MESSAGE
-    2286/  7.100 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 47 - 2024-05-01 01:09:38 PM
+    2286/  7.073 : 033 131 043 076              DB      A.ESC,'Y#>'     ; CURSOR ADDRESS OF SPEED = VALUE
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 47 - 2024-05-12 07:02:04 PM
 
 
-    2287/  7.100 :                      ;       MSG.HSS - BLANKS 'WORKING' MESSAGE
-    2288/  7.100 :                      ;
-    2289/  7.100 :                      
-    2290/  7.100 : 033 110              MSG.HSS DB      A.ESC,'H'       ; CURSOR HOME
-    2291/  7.102 : 040 040 040 040 040          DB      '       '       ; BLANKS
+    2287/  7.077 : 000                          DB      0               ; END MESSAGE
+    2288/  7.100 :                      
+    2289/  7.100 :                      ;       MSG.HSS - BLANKS 'WORKING' MESSAGE
+    2290/  7.100 :                      ;
+    2291/  7.100 :                      
+    2292/  7.100 : 033 110              MSG.HSS DB      A.ESC,'H'       ; CURSOR HOME
+    2293/  7.102 : 040 040 040 040 040          DB      '       '       ; BLANKS
            7.107 : 040 040            
-    2292/  7.111 : 033 131 043 076              DB      A.ESC,'Y#>'     ; CURSOR ADDRESS OF SPEED = VALUE
-    2293/  7.115 : 000                          DB      0               ; END MESSAGE
-    2294/  7.116 :                      
-    2295/  7.116 :                      
-    2296/  7.116 :                      ;       DYMEM - DYNAMIC MEMORY TEST
-    2297/  7.116 :                      ;
-    2298/  7.116 :                      ;       DYMEM TEST THE DYNAMIC MEMORY IN THE H88/H89 BY PLACING
-    2299/  7.116 :                      ;       A KNOWN PATTERN IN EACH DYNAMIC MEMORY CELL AND THEN
-    2300/  7.116 :                      ;       PERFORMING A READ, INCREMENT, READ SEQUENCE WITH A DELAY
-    2301/  7.116 :                      ;       BETWEEN EACH PASS OF THE TEST.
-    2302/  7.116 :                      ;
-    2303/  7.116 :                      ;       ENTRY:  NONE
+    2294/  7.111 : 033 131 043 076              DB      A.ESC,'Y#>'     ; CURSOR ADDRESS OF SPEED = VALUE
+    2295/  7.115 : 000                          DB      0               ; END MESSAGE
+    2296/  7.116 :                      
+    2297/  7.116 :                      
+    2298/  7.116 :                      ;       DYMEM - DYNAMIC MEMORY TEST
+    2299/  7.116 :                      ;
+    2300/  7.116 :                      ;       DYMEM TEST THE DYNAMIC MEMORY IN THE H88/H89 BY PLACING
+    2301/  7.116 :                      ;       A KNOWN PATTERN IN EACH DYNAMIC MEMORY CELL AND THEN
+    2302/  7.116 :                      ;       PERFORMING A READ, INCREMENT, READ SEQUENCE WITH A DELAY
+    2303/  7.116 :                      ;       BETWEEN EACH PASS OF THE TEST.
     2304/  7.116 :                      ;
-    2305/  7.116 :                      ;       EXIT:   ON RESET
+    2305/  7.116 :                      ;       ENTRY:  NONE
     2306/  7.116 :                      ;
-    2307/  7.116 :                      ;       USES:   A,B,C,D,E,H,L,F,A',F',IX,IY
-    2308/  7.116 :                      
-    2309/  7.116 : 076 000              DYMEM   MVI     A,0             ; MAKE SURE CLOCK AND SINGLE STEP ARE OFF
-    2310/  7.120 : 323 362                      OUT     H88.CTL
-    2311/  7.122 :                      
-    2312/  7.122 :                      ;       DETERMINE END OF MEMORY
+    2307/  7.116 :                      ;       EXIT:   ON RESET
+    2308/  7.116 :                      ;
+    2309/  7.116 :                      ;       USES:   A,B,C,D,E,H,L,F,A',F',IX,IY
+    2310/  7.116 :                      
+    2311/  7.116 : 076 000              DYMEM   MVI     A,0             ; MAKE SURE CLOCK AND SINGLE STEP ARE OFF
+    2312/  7.120 : 323 362                      OUT     H88.CTL
     2313/  7.122 :                      
-    2314/  7.122 : =>FALSE                      IF      RAM
-    2315/  7.122 : =>TRUE                       ELSE
-    2316/  7.122 : 041 000 040          DYMEM1  LXI     H,START
-    2317/  7.125 : [9.010]                      ENDIF
-    2318/  7.125 : 076 001                      MVI     A,1
-    2319/  7.127 : 066 000              DYMEM2  MVI     M,0             ; SET RAM TO ZERO
-    2320/  7.131 : 064                          INR     M               ; SET MEMORY TO ONE
-    2321/  7.132 : 276                          CMP     M               ; SEE IF (A) = ((H,L))
-    2322/  7.133 :                              CPU     Z80
-    2323/  7.133 : 040 003                      JR      NZ,DYMEM3       ; IF NOT EQUAL, THE END OF RAM HAS BEEN REACHED
-    2324/  7.135 :                              CPU     8080     
-    2325/  7.135 :                      
-    2326/  7.135 : 043                          INX     H               ; ELSE, POINT TO NEXT LOCATION IN RAM
-    2327/  7.136 :                              CPU     Z80
-    2328/  7.136 : 030 367                      JR      DYMEM2
-    2329/  7.140 :                              CPU     8080
-    2330/  7.140 :                      
-    2331/  7.140 : 053                  DYMEM3  DCX     H               ; POINT TO LAST GOOD LOCATION
-    2332/  7.141 : 353                          XCHG                    ; PUT ENDING ADDRESS IN D,E
-    2333/  7.142 : 041 324 007                  LXI     H,MSG.RAM       ; OUTPUT ENDING ADDRESS
-    2334/  7.145 :                      
-    2335/  7.145 :                              CPU     Z80
-    2336/  7.145 : 335 041 153 007              LD      IX,DY3.3        ; RETURN ADDRESS
-    2337/  7.151 :                      
-    2338/  7.151 : 030 133                      JR      DYMSG
-    2339/  7.153 :                              CPU     8080
-    2340/  7.153 :                      
-    2341/  7.153 : 172                  DY3.3   MOV     A,D             ; OUTPUT ADDRESS MSB
-    2342/  7.154 :                      
-    2343/  7.154 :                              CPU     Z80
-    2344/  7.154 : 335 041 163 007              LD      IX,DY3.5        ; RETURN ADDRESS
-    2345/  7.160 :                              CPU     8080
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 48 - 2024-05-01 01:09:38 PM
+    2314/  7.122 :                      ;       DETERMINE END OF MEMORY
+    2315/  7.122 :                      
+    2316/  7.122 : =>FALSE                      IF      RAM
+    2317/  7.122 : =>TRUE                       ELSE
+    2318/  7.122 : 041 000 040          DYMEM1  LXI     H,START
+    2319/  7.125 : [9.012]                      ENDIF
+    2320/  7.125 : 076 001                      MVI     A,1
+    2321/  7.127 : 066 000              DYMEM2  MVI     M,0             ; SET RAM TO ZERO
+    2322/  7.131 : 064                          INR     M               ; SET MEMORY TO ONE
+    2323/  7.132 : 276                          CMP     M               ; SEE IF (A) = ((H,L))
+    2324/  7.133 :                              CPU     Z80
+    2325/  7.133 : 040 003                      JR      NZ,DYMEM3       ; IF NOT EQUAL, THE END OF RAM HAS BEEN REACHED
+    2326/  7.135 :                              CPU     8080     
+    2327/  7.135 :                      
+    2328/  7.135 : 043                          INX     H               ; ELSE, POINT TO NEXT LOCATION IN RAM
+    2329/  7.136 :                              CPU     Z80
+    2330/  7.136 : 030 367                      JR      DYMEM2
+    2331/  7.140 :                              CPU     8080
+    2332/  7.140 :                      
+    2333/  7.140 : 053                  DYMEM3  DCX     H               ; POINT TO LAST GOOD LOCATION
+    2334/  7.141 : 353                          XCHG                    ; PUT ENDING ADDRESS IN D,E
+    2335/  7.142 : 041 324 007                  LXI     H,MSG.RAM       ; OUTPUT ENDING ADDRESS
+    2336/  7.145 :                      
+    2337/  7.145 :                              CPU     Z80
+    2338/  7.145 : 335 041 153 007              LD      IX,DY3.3        ; RETURN ADDRESS
+    2339/  7.151 :                      
+    2340/  7.151 : 030 133                      JR      DYMSG
+    2341/  7.153 :                              CPU     8080
+    2342/  7.153 :                      
+    2343/  7.153 : 172                  DY3.3   MOV     A,D             ; OUTPUT ADDRESS MSB
+    2344/  7.154 :                      
+    2345/  7.154 :                              CPU     Z80
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 48 - 2024-05-12 07:02:04 PM
 
 
-    2346/  7.160 :                      
-    2347/  7.160 : 303 160 003                  JMP     DYBYT
-    2348/  7.163 :                      
-    2349/  7.163 : 173                  DY3.5   MOV     A,E             ; LSB
-    2350/  7.164 :                      
-    2351/  7.164 :                              CPU     Z80
-    2352/  7.164 : 335 041 173 007              LD      IX,DY3.7        ; RETURN ADDRESS
-    2353/  7.170 :                              CPU     8080
-    2354/  7.170 :                      
-    2355/  7.170 : 303 160 003                  JMP     DYBYT
-    2356/  7.173 :                      
-    2357/  7.173 : 023                  DY3.7   INX     D               ; (D,E) = LAST BYTE OF RAM + 1
-    2358/  7.174 :                      
-    2359/  7.174 :                      ;       TEST MEMORY
-    2360/  7.174 :                      ;
-    2361/  7.174 : 006 001                      MVI     B,1             ; (B) = CONTENTS OF RAM AFTER SIZING
-    2362/  7.176 : 041 237 003                  LXI     H,MSG.PAS       ; OUTPUT PASS MESSAGE
-    2363/  7.201 :                      
-    2364/  7.201 :                              CPU     Z80
-    2365/  7.201 : 335 041 207 007              LD      IX,DYMEM4       ; RETURN ADDRESS
-    2366/  7.205 :                      
-    2367/  7.205 : 030 077                      JR      DYMSG
-    2368/  7.207 :                              CPU     8080
-    2369/  7.207 :                      
-    2370/  7.207 : =>FALSE                      IF      RAM
-    2371/  7.207 : =>TRUE                       ELSE
-    2372/  7.207 : 041 000 040          DYMEM4  LXI     H,START         ; POINT BACK TO BEGINNING OF RAM
-    2373/  7.212 : [9.066]                      ENDIF
-    2374/  7.212 : 176                  DYMEM5  MOV     A,M             ; READ CURRENT CONTENTS
-    2375/  7.213 : 270                          CMP     B               ; SEE IF CURRENT CONTENTS STILL REMAIN
-    2376/  7.214 : 302 307 000                  JNZ     DYMEM9          ; FAILURE, SEE IF AT END OF RAM
-    2377/  7.217 :                      
-    2378/  7.217 : 074                          INR     A
-    2379/  7.220 : 167                          MOV     M,A             ; INCREMENT RAM
-    2380/  7.221 : 276                          CMP     M               ; SEE OF WRITE WAS SUCCESSFUL
-    2381/  7.222 : 302 307 000                  JNZ     DYMEM9
-    2382/  7.225 :                      
-    2383/  7.225 : 043                          INX     H
-    2384/  7.226 : 175                          MOV     A,L             ; GET LSB AND TEST FOR REACHING END OF RAM
-    2385/  7.227 : 273                          CMP     E
-    2386/  7.230 :                              CPU     Z80
-    2387/  7.230 : 040 360                      JR      NZ,DYMEM5       ; IF LSB NOT EQUAL
-    2388/  7.232 :                              CPU     8080
-    2389/  7.232 :                      
-    2390/  7.232 : 174                          MOV     A,H             ; CHECK LSB
-    2391/  7.233 : 272                          CMP     D
-    2392/  7.234 :                              CPU     Z80
-    2393/  7.234 : 040 354                      JR      NZ,DYMEM5
-    2394/  7.236 :                              CPU     8080
-    2395/  7.236 :                      
-    2396/  7.236 :                      ;       HAVE REACHED THE END OF MEMORY!
-    2397/  7.236 :                      ;       OUTPUT LAST VALUE TESTED
-    2398/  7.236 :                      ;
-    2399/  7.236 : 046 003                      MVI     H,3             ; OUTPUT 3 BACKSPACES
-    2400/  7.240 : 076 010                      MVI     A,A.BKS
-    2401/  7.242 :                      
-    2402/  7.242 :                      DYME5.5
-    2403/  7.242 :                              CPU     Z80
-    2404/  7.242 : 375 041 251 007              LD      IY,DY5.53       ; RETURN ADDRESS
-    2405/  7.246 :                              CPU     8080
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 49 - 2024-05-01 01:09:38 PM
+    2346/  7.154 : 335 041 163 007              LD      IX,DY3.5        ; RETURN ADDRESS
+    2347/  7.160 :                              CPU     8080
+    2348/  7.160 :                      
+    2349/  7.160 : 303 160 003                  JMP     DYBYT
+    2350/  7.163 :                      
+    2351/  7.163 : 173                  DY3.5   MOV     A,E             ; LSB
+    2352/  7.164 :                      
+    2353/  7.164 :                              CPU     Z80
+    2354/  7.164 : 335 041 173 007              LD      IX,DY3.7        ; RETURN ADDRESS
+    2355/  7.170 :                              CPU     8080
+    2356/  7.170 :                      
+    2357/  7.170 : 303 160 003                  JMP     DYBYT
+    2358/  7.173 :                      
+    2359/  7.173 : 023                  DY3.7   INX     D               ; (D,E) = LAST BYTE OF RAM + 1
+    2360/  7.174 :                      
+    2361/  7.174 :                      ;       TEST MEMORY
+    2362/  7.174 :                      ;
+    2363/  7.174 : 006 001                      MVI     B,1             ; (B) = CONTENTS OF RAM AFTER SIZING
+    2364/  7.176 : 041 237 003                  LXI     H,MSG.PAS       ; OUTPUT PASS MESSAGE
+    2365/  7.201 :                      
+    2366/  7.201 :                              CPU     Z80
+    2367/  7.201 : 335 041 207 007              LD      IX,DYMEM4       ; RETURN ADDRESS
+    2368/  7.205 :                      
+    2369/  7.205 : 030 077                      JR      DYMSG
+    2370/  7.207 :                              CPU     8080
+    2371/  7.207 :                      
+    2372/  7.207 : =>FALSE                      IF      RAM
+    2373/  7.207 : =>TRUE                       ELSE
+    2374/  7.207 : 041 000 040          DYMEM4  LXI     H,START         ; POINT BACK TO BEGINNING OF RAM
+    2375/  7.212 : [9.068]                      ENDIF
+    2376/  7.212 : 176                  DYMEM5  MOV     A,M             ; READ CURRENT CONTENTS
+    2377/  7.213 : 270                          CMP     B               ; SEE IF CURRENT CONTENTS STILL REMAIN
+    2378/  7.214 : 302 307 000                  JNZ     DYMEM9          ; FAILURE, SEE IF AT END OF RAM
+    2379/  7.217 :                      
+    2380/  7.217 : 074                          INR     A
+    2381/  7.220 : 167                          MOV     M,A             ; INCREMENT RAM
+    2382/  7.221 : 276                          CMP     M               ; SEE OF WRITE WAS SUCCESSFUL
+    2383/  7.222 : 302 307 000                  JNZ     DYMEM9
+    2384/  7.225 :                      
+    2385/  7.225 : 043                          INX     H
+    2386/  7.226 : 175                          MOV     A,L             ; GET LSB AND TEST FOR REACHING END OF RAM
+    2387/  7.227 : 273                          CMP     E
+    2388/  7.230 :                              CPU     Z80
+    2389/  7.230 : 040 360                      JR      NZ,DYMEM5       ; IF LSB NOT EQUAL
+    2390/  7.232 :                              CPU     8080
+    2391/  7.232 :                      
+    2392/  7.232 : 174                          MOV     A,H             ; CHECK LSB
+    2393/  7.233 : 272                          CMP     D
+    2394/  7.234 :                              CPU     Z80
+    2395/  7.234 : 040 354                      JR      NZ,DYMEM5
+    2396/  7.236 :                              CPU     8080
+    2397/  7.236 :                      
+    2398/  7.236 :                      ;       HAVE REACHED THE END OF MEMORY!
+    2399/  7.236 :                      ;       OUTPUT LAST VALUE TESTED
+    2400/  7.236 :                      ;
+    2401/  7.236 : 046 003                      MVI     H,3             ; OUTPUT 3 BACKSPACES
+    2402/  7.240 : 076 010                      MVI     A,A.BKS
+    2403/  7.242 :                      
+    2404/  7.242 :                      DYME5.5
+    2405/  7.242 :                              CPU     Z80
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 49 - 2024-05-12 07:02:04 PM
 
 
-    2406/  7.246 :                      
-    2407/  7.246 : 303 143 003                  JMP     DYASC
-    2408/  7.251 :                      
-    2409/  7.251 : 045                  DY5.53  DCR     H
-    2410/  7.252 :                              CPU     Z80
-    2411/  7.252 : 040 366                      JR      NZ,DYME5.5
-    2412/  7.254 :                              CPU     8080
-    2413/  7.254 : 004                          INR     B               ; SHOW NEXT PASS VALUE
-    2414/  7.255 : 170                          MOV     A,B             ; VALUE TESTED
-    2415/  7.256 :                      
-    2416/  7.256 :                              CPU     Z80
-    2417/  7.256 : 335 041 273 000              LD      IX,DYMEM6       ; RETURN ADDRESS
-    2418/  7.262 :                              CPU     8080
-    2419/  7.262 :                      
-    2420/  7.262 : 303 160 003                  JMP     DYBYT
-    2421/  7.265 :                      
-    2422/  7.265 :                      ;       THE DYNAMIC RAM TEST CONTINUES ELSEWHERE!!
-    2423/  7.265 :                      ;       AND THEN RETURNS TO HERE!!!!!!!!!!!!!!!!!!
-    2424/  7.265 :                      
-    2425/  7.265 : 041 000 000          DY10.5  LXI      H,0            ; DELAY AND DING BELL AGAIN
-    2426/  7.270 : 006 002                      MVI      B,2            ; 2 LOOPS
-    2427/  7.272 : 045                  DYMEM11 DCR      H
-    2428/  7.273 :                              CPU      Z80
-    2429/  7.273 : 040 375                      JR       NZ,DYMEM11
-    2430/  7.275 :                              CPU      8080
-    2431/  7.275 :                      
-    2432/  7.275 : 055                          DCR      L
-    2433/  7.276 :                              CPU      Z80
-    2434/  7.276 : 040 372                      JR       NZ,DYMEM11
-    2435/  7.300 :                              CPU      8080
-    2436/  7.300 :                      
-    2437/  7.300 : 005                          DCR      B
-    2438/  7.301 :                              CPU      Z80
-    2439/  7.301 : 040 367                      JR       NZ,DYMEM11
-    2440/  7.303 :                              CPU      8080
-    2441/  7.303 :                      
-    2442/  7.303 : 303 360 003                  JMP      DYMEM10        ; AGAIN
-    2443/  7.306 :                      
-    2444/  7.306 :                      ;       DYMSG - DYNAMIC RAM TEST MESSAGE OUTPUT ROUTINE
-    2445/  7.306 :                      ;
-    2446/  7.306 :                      ;       ENTRY:  (H,L) = MESSAGE ADDRESS
-    2447/  7.306 :                      ;               (IX) = RETURN ADDRESS
-    2448/  7.306 :                      ;
-    2449/  7.306 :                      ;       EXIT:   TI (IX)
+    2406/  7.242 : 375 041 251 007              LD      IY,DY5.53       ; RETURN ADDRESS
+    2407/  7.246 :                              CPU     8080
+    2408/  7.246 :                      
+    2409/  7.246 : 303 143 003                  JMP     DYASC
+    2410/  7.251 :                      
+    2411/  7.251 : 045                  DY5.53  DCR     H
+    2412/  7.252 :                              CPU     Z80
+    2413/  7.252 : 040 366                      JR      NZ,DYME5.5
+    2414/  7.254 :                              CPU     8080
+    2415/  7.254 : 004                          INR     B               ; SHOW NEXT PASS VALUE
+    2416/  7.255 : 170                          MOV     A,B             ; VALUE TESTED
+    2417/  7.256 :                      
+    2418/  7.256 :                              CPU     Z80
+    2419/  7.256 : 335 041 273 000              LD      IX,DYMEM6       ; RETURN ADDRESS
+    2420/  7.262 :                              CPU     8080
+    2421/  7.262 :                      
+    2422/  7.262 : 303 160 003                  JMP     DYBYT
+    2423/  7.265 :                      
+    2424/  7.265 :                      ;       THE DYNAMIC RAM TEST CONTINUES ELSEWHERE!!
+    2425/  7.265 :                      ;       AND THEN RETURNS TO HERE!!!!!!!!!!!!!!!!!!
+    2426/  7.265 :                      
+    2427/  7.265 : 041 000 000          DY10.5  LXI      H,0            ; DELAY AND DING BELL AGAIN
+    2428/  7.270 : 006 002                      MVI      B,2            ; 2 LOOPS
+    2429/  7.272 : 045                  DYMEM11 DCR      H
+    2430/  7.273 :                              CPU      Z80
+    2431/  7.273 : 040 375                      JR       NZ,DYMEM11
+    2432/  7.275 :                              CPU      8080
+    2433/  7.275 :                      
+    2434/  7.275 : 055                          DCR      L
+    2435/  7.276 :                              CPU      Z80
+    2436/  7.276 : 040 372                      JR       NZ,DYMEM11
+    2437/  7.300 :                              CPU      8080
+    2438/  7.300 :                      
+    2439/  7.300 : 005                          DCR      B
+    2440/  7.301 :                              CPU      Z80
+    2441/  7.301 : 040 367                      JR       NZ,DYMEM11
+    2442/  7.303 :                              CPU      8080
+    2443/  7.303 :                      
+    2444/  7.303 : 303 360 003                  JMP      DYMEM10        ; AGAIN
+    2445/  7.306 :                      
+    2446/  7.306 :                      ;       DYMSG - DYNAMIC RAM TEST MESSAGE OUTPUT ROUTINE
+    2447/  7.306 :                      ;
+    2448/  7.306 :                      ;       ENTRY:  (H,L) = MESSAGE ADDRESS
+    2449/  7.306 :                      ;               (IX) = RETURN ADDRESS
     2450/  7.306 :                      ;
-    2451/  7.306 :                      ;       USES:   A,H,L,F,IY
-    2452/  7.306 :                      
-    2453/  7.306 : 176                  DYMSG   MOV     A,M             ; GET MESSAGE BYTE
-    2454/  7.307 :                      
-    2455/  7.307 :                              CPU      Z80
-    2456/  7.307 : 375 041 316 007              LD      IY,DYMSG.5      ; RETURN ADDRESS
-    2457/  7.313 :                              CPU      8080
-    2458/  7.313 :                      
-    2459/  7.313 : 303 143 003                  JMP     DYASC           ; OUTPUT ASCII
-    2460/  7.316 :                      
-    2461/  7.316 : 267                  DYMSG.5 ORA     A               ; SEE IF NULL TO END STRING
-    2462/  7.317 : 043                          INX     H               ; POINT TO NEXT CHARACTER
-    2463/  7.320 :                              CPU     Z80
-    2464/  7.320 : 040 364                      JR      NZ,DYMSG        ; IF NOT DONE YET
-    2465/  7.322 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 50 - 2024-05-01 01:09:38 PM
+    2451/  7.306 :                      ;       EXIT:   TI (IX)
+    2452/  7.306 :                      ;
+    2453/  7.306 :                      ;       USES:   A,H,L,F,IY
+    2454/  7.306 :                      
+    2455/  7.306 : 176                  DYMSG   MOV     A,M             ; GET MESSAGE BYTE
+    2456/  7.307 :                      
+    2457/  7.307 :                              CPU      Z80
+    2458/  7.307 : 375 041 316 007              LD      IY,DYMSG.5      ; RETURN ADDRESS
+    2459/  7.313 :                              CPU      8080
+    2460/  7.313 :                      
+    2461/  7.313 : 303 143 003                  JMP     DYASC           ; OUTPUT ASCII
+    2462/  7.316 :                      
+    2463/  7.316 : 267                  DYMSG.5 ORA     A               ; SEE IF NULL TO END STRING
+    2464/  7.317 : 043                          INX     H               ; POINT TO NEXT CHARACTER
+    2465/  7.320 :                              CPU     Z80
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 50 - 2024-05-12 07:02:04 PM
 
 
-    2466/  7.322 : 335 351                      JP      (IX)            ; RETURN TO CALLER
-    2467/  7.324 :                              CPU     8080
-    2468/  7.324 :                      
-    2469/  7.324 :                      
-    2470/  7.324 :                      ;       MSG.RAM - RAM TEST MESSAGE
-    2471/  7.324 :                      ;
-    2472/  7.324 :                      
-    2473/  7.324 : 033 105              MSG.RAM DB      A.ESC,'E'
-    2474/  7.326 : 104 171 156 141 155          DB      'Dynamic RAM test'
+    2466/  7.320 : 040 364                      JR      NZ,DYMSG        ; IF NOT DONE YET
+    2467/  7.322 :                      
+    2468/  7.322 : 335 351                      JP      (IX)            ; RETURN TO CALLER
+    2469/  7.324 :                              CPU     8080
+    2470/  7.324 :                      
+    2471/  7.324 :                      
+    2472/  7.324 :                      ;       MSG.RAM - RAM TEST MESSAGE
+    2473/  7.324 :                      ;
+    2474/  7.324 :                      
+    2475/  7.324 : 033 105              MSG.RAM DB      A.ESC,'E'
+    2476/  7.326 : 104 171 156 141 155          DB      'Dynamic RAM test'
            7.333 : 151 143 040 122 101
            7.340 : 115 040 164 145 163
            7.345 : 164                
-    2475/  7.346 : 015 012 012                  DB      A.CR,A.LF,A.LF
-    2476/  7.351 : 011 040 114 127 101          DB      '	 LWA = '
+    2477/  7.346 : 015 012 012                  DB      A.CR,A.LF,A.LF
+    2478/  7.351 : 011 040 114 127 101          DB      '	 LWA = '
            7.356 : 040 075 040        
-    2477/  7.361 : 000                          DB      0
-    2478/  7.362 :                      
-    2479/  7.362 :                      ;       MSG.EQ - EQUALS MESSAGE
-    2480/  7.362 :                      ;
-    2481/  7.362 :                      
-    2482/  7.362 : 040 075 040          MSG.EQ  DB      ' = '
-    2483/  7.365 : 000                          DB      0
-    2484/  7.366 :                      
-    2485/  7.366 : 107 101 103 056              DB      'GAC.'
-    2486/  7.372 :                      
-    2487/  7.372 :                      ;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
-    2488/  7.372 :                      ;
-    2489/  7.372 : =>FALSE                      IF      RAM
-    2490/  7.372 : =>TRUE                       ELSE
-    2491/  7.372 : (MACRO)                      ERRNZ   4000Q-6-$       ; MUST BE 6 BYTES BEFORE END
-    2491/  7.372 : =>FALSE                      IF (4000Q-6-$) != 0
-    2491/  7.372 :                                ERROR Expression is not zero
-    2491/  7.372 : [9.187]                      ENDIF
-    2492/  7.372 : [9.185]                      ENDIF
-    2493/  7.372 :                      
-    2494/  7.372 : 303 240 006          ESPEED  JMP     SPEED
-    2495/  7.375 :                      
-    2496/  7.375 :                      ;       ENTRY POINT FOR DYNAMIC MEMORY TEST
-    2497/  7.375 :                      ;
-    2498/  7.375 : =>FALSE                      IF      RAM
-    2499/  7.375 : =>TRUE                       ELSE
-    2500/  7.375 : (MACRO)                      ERRNZ   4000Q-3-$      ; MUST BE 3 BYTES BEFORE END
-    2500/  7.375 : =>FALSE                      IF (4000Q-3-$) != 0
-    2500/  7.375 :                                ERROR Expression is not zero
-    2500/  7.375 : [9.196]                      ENDIF
-    2501/  7.375 : [9.194]                      ENDIF
-    2502/  7.375 :                      
-    2503/  7.375 : 303 116 007          EDTMEM  JMP     DYMEM
-    2504/ 10.000 :                      
-    2505/ 10.000 : =>FALSE                      IF      RAM
-    2506/ 10.000 : =>TRUE                       ELSE
-    2507/ 10.000 : (MACRO)                      ERRNZ   $-4000Q        ; MUST NOT EXCEED 2K BYTES
-    2507/ 10.000 : =>FALSE                      IF ($-4000Q) != 0
-    2507/ 10.000 :                                ERROR Expression is not zero
-    2507/ 10.000 : [9.203]                      ENDIF
-    2508/ 10.000 : [9.201]                      ENDIF
-    2509/ 10.000 :                      
-    2510/ 10.000 :                      ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET
-    2511/ 10.000 :                      ;       MONITOR.
-    2512/ 10.000 :                      
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 51 - 2024-05-01 01:09:38 PM
+    2479/  7.361 : 000                          DB      0
+    2480/  7.362 :                      
+    2481/  7.362 :                      ;       MSG.EQ - EQUALS MESSAGE
+    2482/  7.362 :                      ;
+    2483/  7.362 :                      
+    2484/  7.362 : 040 075 040          MSG.EQ  DB      ' = '
+    2485/  7.365 : 000                          DB      0
+    2486/  7.366 :                      
+    2487/  7.366 : 107 101 103 056              DB      'GAC.'
+    2488/  7.372 :                      
+    2489/  7.372 :                      ;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
+    2490/  7.372 :                      ;
+    2491/  7.372 : =>FALSE                      IF      RAM
+    2492/  7.372 : =>TRUE                       ELSE
+    2493/  7.372 : (MACRO)                      ERRNZ   4000Q-6-$       ; MUST BE 6 BYTES BEFORE END
+    2493/  7.372 : =>FALSE                      IF (4000Q-6-$) != 0
+    2493/  7.372 :                                ERROR Expression is not zero
+    2493/  7.372 : [9.189]                      ENDIF
+    2494/  7.372 : [9.187]                      ENDIF
+    2495/  7.372 :                      
+    2496/  7.372 : 303 240 006          ESPEED  JMP     SPEED
+    2497/  7.375 :                      
+    2498/  7.375 :                      ;       ENTRY POINT FOR DYNAMIC MEMORY TEST
+    2499/  7.375 :                      ;
+    2500/  7.375 : =>FALSE                      IF      RAM
+    2501/  7.375 : =>TRUE                       ELSE
+    2502/  7.375 : (MACRO)                      ERRNZ   4000Q-3-$      ; MUST BE 3 BYTES BEFORE END
+    2502/  7.375 : =>FALSE                      IF (4000Q-3-$) != 0
+    2502/  7.375 :                                ERROR Expression is not zero
+    2502/  7.375 : [9.198]                      ENDIF
+    2503/  7.375 : [9.196]                      ENDIF
+    2504/  7.375 :                      
+    2505/  7.375 : 303 116 007          EDTMEM  JMP     DYMEM
+    2506/ 10.000 :                      
+    2507/ 10.000 : =>FALSE                      IF      RAM
+    2508/ 10.000 : =>TRUE                       ELSE
+    2509/ 10.000 : (MACRO)                      ERRNZ   $-4000Q        ; MUST NOT EXCEED 2K BYTES
+    2509/ 10.000 : =>FALSE                      IF ($-4000Q) != 0
+    2509/ 10.000 :                                ERROR Expression is not zero
+    2509/ 10.000 : [9.205]                      ENDIF
+    2510/ 10.000 : [9.203]                      ENDIF
+    2511/ 10.000 :                      
+    2512/ 10.000 :                      ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 51 - 2024-05-12 07:02:04 PM
 
 
-    2513/ 40.000 :                              ORG     20000Q          ; 8192
-    2514/ 40.000 :                      
-    2515/ 40.000 :                      START   DS      2               ; DUMP STARTING ADDRESS
-    2516/ 40.002 :                      IOWRK   DS      2               ; IN OUR OUT INSTRUCTION
-    2517/ 40.004 :                      PRSRAM                          ; FOLLOWING CELLS INITIALIZED FROM ROM
-    2518/ 40.004 :                              DS      1               ; RET
-    2519/ 40.005 :                      REGI    DS      1               ; INDEX OF REGISTER UNDER DISPLAY
-    2520/ 40.006 :                      DSPROT  DS      1               ; PERIOD FLAG BYTE
-    2521/ 40.007 :                      DSPMOD  DS      1               ; DISPLAY MODE
-    2522/ 40.010 :                      
-    2523/ 40.010 :                      MFLAG   DS      1               ; USER FLAG OPTIONS
-    2524/ 40.011 :                                                      ; SEE *UO.XXX* BITS DESCRIBED AT FRONT
-    2525/ 40.011 :                      
-    2526/ 40.011 :                      CTLFLG  DS      1               ; FRONT PANEL CONTROL BITS
-    2527/ 40.012 :                      REFIND  DS      1               ; REFRESH INDEX (0 TO 7)
-    2528/ 40.013 : =7O                  PRSL    EQU     7               ; END OF AREA INITIALIZED FROM ROM
-    2529/ 40.013 :                      
-    2530/ 40.013 :                      FPLEDS                          ; FRONT PANEL LEDS PATTERNS
-    2531/ 40.013 :                      ALEDS   DS      1               ; ADDR 0
-    2532/ 40.014 :                              DS      1               ; ADDR 1
-    2533/ 40.015 :                              DS      1               ; ADDR 2
-    2534/ 40.016 :                      
-    2535/ 40.016 :                              DS      1               ; ADDR 3
-    2536/ 40.017 :                              DS      1               ; ADDR 4
-    2537/ 40.020 :                              DS      1               ; ADDR 5
-    2538/ 40.021 :                      
-    2539/ 40.021 :                      DLEDS   DS      1               ; DATA 0
-    2540/ 40.022 :                              DS      1               ; DATA 1
-    2541/ 40.023 :                              DS      1               ; DATA 2
-    2542/ 40.024 :                      
-    2543/ 40.024 :                      ABUSS   DS      2               ; ADDRESS BUSS
-    2544/ 40.026 :                      RCCA    DS      1               ; RCC SAVE AREA
-    2545/ 40.027 :                      CRCSUM  DS      2               ; CRC-16 CHECKSUM
-    2546/ 40.031 :                      TPERRX  DS      2               ; TAPE ERROR EXIT ADDRESS
-    2547/ 40.033 :                      TICCNT  DS      2               ; CLOCK TIC COUNTER
-    2548/ 40.035 :                      
-    2549/ 40.035 :                      REGPTR  DS      2               ; REGISTER CONTENTS POINTER
-    2550/ 40.037 :                      
-    2551/ 40.037 :                      ;UIVEC                          ; USER INTERRUPT VECTORS
-    2552/ 40.037 :                              DS      3               ; JUMP TO CLOCK PROCESSOR
-    2553/ 40.042 :                              DS      3               ; JUMP TO SINGLE STEP PROCESSOR
-    2554/ 40.045 :                              DS      3               ; JUMP TO I/O 3
-    2555/ 40.050 :                              DS      3               ; JUMP TO I/O 3
-    2556/ 40.053 :                              DS      3               ; JUMP TO I/O 5
-    2557/ 40.056 :                              DS      3               ; JUMP TO I/O 6
-    2558/ 40.061 :                              DS      3               ; JUMP TO I/O 7
-    2559/ 40.064 :                      
-    2560/ 40.064 :                      ;       H88/H89 RAM USAGE BEYOND THAT OF H8MTRF
-    2561/ 40.064 :                      ;
-    2562/ 40.064 :                      NMIRET  DS      2
-    2563/ 40.066 :                      
-    2564/ 41.120 :                              ORG     20520Q
-    2565/ 41.120 :                      PRIM    DS      1               ; PRIMARY DEVICE ADDR. PORT
-    2566/ 41.121 :                      TMFG    DS      1               ; TIMER INTERRUPT FLAG, =1 FOR Z47, =0 FOR H17
-    2567/ 41.122 :                      MYCNT   DS      1               ; COUNTER FOR TIMER INTERRUPT
-    2568/ 41.123 :                      AUTOB   DS      1               ; AUTO BOOT FLAG
-    2569/ 41.124 :                      STK     DS      1               ; STACK POINTER FOR RE-BOOT
-    2570/ 41.125 :                      
-    2571/ 40.066 :                              ORG     20066Q
-    2572/ 40.066 :                      DATA    DS      1               ; OUTPUT 362Q DATA SAVE AREA
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 52 - 2024-05-01 01:09:38 PM
+    2513/ 10.000 :                      ;       MONITOR.
+    2514/ 10.000 :                      
+    2515/ 40.000 :                              ORG     20000Q          ; 8192
+    2516/ 40.000 :                      
+    2517/ 40.000 :                      START   DS      2               ; DUMP STARTING ADDRESS
+    2518/ 40.002 :                      IOWRK   DS      2               ; IN OUR OUT INSTRUCTION
+    2519/ 40.004 :                      PRSRAM                          ; FOLLOWING CELLS INITIALIZED FROM ROM
+    2520/ 40.004 :                              DS      1               ; RET
+    2521/ 40.005 :                      REGI    DS      1               ; INDEX OF REGISTER UNDER DISPLAY
+    2522/ 40.006 :                      DSPROT  DS      1               ; PERIOD FLAG BYTE
+    2523/ 40.007 :                      DSPMOD  DS      1               ; DISPLAY MODE
+    2524/ 40.010 :                      
+    2525/ 40.010 :                      MFLAG   DS      1               ; USER FLAG OPTIONS
+    2526/ 40.011 :                                                      ; SEE *UO.XXX* BITS DESCRIBED AT FRONT
+    2527/ 40.011 :                      
+    2528/ 40.011 :                      CTLFLG  DS      1               ; FRONT PANEL CONTROL BITS
+    2529/ 40.012 :                      REFIND  DS      1               ; REFRESH INDEX (0 TO 7)
+    2530/ 40.013 : =7O                  PRSL    EQU     7               ; END OF AREA INITIALIZED FROM ROM
+    2531/ 40.013 :                      
+    2532/ 40.013 :                      FPLEDS                          ; FRONT PANEL LEDS PATTERNS
+    2533/ 40.013 :                      ALEDS   DS      1               ; ADDR 0
+    2534/ 40.014 :                              DS      1               ; ADDR 1
+    2535/ 40.015 :                              DS      1               ; ADDR 2
+    2536/ 40.016 :                      
+    2537/ 40.016 :                              DS      1               ; ADDR 3
+    2538/ 40.017 :                              DS      1               ; ADDR 4
+    2539/ 40.020 :                              DS      1               ; ADDR 5
+    2540/ 40.021 :                      
+    2541/ 40.021 :                      DLEDS   DS      1               ; DATA 0
+    2542/ 40.022 :                              DS      1               ; DATA 1
+    2543/ 40.023 :                              DS      1               ; DATA 2
+    2544/ 40.024 :                      
+    2545/ 40.024 :                      ABUSS   DS      2               ; ADDRESS BUSS
+    2546/ 40.026 :                      RCCA    DS      1               ; RCC SAVE AREA
+    2547/ 40.027 :                      CRCSUM  DS      2               ; CRC-16 CHECKSUM
+    2548/ 40.031 :                      TPERRX  DS      2               ; TAPE ERROR EXIT ADDRESS
+    2549/ 40.033 :                      TICCNT  DS      2               ; CLOCK TIC COUNTER
+    2550/ 40.035 :                      
+    2551/ 40.035 :                      REGPTR  DS      2               ; REGISTER CONTENTS POINTER
+    2552/ 40.037 :                      
+    2553/ 40.037 :                      ;UIVEC                          ; USER INTERRUPT VECTORS
+    2554/ 40.037 :                              DS      3               ; JUMP TO CLOCK PROCESSOR
+    2555/ 40.042 :                              DS      3               ; JUMP TO SINGLE STEP PROCESSOR
+    2556/ 40.045 :                              DS      3               ; JUMP TO I/O 3
+    2557/ 40.050 :                              DS      3               ; JUMP TO I/O 3
+    2558/ 40.053 :                              DS      3               ; JUMP TO I/O 5
+    2559/ 40.056 :                              DS      3               ; JUMP TO I/O 6
+    2560/ 40.061 :                              DS      3               ; JUMP TO I/O 7
+    2561/ 40.064 :                      
+    2562/ 40.064 :                      ;       H88/H89 RAM USAGE BEYOND THAT OF H8MTRF
+    2563/ 40.064 :                      ;
+    2564/ 40.064 :                      NMIRET  DS      2
+    2565/ 40.066 :                      
+    2566/ 41.120 :                              ORG     20520Q
+    2567/ 41.120 :                      PRIM    DS      1               ; PRIMARY DEVICE ADDR. PORT
+    2568/ 41.121 :                      TMFG    DS      1               ; TIMER INTERRUPT FLAG, =1 FOR Z47, =0 FOR H17
+    2569/ 41.122 :                      MYCNT   DS      1               ; COUNTER FOR TIMER INTERRUPT
+    2570/ 41.123 :                      AUTOB   DS      1               ; AUTO BOOT FLAG
+    2571/ 41.124 :                      STK     DS      1               ; STACK POINTER FOR RE-BOOT
+    2572/ 41.125 :                      
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 52 - 2024-05-12 07:02:04 PM
 
 
-    2573/ 40.067 :                              END
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 53 - 2024-05-01 01:09:38 PM
+    2573/ 40.066 :                              ORG     20066Q
+    2574/ 40.066 :                      DATA    DS      1               ; OUTPUT 362Q DATA SAVE AREA
+    2575/ 40.067 :                              END
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 53 - 2024-05-12 07:02:04 PM
 
 
   Symbol Table (* = unused):
@@ -3256,7 +3258,7 @@
  D.RAM :                     40.240 C |  D.RAML :                        37 - |
  D.SDP :                     40.206 - |  D.STA :                        170 - |
 *D.VEC :                     40.130 C |  DAT :                        6.023 C |
- DATA :                      40.066 C | *DATE :                "2024-05-01" - |
+ DATA :                      40.066 C | *DATE :                "2024-05-12" - |
 *DC.BOOT :                        0 - | *DC.CPY :                        13 - |
 *DC.FRM0 :                       14 - | *DC.FRM1 :                       15 - |
 *DC.FRM2 :                       16 - | *DC.FRM3 :                       17 - |
@@ -3278,7 +3280,7 @@
  DMOVE :                     30.252 - | *DOD :                        3.122 C |
  DP.DC :                        177 - |  DS.HOLE :                        1 - |
 *DSPMOD :                    40.007 C | *DSPROT :                    40.006 C |
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 54 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 54 - 2024-05-12 07:02:04 PM
 
 
  DY10.5 :                     7.265 C |  DY3.3 :                      7.153 C |
@@ -3341,7 +3343,7 @@
  MI.OUT :                       323 - |  MI.RET :                       311 - |
 *MOMCPU :                   200.200 - | *MOMCPUNAME :                "8080" - |
  MSG.BT :                     6.234 C |  MSG.EQ :                     7.362 C |
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 55 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 55 - 2024-05-12 07:02:04 PM
 
 
  MSG.ERR :                    1.047 C |  MSG.GO :                     6.165 C |
@@ -3403,8 +3405,8 @@
  SUBM6 :                      5.062 C |  SUBM7 :                      5.075 C |
  SUBM8 :                      5.077 C |  SUBM9 :                      5.115 C |
 *SYDD :                      40.130 C |  TICCNT :                    40.033 C |
-*TIME :               "01:09:38 PM" - |  TMFG :                      41.121 C |
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 56 - 2024-05-01 01:09:38 PM
+*TIME :               "07:02:03 PM" - |  TMFG :                      41.121 C |
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 56 - 2024-05-12 07:02:04 PM
 
 
  TMOUT :                      4.302 C |  TMOUT1 :                     4.345 C |
@@ -3467,13 +3469,13 @@
  Z47 :                        1.364 C |  Z47A :                       1.370 C |
 *Z80SYNTAX :                      0 - |
 
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 57 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 57 - 2024-05-12 07:02:04 PM
 
 
   1.214 symbols
     201 unused symbols
 
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 58 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 58 - 2024-05-12 07:02:04 PM
 
 
   Defined Macros:
@@ -3484,7 +3486,7 @@ ERRPL                                 | ERRZR
 
       4 macros
 
- AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 59 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 269] - Source File mtr89.asm - Page 59 - 2024-05-12 07:02:04 PM
 
 
   Code Pages:
@@ -3494,10 +3496,10 @@ STANDARD (0 changed characters)
 
 1 code page
 
-0.04 seconds assembly time
+0.03 seconds assembly time
 
- 11.128 lines source file
- 11.221 lines incl. macro expansions
+ 11.130 lines source file
+ 11.223 lines incl. macro expansions
       2 passes
       0 errors
       0 warnings
