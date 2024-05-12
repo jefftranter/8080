@@ -272,8 +272,8 @@ INIT2   DCX     H
 ;               ON STACK.
 ;               (DE) = ADDRESS OF CTLFLG
 
-        ERRNZ   $-132Q
-
+        ERRMI   132Q-$
+        ORG     132Q
 SAVALL  XTHL                    ; SET H,L ON STACK TOP
         PUSH    D
         PUSH    B
@@ -468,7 +468,6 @@ MTR.3   CMP     M               ; SEE IF CHARACTER FROM CONSOLE = TABLE ENTRY
         JMP     MTR.2           ; TRY AGAIN
 
 MTR.4   CALL    WCC             ; WRITE CHARACTER BACK TO CONSOLE
-        INX     H               ; GET ROUTINE ADDRESS LSB
         MOV     A,M
         INX     H               ; GET MSB
         MOV     H,M
@@ -506,7 +505,8 @@ VIEW1   SHLD    BLKICW          ; SAVE START ADDRESS FOR ASCII STUFF
 ;       EXIT    TO (RET)
 ;       USES    NONE
 
-        ERRNZ   $-463Q
+        ERRMI   463Q-$
+        ORG     463Q
 
 SAE     SHLD    ABUSS
         RET
@@ -978,58 +978,58 @@ DEV170  IN      H88.SW          ; GET DEVICE SWITCHES
         JR      DEV1.           ; DO PORT 170 STUFF
         CPU     8080
 
+;       DEVICE IS AT 174q
 
-; XXX HERE XXX
+DEV174  IN     H88.SW           ; GET DEVICE DIPS
 
+        CPU    Z80
+        EX     AF,AF'           ; SAVE DIPS, RESTORE 'SD' FLAG
+        CPU    8080
+        LXI    H,BT174          ; ASSUME PRIMARY
+        CPU    Z80
+        JR     Z,DEV2
 
-        MVI     A,D.STA         ; ASSUME ALL DEVICE ARE Z47 & BOOT AT 170Q
-        STA     PRIM            ; SINCE H17 BOOT ROM WILL TAKE CARE OF ITS MATTER
-        LXI     H,Z47           ; SET Z47 BOOT ADD.
-        MVI     B,'4'           ; SET MAX. UNIT TO 4
+DEV1.   EX     AF,AF'           ; GET SWITCHES BACK
+        CPU    8080
+        RRC
+        RRC                     ; MOVE BITS DOWN
+        CPU    Z80
+        EX     AF,AF'           ; AND SAVE AGAIN
+        CPU    8080
+        LXI    H,BT170          ; WAS PORT 170
+;       JR     DEV2
+;       ERRNZ  $-DEV2
 
-;       DETERMINE BOOT DEVICE AND ITS INFORMATION
+;       HL = ADDRESS OF FWA PROPER TABLE
 
-        IN      H88.SW          ; READ SWITCH DATA
-        PUSH    PSW             ; SAVE IN STACK
-        ANI     H88S.DV         ; CHECK PRIMARY DEVICE ADDRESS
-        CPU     Z80
-        EX      AF,AF'          ; SAVE Z FLAG & GET Z' FOR PRIM. SEC. FLAG
-        JR      NZ,SECOND       ; IT SECONDARY
-        EX      AF,AF'
-        JR      NZ,B170
-        JR      B174
-SECOND  EX      AF,AF'
-        JR      Z,B170          ; BOOT PRIMARY AT 170Q
-        CPU     8080
-B174    MVI     A,UP.DP         ; PRIMARY DEVICE IS AT 174Q
-        STA     PRIM
-        POP     PSW             ; GET SWITCH DATA BACK
-        ANI     H88S.4          ; CHECK THIS IS Z47 OR H17
-        CPU     Z80
-        JR      Z,BH17          ; IT H17
-        CPU     8080
-        DCR     A
-DEV2    RZ                      ; IT IS Z47
-        DCR     H               ; NO DEVICE THERE, Z47 LOCATION MUST ON 1***A
+DEV2    MOV    A,M              ; FIRST BYTE IS PORT NUMBER
+        STA    PRIM             ; (A) = DEVICE ADDRESS
+
+        CPU    Z80
+        EX     AF,AF'           ; (A) = DEVICE SPECIFIC FLAG
+        CPU    8080
+        ANI    H88S.4           ; MASK OFF UNIT BITS
+        ADD    A
+        ADD    A                ; 4 BYTE ENTRIES
+        INX    H                ; HL = FWA OF TABLE ENTRIES
+        MOV    E,A
+        MVI    D,0              ; DE = OFFSET
+        DAD    D                ; HL = ADDRESS OF DEVICE ENTRY
+
+        MOV    A,M
+        STA    TMFG             ; 1ST ENTRY IS TIME-OUT FLAG
+
+        INX    H
+        MOV    B,M              ; 2ND ENTRY IS UNIT NUMBER
+
+        INX    H
+        MOV    E,M
+        INX    H                ; 3RD ENTRY IS BOOT ROUTINE ADDRESS
+        MOV    D,M
+        XCHG                    ; MOVE IT INTO HL
         RET
-        ERRNZ   Z47/256-1
 
-;       PRIMARY DEVICE IS H17
-
-BH17    LXI     H,H17           ; SET TO H17 EXECUTION LOCATION
-        DCR     B               ; SET TO MAX 3 DRIVE
-        STA     TMFG            ; SET TIMER INTERRUPT = 0 FOR H17
-        RET
-
-;       PRIMARY DEVICE IS AT PORT 170Q
-
-B170    POP     PSW             ; GET SWITCH DATA
-        ANI     H88S.0          ; CHECK ANY DEVICE IN 170Q
-        CPI     00000100B       ; CHECK IF IT IS Z47
-        CPU     Z80
-        JR      DEV2
-        CPU     8080
-
+;       ERRMI   1447A-$
         ORG     1447Q
 ;       LRA - LOCATE REGISTER ADDRESS
 ;
@@ -1126,13 +1126,13 @@ IOB2    CPI     A.CR            ; CARRIAGE RETURN?
 ;       EXIT:   TO (IY)
 ;       USES:   A,C,F
 
-DYASC
+DYASC   EQU     $
         CPU     Z80
         EX      AF,AF'          ; SAVE CHARACTER TO OUTPUT
         CPU     8080
-DYASC1  IN      SC.ACE+UR.LSR   ; READ LINE STATUS REGISTER
+DYASC1  IN      SC.ACE+UR.LSR   ; TERMINAL READY?
         ANI     UC.THE
-        JZ      DYASC1          ; WAIT IF UART CAN'T HOLD ANOTHER CHARACTER
+        JZ      DYASC1          ; NOT YET.
 
         CPU     Z80
         EX      AF,AF'          ; GET CHARACTER TO OUTPUT
@@ -1149,15 +1149,8 @@ DYASC1  IN      SC.ACE+UR.LSR   ; READ LINE STATUS REGISTER
 ;       EXIT:   TO (IX)
 ;       USES    A,C,IF.F
 
-DYBYT   MOV     C,A             ; SAVE CHARACTER
-        ANI     11000000B       ; OUTPUT FIRST CHARACTER OF OCTAL VALUE
-        RRC
-        RRC
-        RRC
-        RRC
-        RRC
-        RRC
-        ORI     00110000B       ; MAKE INTO ASCII
+DYBYT   JMP     DYBYT.2
+DYBT.1  ORI     '0'             ; MAKE ASCII
 
         CPU     Z80
         LD      IY,DYBYT.2
@@ -1165,12 +1158,12 @@ DYBYT   MOV     C,A             ; SAVE CHARACTER
 
         JMP     DYASC
 
-DYBYT.2 MOV     A,C             ; OUTPUT SECOND CHARACTER
+DYBYT.2 MOV     A,C
         ANI     00111000B
         RRC
         RRC
         RRC
-        ORI     00110000B       ; MAKE INTO ASCII
+        ORI     '0'
 
         CPU     Z80
         LD      IY,DYBYT.4      ; RETURN ADDRESS
@@ -1179,7 +1172,7 @@ DYBYT.2 MOV     A,C             ; OUTPUT SECOND CHARACTER
 
 DYBYT.4 MOV     A,C             ; OUTPUT LAST CHARACTER
         ANI     00000111B
-        ORI     00110000B       ; MAKE ASCII
+        ORI     '0'
 
         CPU     Z80
         LD      IY,DYBYT.6      ; RETURN ADDRESS
@@ -1187,7 +1180,7 @@ DYBYT.4 MOV     A,C             ; OUTPUT LAST CHARACTER
 
         JMP     DYASC
 
-DYBYT.6
+DYBYT.6 EQU     $
         CPU     Z80
         JP      (IX)            ; RETURN TO CALLER
         CPU     8080
@@ -1199,7 +1192,8 @@ MSG.PAS DB      A.CR,A.LF
         DB      '     Pass =   '
         DB      0
 
-
+        ERRMI   1660Q-$
+        ORG     1660Q
 ;       RCK - READ CONSOLE KEYPAD
 ;
 ;       RCK IS CALLED TO READ A KEYSTROKE FROM THE CONSOLE FRONT PANEL KEYPAD.
@@ -1214,9 +1208,9 @@ MSG.PAS DB      A.CR,A.LF
 ;       RCK MUST HAVE SAME ENTRY AS RCK IN PAM-8
         ERRNZ   $-1660Q
 
-RCK     XRA     A
+RCK     EQU     $
+        XRA     A
         RET
-
 
 ;       RCC - READ CONSOLE CHARACTER.
 ;
@@ -1229,7 +1223,7 @@ RCK     XRA     A
 ;               (A) = ASCII KEY VALUE
 ;       USES    A,F
 
-RCC
+RCC     EQU     $
 
 RCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE LINE STATUS REGISTER
         ANI     UC.DR           ; SEE IF THERE IS A DATA READY
@@ -1237,7 +1231,7 @@ RCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE LINE STATUS REGISTER
         JR      Z,RCC1
         CPU     8080
 
-        IN      SC.ACE+UR.RBR   ; ELSE, INPUT CHARACTER
+RCC2    IN      SC.ACE+UR.RBR   ; ELSE, INPUT CHARACTER
         ANI     01111111B       ; TOSS ANY PARITY
         CPI     A.DEL
         JZ      ERROR           ; IF RUBOUT, EXIT TO CALLER
@@ -1254,7 +1248,7 @@ RCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE LINE STATUS REGISTER
 
 WCC     PUSH    PSW             ; SAVE CHARACTER
 WCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE STATUS
-        ANI     UC.THE          ; SEE IF TRANSMITTER HOLDING IS EMPTY
+        ANI     UC.THE          ; SEE IF TRANSMITTER HOLDING REGISTER IS EMPTY
         CPU     Z80
         JR      Z,WCC1
         CPU     8080
@@ -1263,25 +1257,8 @@ WCC1    IN      SC.ACE+UR.LSR   ; INPUT ACE STATUS
         OUT     SC.ACE+UR.THR   ; OUTPUT TO CONSOLE
         RET
 
-
 ;       THE FOLLOWING IS ONLY A PORTION OF THE DYNAMIC RAM TEST!!
 ;
-DY9.3   XCHG
-        MOV     A,H             ; OUTPUT MSB
-
-        CPU     Z80
-        LD      IX,DY9.4        ; RETURN ADDRESS
-        CPU     8080
-
-        JMP     DYBYT
-
-DY9.4   MOV     A,L             ; OUTPUT LSB
-
-        CPU     Z80
-        LD      IX,DY9.5        ; RETURN ADDRESS
-        JR      DYBYT
-        CPU     8080
-
 DY9.5   XCHG                    ; SAVE ERROR ADDRESS
         LXI     H,MSG.EQ        ; OUTPUT ' = '
 
@@ -1299,13 +1276,26 @@ DY9.8   LDAX    D               ; OUTPUT RAM CONTENTS
 
         JMP     DYBYT
 
-DYMEM10 MVI     A,A.BEL         ; DING BELL
+;;      VIEW3. - CONTINUATION OF *VIEW*
+;
+;       SEE IF END OF BYTES
+;
 
+VIEW3.  INX     H               ; BUMP POINTER
+        CALL    CHKRAD          ; GET RADIX
+        MVI     A,11110000B     ; ASSUME HEX
         CPU     Z80
-        LD      IY,DY10.5       ; RETURN ADDRESS
+        JR      NZ,VIEW3.A      ; IF IT WAS HEX
         CPU     8080
+VIEW3.A ANA     L               ; (A) = MASKWS ddr lsb
+        CMP     L               ; SAME?
+        RET                     ; LET CALLER DECIDE
 
-        JMP     DYASC
+;;      VIEW9 = DP THE ASCII
+;
+
+VIEW9   LHLD    BLKICW          ; RESTORE REGISTERS
+        JMP     VIEW5
 
 
 ;       IO ROUTINES TO BE COPIED INTO AND USED IN RAM.
@@ -1313,9 +1303,10 @@ DYMEM10 MVI     A,A.BEL         ; DING BELL
 ;       MUST CONTINUE TO 3777A FOR PROPER COPY.
 ;       THE TABLE MUST ALSO BE BACKWARDS TO THE FINAL RAM
 
-        ERRNZ   2000Q-7-$
+        ERRMI   2000Q-7-$
+        ORG     2000Q-7
 
-PRSROM
+PRSROM  EQU     $
         DB      1               ; REFIND
         DB      0               ; CTLFLG
         DB      0               ; MFLAG
@@ -1328,7 +1319,7 @@ PRSROM
 
 ;       INIT0X - EXTENSION OF INIT0 TO SUPPORT H88
 
-INIT0X  MVI     A,00000010B
+INIT0X  MVI     A,H888.CK       ; ENABLE LOCL
         OUT     H88.CTL
 
 ;       SET UP ACE FOR CONSOLE COMMUNICATIONS
@@ -1358,7 +1349,7 @@ INIT0X  MVI     A,00000010B
 ;       WAIT A WHILE TO ALLOW THE CONSOLE RESET TO FINISH SO IT CAN
 ;       ACCEPT THE FIRST PROMPT
 ;
-        LXI     B,32400Q        ; APPROX. 100 MS
+        JMP     INT0X0          ; DO OTHER STUFF FIRST
 INIT0X1 DCR     C
         CPU     Z80
         JR      NZ,INIT0X1
@@ -1366,11 +1357,11 @@ INIT0X1 DCR     C
         DJNZ    INIT0X1
         CPU     8080
 
-;       INPUT SWITCH TO SEE IF TO BEGIN OPERATION OF MEMORY TEST
+;       INPUT SWITCH TO SEE IF TO BEGIN OPERATION OR MEMORY TEST
 ;
         IN      H88.SW          ; GET SWITCHES
         ANI     H88S.M          ; MASK FOR MEMORY TEST ONLY
-        JZ      DYMEM           ; IF TO PERFORM MEMORY TESTS
+        JZ      MEMORY.         ; IF TO PERFORM MEMORY TESTS
 
 ;       REPLACE WHAT WAS ORIGINALLY AT THE JUMP WHICH GOT US HERE
 ;
@@ -1382,7 +1373,7 @@ INIT0X1 DCR     C
 
 ;       BRTAB - BAUD RATE DIVISOR TABLE
 ;
-BRTAB
+BRTAB   EQU     $
 
 BR96    DB      0,12            ;   9600 BAUD
 BR19.2  DB      0,6             ; 19,200 BAUD
@@ -1530,6 +1521,7 @@ NMI3    POP     B
 ;       RET                     ; Z80 RETURN FROM NMI
         DB      355Q,105Q
 
+; XXX HERE XXX
 
 ;       ATB     - AUTO BOOT ROUTINE CONTINUE
 
