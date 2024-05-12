@@ -662,24 +662,24 @@ START1  CALL    RCC             ; INPUT FROM KB
         CPU     Z80
         JR      Z,BOOT0         ;     THEN TAKE IT AS DRIVE 0
         CPU     8080
-        CPI     '0'             ; CHECK INPUT IS WITHIN DRIVE 0 - (B)
+        CALL    BOOT7
         CPU     Z80
-        JR      C,WRONG         ;   IF LESS THEN 0, WRONG INPUT
+        JR      C,WRONG
         CPU     8080
         CMP     B
         CPU     Z80
-        JR      C,BOOT5
+        JR      C,BOOT5         ;   IF WITHIN THE RANGE, BOOT IT!
         EX      AF,AF'          ; SAVE INPUT, CHECK PRIM OR SEC?
         JR      Z,NB7           ; IF PRIMARY, CHECK 'S'
         EX      AF,AF'          ; RESTORE (Z) FLAG
         CPU     8080
-WRONG
-        MVI     A,A.BEL         ; NOT THE CASES, BEEP!
+WRONG   EQU     $
+        MVI     A,A.BEL         ; NOT THE CASE, BEEP!
         CALL    WCC
         CPU     Z80
         JR      START1          ; AND TRY AGAIN
 
-NB7     EX      AF,AF'          ; RESTORE INPUT & PRIM, SEC FLAG
+NB7     EX      AF,AF'          ; RESTORE INPUT & PRIM. SEC FLAG
         CPU     8080
         ANI     01011111B       ; MASK TO UPPER CASE LETTER
         CPI     'S'             ; CHECK THE USER LIKE TO BOOT FROM
@@ -689,7 +689,7 @@ NB7     EX      AF,AF'          ; RESTORE INPUT & PRIM, SEC FLAG
 
 ;       USER WISHES TO BOOT FROM SECONDARY DEVICE
 
-BSEC
+BSEC    EQU     $
         LXI     H,BSMSG         ; PRINT BOOT SECONDARY MESSAGE
         CALL    TYPMSG
         INR     A               ; SET (Z)=0 FOR SECONDARY DEVICE
@@ -700,24 +700,24 @@ BSEC
 ;       SAVE THE AIO.UNI, CHECK IF THERE IS THE BOOT DEVICE AND GO!
 
 BOOT0   XRA     A               ; TAKE CR OR AUTO BOOT AS DRIVE 0
+        LXI     SP,21200Q       ; SET STACK FOR NO COMMAND LINE
         CPU     Z80
         JR      BOOT6
         CPU     8080
 
 BOOT5   CALL    WCC             ; PRINT UNIT NUMBER
         SUI     '0'             ; MAKE IT BINARY
-        MOV     B,A             ; SAVE THE UNIT #
-        CALL    WCR             ; WAIT FOR A CR
-        MOV     A,B             ; GET UNIT NUMBER BACK
+        JMP     CCLA            ; CHECK FOR COMMAND LINE
 BOOT6   STA     AIO.UNI         ; STORE THE UNIT #
         MOV     A,H             ; CHECK IF NO DEVICE AT ADDR. PORT
         ANA     A
+        EI                      ; INSURE INTERRUPTS READY
         JZ      NODEV           ; NO DEVICE
         PCHL                    ; JMP TO THE EXECUTION ROUTINE
 
-;       Z47     -               BOOT FORM Z47 DISK DRIVE
+;       Z47     -               BOOT FROM Z47 DISK DRIVE
 ;
-;       Z47 WILL LOAD DATA FROM DISK TRACK 0 SECTOR 1 AND 2 TO
+;       Z47 WILL LOAD DATA FROM DISK TRACK 0 SECTOR 10 thru 9 2 TO
 ;       USER FIRST AVAILABLE RAM LOCATION. IF THE BOOT IS SUCCEED,
 ;       CONTROL PASS TO THAT LOCATION.
 ;
@@ -727,12 +727,12 @@ BOOT6   STA     AIO.UNI         ; STORE THE UNIT #
 ;
 ;       USE:    ALL
 
-Z47
+Z47     EQU     $
 ;       LD      (STK),SP        ; SAVE STACK POINTER FOR RE-BOOT
         DB      355Q,163Q
         DW      STK
 
-Z47A
+Z47A    EQU     $
         EI                      ; LET THE TIMER FLY
         LDA     AIO.UNI         ; GET UNIT NUMBER
         RLC                     ; SET TO SIDE/UNIT/SECTOR FORMAT
@@ -742,39 +742,20 @@ Z47A
         RLC
         INR     A               ; SET TO SECTOR 1
         MOV     C,A             ; SAVE SIDE/UNIT/SECTOR (SIDE=0)
+
 RESET   MVI     A,W.RES         ; RESET Z47
-        CALL    OUT.
-
-; DETERMINE THE DISK IS SINGLE OR DOUBLE DENSITY
-
-        MVI     A,DC.RAS        ; SEND READ AUX. STATUS COMMAND
-        CALL    COM
-        MOV     A,C             ; GET SIDE/UNIT/SECTOR
-        CALL    DAT             ; SEND SECOND COMMAND BYTE
-        CALL    PIN             ; GET AUX. STATUS BYTE
-        ANI     AS.0DD          ; CHECK IT IS SINGLE OR DOUBLE DENSITY
-        RLC
-        XRI     10000000B       ; REVERSE THE 7TH BIT, MAKE THE SECTOR
-        MOV     B,A             ; # TO 128 OR 256(B=0) BYTES
+        CALL    Z47X            ; DO Z47 EXTENSION
 
 ;       READ BOOT CODE FROM Z47
 
-        LXI     H,USERFWA       ; BOOT DESTINATION
-        PUSH    B               ; SAVE SECTOR SIZE & SIDE/UNIT/SECTOR
+        LXI     H,USERDWA       ; BOOT DESTINATION
         CALL    RDBLCK          ; READ A SECTOR FROM DISK
-        POP     B               ; GET SECTOR SIZE & SUS BACK
-        INR     C               ; SET TO NEXT SECTOR
-        CALL    RDBLCK          ; READ ANOTHER SECTOR
+        JC      NODEV           ; IF READ ERROR
 
-;       CHECK ANY ERROR DURING BOOT
+        LHLD    STK
+        SPHL                    ; RESTORE STACK
 
-        CALL    IN.             ; GET INTERFACE STATUS
-        ANI     S.ERR           ; IS THERE ANY ERROR WHEN BOOT
-        CPU     Z80
-        JR      NZ,NODEV        ;      THEN ABORT
-        CPU     8080
-        STA     MFLAG           ; STOP TIMER
-        JMP     USERFWA
+        JMP     EUC             ; SET CLOCK AND ENTER USER CODE
 
 ;       RETRY   -               RE-BOOT Z47
 ;
@@ -793,11 +774,11 @@ RETRY   LHLD    STK             ; GET OLD STACK ADDRESS
         JR      Z47A            ; RE-BOOT
         CPU     8080
 
-
 ;       R.SDP   - SET DEVICE PARAMETER, ALLOW TO SET DRIVE 0, 1, AND 2.
 ;       (MORE INFORMATION CAN BE FOUND IN H17 ROM CODE 36062A)
 
-R.SDP   MVI     A,ERPTCNT
+R.SDP   EQU   $
+        MVI     A,ERPTCNT
         STA     D.OECNT         ; SET MAX ERROR COUNT FOR OPERATION
         LDA     AIO.UNI         ; LOAD DRIVE NUMBER
         PUSH    PSW             ; SAVE IT
@@ -808,30 +789,22 @@ R.SDP   MVI     A,ERPTCNT
         MVI     A,3
 R.SDP1  JMP     SDP3
 
-;       CKAUTO  -       CHECK IF IT IS AUTO BOOT
+;;      VIEW2 - CONTINUE *VIEW* COMMAND
 ;
-;       CKAUTO IS ENTERED FROM MONITOR LOOP. IT WILL CHECK IF AUTO BOOT
-;       CONDITION IS TRUE.IF NOT, BACK TO MONITOR LOOP.
-;               IF AUTO BOOT, JUMP TO BOOT DEVICE ROUTINE.
-;
-;       ENTRY:  NONE
-;
-;       EXIT:   NONE
-;
-;       USE:    ALL
 
-CKAUTO  IN      H88.SW          ; GET SWITCH DATA
-        ANI     H88S.AT         ; CHECK AUTO BOOT SWITCH BIT SET
-        CPU     Z80
-        JR      Z,CHAT2         ; NOT SET
-        CPU     8080
-        LXI     H,AUTOB         ; SET AUTO BOOT FLAG ADDR.
-        CMP     M               ; CHECK AUTO BOOT BEFORE?
-        JNZ     ATB             ; YES, AUTO BOOT
-CHAT2   LXI     H,MSG.PR        ; LOAD 'HI' ADDR.
-        JMP     MTR.15          ; BACK TO MONITOR LOOP
+VIEW2   MOV     A,M             ; A = BYTE
+        CALL    TOB
+        MVI     A,' '           ; SPACE BETWEEN
+        CALL    WCC
+        CALL    VIEW4           ; CHECK FOR END
+        JZ      VIEW9           ; IF ALL DONE
+        CALL    VIEW3.          ; CHECK FOR END OF LINE
+        JMP     VIEW3
 
+MSG.VEW DB      'iew ',0
 
+        ERRMI   1136Q-$
+        ORG     1136Q
 ;       HORN - MAKE NOISE.
 ;
 ;       ENTRY   (A) = (MILLISECOND COUNT)/2
@@ -840,7 +813,7 @@ CHAT2   LXI     H,MSG.PR        ; LOAD 'HI' ADDR.
 
         ERRNZ   $-1136Q
 
-ALARM
+ALARM   EQU     $
         CPU     Z80
         JR      ALARMB          ; BRANCH TO A JUMP TO NOISE TO DING BELL
         CPU     8080
@@ -886,22 +859,26 @@ ALARMB  JMP     NOISE           ; SEND A BELL TO THE CONSOLE
 ;
 ;       USE:    AF, HL
 
-NODEV   LXI     H,ERRMSG        ; PRINT ERROR MESSAGE
+NODEV   EQU     $
+        LXI     H,ERRMSG        ; PRINT ERROR MESSAGE
         CALL    TYPMSG
-        STA     MFLAG           ; STOP TIMER
+NODEV1  STA     MFLAG           ; STOP TIMER
         OUT     DP.DC           ; OFF DISK
         JMP     ERROR           ; BACK TO MONITOR LOOP
 
 
 ;       H17     - BOOT FROM H17 DISK SYSTEM
 ;                 (THIS IS THE MODIFICATION OF THE H17 BOOT ROUTINE.
-;                  MORE INFORMATION CAN BE FOUND O H17 BOOT ROM 300008)
+;                  MORE INFORMATION CAN BE FOUND O H17 BOOT ROM 30000 A)
 ;
-;       ENTRY:  NONE 
+;       ENTRY:  (AIO.UNI) = THE UNIT TO BOOT
+;
+;       EXIT:   NONE
 ;
 ;       USE:    ALL
 
-H17     LXI     B,BOOTAL        ; SET THE COUNT TO MOVE IN CONSTANTS AND VECTORS
+H17     EQU     $
+        LXI     B,BOOTAL        ; SET THE COUNT TO MOVE IN CONSTANTS AND VECTORS
         LXI     D,BOOTA         ; SET THE SOURCE ADDRESS
         LXI     H,D.CON         ; SET THE DESTINATION ADDRESS
         CALL    DMOVE           ; MOVE IT
@@ -926,7 +903,7 @@ H17A    CALL   WNH              ; WAIT FOR NO HOLE
 
 ;       READ BOOT CODE
 
-        CALL   R.ABORT          ; RESET THE DISK DRIVE
+        CALL   H17X             ; H17 Extension Routine
         LXI    D,USERFWA        ; SET THE LOAD LOCATION
         LXI    B,9*256          ; LOAD 9 SECTORS
         LXI    H,0              ; LOAD FROM TRACK 0 SECTOR 1
@@ -934,31 +911,23 @@ H17A    CALL   WNH              ; WAIT FOR NO HOLE
         CPU    Z80
         JR     C,NODEV          ;   ERROR ON BOOT, BACK TO 'H:'
         CPU    8080
-
-;       SETUP CLOCK INTERRUPT FOR H17 ONLY
-
-        LXI   H,CLOCK17         ; LOAD CLOCK ROUTINE ADDRESS
-        SHLD  UIVEC+1           ; SET IT INTO VECTOR LOCATION
-        JMP   USERFWA           ; GOTO BOOT CODE
+        JMP    EUC.             ; VECTORS ALREADY IN
 
 ;      DEVICE - DETERMINE BOOT WHICH DEVICE AT WHICH PORT
 ;
 ;       ENTRY:  Z FLAG ( Z=1 FOR PRIMARY, Z=0 FOR SECONDARY)
 ;
 ;       EXIT:   HL = DEVICE BOOT EXECUTION ADDRESS
-;                     IF H=0 THEN NO DEVICE THERE
-;                     (I.E. THE EXEC. ADDR. MUST RESIDENT > 1000A)
 ;               REG B = PRIMARY MAXI. DRIVE NUMBER
-;                    IF Z47, #='4'; IF HL7, #='3'
+;                    IF Z47 ='4'; H17 ='3';H37 ='4';H67 ='4'
 ;               (PRIM) = PRIMARY DEVICE PORT ADDRESS
-;                    IF Z47 THEN THE PORT IS EITHER 170Q OR 174Q
-;                    IF H17 THEN DON'T CARE (H17 BOOT ROM TAKE CARE IT)
-;               (TMFG) = 1 IF BOOT FROM Z47, = 0 IF FROM H17
+;               (TMFG) = SET UP FROM TABLE
 ;
 ;       USE:    ALL
 
         CPU     Z80
-DEVICE  EX      AF,AF'          ; SAVE Z FLAG
+DEVICE  EQU     $
+        EX      AF,AF'          ; SAVE Z FLAG
         CPU     8080
 
 ;       INITIAL VARIABLES
@@ -972,7 +941,6 @@ DEVICE  EX      AF,AF'          ; SAVE Z FLAG
         STA     MYCNT           ; 0.5 SECOND TIMER = 0
 
         INR     A               ; (A)=1
-        STA     TMFG            ; SET TIMER TO Z47 FLAG
         ERRNZ   UO.CLK-1        ; TIMER INTERRUPT MUST = 1
         STA     MFLAG           ; ALLOW TIMER INTERRUPT
         LXI     H,UIVEC         ; SET ALL VECTOR TO EI/RET ADDRESS
@@ -987,6 +955,32 @@ BOOT2   MVI     M,MI.JMP
 
         LXI     H,TMOUT         ; SET TIMER INTERRUPT VECTOR
         SHLD    UIVEC+1
+
+;       DETERMINE BOOT DEVICE AND ITS INFORMATION
+
+        IN      H88.SW          ; READ SWITCH DATA
+        ANI     H88S.DEV        ; DETERMINE WHICH TABLE IS PRIMARY
+        CPU     Z80
+        JR      Z,DEV174        ;   IF PORT 174 IS PRIMARY
+        CPU     8080
+
+;       PRIMARY DEVICE IS AT 170q
+
+DEV170  IN      H88.SW          ; GET DEVICE SWITCHES
+
+        CPU     Z80
+        EX      AF,AF'          ; GET 'SD' FLAGS
+        CPU     8080
+        LXI     H,BT174         ; ASSUME PORT 174
+        CPU     Z80
+        JR      NZ,DEV2         ;    IF WAS 174
+
+        JR      DEV1.           ; DO PORT 170 STUFF
+        CPU     8080
+
+
+; XXX HERE XXX
+
 
         MVI     A,D.STA         ; ASSUME ALL DEVICE ARE Z47 & BOOT AT 170Q
         STA     PRIM            ; SINCE H17 BOOT ROM WILL TAKE CARE OF ITS MATTER
