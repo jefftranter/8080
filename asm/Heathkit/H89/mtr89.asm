@@ -784,7 +784,7 @@ BOOT6   STA     AIO.UNI         ; STORE THE UNIT #
         JZ      NODEV           ; NO DEVICE
         PCHL                    ; JMP TO THE EXECUTION ROUTINE
 
-;       Z47     -               BOOT FORM Z47 DISK DRIVE
+;       Z47     -               BOOT FROM Z47 DISK DRIVE
 ;
 ;       Z47 WILL LOAD DATA FROM DISK TRACK 0 SECTOR 1 AND 2 TO
 ;       USER FIRST AVAILABLE RAM LOCATION. IF THE BOOT IS SUCCEED,
@@ -1849,7 +1849,7 @@ IOA2    CNC     RCC             ; IF CARRY SET, FIRST CHARACTER IS IN ACC
         DAD     H               ; SHIFT THREE TO MAKE ROOM FOR NEW CHARACTER
         DAD     H
         DAD     H
-        PUSH    PSW             ; SAVE CARRY FORM DAD
+        PUSH    PSW             ; SAVE CARRY FROM DAD
         POP     D               ; SAVE FLAG RESULT IN E
         POP     PSW             ; RETURN NEW CHARACTER VALUE TO (A)
         ADD     L
