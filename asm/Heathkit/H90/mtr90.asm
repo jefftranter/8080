@@ -1521,8 +1521,6 @@ NMI3    POP     B
 ;       RET                     ; Z80 RETURN FROM NMI
         DB      355Q,105Q
 
-; XXX HERE XXX
-
 ;       ATB     - AUTO BOOT ROUTINE CONTINUE
 
 ATB     MOV     M,A             ; SET AUTO BOOT FLAG
@@ -1533,6 +1531,7 @@ ATB     MOV     M,A             ; SET AUTO BOOT FLAG
         JR      BOOTX
         CPU     8080
 
+        ERRMI   2256-$
         ORG     2256Q
 ;       BOOT H-17 OR Z47 ENTRY POINT FOR H88
 ;
@@ -1544,13 +1543,14 @@ ATB     MOV     M,A             ; SET AUTO BOOT FLAG
 
 BOOT    LXI     H,MSG.BT        ; COMPLETE BOOT MESSAGE
         CALL    TYPMSG
+        DI
         MVI     A,10
         CALL    LRA.            ; GET LOCATION OF USER PC
         LXI     D,NBOOT         ; SET ITS VALUE TO THE NORMAL BOOT ROUTINE
 BOOTX   MOV     M,E
         INX     H
         MOV     M,D
-
+        EI
         JMP     GO.             ; DO IT
 
 
@@ -1562,6 +1562,10 @@ BOOTX   MOV     M,E
 ;                  THEN ABORT BOOT Z47 & TO MONITOR LOOP
 ;               IF < 15S & 3.5S THEN RE-BOOT
 ;
+;       NOTE: Because the H37 and H67 run with interrupts disabled
+;             during portions of the code, they handle their own
+;             time outs.
+;
 ;       ENTRY:  (TMFG)  = 1 IF THE TIME OUT IS FOR Z47
 ;                       = 0 IF THE TIME OUT IS FOR H17
 ;
@@ -1569,7 +1573,8 @@ BOOTX   MOV     M,E
 ;
 ;       USE:    ALL (WHEN RETURN, ALL REGISTERS ARE RESTORED)
 
-TMOUT   IN      SC.ACE+UR.LSR   ; INPUT ACE LINE STATUS REGISTER
+TMOUT   EQU     $
+        IN      SC.ACE+UR.LSR   ; INPUT ACE LINE STATUS REGISTER
         ANI     UC.DR           ; SEE IF THERE IS A DATA READY
         CPU     Z80
         JR      Z,TMOUT4        ; CHECK IF IT IS <DELETE>
@@ -1614,6 +1619,7 @@ TMOUT3  JMP     CLOCK17         ; CONTINUE H17 CLOCK ROUTINE
 
         DB      0,0             ; UNUSED BYTES
 
+        ERRMI   2370Q-4
         ORG     2370Q
 ;       SUBM - SUBSTITUTE MEMORY
 ;
@@ -1671,15 +1677,7 @@ SUBM6   CPI     A.CR            ; RETURN?
 SUBM7   MVI     M,0             ; ZERO BYTE TO BE BUILT
 
 SUBM8   CALL    WCC             ; ECHO OCTAL CHARACTER
-        ANI     00000111B       ; GET BINARY VALUE
-        MOV     E,A             ; SAVE PARTIAL
-        MOV     A,M             ; GET CURRENT
-        RLC                     ; MAKE ROOM FOR NEW CHARACTER
-        RLC
-        RLC
-        ANI     11111000B       ; TOSS PREVIOUS LSB
-        ORA     E               ; ADD NEW
-        MOV     M,A             ; SAVE NEW TOTAL
+        CALL    SUBM10
 SUBM9   CALL    IOC             ; INPUT NEXT CHARACTER
         JNC     SUBM8           ; IF OCTAL
 
@@ -1706,7 +1704,7 @@ SUBM9   CALL    IOC             ; INPUT NEXT CHARACTER
 ;               'C' = SET IF CHARACTER IS OCTAL
 ;       USES    A,F
 
-IROC    CALL    RCC             ; INPUT CHARACTER
+IROCO   CALL    RCC             ; INPUT CHARACTER
         CPI     A.CR            ; RETURN?
         RZ                      ; IF A CR
 
@@ -1733,14 +1731,12 @@ IROC1   MVI     A,A.BEL         ; ELSE, RING BELL
 
 IOA1    PUSH    B               ; SAVE (B,C)
         MOV     B,D             ; (B) = TERMINATION CHARACTER
+        MVI     E,0             ; CLEAR PSEUDO FLAGS
         PUSH    H               ; SAVE ADDRESS WHERE INPUT IS TO BE PLACED
         LXI     H,0             ; SET NEW VALUE TO ZERO
 IOA2    CNC     RCC             ; IF CARRY SET, FIRST CHARACTER IS IN ACC
-        CPI     '0'             ; MAKE SURE CHARACTER IS OCTAL
+        CALL    IOC.            ; CHECK VALIDITY
         JC      IOA3            ; IF < OCTAL
-
-        CPI     '8'
-        JNC     IOA3            ; IF > OCTAL
 
         CALL    WCC             ; ECHO OCTAL CHARACTER
         ANI     00000111B       ; GET BINARY VALUE
@@ -1760,8 +1756,7 @@ IOA3    CMP     B               ; TERMINATING CHARACTER?
 
         MVI     A,A.BEL         ; ELSE, DING BELL
         CALL    WCC
-        STC                     ; TRY AGAIN
-        CMC
+        ANA     A               ; CLEAR CARRY
         JMP     IOA2
 
 ;       END OF INPUT, PUT VALUE IN MEMORY AND EXIT
@@ -1790,8 +1785,8 @@ IOA4    CALL    WCC             ; ECHO CHARACTER
 ;               'X' SET IF CHARACTER IS NOT OCTAL
 ;       USES    A,F
 
-IOC     CALL    RCC             ; INPUT CHARACTER
-        CPI     '0'
+IOC0    CALL    RCC             ; INPUT CHARACTER
+IOC.    CPI     '0'
         RC                      ; IF CHARACTER < OCTAL
 
         CPI     '8'             ; CHARACTER > OCTAL?
@@ -1806,10 +1801,8 @@ IOC     CALL    RCC             ; INPUT CHARACTER
 ;       EXIT    NONE
 ;       USES    A,B,C,F
 
-TOA     MVI     A,A.CR          ; CRLF
-        CALL    WCC
-        MVI     A,A.LF
-        CALL    WCC
+TOAO    MVI     A,A.CR          ; CRLF
+        CALL    WCR.
 
 TOA.    MOV     A,H             ; ADDRESS
         CALL    TOB
@@ -1817,8 +1810,7 @@ TOA.    MOV     A,H             ; ADDRESS
         CALL    TOB
 
         MVI     A,' '           ; SPACE
-        CALL    WCC
-        RET
+        JMP     WCC
 
 ;       TOB - TYPE OCTAL BYTE
 ;
@@ -1847,9 +1839,8 @@ TOB1    RAR                     ; SHIFT MIDDLE BYTE TO LSB
 
         ANI     00000111B       ; ELSE, OUTPUT LAST CHARACTER
         ORI     00110000B
-        CALL    WCC
         POP     B
-        RET
+        JMP     WCC
 
 ;       WCR - WAIT FOR A CARRIAGE RETURN
 ;
@@ -1866,11 +1857,20 @@ WCR     CALL    RCC             ; INPUT CHARACTER
         JR      NZ,WCR          ; IF NOT A CR
         CPU     8080
 
-        CALL    WCC             ; ELSE ECHO CR
+WCR.    CALL    WCC             ; ELSE ECHO CR
         MVI     A,A.LF          ; LINE FEED
-        CALL    WCC
-        RET
+        JMP     WCC
 
+
+;;      VIEW3 - *VIEW* CONTINUATION
+;
+
+VIEW3   JNZ     VIEW2           ; IF NOT END OF LINE
+        CALL    VIEW9           ; END OF LINE, RESTORE ADDRESS
+        MVI     A,A.CR
+        JMP     VIEW3A.         ; DO ASCII STUFF
+        ERRMI   3023Q-$
+        ORG     3023Q
 
 ;       DAT     - DATA BYTE OUTPUT TO Z-47
 ;
@@ -1881,11 +1881,13 @@ WCR     CALL    RCC             ; INPUT CHARACTER
 ;
 ;       USES:   AF, D
 
-DAT     MVI     D,S.DTR         ; SET MATCH CONDITION TO DATA TRANSFER
+DAT     EQU     $
+        MVI     D,S.DTR         ; SET MATCH CONDITION TO DATA TRANSFER
         CPU     Z80
         JR      COM1            ; REQUEST BIT
         CPU     8080
-
+        ERRMI   3027Q-$
+        ORG     3027Q
 
 ;       COM      - OUTPUT COMMAND BYTE TO Z-47
 ;
@@ -1896,7 +1898,8 @@ DAT     MVI     D,S.DTR         ; SET MATCH CONDITION TO DATA TRANSFER
 ;
 ;       USES:   AF, D
 
-COM     MVI     D,S.DON         ; SET MATCH CONDITION TO DONE BIT
+COM     EQU     $
+        MVI     D,S.DON         ; SET MATCH CONDITION TO DONE BIT
 COM1    PUSH    PSW
 WTDON1  CALL    IN.             ; READ CONTROLLER STATUS REGISTER
         ANA     D               ; GET MATCH BIT ONLY
@@ -1904,10 +1907,9 @@ WTDON1  CALL    IN.             ; READ CONTROLLER STATUS REGISTER
         JR      Z,WTDON1        ; IF NO MATCH, WAIT
         CPU     8080
         POP     PSW
-        CALL    OUT1.           ; OUTPUT THE BYTE TO THE DATA PORT
-        RET
+        JMP     COM2            ; CONTINUE *COM* ROUTINE
 
-
+        ERRMI   3045Q-$
         ORG     3045Q
 ;       HRNX - HORN EXTENSION ROUTINE
 ;
@@ -1938,18 +1940,19 @@ NOISE   MVI     A,A.BEL
 ;
 ;       USES:   NONE
 
-OUT.    PUSH    B
+OUT.    EQU     $
+        PUSH    B
         MOV     B,A             ; SAVE THE OUTPUT DATA
         LDA     PRIM            ; GET PORT ADDRESS
 OUT.1   MOV     C,A             ; SET TO REG C
         MOV     A,B             ; GET OUTPUT BYTE DATA BACK
-;       OUT     (C),A           ; OUTPUT BYTE
-        DB      355Q,171Q
+        CPU     Z80
+        OUT     (C),A           ; OUTPUT BYTE
+        CPU     8080
         POP     B
         RET
 
-        DB      0,0             ; UNUSED BYTES
-
+        ERRMI   3100Q-$
         ORG     3100Q
 ;       TYPMSG - TYPE MESSAGE TO CONSOLE
 ;
@@ -1970,28 +1973,19 @@ TYPMSG  MOV     A,M             ; GET CHARACTER
         JR      TYPMSG          ; OUTPUT IT
         CPU     8080
 
-;       MSG.PR - MESSAGE FOR MONITOR PROMPT
-;
-;       CRLF, "  H: "
-
-MSG.PR  DB      A.CR,A.LF,"  H: ",0
-
-
 ;       RDBLCK  - INPUT A BLOCK FROM Z-47
 ;
 ;       RDBLCK READS IN A BLOCK FROM THE DISK CONTROLLER
 ;
 ;       ENTRY:
 ;               HL = LOAD ADDRESS
-;               B  = COUNT
 ;               C  = SIDE/UNIT/SECTOR
 ;
-;       EXIT:   NONE
+;       EXIT:   BLOCK IN READ IN MEMORY
 ;
 ;       USE:    ALL
 
-RDBLCK
-RD1     MVI     A,DC.REAB
+RDBLCK  MVI     A,DC.REAB
         CALL    COM             ; SEND THE COMMAND
         XRA     A               ; FOR TRACK 0
         CALL    DAT             ; SEND IT TO DISK
@@ -1999,12 +1993,13 @@ RD1     MVI     A,DC.REAB
         CALL    DAT             ; SEND IT TO DISK
 
 RD2     CALL    PIN             ; INPUT A BYTE FROM DISK
-        MOV     M,A             ; STORE IN BUFFER
-        INX     H               ; BUFFER TO NEXT ADDRESS
+        JC      WDN             ; 'C' SET IF S.DON
+
+        MOV     M,A
+        INX     H 
         CPU     Z80
-        DJNZ    RD2
+        JR      RD2             ; CONTINUE TRANSFER
         CPU     8080
-        RET                     ; CONTINUE
 
 
 ;       OUT1.   - OUTPUT A BYTE TO PORT (PRIM+1)
@@ -2015,7 +2010,8 @@ RD2     CALL    PIN             ; INPUT A BYTE FROM DISK
 ;
 ;       USE:    NONE
 
-OUT1.   PUSH    B
+OUT1.   EQU     $
+        PUSH    B
         MOV     B,A             ; SAVE THE OUTPUT DATA
         LDA     PRIM            ; GET PORT ADDRESS
         INR     A               ; SET TO (PRIM+1)
@@ -2031,13 +2027,16 @@ OUT1.   PUSH    B
 ;
 ;       USES:   A
 
-IN1.    PUSH    B
+IN1.    EQU     $
+        PUSH    B
         LDA     PRIM            ; GET PORT ADDRESS
         INR     A               ; SET TO (PRIM+1)
+        ANA     A
         CPU     Z80
         JR      IN.1
         CPU     8080
 
+        ERRMI   3165Q-$
         ORG     3165Q
 ;       MSG.GO - (G)O
 ;
@@ -2053,14 +2052,17 @@ MSG.GO  DB      "o ",0
 ;
 ;       USES:   A
 
-IN.     PUSH    B
+IN.     EQU     $
+        PUSH    B
         LDA     PRIM            ; GET PORT ADDRESS
 IN.1    MOV     C,A             ; SET ADDR. TO REG C.
-;       IN      A,(C)
-        DB      355Q,170Q       ; INPUT BYTE
+        CPU     Z80
+        IN      A,(C)
+        CPU     8080
         POP     B
         RET
 
+        ERRMI   3201Q-$
         ORG     3201Q
 ;       MSG.SUB - (S)UBSTITUTE
 ;
@@ -2233,23 +2235,6 @@ DYMEM3  DCX     H               ; POINT TO LAST GOOD LOCATION
 
         JR      DYMSG
         CPU     8080
-
-DY3.3   MOV     A,D             ; OUTPUT ADDRESS MSB
-
-        CPU     Z80
-        LD      IX,DY3.5        ; RETURN ADDRESS
-        CPU     8080
-
-        JMP     DYBYT
-
-DY3.5   MOV     A,E             ; LSB
-
-        CPU     Z80
-        LD      IX,DY3.7        ; RETURN ADDRESS
-        CPU     8080
-
-        JMP     DYBYT
-
 DY3.7   INX     D               ; (D,E) = LAST BYTE OF RAM + 1
 
 ;       TEST MEMORY
@@ -2280,19 +2265,12 @@ DYMEM5  MOV     A,M             ; READ CURRENT CONTENTS
         JR      NZ,DYMEM5       ; IF LSB NOT EQUAL
         CPU     8080
 
-        MOV     A,H             ; CHECK LSB
-        CMP     D
-        CPU     Z80
-        JR      NZ,DYMEM5
-        CPU     8080
-
 ;       HAVE REACHED THE END OF MEMORY!
 ;       OUTPUT LAST VALUE TESTED
-;
-        MVI     H,3             ; OUTPUT 3 BACKSPACES
-        MVI     A,A.BKS
 
-DYME5.5
+        JMP     DYMM5           ; HOW MANY TO BACK SPACE?
+
+DYME5.5 EQU     $
         CPU     Z80
         LD      IY,DY5.53       ; RETURN ADDRESS
         CPU     8080
@@ -2318,11 +2296,6 @@ DY5.53  DCR     H
 DY10.5  LXI      H,0            ; DELAY AND DING BELL AGAIN
         MVI      B,2            ; 2 LOOPS
 DYMEM11 DCR      H
-        CPU      Z80
-        JR       NZ,DYMEM11
-        CPU      8080
-
-        DCR      L
         CPU      Z80
         JR       NZ,DYMEM11
         CPU      8080
@@ -2377,9 +2350,25 @@ MSG.EQ  DB      ' = '
 
         DB      'GAC.'
 
+;;      VIEW3A - *VIEW* CONTINUED
+;
+
+VIEW3A  CALL    VIEW8           ; GET BOUNDARIES
+        XCHG
+VIEW3A. CALL    VIEW12          ; PRINT CRLF AND ADDRESS
+        JMP     VIEW1           ; AND START NEXT LINE
+
+VIEW4   MOV     A,H
+        CMP     B               ; COMPre bc and de
+        RNZ
+        MOV     A,L
+        CMP     C
+        RET
+
 ;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
 ;
-        ERRNZ   4000Q-6-$       ; MUST BE 6 BYTES BEFORE END
+        ERRMI   4000Q-6-$       ; MUST BE 6 BYTES BEFORE END
+        ORG     4000Q-6
 
 ESPEED  JMP     SPEED
 
@@ -2387,9 +2376,97 @@ ESPEED  JMP     SPEED
 ;
         ERRNZ   4000Q-3-$      ; MUST BE 3 BYTES BEFORE END
 
-EDTMEM  JMP     DYMEM
+EDYMEM  JMP     MEMORY.
 
-        ERRNZ   $-4000Q        ; MUST NOT EXCEED 2K BYTES
+;;      Z47X - EXTENSION TO Z47 ROUTOINE
+;
+
+Z47X    CALL    OUT.           ; SEND RESET COMMAND
+
+        CALL    WDN            ; WAIT FOR HIM TO WAKE UP
+        JC      NODEV          ; ERROR WAITING FOR DONE
+
+Z47X.   CALL    RRDY
+        JC      NODEV
+        CALL    RRDY
+        JC      NODEV
+
+        LDA     AIO.UNI        ; (A)=UNIT NUMBER
+        MOV     B,A
+        XRA     A
+        CALL    BITS           ; SET UNIT BIT MASK
+        ANA     L
+        CPU     Z80
+        JR      NZ,Z47X.
+        CPU     8080
+
+        MVI     A,DD.RAS
+        CALL    COM            ; READ AUX STAT
+        MOV     A,C
+        CALL    DAT
+        CALL    PIN
+        JC      NODEV          ; PREMATURE DONE
+
+;       SET TRANSFER COUNT O 9 SECTORS
+
+        MVI     A,DD.LSC
+        CALL    COM            ; SEND 'LOAD COUNT'
+
+        XRA     A
+        CALL    DAT            ; SEND HIGH ORDER BYTE
+
+        MVI     A,10
+        CALL    DAT            ; SEND LOW ORDER BYTE
+
+        CALL    WDN            ; WAIT FOR DONE, THEN EXIT
+        JC      NODEV
+
+        RET
+
+;;      WDB - WAIT FOR DONE
+;
+;       WDN waits for the done bit to be set.
+;
+;       time-out is in effect at this point
+;
+;       ENTRY:  NONE
+;
+;       EXIT:   PSG     'C' SET IF ERROR
+;                       'C' CLEAR IF DONE
+;
+;       USES:   PSW
+;
+
+WDN     DI
+        PUSH    B              ; SAVE BC
+        LXI     B,WDNA
+
+WDN1    DCX     B
+        MOV     A,B
+        ORA     C              ; IF TIMED-OUT
+        STC
+        CPU     Z80
+        JR      Z,WDN2
+        CPU     8080
+
+        CALL    IN.
+        ANI     S.DON
+        CPU     Z80
+        JR      Z,WDN1         ; IF NOT DONE YET
+        CPU     8080
+
+
+
+; XXX HERE XXX
+
+
+
+
+
+
+
+
+
 
 ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET
 ;       MONITOR.
