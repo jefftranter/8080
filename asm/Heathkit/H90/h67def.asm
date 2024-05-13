@@ -14,7 +14,7 @@ RI.BST  EQU     1               ; Bus Status (Read Only)
 
 BC.SEL  EQU     01000000B       ; Select and data bit 0
 BC.IE   EQU     00100000B       ; Interrupt Enable
-BC.RTS  EQU     00010000B       ; Reset
+BC.RST  EQU     00010000B       ; Reset
 BC.EDT  EQU     00000010B       ; Enable Data
 
 ;       Bus Status Register Definition

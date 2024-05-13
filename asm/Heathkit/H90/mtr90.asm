@@ -183,7 +183,7 @@ INT2    EQU     20Q             ; LEVEL 2 ENTRY
 
 INT3    JMP     UIVEC+6         ; JUMP TO USER ROUTINE
 
-        DB      '44440'         ; HEATH PART NUMBER 444-10
+        DB      102Q,61Q,64Q,62Q,102Q ; HEATH PART NUMBER 444-142
 
         ORG     40Q
 
@@ -260,6 +260,7 @@ INIT2   DCX     H
         LXI     H,ERROR
         PUSH    H               ; SET 'RETURN ADDRESS'
 
+        DB      0,0,0,0         ; UNUSED BYTES
 
 ;       SAVALL - SAVE ALL REGISTERS ON STACK.
 ;
@@ -531,8 +532,6 @@ PIN     EQU     $
         RP
         JMP     IN1.            ; INPUT A BYTE FROM PORT
 
-        DB      0               ; UNUSED BYTE
-
         ORG     503Q
 ;       PCA - PROGRAM COUNTER ALTER
 ;
@@ -601,8 +600,6 @@ GO88.1  CALL    WCC             ; ECHO RETURN
 AUTOBO  XRA     A               ; SET TO PRIMARY FLAG
         CALL    DEVICE          ; CHECK DEVICE INFORMATION
         JMP     BOOT0           ; GOTO BOOT IT
-
-        DB      0               ; UNUSED BYTE
 
         ORG     622Q
 ;       GO - RETURN TO USER MODE
@@ -707,7 +704,7 @@ BOOT0   XRA     A               ; TAKE CR OR AUTO BOOT AS DRIVE 0
 
 BOOT5   CALL    WCC             ; PRINT UNIT NUMBER
         SUI     '0'             ; MAKE IT BINARY
-        JMP     CCLA            ; CHECK FOR COMMAND LINE
+        JMP     CCL             ; CHECK FOR COMMAND LINE
 BOOT6   STA     AIO.UNI         ; STORE THE UNIT #
         MOV     A,H             ; CHECK IF NO DEVICE AT ADDR. PORT
         ANA     A
@@ -748,7 +745,7 @@ RESET   MVI     A,W.RES         ; RESET Z47
 
 ;       READ BOOT CODE FROM Z47
 
-        LXI     H,USERDWA       ; BOOT DESTINATION
+        LXI     H,USERFWA       ; BOOT DESTINATION
         CALL    RDBLCK          ; READ A SECTOR FROM DISK
         JC      NODEV           ; IF READ ERROR
 
@@ -959,7 +956,7 @@ BOOT2   MVI     M,MI.JMP
 ;       DETERMINE BOOT DEVICE AND ITS INFORMATION
 
         IN      H88.SW          ; READ SWITCH DATA
-        ANI     H88S.DEV        ; DETERMINE WHICH TABLE IS PRIMARY
+        ANI     H88S.DV         ; DETERMINE WHICH TABLE IS PRIMARY
         CPU     Z80
         JR      Z,DEV174        ;   IF PORT 174 IS PRIMARY
         CPU     8080
@@ -1057,7 +1054,7 @@ LRA.    MOV     E,A
 
         ERRNZ   $-1462Q
 
-IOA     JMP     IOA1
+IOA0    JMP     IOA1
         NOP                     ; RETAIN H8 ORG
 
 ;       IOB - INPUT OCTAL BYTE
@@ -1071,7 +1068,7 @@ IOA     JMP     IOA1
 
         ERRNZ   $-1466Q
 
-IOB     MVI     M,0             ; ZERO OUT OLD VALUE
+IOB0    MVI     M,0             ; ZERO OUT OLD VALUE
 IOB1    CNC     RCC             ; READ CONSOLE CHARACTER
 
 ;       SEE IF CHARACTER IS A VALID OCTAL VALUE
@@ -1150,7 +1147,7 @@ DYASC1  IN      SC.ACE+UR.LSR   ; TERMINAL READY?
 ;       USES    A,C,IF.F
 
 DYBYT   JMP     DYBYT.2
-DYBT.1  ORI     '0'             ; MAKE ASCII
+DYBYT.1 ORI     '0'             ; MAKE ASCII
 
         CPU     Z80
         LD      IY,DYBYT.2
@@ -1319,7 +1316,7 @@ PRSROM  EQU     $
 
 ;       INIT0X - EXTENSION OF INIT0 TO SUPPORT H88
 
-INIT0X  MVI     A,H888.CK       ; ENABLE LOCL
+INIT0X  MVI     A,H88B.CK       ; ENABLE LOCL
         OUT     H88.CTL
 
 ;       SET UP ACE FOR CONSOLE COMMUNICATIONS
@@ -1617,8 +1614,6 @@ TMOUT2  EX      AF,AF'          ; CHECK IT IS Z47 OR H17
         RNZ                     ; Z47, THEN RETURN
 TMOUT3  JMP     CLOCK17         ; CONTINUE H17 CLOCK ROUTINE
 
-        DB      0,0             ; UNUSED BYTES
-
         ERRMI   2370Q-4
         ORG     2370Q
 ;       SUBM - SUBSTITUTE MEMORY
@@ -1801,7 +1796,7 @@ IOC.    CPI     '0'
 ;       EXIT    NONE
 ;       USES    A,B,C,F
 
-TOAO    MVI     A,A.CR          ; CRLF
+TOA0    MVI     A,A.CR          ; CRLF
         CALL    WCR.
 
 TOA.    MOV     A,H             ; ADDRESS
@@ -1820,7 +1815,7 @@ TOA.    MOV     A,H             ; ADDRESS
 ;       EXIT    NONE
 ;       USES    A,F
 
-TOB     PUSH    B
+TOB0    PUSH    B
         MVI     B,2             ; NUMBER OF CHARACTERS - 1
         MOV     C,A             ; SAVE ORIGINAL BYTE
         ORA     A               ; ASSURE 'C' = ZERO
@@ -1985,7 +1980,7 @@ TYPMSG  MOV     A,M             ; GET CHARACTER
 ;
 ;       USE:    ALL
 
-RDBLCK  MVI     A,DC.REAB
+RDBLCK  MVI     A,DD.REAB
         CALL    COM             ; SEND THE COMMAND
         XRA     A               ; FOR TRACK 0
         CALL    DAT             ; SEND IT TO DISK
@@ -2098,7 +2093,7 @@ MSG.BT  DB      "oot",0
 ;
 ;       THE ABOVE TEST ADJUSTS SY0:.  TO ADJUST SY1:, USE HDOS
 
-;       LABLE EQUIVALENCES
+;       LABEL EQUIVALENCES
 ;
 ;       I/O PORTS
 OP.DC   EQU     177Q            ; DRIVE CONTROL OUTPUT PORT
@@ -2255,7 +2250,7 @@ DYMEM5  MOV     A,M             ; READ CURRENT CONTENTS
 
         INR     A
         MOV     M,A             ; INCREMENT RAM
-        CMP     M               ; SEE OF WRITE WAS SUCCESSFUL
+        CMP     M               ; SEE IF WRITE WAS SUCCESSFUL
         JNZ     DYMEM9
 
         INX     H
@@ -2263,6 +2258,12 @@ DYMEM5  MOV     A,M             ; READ CURRENT CONTENTS
         CMP     E
         CPU     Z80
         JR      NZ,DYMEM5       ; IF LSB NOT EQUAL
+        CPU     8080
+
+        MOV     A,H             ; CHECK LSB
+        CMP     D
+        CPU     Z80
+        JR      NZ,DYMEM5
         CPU     8080
 
 ;       HAVE REACHED THE END OF MEMORY!
@@ -2296,6 +2297,11 @@ DY5.53  DCR     H
 DY10.5  LXI      H,0            ; DELAY AND DING BELL AGAIN
         MVI      B,2            ; 2 LOOPS
 DYMEM11 DCR      H
+        CPU      Z80
+        JR       NZ,DYMEM11
+        CPU      8080
+
+        DCR      L
         CPU      Z80
         JR       NZ,DYMEM11
         CPU      8080
@@ -2359,7 +2365,7 @@ VIEW3A. CALL    VIEW12          ; PRINT CRLF AND ADDRESS
         JMP     VIEW1           ; AND START NEXT LINE
 
 VIEW4   MOV     A,H
-        CMP     B               ; COMPre bc and de
+        CMP     B               ; Compare BC and DE
         RNZ
         MOV     A,L
         CMP     C
@@ -2378,7 +2384,7 @@ ESPEED  JMP     SPEED
 
 EDYMEM  JMP     MEMORY.
 
-;;      Z47X - EXTENSION TO Z47 ROUTOINE
+;;      Z47X - EXTENSION TO Z47 ROUTINE
 ;
 
 Z47X    CALL    OUT.           ; SEND RESET COMMAND
@@ -2455,18 +2461,1581 @@ WDN1    DCX     B
         JR      Z,WDN1         ; IF NOT DONE YET
         CPU     8080
 
+        CALL    IN.            ; S.ERR VALID ONLY IF S.DONE SET
+        ANI     S.ERR
+        STC
+        CPU     Z80
+        JR      NZ,WDN2        ; IF ERROR BIT SET
+        CPU     8080
+
+        ANA     A              ; CLEAR CARRY
+
+WDN2    POP     B
+        EI
+        RET                    ; ALL OK.
+
+WDNA    EQU     3200Q          ; TIME OUT COUNTER
+
+;;      RRDY - CHECK DEVICE READY
+;
+;       RRDY RETURNS THE DEVICE READY BITS IN
+;       THE L REGISTER. BITS 'ON' INDICATE
+;       UNIT NOT READY.
+;
+
+RRDY    MVI     A,DD.RRDY
+        CALL    COM
+
+        CALL    PIN
+
+        MOV     L,A
+        JMP     WDN
+
+;;      COM2 - *COM* ROUTINE CONTINUATION
+;
+;       OUTPUT COMMAND TO 47 AND THEN DELAY
+;
+
+COM2    CALL    OUT1.           ; SEND COMMAND BYTE
+        MVI     A,40Q
+        ANA     A               ; CLEAR 'Z'
+
+COM3    DCR     A
+        JNZ     COM3            ; SHORT DELAY
+
+        RET
+
+;;      VIEW5 - *VIEW* CONTINUED
+;
+;       VIEW5 DOES THE ASCII PORTION OF THE *VIEW* ROUTINE
+;
+
+VIEW5   CALL    PCFA            ; POSITION CURSOR FOR ASCII
+VIEW5A  MOV     A,M             ; GET A BYTE
+        ANA     A               ; CHECK PARITY
+        JM      VIEW7
+        CPI     177Q
+        JZ      VIEW5.          ; IF DELETE
+        CPI     ' '             ; PRINTABLE?
+        CPU     Z80
+        JR      NC,VIEW6        ; YES
+        CPU     8080
+VIEW5.  PUSH    H
+        LXI     H,VEW.NPC       ; NON-PRINTABLE CHARACTER
+        CALL    TYPMSG
+        POP     H
+        CPU     Z80
+        JR      VIEW6.
+        CPU     8080
+VIEW6   CALL    WCC             ; PRINT IT
+VIEW6.  CALL    VIEW4
+        RZ                      ; IF LAST BYTE DONE
+        CALL    VIEW3.          ; CHECK FOR END
+        CPU     Z80
+        JR      NZ,VIEW5A       ; NO, DO MORE
+        CPU     8080
+        RET
+
+VIEW7   ANI     177Q            ; STRIP PARITY
+        PUSH    PSW             ; SAVE IT
+        MVI     A,33Q
+        CALL    WCC
+        MVI     A,'p'
+        CALL    WCC             ; GO TO REVERSE VIDEO
+        POP     PSW
+        CPI     177Q
+        JZ      VIEW7A
+        CPI     ' '
+        CPU     Z80
+        JR      NC,VIEW7.
+        CPU     8080
+VIEW7A  PUSH    H
+        LXI     H,VEW.NPC
+        CALL    TYPMSG
+        POP     H
+        CPU     Z80
+        JR      VIEW7..
+        CPU     8080
+VIEW7.  CALL    WCC             ; PRINT IT
+VIEW7.. MVI     A,33Q
+        CALL    WCC
+        MVI     A,'q'           ; EXIT REVERSE VIDEO
+        CPU     Z80
+        JR      VIEW6           ; AND FINISH UP
+        CPU     8080
+
+PCFA    PUSH    H
+        CALL    CHKRAD
+        LXI     H,PCF.MO        ; ASSUME OCTAL
+        JZ      PCFAA
+        LXI     H,PCF.MH        ; WAS HEX
+PCFAA   CALL    TYPMSG
+        POP     H
+        MVI     A,1             ; Skip 1 space per letter
 
 
-; XXX HERE XXX
+PCFA.   PUSH    H
+        PUSH    B
+        MOV     B,A             ; B=SKIP COUNT
+        CALL    CHKRAD
+        JZ      PCFA1
+
+        MVI     A,11110000B     ; MASK FOR HEX
+        JMP     PCFA2
 
 
+PCFA1   MVI     A,11111000B     ; MASK FOR OCTAL
+
+PCFA2   ANA     L               ; MASK LOW ORDER, RESULT IN A
+
+PCFA3   CMP     L
+        JZ      PCFA4           ; IF A=L, DONE
+        DCR     L
+        PUSH    PSW
+        PUSH    B
+PCFA3.  MVI     A,' '
+        CALL    WCC
+        DCR     B
+        JNZ     PCFA3.
+
+        POP     B
+        POP     PSW
+        JMP     PCFA3           ; PRINT (B) SPACES AND CHECK AGAIN
+
+PCFA4   POP     B
+        POP     H
+        RET
+
+PCF.MH  DB      33Q,'Y',1,54+31,0 ; Hex Version
+PCF.MO  DB      33Q,'Y',1,40+31,0 ; Octal Version
+
+VEW.NPC DB      33Q,'F^',33Q,'G',0 ; ESC,GRAPHICS,|,ESC,NO-GRAPHICS
+
+;;      VIEW8 - GET BOUNDARIES
+;
+
+VIEW8   CALL    IROC            ; GET CHARACTER OR RETURN
+        CPU     Z80
+        JR      NZ,VIEW8A
+        CPU     8080
+
+        LHLD    VEWHLD          ; GET LAST ONE
+        INX     H               ; START AT NEXT ONE
+        XCHG
+        LXI     B,0             ; SET LENGTH TO 0
+        CPU     Z80
+        JR      VIEW8B
+        CPU     8080
+
+VIEW8A  CALL    GETBND.         ; 'C' IS SET, FIRST CHARACTER IN A
+
+VIEW8B  MOV     L,C
+        MOV     H,B
+        SHLD    VEWHLD          ; SAVE LAST
+
+        MOV     A,B
+        ORA     C               ; LAST = 0
+        RNZ                     ; NO, OK
+        LXI     H,200Q-1        ; ADD 177Q TO VALUE
+        DAD     D               ; HL = DE + 177Q
+
+        CALL    CHKRAD
+        CPU     Z80
+        JR      Z,VIEW8.
+        CPU     8080
+
+        PUSH    D
+        LXI     D,200Q
+        DAD     D               ; ADD IN ANOTHER
+        POP     D
+
+VIEW8.  SHLD    VEWHLD          ; UPDATE END ADDRESS
+        MOV     C,L
+        MOV     B,H
+        RET
+
+;;      VIEW12 - Print address and position cursor
+;
+
+VIEW12  EQU     $
+        CALL    TOA
+        CALL    CHKRAD
+        JZ      VIEW3B
+        MVI     A,3             ; NUMBER OF ASCII FOR BYTES
+        JMP     VIEW3C
+VIEW3B  MVI     A,4
+VIEW3C  CALL    PCFA.           ; SKIP TO START IN SCREEN
+        RET
+
+;;      CKAUTO - CHECK FOR AUTO BOOT
+;
+;       CKAUTO IS ENTERED DURING THE MONITOR LOOP TO CHECK
+;       IF THE AUTO BOOT SWITCH IS SET.
+;
+;       THIS ROUTINE WAS MOVED FROM UP FRONT TO MAKE ROOM
+;
+
+CKAUTO  IN      H88.SW
+        ANI     H88S.AT         ; CHECK SWITCH
+        CPU     Z80
+        JR      Z,CHAT2         ; NOT AUTO BOOT
+        CPU     8080
+        LXI     H,AUTOB
+        CMP     M               ; HAVE WE BEEN HERE BEFORE?
+        JNZ     ATB             ; NO, DO AUTO BOOT
+
+CHAT2   LXI     H,MSG.PR
+        JMP     MTR.15          ; RETURN TO MONITOR LOOP
+
+;;      DYMEM EXTENSION
+;
+
+DY9.3   XCHG
+        MOV     A,H
+        CPU     Z80
+        LD      IX,DY9.4
+        CPU     8080
+        JMP     DYBYT
+
+DY9.4   MOV     A,L
+        CPU     Z80
+        LD      IX,DY9.5
+        CPU     8080
+        JMP     DYBYT
+
+;       ANOTHER EXTENSION!
+
+DY3.3   MOV     A,D
+        CPU     Z80
+        LD      IX,DY3.5
+        CPU     8080
+        JMP     DYBYT
+
+DY3.5   MOV     A,E
+        CPU     Z80
+        LD      IX,DY3.7
+        CPU     8080
+        JMP     DYBYT
+
+;;      H37 - ENTRY POINT TO BOOT FROM H37
+;
+
+H37     XRA     A
+        OUT     DK.INT          ; SET FLIP LATCH
+
+        MVI     A,FDC.FI
+        OUT     FD.CMD          ; SET NOT BUSY
+
+        MVI     A,1
+        CALL    DLY             ; DLY 2 MILLISECONDS
+
+        IN      FD.STAT         ; CLEAR INTERRUPTS
+
+        LXI     H,MYINT
+        SHLD    UIVEC+9+1       ; SET INTERRUPT ROUTINE
+        MVI     A,MI.JMP
+        STA     UIVEC+9
+
+        LDA     AIO.UNI
+        ADI     4
+        MOV     B,A
+        XRA     A
+        CALL    BITS            ; GET DEVICE CODE
+
+        ORI     CON.MO+CON.EI+CON.MFM
+        OUT     DK.CON
+        MOV     B,A
+        PUSH    B
+
+        EI                      ; Insure Interrupts on
+
+        MVI     A,150           ; 300MS ON DELAY
+        CALL    DLY
+
+        LXI     H,H371
+        SHLD    BLKICW          ; SET RETURN ADDRESS
+        MVI     A,FDC.RST+FDF.S30
+        OUT     FD.CMD
+
+        LXI     B,-1            ; ABOUT 5 SECONDS
+        MVI     D,4             ;   DOUBLED.
+H37.    DCX     B
+        MOV     A,B
+        ORA     C
+        CPU     Z80
+        JR      NZ,H37.         ; IF BC>0
+        CPU     8080
+
+        DCR     D
+        CPU     Z80
+        JR      NZ,H37.         ; IF D>0
+        CPU     8080
+
+        MVI     A,FDC.FI
+        OUT     FD.CMD
+
+        CPU     Z80
+        JR      H373            ; TIMED OUT
+        CPU     8080
+
+H371    LXI     H,H371B
+        SHLD    BLKICW          ; LOAD RETURN ADDRESS
+        MVI     A,10            ; NUMBER OF TRACKS TO STEP
+        OUT     FD.DAT          ; SET TRACK NUMBER TO 10
+        MVI     A,FDC.SEK+FDF.S30
+        OUT     FD.CMD
+        JMP     $               ; Wait for interrupt
+
+;       Return here after doing seek
+
+H371B   LXI     H,H371C
+        SHLD    BLKICW
+        MVI     A,FDC.RST+FDF.S30
+        OUT     FD.CMD
+        JMP     $
+
+;       Here after final RESTORE
+
+H371C   ANI     FDS.TK0         ; Be sure track zero switch on
+        CPU     Z80
+        JR      Z,H373          ; If not there
+        CPU     8080
+
+;       Over track zero, Wait for head to settle
+
+        LXI     B,3200          ; 40 mS DELAY
+H371.   DCX     B
+        MOV     A,B
+        ORA     C
+        CPU     Z80
+        JR      NZ,H371.        ; ALLOW HEAD SETTLE TIME
+        CPU     8080
+
+        POP     B
+        MOV     A,B             ; (A) = Device Control Bits
+        ORI     CON.DRQ         ; Turn on DRQ Interrupt
+        MOV     B,A
+        PUSH    B               ; save device control bits
+        OUT     DK.CON          ; READY FOR TRANSFERS
+
+        CALL    READT           ; Read a track
+        POP     B
+        PUSH    PSW             ; SAVE RETURN STATUS
+        MOV     A,B
+        ANI     366Q-CON.MFM    ; OFF DBL DENSITY
+        MOV     B,A
+        POP     PSW
+        CPU     Z80
+        JR      NZ,H373         ;    IF READ FAILURE
+        CPU     8080
+
+        LXI     H,-USERFWA
+        DAD     D               ;    HL = Bytes Read
+        MOV     A,H
+        CPI     (2048+256)/256  ; See if 2.25K
+        JNC     EUC             ; If got it all
+
+H372    MOV     A,B
+        OUT     DK.CON
+
+        CALL    READT           ; TRY SINGLE DENSITY
+        CPU     Z80
+        JR      NZ,H373         ;    IF FAILURE
+        CPU     8080
+
+        LXI     H,-USERFWA
+        DAD     D               ;    HL = Bytes Read
+        MOV     A,H
+        CPI     (2048+256)/256  ; See if 2.25K
+        JNC     EUC             ; More than 2.25K read, is ok        
+
+H373    XRA     A
+        OUT     DK.CON          ; TURN OFF DEVICE
+        JMP     NODEV
+
+READT   MVI     A,CON.ST
+        OUT     DK.INT
+        OUT     FD.SEC
+;       ERRNZ   CON.ST-1
+        XRA     A
+        OUT     DK.INT
+        ERRNZ   CON.CD
+
+        LXI     H,READT2
+        SHLD    BLKICW          ; SET RETURN ADDRESS
+        LXI     H,READT1
+        LXI     D,USERFWA
+        MVI     A,FDC.RDS+FDF.DLF+FDF.MRF+FDF.SLF
+        OUT     FD.CMD
+
+READT1  HLT
+        IN      FD.DAT          ; *TIME DEPENDENT*
+        STAX    D
+        INX     D
+        PCHL
+
+READT2  PUSH    PSW
+        MVI     A,CON.MO
+        OUT     DK.CON
+        POP     PSW
+        ANI     FDS.NRD+FDS.LDT+FDS.CRC+FDS.RTE
+        RET
+
+;;      MYINT - H37 Interrupt Routine
+;
+;       This routine is entered when a level 4 interrupt
+;       is received from the H37 Hardware.
+;
+;       Control is passed to the address in BLKICW
+;
+;       ENTRY:  NONE    (From the disk routine via level 4 interrupt)
+;
+;       EXIT:   PSW     =           Status byte from controller
+;               HL      =           Return address to routine
+
+MYINT   IN      FD.STAT
+        POP     H
+        LHLD    BLKICW
+        EI
+        PCHL
+        INCLUDE bits.asm
+
+;;      H67 - BOOT H67
+;
+;       The section of this code most likely to 'HANG' because
+;       of no controller is timed using the BC register pair
+;       for approximately 3 seconds.
+;
+
+H67     MVI     A,BC.RST
+        CALL    OUT1.           ; RESET THE CONTROLLER
+
+        MVI     A,4
+        CALL    DLY
+
+        LXI     H,AIO.DIR       ; SCRATCH AREA FOR CDB
+        MVI     M,D.TDR         ; TEST FOR READY
+        MVI     C,5
+H671    INX     H
+        MVI     M,0             ; FILL CDB WITH 0
+        DCR     C
+        CPU     Z80
+        JR      NZ,H671
+        CPU     8080
+
+        CALL    H67UNI          ; GET UNIT NUMBER
+        STA     AIO.DIR+1       ; SET THE LUN
+
+H671.   CALL    GETCON          ; CHECK READY
+        CPU     Z80
+        JR      NC,H672         ; IF DRIVE IS READY
+        CPU     8080
+
+        JZ      NODEV           ; IF WAS TIME-OUT PROBLEM
+
+        MVI     A,377Q
+        CALL    DLY             ; WAIT ABOUT 1/2 SECOND
+        CPU     Z80
+        JR      H671.
+        CPU     8080
+
+H672    LXI     H,AIO.DIR
+        MVI     M,D.REC         ; RECAL THE DRIVE
+
+        CALL    GETCON          ; DO THE RECAL
+        JC      NODEV           ; ERROR IN RECAL
+
+;       Now cause the drive to step out 10 tracks
+
+        LDA     AIO.UNI         ; Only for the hard disk
+        ANA     A
+        JNZ     H673            ; If unit = 1, is 8" floppy
+
+        LXI     H,AIO.DIR
+        MVI     M,D.SEK
+        INX     H               ; HL over logical address 0
+        INX     H
+        MVI     M,7             ; Seek block (7*256)
+
+        CALL    GETCON          ; Do the seek
+        JC      NODEV           ; If error during Seek
+
+        LXI     H,AIO.DIR
+        MVI     M,D.REC
+        INX     H
+        INX     H
+        MVI     M,0             ; Do another Recal
+        CALL    GETCON
+        JC      NODEV
+
+H673    LXI     H,AIO.DIR       ; SET UP READ COMMAND
+        MVI     M,D.REA
+        INX     H               ; HL = LUN
+        INX     H
+        INX     H
+        INX     H
+        MVI     M,10            ; SET 10 SECTOR READ
+        INX     H
+        MVI     M,080H          ; CONTROL BYTE
+
+        CALL    H67UNI
+        STA     AIO.DIR+1       ; SET LUN TO READ
+
+        CALL    GETCON
+        JC      NODEV           ; IF READ ERROR
+        JMP     EUC             ; ENTER USER CODE
+
+H67UNI  LDA     AIO.UNI         ; (A)=UNIT NUMBER
+        RRC
+        RRC
+        RRC                     ; MOVE IT INTO PLACE
+        ANI     ST.LUN
+        RET
+
+GETCON  DI                      ; GET CONTROLLER ATTENTION
+
+        LXI     B,65535         ; ABOUT 5 SECONDS FOR RESPONSE
+        MVI     D,2             ; 3 BYTE COUNTER (D,B,C)
+
+GTCON   CALL    IN1.            ; GET BUSS STATUS
+        ANI     BS.BSY
+        CPU     Z80
+        JR      Z,GTCON1        ; WAIT FOR BUSY TO LEAVE
+        CPU     8080
+
+        DCX     B               ; COUNT DOWN
+        MOV     A,B
+        ORA     C
+        CPU     Z80
+        JR      NZ,GTCON        ; NO TIMEOUT YET
+        CPU     8080
+
+        DCR     D
+        CPU     Z80
+        JR      NZ,GTCON        ; DEC 3RD BYTE
+        CPU     8080
+
+        STC                     ; INDICATE ERROR
+        RET
+
+GTCON1  MVI     A,BC.SEL
+        CALL    OUT1.           ; OUTPUT TO (PRIM)
+
+CBUSY   CALL    IN1.
+        ANI     BS.BSY
+        CPU     Z80
+        JR      NZ,CBUSY1       ;    WAIT FOR CONTROLLER
+        CPU     8080
+
+        DCX     B               ; CONTINUE COUNTING
+        MOV     A,B
+        ORA     C
+        CPU     Z80
+        JR      NZ,CBUSY
+        CPU     8080
+        STC
+        RET                     ; TIMED OUT
+
+CBUSY1  MVI     A,BC.EDT
+        CALL    OUT1.
+;
+;       HAVE CONTROLLER, SEND HIM COMMAND
+;
+OUTCOM  LXI     H,AIO.DIR       ; FWA OF COMMAND BUFFER
+
+COMREQ  CALL    IN1.
+        MOV     C,A
+        ANA     A
+        JP      COMREQ
+        ERRNZ   200Q-BS.REQ     ; WAIT FOR REQUEST BIT
+
+        ANI     BS.COM
+        CPU     Z80
+        JR      Z,TFDATA        ;   COMMAND DONE, SEND DATA
+        CPU     8080
+
+        MOV     A,C             ; (A)=BUSS STATUS BYTE
+        ANI     BS.DTD          ; CHECK DIRECTION
+        CPU     Z80
+        JR      Z,GETST         ;   IF DONE, GET STATUS
+        CPU     8080
+
+        MOV     A,M             ; (A)=COMMAND BYTE
+        CALL    OUT.            ; SEND OUT DATA
+        INX     H               ; BUMP POINTER
+        CPU     Z80
+        JR      COMREQ          ; CONTINUE SENDING BYTES
+        CPU     8080
+;
+;       GET STATUS - COMPLETION BYTE SHOULD BE ZEROS AND
+;       STATUS BYTE SHOULD BE ZERO IN 2 LS BITS
+;
+GETST   CALL    IN1.
+        ANI     BS.REQ+BS.DTD+BS.COM
+        CPI     BS.REQ+BS.COM
+        CPU     Z80 
+        JR      NZ,GETST        ; WAIT FOR CONTROLLER
+        CPU     8080
+
+        CALL    IN.             ;                            /2.1b/
+        MOV     C,A             ; (C)=STATUS BYTE
+        STA     AIO.DIR+6
+
+GETCPT  CALL    IN1.
+        MOV     B,A
+        STA     AIO.DIR+7
+
+        ANI     BS.REQ+BS.DTD+BS.MTY+BS.COM
+        CPI     BS.REQ+BS.MTY+BS.COM
+        CPU     Z80
+        JR      NZ,GETCPT       ;    WAIT FOR MESSAGE
+        CPU     8080
+        STA     AIO.DIR+8       ; SAVE BYTES FOR DEBUG
+
+        EI
+
+        CALL    IN.             ; (A)=COMPLETION BYTE
+        ORA     A               ; CHECK COMPLETION
+        STC
+        RNZ                     ; SHOULD BE ZERO
+
+        MOV     A,C
+        ANI     00000011B       ; CHECK FOR ERRORS
+        STC
+        RNZ                     ; IF BIT IS SET
+
+        MOV     A,B
+        ANI     00000010B
+        STC
+        RNZ                     ; IF INTERFACE ERROR
+
+        XRA     A               ; CLEAR CARRY
+        RET
+
+TFDATA  LXI     H,USERFWA       ; HL = LOAD ADDRESS
+
+TFREQ   CALL    IN1.
+        MOV     C,A
+        ANI     BS.REQ
+        CPU     Z80
+        JR      Z,TFREQ         ;   WAIT FOR REQUEST
+        CPU     8080
+
+        MOV     A,C
+        ANI     BS.COM
+        CPU     Z80
+        JR      NZ,GETST        ;      IF DONE, CHECK STATUS
+        CPU     8080
+
+        CALL    IN.             ;        GET DATA BYTE
+        MOV     M,A
+        INX     H
+        CPU     Z80
+        JR      TFREQ           ; CONTINUE UNTIL DONE
+        CPU     8080
+
+;;      FEDEV - FUTURE EXPANSION DEVICE
+;
+;       CURRENTLY, FEDEV JUST PRINTS "UNKNOWN DEVICE"
+;
+
+FEDEV   LXI     H,MSG.FE
+        CALL    TYPMSG
+        JMP     NODEV1          ; ENTER COMMON RECOVERY CODE
+
+MSG.FE  DB      '?Unknown Device',0
+
+;;      DYMEM10 - DYNAMIC RAM TEST CONTINUED
+;
+
+DYMEM10 MVI     A,A.BEL
+        CPU     Z80
+        LD      IY,DY10.5
+        CPU     8080
+
+        JMP     DYASC
+
+;;      CCL - CHECK COMMAND LINE
+;
+;       CCL CHECKS TO SEE IF THE USER WISHES TO PASS A COMMAND
+;       TO THE BOOT ROUTINE. IF THE USER SIMPLY TYPES A CARRIAGE
+;       RETURN, THEN NO COMMAND LINE IS PRESENT AND (S) = 42.200
+;       OTHERWISE THE COMMAND LINE IS PUSHED ONTO THE STACK ALA HDOS
+;       AND THE BOOT ROUTINES CAN DO WITH IT AS THEY SEE FIT.
+;
+;       ENTRY:  NONE
+;
+;       EXIT:   (SP)    =       42.200
+;                               NO COMMAND LINE
+;               (S)     <>      42.200
+;                               COMMAND ON STACK TERMIANTED WITH 000Q
+;
+;       USES:   SP
+;
+
+CCL     STA     START           ; SAVE UNIT NUMBER
+        SHLD    IOWRK           ; SAVE DEVICE ADDRESS
+        LXI     SP,21200Q       ; SET STACK
+
+        LXI     H,AIO.DIR
+        MVI     C,PRIM-AIO.DIR-1 ; (C) = MAXIMUM ALLOWABLE LENGTH
+
+;       GET 1ST CHARACTER
+
+CCL1    CALL    RCC             ; READ KEYBOARD
+        CPI     A.CR            ; IS HE DONE?
+        CPU     Z80
+        JR      Z,CCL3
+        CPU     8080
+        CPI     ':'             ; COMMAND LINE FOLLOWS
+        CPU     Z80
+        JR      Z,CCL4
+        CPU     8080
+        CPI     ' '             ; ALLOW A SPACE
+        CPU     Z80
+        JR      Z,CCL2
+        CPU     8080
+        MVI     A,A.BEL
+CCL2    CALL    WCC             ; ECHO CHARACTER
+        CPU     Z80
+        JR      CCL1
+        CPU     8080
+
+;       JUST A CARRIAGE RETURN, NO COMMAND
+
+CCL3    CALL    WCR.            ; ECHO CRLF
+CCL3.   LHLD    IOWRK
+        LDA     START           ; RESTORE REGISTERS
+        JMP     BOOT6           ; RETURN TO CALLED
+
+;       HAD ':', COMMAND LINE FOLLOWS
+
+CCL4    CALL    WCC             ; ECHO THE CHARACTER
+CCL5    CALL    RCC             ; GET NEXT
+        CPI     A.CR
+        CPU     Z80
+        JR      Z,CCL6          ;   IF END OF LINE
+        CPU     8080
+        MOV     M,A             ; SAVE CHARACTER
+        INX     H
+        DCR     C
+        CPU     Z80
+        JR      NZ,CCL4         ;   IF NOT TOO MANY
+        CPU     8080
+        INR     C               ; RESET COUNTER
+        DCX     H               ; IGNORE IT
+        MVI     A,A.BEL         ; BEEP
+        CPU     Z80
+        JR      CCL4
+        CPU     8080
+
+;       END OF COMMAND LINE
+
+CCL6    CALL    WCR.
+        MVI     M,0             ; NUL TERMINATOR
+        XCHG                    ; (DE)=LWA OF COMMAND
+        LXI     H,0
+        DAD     SP              ; HL = STACK
+        DCX     H               ; HL = LWA OF COMMAND LINE (NULL BYTE)
+
+;       MOVE COMMAND INTO STACK AREA
+
+        DI                      ; NO CLOCK INTERRUPTS
+
+CCL7    LDAX    D               ; DE = COMMAND BYTE
+        MOV     M,A             ; MOVE IT IN
+        DCX     H
+        DCX     D               ; BUMP POINTERS
+        SHLD    BLKICW          ; SAVE FOR A SECOND
+        LXI     H,AIO.DIR-1     ; AM I DONE?
+        MOV     A,H
+        CMP     D
+        CPU     Z80
+        JR      NZ,CCL8         ;   NO
+        CPU     8080
+        MOV     A,L
+        CMP     E
+        CPU     Z80
+        JR      Z,CCL9          ;  YES, FINISH UP
+        CPU     8080
+
+CCL8    LHLD    BLKICW
+        CPU     Z80
+        JR      CCL7
+        CPU     8080
+
+;       FINISHED WITH COMMAND LINE, (BLKICW)=FWA-1
+
+CCL9    LHLD     BLKICW
+        INX      H
+        SPHL
+        CPU     Z80
+        JR       CCL3.          ; AND GO BACK
+        CPU     8080
+
+;;      BSMSG - BOOT SECONDARY MESSAGE
+;
+
+BSMSG   DB      ' SD',0
 
 
+;;      ERRMSG - GENERAL ERROR MESSAGE
+
+ERRMSG  DB     '?Boot Error',0
+
+;;      MSG.PR - Prompt Message
+;
+MSG.PR  DB      A.CR,A.LF,'  H: ',0
+
+;;      RADIX - ASSIGN DEFAULT RADIX
+;
+;       RADIX SETS THE SYSTEM RADIX TO OCTAL OR HEX
+;
+
+RADIX   LXI     H,MSG.RAD
+        CALL    TYPMSG          ; COMPLETE NAME
+
+RADIX1  CALL    RCC             ; READ CHARACTER
+        CALL    MCU             ; MAP TO UPPER
+        CPI     'O'
+        CPU     Z80
+        JR      Z,RADIX2
+        CPU     8080
+        CPI     'H'
+        CPU     Z80
+        JR      Z,RADIX3
+        CPU     8080
+        CPI     A.CR
+        CPU     Z80
+        JR      Z,RADIX4
+        CPU     8080
+        MVI     A,A.BEL
+        CALL    WCC
+        CPU     Z80
+        JR      RADIX1
+        CPU     8080
+
+;       SET OCTAL RADIO
+
+RADIX2  LXI     H,RAD.OCT
+        CALL    TYPMSG
+        XRA     A
+        STA     RADFLG          ; SET FLAG
+        RET
+
+;       SET HEX RADIX
+
+RADIX3  LXI H,RAD.HEX
+        CALL    TYPMSG
+        MVI     A,1
+        STA     RADFLG
+        RET
+
+;       SHOW CURRENT SETTING
+
+RADIX4  LXI     H,RAD.OCT
+        CALL    CHKRAD          ; ASSUME OCTAL
+        CPU     Z80
+        JR      Z,RADIX5        ; WAS OCTAL
+        CPU     8080
+        LXI     H,RAD.HEX
+
+RADIX5  MVI     A,A.CR
+        CALL    WCR.            ; PRINT CRLF
+        JMP     TYPMSG          ; TYPE NAME
+
+;       MESSAGES
+
+MSG.RAD DB      'adix',0
+RAD.OCT DB      'Octal',0
+RAD.HEX DB      'Hexadecimal',0
+
+;;      INPUT - PORT INPUT
+;
+;       INPUT INPUTS THE VALUE FROM THE SPECIFIED
+;       PORT NUMBER. THIS VALUE IS THEN PRINTED.
+;
+
+INPUT   LXI     H,MSG.INP       ; FINISH COMMAND
+        CALL    TYPMSG
+
+;       GET DESIRED PORT NUMBER
+
+        LXI     H,PRIM
+        ANA     A               ; CLEAR CARRY
+        CALL    IOB             ; GET PORT
+
+;       READ DATA FROM THAT PORT
+
+        CALL    IN.             ; GET DATA AT (PRIM)
+
+;       NOW PRINT RESULT
+
+        PUSH    PSW
+        MVI     A,A.CR
+        CALL    WCR.            ; PRINT CRLF
+        POP     PSW
+        JMP     TOB             ; TYPE THE BYTE
+
+;       OUTPUT - PORT OUTPUT
+;
+;       OUTPUT SENDS DATA OUT THE DESIRED PORT
+;       IN KEEPING WITH THE TAPE LOAD/DUMP ROUTINES, THE
+;       PORT NUMBER IS SPECIFIED FIRST, FOLLOWED BY A HYPHEN
+;       AND FOLLOWED BY DATA:
+;
+;       OUTPUT AAA,DDD<CR>
+;
+
+OUTPUT  LXI     H,MSG.OUT
+        CALL    TYPMSG
+
+        LXI     H,IOWRK+1       ; STORE INFO IN IOWRK
+        MVI     D,','           ; TERMINATE PORT BY HYPHEN
+        ANA     A               ; CLEAR CARRY
+
+        CALL    IOA             ; INPUT ADDRESS
+
+        LDA     IOWRK           ; (A)=PORT NUMBER
+        STA     PRIM            ; SAVE IT
+
+        ANA     A
+        LXI     H,IOWRK         ; GET DATA
+        CALL    IOB             ; GET BYTE AND <CR>
+        LDA     IOWRK           ; GET DATA IN (A)
+
+        JMP     OUT.            ; OUT (PRIM) WITH (A)
+
+;;      MSG.XXX - INPUT/OUTPUT MESSAGES
+;
+
+MSG.INP DB      'n ',0
+MSG.OUT DB      'ut ',0
+MSG.ERR DB      A.CR,A.LF,A.LF,'Error @ ',0
+
+;;      SUBM10 - SUBSTITUTE PREFIX
+;
+
+SUBM10  CALL    CHKRAD
+        CPU     Z80
+        JR      NZ,SUBM11
+        CPU     8080
+        ANI     00000111B       ; GET BINARY VALUE
+        MOV     E,A             ; SAVE PARTIAL
+        MOV     A,M             ; GET CURRENT
+        RLC                     ; MAKE ROOM FOR NEW CHARACTER
+        RLC
+        RLC
+        ANI     11111000B       ; TOSS PREVIOUS LSB
+SUBM10. ORA     E               ; ADD NEW
+        MOV     M,A             ; SAVE NEW TOTAL
+        RET
+SUBM11  CALL    CHC             ; CONVERT IT TO HEX
+        ANI     00001111B
+        MOV     E,A
+        MOV     A,M
+        RLC
+        RLC
+        RLC
+        RLC
+        ANI     11110000B
+        CPU     Z80
+        JR      SUBM10.
+        CPU     8080
+
+;;      PREFIXES
+;
+;       THESE ROUTINES ARE PREFIXES TO THE IOA, IOB,
+;       TOA, AND TOB ROUTINES. THESE PREFIXES DETERMINE
+;       THE PROPER BASES TO USE, AND TRANSFER CONTROL
+;       TO THE NEEDED ROUTINES
+;
+
+IROC    CALL    CHKRAD
+        JZ      IROCO
+        JMP     IROCH
 
 
+IOA     PUSH    PSW
+        CALL    CHKRAD          ; CHECK RADIX
+        JNZ     IHA
+        POP     PSW             ; SAVE CARRY FLAG
+        JMP     IOA0
+
+IOB     PUSH    PSW
+        CALL    CHKRAD
+        JNZ     IHB
+        POP     PSW
+        JMP     IOB0
+
+IOC     PUSH    PSW
+        CALL    CHKRAD
+        JNZ     IHC
+        POP     PSW
+        JMP     IOC0
+
+TOA     PUSH    PSW
+        CALL    CHKRAD
+        JNZ     THA
+        POP     PSW
+        JMP     TOA0
+
+TOB     PUSH    PSW
+        CALL    CHKRAD
+        JNZ     THB
+        POP     PSW
+        JMP     TOB0
+
+;       CHECK CURRENT RADIX
+
+CHKRAD  PUSH    B
+        MOV     B,A
+        LDA     RADFLG
+        ANA     A
+        MOV     A,B
+        POP     B
+        RET
+
+;;      HEX ROUTINES
+;
+;       THESE ROUTINES ARE THE HEX EQUIVALENT OF THE
+;       OCTAL ROUTINES PREFIXES ABOVE
+;
+;       NOTE: THESE ROUTINES ARE ENTERED WITH PSW ON THE STACK
+;
+
+IHB     MVI     M,0             ; CLEAR RESULT
+        POP     PSW
+IHB1    CNC     RCC
+
+;       CHECK FOR VALIDITY
+
+        CALL    CCH             ; CHECK CHARACTER FOR VALID HEX
+        CPU     Z80
+        JR      NC,IHB2
+        CPU     8080
+        CPI     A.CR            ; RETURN?
+        RZ                      ; YES, DONE
+        ANA     A               ; INSURE CARRY OFF
+        MVI     A,A.BEL
+        CALL    WCC
+        CPU     Z80
+        JR      IHB1
+        CPU     8080
+
+;       HAVE A VALID HEX CHARACTER
+
+IHB2    CALL    WCC
+        CALL    CHC             ; CONVERT HEX CHARACTER
+        MOV     E,A
+        MOV     A,M             ; GET VALUE SO FAR
+        RLC
+        RLC                     ; MOVE UP NIBBLE
+        RLC
+        RLC
+        ANI     1111000B        ; THROW AWAY LAST
+        ORA     E
+        MOV     M,A             ; SET NEW NIBBLE
+        CPU     Z80
+        JR      IHB1
+        CPU     8080
+
+;;      CHECK FOR VALID HEX CHARACTER
+;
+;       CCH CHECKS (A) FOR HEX VALIDITY
+;       'C' IS SET IF INVALID
+;
+
+CCH     CALL    MCU             ; MAP TO UPPER
+CPI     CPI     '0'
+        RC                      ; IF LESS THAN ZERO
+        CPI     '9'+1
+        CMC
+        RNC                     ; BETWEEN 0 AND 9
+        CPI     'A'
+        RC                      ; LOWER CASE IS NOT VALID
+        CPI     'F'+1
+        CMC
+        RET
+
+;;      IHC - INPUT HEX CHARACTER
+;
+
+IHC     POP     PSW
+        CALL    RCC             ; GET CHARACTER
+        JMP     CCH             ; CHECK FOR VALID HEX
+
+;;      MCU - MAP CASE TO UPPER
+;
+
+MCU     CPI     'a'
+        RC                      ; LESS THAN 'A'
+        CPI     'z'+1
+        RNC
+        ANI     01011111B
+        RET
+
+;;      CONVERT HEX TO BINARY
+;
+;       CHC CONVERTS THE ASCII CHARACTER IN (A) INTO
+;       IT'S 4 BIT HEX EQUIVALENT
+;
+
+CHC     SUI     '0'
+        CPI     9+1
+        RC                      ; IF DONE
+        SUI     7
+        RET                     ; CONVERT A - F
+
+;       INPUT HEX ADDRESS
+
+IHA     POP     PSW
+IHA.    PUSH    B
+        MOV     B,D
+        PUSH    H               ; B - DELIMITER
+        LXI     H,0
+IHA1    CNC     RCC
+        CALL    CCH             ; CHECK FOR HEX
+        CPU     Z80
+        JR      C,IHA3          ;   IF NOT, CHECK DELIMITER
+        CPU     8080
+        CALL    WCC
+        CALL    CHC             ; CONVERT IT
+        DAD     H
+        DAD     H
+        DAD     H
+        DAD     H               ; HL = HL + 16
+        MOV     L,A             ; MOVE IN NEW NIBBLE
+        CPU     Z80
+        JR      IHA1
+        CPU     8080
+
+IHA3    CMP     B
+        CPU     Z80
+        JR      Z,IHA4          ; IF VALID DELIMITER
+        CPU     8080
+        MVI     A,A.BEL
+        CALL    WCC
+        ANA     A
+        CPU     Z80
+        JR      IHA1
+        CPU     8080
+
+;       END OF INPUT
+
+IHA4    CALL    WCC             ; PRINT DELIMITER
+        XCHG
+        POP     H
+        MOV     M,D
+        DCX     H
+        MOV     M,E
+        POP     B
+        RET
+
+;       IROC REPLACEMENT
+
+IROCH   CALL    RCC
+        CPI     A.CR
+        RZ                      ; IF CARRIAGE RETURN
+
+        CALL    CCH
+        CMC
+        RC                      ; IF VALID
+
+        MVI     A,A.BEL
+        CALL    WCC
+        CPU     Z80
+        JR      IROCH
+        CPU     8080
+
+;       TYPE BYTE REPLACEMENT
+
+THB     POP     PSW
+THB1    PUSH    PSW
+        ANI     11110000B
+        RRC
+        RRC
+        RRC
+        RRC                     ; DO HIGH NIBBLE FIRST
+        CALL    THB2
+        POP     PSW
+        ANI     00001111B
+
+;       THB1 - TYPE NIBBKE
+
+THB2    ADI     '0'
+        CPI     '9'+1
+        CPU     Z80
+        JR      C,THB3
+        CPU     8080
+        ADI     7
+THB3    JMP     WCC
+
+;       THA - TYPE HEX ADDRESS
+
+THA     POP     PSW
+        MVI     A,A.CR
+        CALL    WCR.
+
+THA1    MOV     A,H
+        CALL    THB1
+        MOV     A,L
+        CALL    THB1
+        MVI     A,' '
+        JMP     WCC
+
+;;      MEMORY - MEMORY DIAGNOSTIC
+;
+;       MEMORY IS THE PREFACE TO THE MEMORY
+;       DIAGNOSTIC UTILITY
+;
+MEMORY  LXI     H,MSG.MEM
+        CALL    TYPMSG
+MEMORY. LDA     RADFLG
+        CPU     Z80
+        EXX
+        CPU     8080
+        MOV     L,A
+        CPU     Z80
+        EXX
+        CPU     8080
+        JMP     DYMEM
+
+MSG.MEM DB      'est Memory',A.CR,A.LF,0
+
+;;      GETBND - GET BOUNDARIES
+;
+;       GETBND GETS THREE ADDRESS BOUNDARIES, RETURNING
+;       THE FIRST IN HL, THE SECOND IN DE AND THE THIRD
+;       IN BC.
+
+GETBND  LXI     H,IOWRK+1
+        MVI     D,','
+        CALL    IOA             ; GET FIRST
+
+        LHLD    IOWRK
+GETBND. PUSH    H               ; ENTRY POINT FOR DE,BC ONLY
+
+        LXI     H,IOWRK+1
+        MVI     D,','
+        CALL    IOA
+
+        LHLD    IOWRK           ; SAVE SECOND
+        PUSH    H
+        JMP     GETBND1         ; CONTINUE ELSEWHERE
+
+;       INTOXO - EXTENSION TO INT0X
+;
+;       INT0X0 CLEANS UP SOME OF THE RAM CELLS
+;
+
+INT0X0  XRA     A
+        STA     RADFLG
+        LXI     H,-1
+        SHLD    VEWHLD
+        LXI     B,1600Q
+        JMP     INIT0X1
 
 
+;;      BOOT7 - EXTENSION TO BOOT ROUTINE
+;
+;       THIS ROUTINE HANDLES BOOTING FROM DEVICE
+;       ZERO WITH COMMAND LINES
+;
 
+BOOT7   CPI     ' '
+        CPU     Z80
+        JR      Z,BOOT71        ; TYPES SPACE, MUST WANT COMMAND LINE
+        CPU     8080
+        CPI     ':'
+        CPU     Z80
+        JR      Z,BOOT72        ; TYPE :, HERE COMES COMMAND
+        CPU     8080
+        CPI     '0'
+        RET                     ; OTHERWISE, MAYBE UNIT NUMBER
+BOOT71  CALL    WCC
+        XRA     A               ; ENTER CCL AS UNIT 0
+        JMP     CCL
+
+;       HE ALREADY START THE COMMAND LINE, LET'S CATCH UP!
+
+BOOT72  XRA     A
+        STA     START           ; SAVE UNIT NUMBER
+        SHLD    IOWRK           ; SAVE DEVICE ADDRESS
+        LXI     SP,21200Q       ; SET UP STACK
+        LXI     H,AIO.DIR
+        MVI     C,PRIM-AIO.DIR-1
+        MVI     A,':'           ; ECHO THE COLON
+        JMP     CCL4            ; CONTINUE FROM HERE
+
+;;      EUC - ENTER USER CODE
+;
+;       EUC ENTERS THE USER BOOT CODE, AFTER RE-VECTORING
+;       THE CLOCK INTERRUPT REQUEST VECTORS
+;
+;       THE H17 RAM CONSTANTS ETC. ARE ALSO MOVED IN
+
+EUC     LXI     B,BOOTAL        ; SET THE COUNT TO MOVE IN CONSTANTS AND VECTORS
+        LXI     D,BOOTA         ; SET THE SOURCE ADDRESS
+        LXI     H,D.CON         ; SET THE DESTINATION ADDRESS
+        CALL    DMOVE           ; MOVE IT
+
+;       ENTRY POINT FROM H17 (CONSTANTS ALREADY MOVED IN)
+
+EUC.    DI                      ; STOP CLOCK
+        LXI     H,CLOCK17       ; LOAD CLOCK ROUTINE ADDRESS
+        SHLD    UIVEC+1         ; SET IT INTO VECTOR LOCATION
+        EI
+
+;       Zero out H67 operating system info
+
+;       ERRNZ   S.OSZ-S.OSI02   ; MUST BE CONTIGUOUS BYTES
+        LXI     H,S.OSI
+        MVI     B,1+1+3
+        CALL    DZERO           ; Zero area
+
+        JMP     USERFWA
+
+;;      DYBYTX
+;
+;       DYBYTX DETERMINES WHETHER TO OUTPUT THE BYTE
+;       IN HEX OR OCTAL. IF IN OCTAL WE MUST REPLACE
+;       THE CODE WE PATCHED TO GET US HERE.
+;
+;       ENTRY:  (A) = BYTE OF TO OUTPUT
+
+DYBYTX  MOV     C,A             ; SAVE BYTE
+        CPU     Z80
+        EXX
+        CPU     8080
+        MOV     A,L             ; GET RADIX FLAG
+        CPU     Z80
+        EXX
+        CPU     8080
+        ANA     A               ; 'Z' SET IF OCTAL
+        MOV     A,C             ; RESTORE A
+        CPU     Z80
+        JR      NZ,DYBYTH       ; IF IN HEX
+        CPU     8080
+
+DYBYT0  MOV     C,A
+        ANI     11000000B
+        RLC
+        RLC
+        ANI     00000011B
+        JMP     DYBYT.1         ; FINISH UP OLD OCTAL ROUTINE
+
+;       IS HEX
+
+DYBYTH  MOV     C,A
+        ANI     11110000B
+        RRC
+        RRC
+        RRC
+        RRC                     ; MOVE DOWN HIGH HALF
+        ANI     00001111B
+        ADI     '0'
+        CPI     '9'+1
+        CPU     Z80
+        JR      DYBYTH1
+        CPU     8080
+        ADI     7
+        CPU     Z80
+DYBYTH1 LD      IY,DYBYTH2         ; SET RETURN ADDRESS
+        CPU     8080
+        JMP     DYASC
+
+DYBYTH2 MOV     A,C
+        ANI     00001111B
+        ADI     '0'
+        CPI     '9'+1
+        CPU     Z80
+        JR      C,DYBYTH3
+        CPU     8080
+        ADI     7
+        CPU     Z80
+DYBYTH3 LD      IY,DYBYTH4
+        CPU     8080
+        JMP     DYASC
+
+        CPU     Z80
+DYBYTH4 JP      (IX)
+        CPU     8080
+
+;;      DYMM5
+;
+;       DETERMINE NUMBER OF BACKSPACES
+;       TO TYPE FOR EACH CHARACTER INPUT
+;
+
+        CPU     Z80
+DYMM5   EXX
+        CPU     8080
+        MOV     A,L
+        CPU     Z80
+        EXX
+        CPU     8080
+        ANA     A
+        MVI     A,A.BKS
+        MVI     H,3
+        JZ      DYME5.5
+        DCR     H
+        JMP     DYME5.5
+
+;;      CONVERT - BASE CONVERSION
+;
+;       CONVERT CONVERTS THE INPUT IN THE OPPOSITE
+;       RADIX AND CHANGES IT TO THE CURRENT RADIX
+;
+
+CONVERT LXI     H,MSG.CON
+        CALL    TYPMSG
+        LXI     H,IOWRK+1
+        MVI     D,A.CR
+        CALL    CHKRAD
+        CPU     Z80
+        JR      Z,CONV.O        ; IF OCATL
+        CPU     8080
+
+CONV.H  CALL    IOA0
+        CPU     Z80
+        JR      CONV.E
+        CPU     8080
+
+CONV.O  CALL    IHA.
+
+CONV.E  LHLD    IOWRK
+        XCHG
+        JMP     TOA
+
+MSG.CON DB      'onvert',0
+
+;;      H17X - H17 Extension routine
+;
+;       H17x is the extension to the H17 Abort command
+;
+
+H17X    CALL    R.ABORT
+
+;       Step the heat out 10 tracks
+
+        CALL    R.SDP           ; Set up device
+        MVI     A,10
+        STA     D.TT            ; Set target track to 10
+        CALL    D.SDT           ; Seek Desired track
+
+        JMP     R.ABORT         ; Abort and return
+
+;;      MTRA - COMMAND DESCRIPTOR TABLE
+;
+;       THIS TABLE CONTAINS THE SINGLE LETTER COMMANDS
+;       UNDERSTOOD BY MTR90. THE ENTRIES IN THIS TABLE
+;       CONSIST OF A SINGLE LETTER (THE COMMAND KEY) FOLLOWED
+;       BY A WORD ADDRESS OF THE ROUTINE.
+;
+;       NOTE: THIS TABLE WAS MOVED FROM UP FRONT BECAUSE
+;               OF SIZE CONSIDERATIONS
+;
+
+MTRA    EQU     $
+        DB      'G'             ; *GO*
+        DW      GO88
+
+        DB      'S'             ; *SUBSTITUTE*
+        DW      SUBM
+
+        DB      'P'             ; *PROGRAM COUNTER"
+        DW      PCA
+
+        DB      'B'             ; *BOOT*
+        DW      BOOT
+
+        DB      'I'             ; *INPUT*
+        DW      INPUT
+
+        DB      'O'             ; *OUTPUT*
+        DW      OUTPUT
+
+        DB      'R'             ; *RADIX*
+        DW      RADIX
+
+        DB      'T'             ; *TEST RAM*
+        DW      MEMORY
+
+        DB      'V'             ; *VIEW*
+        DW      VIEW
+
+        DB      'C'             ; *CONVERT*
+        DW      CONVERT
+MTRAL   EQU     ($-MTRA)/3      ; NUMBER OF ENTRIES            /JWT  790507/
+
+;;      BT170, BY174 - BOOT TABLES
+;
+;       THESE TABLES DEFINE DEVICE DEPENDENT INFORMATION USED
+;       TO DETERMINE WHICH DEVICE IS TO BE BOOTED FROM
+;
+;       THE ORGANIZATION OF THE TWO TABLES IS IDENTICAL:
+;
+;       BYTE 1          -       PORT NUMBER OF THESE DEVICES
+;
+;       BYTE 2          -       DEVICE 0 TMFG
+;       BYTE 3          -           MAX UNITS
+;       BYTE 4,5        -           BOOT CODE ADDRESS
+;
+;       BYTE 6          -       DEVICE 1 TMFG
+;       BYTE 7          -           MAX UNITS
+;       BYTE 8,9        -           BOOT CODE ADDRESS
+;
+;       etc., etc., etc. THRU DEVICE 3
+;
+;       NO END-OF-TABLE CHECK IS MADE, THEREFORE 4 ENTRIES
+;       MUST EXIST PER TABLE
+
+BT174   DB     174Q             ; PORT ADDRESS
+BT174E  EQU    $
+
+BTH174  DB     0                ; TMFG = 0
+        DB     '3'              ; MAX UNIT = 4
+        DW     H17              ; BOOT ADDRESS
+
+BTH474  DB     1
+        DB     '4'
+        DW     Z47
+
+BTH674  DB     0
+        DB     '4'
+        DW     H67
+
+BTHFE4  DB     0
+        DB     '1'
+        DW     FEDEV
+
+BT174L  EQU    ($-BT174E)/4     ; INSURE ALL ENTRIES FILLED
+        ERRNZ  BT174L-4
+
+BT170   DB     170Q             ; PORT ADDRESS
+BT170E  EQU    $
+
+BTH370  DB     0
+        DB     '4'
+        DW     H37
+
+BTH470  DB     1
+        DB     '4'
+        DW     Z47
+
+BTH670  DB     0
+        DB     '4'
+        DW     H67
+
+BTHFE0  DB     0
+        DB     '1'
+        DW     FEDEV
+
+BT170L  EQU    ($-BT170E)/4
+        ERRNZ  BT170L-4
+
+        ERRMI  10000Q-$         ; MUST NOT EXCEED 4K BYTES
 
 ;       THE FOLLOWING ARE CONTROL CELLS AND FLAGS USED BY THE KEYSET
 ;       MONITOR.
@@ -2521,14 +4090,15 @@ REGPTR  DS      2               ; REGISTER CONTENTS POINTER
 ;       H88/H89 RAM USAGE BEYOND THAT OF H8MTRF
 ;
 NMIRET  DS      2
-
+DATA    DS      1               ; OUTPUT TO 362Q DATA SAVE
+BLKICW  DS      2               ; H37 INTERRUPT RETURN ADDRESS
+RADFLG  DS      1               ; RADIX FLAG
+VEWHLD  DS      2
+MEML    EQU     $
+        ERRMI   20520Q-MEML
         ORG     20520Q
 PRIM    DS      1               ; PRIMARY DEVICE ADDR. PORT
 TMFG    DS      1               ; TIMER INTERRUPT FLAG, =1 FOR Z47, =0 FOR H17
 MYCNT   DS      1               ; COUNTER FOR TIMER INTERRUPT
 AUTOB   DS      1               ; AUTO BOOT FLAG
-STK     DS      1               ; STACK POINTER FOR RE-BOOT
-
-        ORG     20066Q
-DATA    DS      1               ; OUTPUT 362Q DATA SAVE AREA
-        END
+STK     DS      2               ; STACK POINTER FOR RE-BOOT
