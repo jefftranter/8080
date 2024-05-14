@@ -1294,7 +1294,7 @@ VIEW3.  INX     H               ; BUMP POINTER
         JR      NZ,VIEW3.A      ; IF IT WAS HEX
         CPU     8080
         MVI     A,11111000B
-VIEW3.A ANA     L               ; (A) = MASKWS ddr lsb
+VIEW3.A ANA     L               ; (A) = MASKED ADDR LSB
         CMP     L               ; SAME?
         RET                     ; LET CALLER DECIDE
 
@@ -1327,7 +1327,7 @@ PRSROM  EQU     $
 
 ;       INIT0X - EXTENSION OF INIT0 TO SUPPORT H88
 
-INIT0X  MVI     A,H88B.CK       ; ENABLE LOCL
+INIT0X  MVI     A,H88B.CK       ; ENABLE CLOCK
         OUT     H88.CTL
 
 ;       SET UP ACE FOR CONSOLE COMMUNICATIONS
@@ -3747,7 +3747,7 @@ GETBND. PUSH    H               ; ENTRY POINT FOR DE,BC ONLY
         PUSH    H
         JMP     GETBND1         ; CONTINUE ELSEWHERE
 
-;       INTOXO - EXTENSION TO INT0X
+;       INT0X0 - EXTENSION TO INT0X
 ;
 ;       INT0X0 CLEANS UP SOME OF THE RAM CELLS
 ;
