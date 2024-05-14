@@ -3182,7 +3182,7 @@ DYMEM10 MVI     A,A.BEL
 ;       CCL CHECKS TO SEE IF THE USER WISHES TO PASS A COMMAND
 ;       TO THE BOOT ROUTINE. IF THE USER SIMPLY TYPES A CARRIAGE
 ;       RETURN, THEN NO COMMAND LINE IS PRESENT AND (S) = 42.200
-;       OTHERWISE THE COMMAND LINE IS PUSHED ONTO THE STACK ALA HDOS
+;       OTHERWISE THE COMMAND LINE IS PUSHED ONTO THE STACK A LA HDOS
 ;       AND THE BOOT ROUTINES CAN DO WITH IT AS THEY SEE FIT.
 ;
 ;       ENTRY:  NONE
@@ -3190,7 +3190,7 @@ DYMEM10 MVI     A,A.BEL
 ;       EXIT:   (SP)    =       42.200
 ;                               NO COMMAND LINE
 ;               (S)     <>      42.200
-;                               COMMAND ON STACK TERMIANTED WITH 000Q
+;                               COMMAND ON STACK TERMINATED WITH 000Q
 ;
 ;       USES:   SP
 ;
@@ -3684,7 +3684,7 @@ THB1    PUSH    PSW
         POP     PSW
         ANI     00001111B
 
-;       THB1 - TYPE NIBBKE
+;       THB1 - TYPE NIBBLE
 
 THB2    ADI     '0'
         CPI     '9'+1
@@ -3917,7 +3917,7 @@ CONVERT LXI     H,MSG.CON
         MVI     D,A.CR
         CALL    CHKRAD
         CPU     Z80
-        JR      Z,CONV.O        ; IF OCATL
+        JR      Z,CONV.O        ; IF OCTAL
         CPU     8080
 
 CONV.H  CALL    IOA0
