@@ -456,10 +456,10 @@ MTR.2   CALL    RCC             ; READ A CONSOLE CHARACTER
         LXI     H,MTRA          ; LOOK UP CHARACTER IN *MTRA*
         MVI     B,MTRAL         ; (B) = LENGTH OF TABLE
 MTR.3   CMP     M               ; SEE IF CHARACTER FROM CONSOLE = TABLE ENTRY
+        INX     H               ; ML = ADDRESS
         JZ      MTR.4           ; IF EQUAL
 
         INX     H               ; POINT TO NEXT TABLE ENTRY
-        INX     H
         INX     H
         DCR     B               ; SEE IF PAST END OF TABLE
         JNZ     MTR.3           ; IF NOT PAST
@@ -584,9 +584,7 @@ GO88    LXI     H,MSG.GO        ; COMPLETE GO MESSAGE
         POP     PSW             ; GET FIRST CHARACTER BACK
         MVI     D,A.CR          ; END ADDRESS WITH A RETURN
         CALL    IOA             ; INPUT NEW GO ADDRESS
-GO88.1  CALL    WCC             ; ECHO RETURN
-        MVI     A,A.LF          ; LINE FEED
-        CALL    WCC
+GO88.1  CALL    WCR.            ; ECHO RETURN
         JMP     GO              ; EXECUTE USER ROUTINE
 
 ;       AUTOBO - AUTO BOOT
@@ -600,6 +598,8 @@ GO88.1  CALL    WCC             ; ECHO RETURN
 AUTOBO  XRA     A               ; SET TO PRIMARY FLAG
         CALL    DEVICE          ; CHECK DEVICE INFORMATION
         JMP     BOOT0           ; GOTO BOOT IT
+
+        DB      0,0,0,0,0,0     ; UNUSED BYTES
 
         ORG     622Q
 ;       GO - RETURN TO USER MODE
@@ -657,7 +657,7 @@ NBOOT0  CALL    DEVICE          ; READ SWITCH TO DETERMINE BOOT DEVICE
 START1  CALL    RCC             ; INPUT FROM KB
         CPI     A.CR            ; IF INPUT IS CR
         CPU     Z80
-        JR      Z,BOOT0         ;     THEN TAKE IT AS DRIVE 0
+        JR      Z,BOOT0.        ;     THEN TAKE IT AS DRIVE 0
         CPU     8080
         CALL    BOOT7
         CPU     Z80
@@ -695,6 +695,8 @@ BSEC    EQU     $
         CPU     8080
 
 ;       SAVE THE AIO.UNI, CHECK IF THERE IS THE BOOT DEVICE AND GO!
+
+BOOT0.  CALL    WCR.            ; PRINT CR FOR GOOD LOOKS
 
 BOOT0   XRA     A               ; TAKE CR OR AUTO BOOT AS DRIVE 0
         LXI     SP,21200Q       ; SET STACK FOR NO COMMAND LINE
@@ -799,6 +801,9 @@ VIEW2   MOV     A,M             ; A = BYTE
         JMP     VIEW3
 
 MSG.VEW DB      'iew ',0
+
+        DB      0,0,0,0,0,0,0   ; UNUSED BYTES
+        DB      0,0,0,0,0,0,0
 
         ERRMI   1136Q-$
         ORG     1136Q
@@ -1026,6 +1031,8 @@ DEV2    MOV    A,M              ; FIRST BYTE IS PORT NUMBER
         XCHG                    ; MOVE IT INTO HL
         RET
 
+        DB      0,0,0,0,0,0,0   ; UNUSED BYTES
+
 ;       ERRMI   1447A-$
         ORG     1447Q
 ;       LRA - LOCATE REGISTER ADDRESS
@@ -1146,7 +1153,7 @@ DYASC1  IN      SC.ACE+UR.LSR   ; TERMINAL READY?
 ;       EXIT:   TO (IX)
 ;       USES    A,C,IF.F
 
-DYBYT   JMP     DYBYT.2
+DYBYT   JMP     DYBYTX
 DYBYT.1 ORI     '0'             ; MAKE ASCII
 
         CPU     Z80
@@ -1185,9 +1192,11 @@ DYBYT.6 EQU     $
 ;       MSQ.PAS - PASS MESSAGE FOR DYNAMIC RAM TEST
 ;
 
-MSG.PAS DB      A.CR,A.LF
-        DB      '     Pass =   '
+MSG.PAS DB      A.CR,A.LF,A.LF
+        DB      '	 Pass =',11Q,'   '
         DB      0
+
+        DB      0,0,0,0,0,0,0   ; UNUSED BYTES
 
         ERRMI   1660Q-$
         ORG     1660Q
@@ -1284,6 +1293,7 @@ VIEW3.  INX     H               ; BUMP POINTER
         CPU     Z80
         JR      NZ,VIEW3.A      ; IF IT WAS HEX
         CPU     8080
+        MVI     A,11111000B
 VIEW3.A ANA     L               ; (A) = MASKWS ddr lsb
         CMP     L               ; SAME?
         RET                     ; LET CALLER DECIDE
@@ -1294,6 +1304,7 @@ VIEW3.A ANA     L               ; (A) = MASKWS ddr lsb
 VIEW9   LHLD    BLKICW          ; RESTORE REGISTERS
         JMP     VIEW5
 
+        DB      0,0,0,0,0,0     ; UNUSED BYTES
 
 ;       IO ROUTINES TO BE COPIED INTO AND USED IN RAM.
 ;
@@ -1800,9 +1811,9 @@ TOA0    MVI     A,A.CR          ; CRLF
         CALL    WCR.
 
 TOA.    MOV     A,H             ; ADDRESS
-        CALL    TOB
+        CALL    TOB0
         MOV     A,L
-        CALL    TOB
+        CALL    TOB0
 
         MVI     A,' '           ; SPACE
         JMP     WCC
@@ -1818,7 +1829,7 @@ TOA.    MOV     A,H             ; ADDRESS
 TOB0    PUSH    B
         MVI     B,2             ; NUMBER OF CHARACTERS - 1
         MOV     C,A             ; SAVE ORIGINAL BYTE
-        ORA     A               ; ASSURE 'C' = ZERO
+        ANA     A               ; CLEAR CARRY
         RAR
         RAR                     ; SHIFT TOP BYTE TO LSB
         RAR
@@ -1864,6 +1875,9 @@ VIEW3   JNZ     VIEW2           ; IF NOT END OF LINE
         CALL    VIEW9           ; END OF LINE, RESTORE ADDRESS
         MVI     A,A.CR
         JMP     VIEW3A.         ; DO ASCII STUFF
+
+        DB      0,0,0,0,0,0,0,0 ; FILL UNUSED BYTES
+
         ERRMI   3023Q-$
         ORG     3023Q
 
@@ -1903,6 +1917,8 @@ WTDON1  CALL    IN.             ; READ CONTROLLER STATUS REGISTER
         CPU     8080
         POP     PSW
         JMP     COM2            ; CONTINUE *COM* ROUTINE
+
+        DB      0               ; FILL UNUSED BYTES
 
         ERRMI   3045Q-$
         ORG     3045Q
@@ -1946,6 +1962,8 @@ OUT.1   MOV     C,A             ; SET TO REG C
         CPU     8080
         POP     B
         RET
+
+        DB      0,0             ; FILL UNUSED BYTES
 
         ERRMI   3100Q-$
         ORG     3100Q
@@ -2030,6 +2048,8 @@ IN1.    EQU     $
         CPU     Z80
         JR      IN.1
         CPU     8080
+
+        DB      0,0,0,0,0       ; FILL UNUSED BYTES
 
         ERRMI   3165Q-$
         ORG     3165Q
@@ -2371,6 +2391,8 @@ VIEW4   MOV     A,H
         CMP     C
         RET
 
+        DB      0               ; FILL UNUSED BYTES
+
 ;       ENTRY POINT FOR FLOPPY DISK ROTATIONAL SPEED TEST
 ;
         ERRMI   4000Q-6-$       ; MUST BE 6 BYTES BEFORE END
@@ -2474,7 +2496,7 @@ WDN2    POP     B
         EI
         RET                    ; ALL OK.
 
-WDNA    EQU     3200Q          ; TIME OUT COUNTER
+WDNA    EQU     32000          ; TIME OUT COUNTER
 
 ;;      RRDY - CHECK DEVICE READY
 ;
@@ -2822,11 +2844,11 @@ H371.   DCX     B
         POP     B
         PUSH    PSW             ; SAVE RETURN STATUS
         MOV     A,B
-        ANI     366Q-CON.MFM    ; OFF DBL DENSITY
+        ANI     377Q-CON.MFM    ; OFF DBL DENSITY
         MOV     B,A
         POP     PSW
         CPU     Z80
-        JR      NZ,H373         ;    IF READ FAILURE
+        JR      NZ,H372         ;    IF READ FAILURE
         CPU     8080
 
         LXI     H,-USERFWA
@@ -3143,7 +3165,7 @@ FEDEV   LXI     H,MSG.FE
         CALL    TYPMSG
         JMP     NODEV1          ; ENTER COMMON RECOVERY CODE
 
-MSG.FE  DB      '?Unknown Device',0
+MSG.FE  DB      '?Unkown Device',0
 
 ;;      DYMEM10 - DYNAMIC RAM TEST CONTINUED
 ;
@@ -3346,7 +3368,7 @@ RADIX5  MVI     A,A.CR
 
 ;       MESSAGES
 
-MSG.RAD DB      'adix',0
+MSG.RAD DB      'adix ',0
 RAD.OCT DB      'Octal',0
 RAD.HEX DB      'Hexadecimal',0
 
@@ -3605,6 +3627,7 @@ IHA1    CNC     RCC
         DAD     H
         DAD     H
         DAD     H               ; HL = HL + 16
+        ADD     L
         MOV     L,A             ; MOVE IN NEW NIBBLE
         CPU     Z80
         JR      IHA1
@@ -3757,7 +3780,7 @@ BOOT71  CALL    WCC
         XRA     A               ; ENTER CCL AS UNIT 0
         JMP     CCL
 
-;       HE ALREADY START THE COMMAND LINE, LET'S CATCH UP!
+;       HE ALREADY STARTED THE COMMAND LINE, LET'S CATCH UP!
 
 BOOT72  XRA     A
         STA     START           ; SAVE UNIT NUMBER
@@ -3908,7 +3931,7 @@ CONV.E  LHLD    IOWRK
         XCHG
         JMP     TOA
 
-MSG.CON DB      'onvert',0
+MSG.CON DB      'onvert ',0
 
 ;;      H17X - H17 Extension routine
 ;
@@ -4034,6 +4057,8 @@ BTHFE0  DB     0
 
 BT170L  EQU    ($-BT170E)/4
         ERRNZ  BT170L-4
+
+        DB     10000Q-$ DUP 0   ; FILL REST OF ROM WITH ZEROES
 
         ERRMI  10000Q-$         ; MUST NOT EXCEED 4K BYTES
 
