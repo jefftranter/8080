@@ -3555,7 +3555,7 @@ IHB2    CALL    WCC
         RLC                     ; MOVE UP NIBBLE
         RLC
         RLC
-        ANI     1111000B        ; THROW AWAY LAST
+        ANI     11110000B       ; THROW AWAY LAST
         ORA     E
         MOV     M,A             ; SET NEW NIBBLE
         CPU     Z80
@@ -3756,7 +3756,7 @@ INT0X0  XRA     A
         STA     RADFLG
         LXI     H,-1
         SHLD    VEWHLD
-        LXI     B,1600Q
+        LXI     B,16000
         JMP     INIT0X1
 
 
@@ -3860,11 +3860,11 @@ DYBYTH  MOV     C,A
         ADI     '0'
         CPI     '9'+1
         CPU     Z80
-        JR      DYBYTH1
+        JR      C,DYBYTH1
         CPU     8080
         ADI     7
         CPU     Z80
-DYBYTH1 LD      IY,DYBYTH2         ; SET RETURN ADDRESS
+DYBYTH1 LD      IY,DYBYTH2      ; SET RETURN ADDRESS
         CPU     8080
         JMP     DYASC
 
