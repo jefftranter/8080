@@ -1,0 +1,602 @@
+ AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 1 - 2024-05-23 03:06:23 PM
+
+
+    1/   0 :                            ; H89 CF Card Boot ROM - Disassembled from binary
+    2/   0 :                            ; See http://koyado.com/heathkit/New-H8-Website/h89-cf-serial-parallel-rtc.html
+    3/   0 :                            
+    4/   0 :                            ; Constants
+    5/   0 :                            
+    6/   0 : =0DH                       CR      EQU     0DH             ; Carriage Return
+    7/   0 : =0AH                       LF      EQU     0AH             ; Line Feed
+    8/   0 : =7H                        BELL    EQU     07H             ; Bell
+    9/   0 :                            
+   10/   0 :                            ; External ROM routines
+   11/   0 :                            
+   12/   0 : =18AAH                     DMOVE   EQU    18AAH            ; Move data routine
+   13/   0 : =198AH                     DZERO   EQU    198AH            ; Zero RAM routine
+   14/   0 : =640H                      IOA     EQU    0640H            ; Input octal address
+   15/   0 : =3B2H                      RCC     EQU    03B2H            ; Read console character
+   16/   0 : =3C2H                      WCC     EQU    03C2H            ; Write console character
+   17/   0 :                            
+   18/1000 :                                    ORG     1000H
+   19/1000 :                            
+   20/1000 :                            ; Entry point
+   21/1000 :                            
+   22/1000 : F3                                 DI                      ; Disable interrupts
+   23/1001 : 31 7F 22                           LXI     SP,227FH        ; Set stack
+   24/1004 : 01 00 04                           LXI     B,0400H         ; Set count for DMOVE
+   25/1007 : 11 9B 10                           LXI     D,L5            ; Set source address for DMOVE
+   26/100A : 21 92 30                           LXI     H,3092H         ; Set destination address for DMOVE
+   27/100D : CD AA 18                           CALL    DMOVE           ; Call move routine
+   28/1010 : 21 80 2C                           LXI     H,2C80H         ; Set address for DZERO
+   29/1013 : 06 13                              MVI     B,13H           ; Set length for DZERO
+   30/1015 : CD 8A 19                           CALL    DZERO           ; Call zero routine
+   31/1018 : FB                                 EI                      ; Enable interrupts
+   32/1019 : 3E D4                              MVI     A,0D4H
+   33/101B : 32 83 2C                           STA     02C83H
+   34/101E : CD AB 32                           CALL    32ABH           ; Jump to code that was moved to RAM
+   35/1021 : 21 45 10                           LXI     H,MSG1          ; Address of message to display
+   36/1024 : CD 40 06                           CALL    IOA             ; Input octal address from user (drive number to boot from)
+   37/1027 : F3                         L3      DI                      ; Disable interrupts
+   38/1028 : CD B2 03                           CALL    RCC             ; Read character from console
+   39/102B : FB                                 EI                      ; Enable interrupts
+   40/102C : FE 0D                              CPI     CR              ; Is it <Return>?
+   41/102E : C2 33 10                           JNZ     L1              ; Branch if not
+   42/1031 : 3E 30                              MVI     A,'0'           ; Otherwise default to drive 0
+   43/1033 : FE 30                      L1      CPI     '0'
+   44/1035 : DA 3D 10                           JC      L2              ; Branch if less than '0'
+   45/1038 : FE 37                              CPI     '7'
+   46/103A : DA 69 10                           JC      L4              ; Branch if less than '7'
+   47/103D : 3E 07                      L2      MVI     A,BELL          ; Invalid entry. Ring bell and try again.
+   48/103F : CD C2 03                           CALL    WCC
+   49/1042 : C3 27 10                           JMP     L3
+   50/1045 :                            
+   51/1045 : 0D 0A 42 4F 4F 54 20 43 46 MSG1    DB      CR,LF,"BOOT CF LOGICAL DRIVE (0-6)? <0> ",0
+      104E : 20 4C 4F 47 49 43 41 4C 20
+      1057 : 44 52 49 56 45 20 28 30 2D
+      1060 : 36 29 3F 20 3C 30 3E 20 00
+   52/1069 :                            
+   53/1069 : CD C2 03                   L4      CALL    WCC             ; Echo character to console
+   54/106C : E6 07                              ANI     07H             ; Convert driver number from ASCII to binary
+   55/106E : 32 8B 2C                           STA     2C8BH
+   56/1071 : AF                                 XRA     A
+   57/1072 : 32 88 2C                           STA     2C88H
+ AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 2 - 2024-05-23 03:06:23 PM
+
+
+   58/1075 : CD 2C 32                           CALL    322CH
+   59/1078 : AF                                 XRA     A
+   60/1079 : CD 20 32                           CALL    3220H
+   61/107C : CD 23 32                           CALL    3223H
+   62/107F : CD 26 32                           CALL    3226H
+   63/1082 : CD 36 32                           CALL    3236H
+   64/1085 : 3E 07                              MVI     A,07H
+   65/1087 : CD 4D 32                           CALL    324DH
+   66/108A : CD 61 32                   L6      CALL    3261H
+   67/108D : E6 C0                              ANI     0C0H
+   68/108F : FE 40                              CPI     40H
+   69/1091 : C2 8A 10                           JNZ     L6
+   70/1094 : AF                                 XRA     A
+   71/1095 : 32 80 2C                           STA     2C80H
+   72/1098 : C3 92 30                           JMP     3092H
+   73/109B : 11 92 2C                   L5      LXI     D,2C92H
+   74/109E : 21 01 00                           LXI     H,0001H
+   75/10A1 : 22 84 2C                           SHLD    2C84H
+   76/10A4 : AF                                 XRA     A
+   77/10A5 : 32 88 2C                           STA     2C88H
+   78/10A8 : 3A 8B 2C                           LDA     2C8BH
+   79/10AB : 32 86 2C                           STA     2C86H
+   80/10AE : 3E 01                              MVI     A,01H
+   81/10B0 : 32 87 2C                           STA     2C87H
+   82/10B3 : AF                                 XRA     A
+   83/10B4 : 32 80 2C                           STA     2C80H
+   84/10B7 : CD C1 32                           CALL    32C1H
+   85/10BA : 2A B0 2C                           LHLD    2CB0H
+   86/10BD : 23                                 INX     H
+   87/10BE : 22 84 2C                           SHLD    2C84H
+   88/10C1 : 11 92 2C                           LXI     D,2C92H
+   89/10C4 : 3E 01                              MVI     A,01H
+   90/10C6 : 32 87 2C                           STA     2C87H
+   91/10C9 : CD C1 32                           CALL    32C1H
+   92/10CC : 2A 84 2C                           LHLD    2C84H
+   93/10CF : 23                                 INX     H
+   94/10D0 : 22 84 2C                           SHLD    2C84H
+   95/10D3 : 11 92 2D                           LXI     D,2D92H
+   96/10D6 : 3E 01                              MVI     A,01H
+   97/10D8 : 32 87 2C                           STA     2C87H
+   98/10DB : CD C1 32                           CALL    32C1H
+   99/10DE : 3A 92 2C                           LDA     2C92H
+  100/10E1 : FE 48                              CPI     48H
+  101/10E3 : CA AD 31                           JZ      31ADH
+  102/10E6 : FE 68                              CPI     68H
+  103/10E8 : CA AD 31                           JZ      31ADH
+  104/10EB : FE 43                              CPI     43H
+  105/10ED : CA 0E 31                           JZ      310EH
+  106/10F0 : FE 63                              CPI     63H
+  107/10F2 : CA 0E 31                           JZ      310EH
+  108/10F5 : 21 F5 30                           LXI     H,30F5H
+  109/10F8 : CD 40 06                           CALL    IOA
+  110/10FB : C3 D2 00                           JMP     00D2H
+  111/10FE :                            
+  112/10FE : 55 6E 6B 6E 6F 77 6E 20 70         DB      "Unknown partition type",CR,LF,0
+      1107 : 61 72 74 69 74 69 6F 6E 20
+      1110 : 74 79 70 65 0D 0A 00      
+  113/1117 :                            
+  114/1117 : F3                                 DI
+  115/1118 : 3E 22                              MVI     A,22H
+ AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 3 - 2024-05-23 03:06:23 PM
+
+
+  116/111A : 32 36 20                           STA     2036H
+  117/111D : D3 F2                              OUT     0F2H
+  118/111F : 32 36 20                           STA     2036H
+  119/1122 : 21 00 00                           LXI     H,0000H
+  120/1125 : 0E 00                              MVI     C,00H
+  121/1127 : 36 00                              MVI     M,00H
+  122/1129 : 23                                 INX     H
+  123/112A : 0D                                 DCR     C
+  124/112B : C2 1E 31                           JNZ     311EH
+  125/112E : 32 0D 00                           STA     000DH
+  126/1131 : 31 FF 00                           LXI     SP,00FFH
+  127/1134 : 21 F1 00                           LXI     H,00F1H
+  128/1137 : 22 84 2C                           SHLD    2C84H
+  129/113A : 0E 1E                              MVI     C,1EH
+  130/113C : 21 80 43                           LXI     H,4380H
+  131/113F : C5                                 PUSH    B
+  132/1140 : E5                                 PUSH    H
+  133/1141 : 3E 01                              MVI     A,01H
+  134/1143 : 32 87 2C                           STA     2C87H
+  135/1146 : 32 80 2C                           STA     2C80H
+  136/1149 : 11 92 2C                           LXI     D,2C92H
+  137/114C : CD C1 32                           CALL    32C1H
+  138/114F : E1                                 POP     H
+  139/1150 : C1                                 POP     B
+  140/1151 : 3E 01                              MVI     A,01H
+  141/1153 : B9                                 CMP     C
+  142/1154 : C5                                 PUSH    B
+  143/1155 : 01 80 01                           LXI     B,0180H
+  144/1158 : CA 55 31                           JZ      3155H
+  145/115B : 01 00 02                           LXI     B,0200H
+  146/115E : 11 92 2C                           LXI     D,2C92H
+  147/1161 : 1A                                 LDAX    D
+  148/1162 : 77                                 MOV     M,A
+  149/1163 : 23                                 INX     H
+  150/1164 : 13                                 INX     D
+  151/1165 : 0B                                 DCX     B
+  152/1166 : 79                                 MOV     A,C
+  153/1167 : B0                                 ORA     B
+  154/1168 : C2 58 31                           JNZ     3158H
+  155/116B : C1                                 POP     B
+  156/116C : EB                                 XCHG
+  157/116D : 2A 84 2C                           LHLD    2C84H
+  158/1170 : 23                                 INX     H
+  159/1171 : 22 84 2C                           SHLD    2C84H
+  160/1174 : EB                                 XCHG
+  161/1175 : 0D                                 DCR     C
+  162/1176 : C2 36 31                           JNZ     3136H
+  163/1179 : 3A 02 5A                           LDA     5A02H
+  164/117C : 3D                                 DCR     A
+  165/117D : 67                                 MOV     H,A
+  166/117E : 2E 00                              MVI     L,00H
+  167/1180 : 11 00 EA                           LXI     D,0EA00H
+  168/1183 : 19                                 DAD     D
+  169/1184 : 11 00 44                           LXI     D,4400H
+  170/1187 : 1A                                 LDAX    D
+  171/1188 : 77                                 MOV     M,A
+  172/1189 : 23                                 INX     H
+  173/118A : 13                                 INX     D
+  174/118B : 7D                                 MOV     A,L
+  175/118C : B4                                 ORA     H
+ AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 4 - 2024-05-23 03:06:23 PM
+
+
+  176/118D : C2 7E 31                           JNZ     317EH
+  177/1190 : AF                                 XRA     A
+  178/1191 : 32 0E 00                           STA     000EH
+  179/1194 : 3E A0                              MVI     A,0A0H
+  180/1196 : 32 48 00                           STA     0048H
+  181/1199 : 3E 58                              MVI     A,58H
+  182/119B : 32 49 00                           STA     0049H
+  183/119E : 3A 02 5A                           LDA     5A02H
+  184/11A1 : 3D                                 DCR     A
+  185/11A2 : 67                                 MOV     H,A
+  186/11A3 : 2E 00                              MVI     L,00H
+  187/11A5 : 3E 03                              MVI     A,03H
+  188/11A7 : 32 04 00                           STA     0004H
+  189/11AA : 4F                                 MOV     C,A
+  190/11AB : 3A 8B 2C                           LDA     2C8BH
+  191/11AE : 47                                 MOV     B,A
+  192/11AF : 3A 83 2C                           LDA     2C83H
+  193/11B2 : 22 FE 43                           SHLD    43FEH
+  194/11B5 : E9                                 PCHL
+  195/11B6 : 2A 97 2D                           LHLD    2D97H
+  196/11B9 : 23                                 INX     H
+  197/11BA : 22 84 2C                           SHLD    2C84H
+  198/11BD : AF                                 XRA     A
+  199/11BE : 32 80 2C                           STA     2C80H
+  200/11C1 : 0E 0A                              MVI     C,0AH
+  201/11C3 : 11 80 22                           LXI     D,2280H
+  202/11C6 : 3E 01                              MVI     A,01H
+  203/11C8 : 32 87 2C                           STA     2C87H
+  204/11CB : C5                                 PUSH    B
+  205/11CC : CD C1 32                           CALL    32C1H
+  206/11CF : C1                                 POP     B
+  207/11D0 : 2A 84 2C                           LHLD    2C84H
+  208/11D3 : 23                                 INX     H
+  209/11D4 : 22 84 2C                           SHLD    2C84H
+  210/11D7 : 0D                                 DCR     C
+  211/11D8 : C2 BD 31                           JNZ     31BDH
+  212/11DB : F3                                 DI
+  213/11DC : 21 A0 20                           LXI     H,20A0H
+  214/11DF : 01 1F 00                           LXI     B,001FH
+  215/11E2 : CD 8A 19                           CALL    DZERO
+  216/11E5 : D3 7F                              OUT     7FH
+  217/11E7 : 32 1B 20                           STA     201BH
+  218/11EA : 32 52 21                           STA     2152H
+  219/11ED : 3C                                 INR     A
+  220/11EE : 32 08 20                           STA     2008H
+  221/11F1 : 21 1F 20                           LXI     H,201FH
+  222/11F4 : 36 C3                              MVI     M,0C3H
+  223/11F6 : 23                                 INX     H
+  224/11F7 : 36 17                              MVI     M,17H
+  225/11F9 : 23                                 INX     H
+  226/11FA : 36 1C                              MVI     M,1CH
+  227/11FC : 23                                 INX     H
+  228/11FD : 87                                 ADD     A
+  229/11FE : F2 EB 31                           JP      31EBH
+  230/1201 : 01 58 00                           LXI     B,0058H
+  231/1204 : 11 5A 1F                           LXI     D,1F5AH
+  232/1207 : 21 48 20                           LXI     H,2048H
+  233/120A : CD AA 18                           CALL    DMOVE
+  234/120D : AF                                 XRA     A
+  235/120E : 32 31 21                           STA     2131H
+ AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 5 - 2024-05-23 03:06:23 PM
+
+
+  236/1211 : 21 19 1C                           LXI     H,1C19H
+  237/1214 : 22 20 20                           SHLD    2020H
+  238/1217 : 21 56 21                           LXI     H,2156H
+  239/121A : 06 05                              MVI     B,05H
+  240/121C : CD 8A 19                           CALL    DZERO
+  241/121F : FB                                 EI
+  242/1220 : C3 80 22                           JMP     2280H
+  243/1223 : DB D4                              IN      0D4H
+  244/1225 : C9                                 RET
+  245/1226 : DB D5                              IN      0D5H
+  246/1228 : C9                                 RET
+  247/1229 : D3 D4                              OUT     0D4H
+  248/122B : C9                                 RET
+  249/122C : D3 D5                              OUT     0D5H
+  250/122E : C9                                 RET
+  251/122F : D3 D6                              OUT     0D6H
+  252/1231 : C9                                 RET
+  253/1232 : D3 D7                              OUT     0D7H
+  254/1234 : C9                                 RET
+  255/1235 : 3E 92                              MVI     A,92H
+  256/1237 : C3 29 32                           JMP     3229H
+  257/123A : 3E 80                              MVI     A,80H
+  258/123C : C3 29 32                           JMP     3229H
+  259/123F : 3E 0F                              MVI     A,0FH
+  260/1241 : CD 29 32                           CALL    3229H
+  261/1244 : 3E 64                              MVI     A,64H
+  262/1246 : 3D                                 DCR     A
+  263/1247 : C2 3D 32                           JNZ     323DH
+  264/124A : 3E 0E                              MVI     A,0EH
+  265/124C : CD 29 32                           CALL    3229H
+  266/124F : 3E C8                              MVI     A,0C8H
+  267/1251 : 3D                                 DCR     A
+  268/1252 : C2 48 32                           JNZ     3248H
+  269/1255 : C9                                 RET
+  270/1256 : C3 26 32                           JMP     3226H
+  271/1259 : CD 31 32                           CALL    3231H
+  272/125C : 3E 06                              MVI     A,06H
+  273/125E : CD 4D 32                           CALL    324DH
+  274/1261 : 3A 88 2C                           LDA     2C88H
+  275/1264 : F6 E0                              ORI     0E0H
+  276/1266 : CD 7C 32                           CALL    327CH
+  277/1269 : C9                                 RET
+  278/126A : 3E 07                              MVI     A,07H
+  279/126C : CD 29 32                           CALL    3229H
+  280/126F : 3E 0D                              MVI     A,0DH
+  281/1271 : CD 29 32                           CALL    3229H
+  282/1274 : 00                                 NOP
+  283/1275 : CD 1A 32                           CALL    321AH
+  284/1278 : F5                                 PUSH    PSW
+  285/1279 : 3E 0C                              MVI     A,0CH
+  286/127B : CD 29 32                           CALL    3229H
+  287/127E : 3E 06                              MVI     A,06H
+  288/1280 : CD 29 32                           CALL    3229H
+  289/1283 : F1                                 POP     PSW
+  290/1284 : C9                                 RET
+  291/1285 : CD 20 32                           CALL    3220H
+  292/1288 : 3E 07                              MVI     A,07H
+  293/128A : CD 29 32                           CALL    3229H
+  294/128D : 3E 0B                              MVI     A,0BH
+  295/128F : CD 29 32                           CALL    3229H
+ AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 6 - 2024-05-23 03:06:23 PM
+
+
+  296/1292 : 00                                 NOP
+  297/1293 : 3E 0A                              MVI     A,0AH
+  298/1295 : CD 29 32                           CALL    3229H
+  299/1298 : 3E 06                              MVI     A,06H
+  300/129A : CD 29 32                           CALL    3229H
+  301/129D : C9                                 RET
+  302/129E : 3E 07                              MVI     A,07H
+  303/12A0 : CD 29 32                           CALL    3229H
+  304/12A3 : 3E 0D                              MVI     A,0DH
+  305/12A5 : CD 29 32                           CALL    3229H
+  306/12A8 : C9                                 RET
+  307/12A9 : 3E 0C                              MVI     A,0CH
+  308/12AB : CD 29 32                           CALL    3229H
+  309/12AE : 3E 06                              MVI     A,06H
+  310/12B0 : CD 29 32                           CALL    3229H
+  311/12B3 : C9                                 RET
+  312/12B4 : 32 1B 32                           STA     321BH
+  313/12B7 : 32 21 32                           STA     3221H
+  314/12BA : 3C                                 INR     A
+  315/12BB : 32 1E 32                           STA     321EH
+  316/12BE : 32 24 32                           STA     3224H
+  317/12C1 : 3C                                 INR     A
+  318/12C2 : 32 27 32                           STA     3227H
+  319/12C5 : 3C                                 INR     A
+  320/12C6 : 32 2A 32                           STA     322AH
+  321/12C9 : C9                                 RET
+  322/12CA : CD 50 32                           CALL    3250H
+  323/12CD : CD 2C 32                           CALL    322CH
+  324/12D0 : 3E 07                              MVI     A,07H
+  325/12D2 : CD 4D 32                           CALL    324DH
+  326/12D5 : CD 61 32                           CALL    3261H
+  327/12D8 : E6 C0                              ANI     0C0H
+  328/12DA : FE 40                              CPI     40H
+  329/12DC : C2 CC 32                           JNZ     32CCH
+  330/12DF : CD 31 32                           CALL    3231H
+  331/12E2 : 2A 84 2C                           LHLD    2C84H
+  332/12E5 : 3E 03                              MVI     A,03H
+  333/12E7 : CD 4D 32                           CALL    324DH
+  334/12EA : 7D                                 MOV     A,L
+  335/12EB : CD 7C 32                           CALL    327CH
+  336/12EE : 3E 04                              MVI     A,04H
+  337/12F0 : CD 4D 32                           CALL    324DH
+  338/12F3 : 7C                                 MOV     A,H
+  339/12F4 : CD 7C 32                           CALL    327CH
+  340/12F7 : 3E 05                              MVI     A,05H
+  341/12F9 : CD 4D 32                           CALL    324DH
+  342/12FC : 3A 86 2C                           LDA     2C86H
+  343/12FF : CD 7C 32                           CALL    327CH
+  344/1302 : 3E 02                              MVI     A,02H
+  345/1304 : CD 4D 32                           CALL    324DH
+  346/1307 : 3A 87 2C                           LDA     2C87H
+  347/130A : CD 7C 32                           CALL    327CH
+  348/130D : 3E 07                              MVI     A,07H
+  349/130F : CD 4D 32                           CALL    324DH
+  350/1312 : 3E 20                              MVI     A,20H
+  351/1314 : CD 7C 32                           CALL    327CH
+  352/1317 : CD 2C 32                           CALL    322CH
+  353/131A : 3E 07                              MVI     A,07H
+  354/131C : CD 4D 32                           CALL    324DH
+  355/131F : CD 61 32                           CALL    3261H
+ AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 7 - 2024-05-23 03:06:23 PM
+
+
+  356/1322 : E6 88                              ANI     88H
+  357/1324 : FE 08                              CPI     08H
+  358/1326 : C2 16 33                           JNZ     3316H
+  359/1329 : 0E 80                              MVI     C,80H
+  360/132B : 3A 80 2C                           LDA     2C80H
+  361/132E : A7                                 ANA     A
+  362/132F : CA 2B 33                           JZ      332BH
+  363/1332 : 0E 00                              MVI     C,00H
+  364/1334 : 3E 00                              MVI     A,00H
+  365/1336 : CD 4D 32                           CALL    324DH
+  366/1339 : 3E 07                              MVI     A,07H
+  367/133B : CD 29 32                           CALL    3229H
+  368/133E : 3E 0D                              MVI     A,0DH
+  369/1340 : CD 29 32                           CALL    3229H
+  370/1343 : CD 1A 32                           CALL    321AH
+  371/1346 : 12                                 STAX    D
+  372/1347 : 13                                 INX     D
+  373/1348 : CD 1D 32                           CALL    321DH
+  374/134B : 12                                 STAX    D
+  375/134C : 13                                 INX     D
+  376/134D : 3E 0C                              MVI     A,0CH
+  377/134F : CD 29 32                           CALL    3229H
+  378/1352 : 3E 06                              MVI     A,06H
+  379/1354 : CD 29 32                           CALL    3229H
+  380/1357 : 0D                                 DCR     C
+  381/1358 : C2 30 33                           JNZ     3330H
+  382/135B : 3A 80 2C                           LDA     2C80H
+  383/135E : A7                                 ANA     A
+  384/135F : C2 65 33                           JNZ     3365H
+  385/1362 : 0E 80                              MVI     C,80H
+  386/1364 : CD 95 32                           CALL    3295H
+  387/1367 : CD A0 32                           CALL    32A0H
+  388/136A : 0D                                 DCR     C
+  389/136B : C2 5B 33                           JNZ     335BH
+  390/136E : 3E 07                              MVI     A,07H
+  391/1370 : CD 4D 32                           CALL    324DH
+  392/1373 : CD 61 32                           CALL    3261H
+  393/1376 : E6 C0                              ANI     0C0H
+  394/1378 : FE 40                              CPI     40H
+  395/137A : C2 6A 33                           JNZ     336AH
+  396/137D : AF                                 XRA     A
+  397/137E : C9                                 RET
+  398/137F : 4E 36 59 50 43                     DB      4EH,36H,59H,50H,43H
+  399/1384 :                            
+  400/1384 : 00 00 00 00 00 00 00 00 00         DB      1800H-$ DUP 0   ; Fill rest of ROM with zeroes
+      138D : 00 00 00 00 00 00 00 00 00
+      1396 : 00 00 00 00 00 00 00 00 00
+      139F : 00 00 00 00 00 00 00 00 00
+      13A8 : 00 00 00 00 00 00 00 00 00
+      13B1 : 00 00 00 00 00 00 00 00 00
+      13BA : 00 00 00 00 00 00 00 00 00
+      13C3 : 00 00 00 00 00 00 00 00 00
+      13CC : 00 00 00 00 00 00 00 00 00
+      13D5 : 00 00 00 00 00 00 00 00 00
+      13DE : 00 00 00 00 00 00 00 00 00
+      13E7 : 00 00 00 00 00 00 00 00 00
+      13F0 : 00 00 00 00 00 00 00 00 00
+      13F9 : 00 00 00 00 00 00 00 00 00
+      1402 : 00 00 00 00 00 00 00 00 00
+      140B : 00 00 00 00 00 00 00 00 00
+ AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 8 - 2024-05-23 03:06:23 PM
+
+
+      1414 : 00 00 00 00 00 00 00 00 00
+      141D : 00 00 00 00 00 00 00 00 00
+      1426 : 00 00 00 00 00 00 00 00 00
+      142F : 00 00 00 00 00 00 00 00 00
+      1438 : 00 00 00 00 00 00 00 00 00
+      1441 : 00 00 00 00 00 00 00 00 00
+      144A : 00 00 00 00 00 00 00 00 00
+      1453 : 00 00 00 00 00 00 00 00 00
+      145C : 00 00 00 00 00 00 00 00 00
+      1465 : 00 00 00 00 00 00 00 00 00
+      146E : 00 00 00 00 00 00 00 00 00
+      1477 : 00 00 00 00 00 00 00 00 00
+      1480 : 00 00 00 00 00 00 00 00 00
+      1489 : 00 00 00 00 00 00 00 00 00
+      1492 : 00 00 00 00 00 00 00 00 00
+      149B : 00 00 00 00 00 00 00 00 00
+      14A4 : 00 00 00 00 00 00 00 00 00
+      14AD : 00 00 00 00 00 00 00 00 00
+      14B6 : 00 00 00 00 00 00 00 00 00
+      14BF : 00 00 00 00 00 00 00 00 00
+      14C8 : 00 00 00 00 00 00 00 00 00
+      14D1 : 00 00 00 00 00 00 00 00 00
+      14DA : 00 00 00 00 00 00 00 00 00
+      14E3 : 00 00 00 00 00 00 00 00 00
+      14EC : 00 00 00 00 00 00 00 00 00
+      14F5 : 00 00 00 00 00 00 00 00 00
+      14FE : 00 00 00 00 00 00 00 00 00
+      1507 : 00 00 00 00 00 00 00 00 00
+      1510 : 00 00 00 00 00 00 00 00 00
+      1519 : 00 00 00 00 00 00 00 00 00
+      1522 : 00 00 00 00 00 00 00 00 00
+      152B : 00 00 00 00 00 00 00 00 00
+      1534 : 00 00 00 00 00 00 00 00 00
+      153D : 00 00 00 00 00 00 00 00 00
+      1546 : 00 00 00 00 00 00 00 00 00
+      154F : 00 00 00 00 00 00 00 00 00
+      1558 : 00 00 00 00 00 00 00 00 00
+      1561 : 00 00 00 00 00 00 00 00 00
+      156A : 00 00 00 00 00 00 00 00 00
+      1573 : 00 00 00 00 00 00 00 00 00
+      157C : 00 00 00 00 00 00 00 00 00
+      1585 : 00 00 00 00 00 00 00 00 00
+      158E : 00 00 00 00 00 00 00 00 00
+      1597 : 00 00 00 00 00 00 00 00 00
+      15A0 : 00 00 00 00 00 00 00 00 00
+      15A9 : 00 00 00 00 00 00 00 00 00
+      15B2 : 00 00 00 00 00 00 00 00 00
+      15BB : 00 00 00 00 00 00 00 00 00
+      15C4 : 00 00 00 00 00 00 00 00 00
+      15CD : 00 00 00 00 00 00 00 00 00
+      15D6 : 00 00 00 00 00 00 00 00 00
+      15DF : 00 00 00 00 00 00 00 00 00
+      15E8 : 00 00 00 00 00 00 00 00 00
+      15F1 : 00 00 00 00 00 00 00 00 00
+      15FA : 00 00 00 00 00 00 00 00 00
+      1603 : 00 00 00 00 00 00 00 00 00
+      160C : 00 00 00 00 00 00 00 00 00
+      1615 : 00 00 00 00 00 00 00 00 00
+      161E : 00 00 00 00 00 00 00 00 00
+      1627 : 00 00 00 00 00 00 00 00 00
+ AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 9 - 2024-05-23 03:06:23 PM
+
+
+      1630 : 00 00 00 00 00 00 00 00 00
+      1639 : 00 00 00 00 00 00 00 00 00
+      1642 : 00 00 00 00 00 00 00 00 00
+      164B : 00 00 00 00 00 00 00 00 00
+      1654 : 00 00 00 00 00 00 00 00 00
+      165D : 00 00 00 00 00 00 00 00 00
+      1666 : 00 00 00 00 00 00 00 00 00
+      166F : 00 00 00 00 00 00 00 00 00
+      1678 : 00 00 00 00 00 00 00 00 00
+      1681 : 00 00 00 00 00 00 00 00 00
+      168A : 00 00 00 00 00 00 00 00 00
+      1693 : 00 00 00 00 00 00 00 00 00
+      169C : 00 00 00 00 00 00 00 00 00
+      16A5 : 00 00 00 00 00 00 00 00 00
+      16AE : 00 00 00 00 00 00 00 00 00
+      16B7 : 00 00 00 00 00 00 00 00 00
+      16C0 : 00 00 00 00 00 00 00 00 00
+      16C9 : 00 00 00 00 00 00 00 00 00
+      16D2 : 00 00 00 00 00 00 00 00 00
+      16DB : 00 00 00 00 00 00 00 00 00
+      16E4 : 00 00 00 00 00 00 00 00 00
+      16ED : 00 00 00 00 00 00 00 00 00
+      16F6 : 00 00 00 00 00 00 00 00 00
+      16FF : 00 00 00 00 00 00 00 00 00
+      1708 : 00 00 00 00 00 00 00 00 00
+      1711 : 00 00 00 00 00 00 00 00 00
+      171A : 00 00 00 00 00 00 00 00 00
+      1723 : 00 00 00 00 00 00 00 00 00
+      172C : 00 00 00 00 00 00 00 00 00
+      1735 : 00 00 00 00 00 00 00 00 00
+      173E : 00 00 00 00 00 00 00 00 00
+      1747 : 00 00 00 00 00 00 00 00 00
+      1750 : 00 00 00 00 00 00 00 00 00
+      1759 : 00 00 00 00 00 00 00 00 00
+      1762 : 00 00 00 00 00 00 00 00 00
+      176B : 00 00 00 00 00 00 00 00 00
+      1774 : 00 00 00 00 00 00 00 00 00
+      177D : 00 00 00 00 00 00 00 00 00
+      1786 : 00 00 00 00 00 00 00 00 00
+      178F : 00 00 00 00 00 00 00 00 00
+      1798 : 00 00 00 00 00 00 00 00 00
+      17A1 : 00 00 00 00 00 00 00 00 00
+      17AA : 00 00 00 00 00 00 00 00 00
+      17B3 : 00 00 00 00 00 00 00 00 00
+      17BC : 00 00 00 00 00 00 00 00 00
+      17C5 : 00 00 00 00 00 00 00 00 00
+      17CE : 00 00 00 00 00 00 00 00 00
+      17D7 : 00 00 00 00 00 00 00 00 00
+      17E0 : 00 00 00 00 00 00 00 00 00
+      17E9 : 00 00 00 00 00 00 00 00 00
+      17F2 : 00 00 00 00 00 00 00 00 00
+      17FB : 00 00 00 00 00            
+  401/1800 :                            
+ AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 10 - 2024-05-23 03:06:23 PM
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+ BELL :                           7 - | *CASESENSITIVE :                  0 - |
+*CONSTPI :        3.141592653589793 - |  CR :                            0D - |
+*DATE :                "2024-05-23" - |  DMOVE :                       18AA - |
+ DZERO :                       198A - | *FALSE :                          0 - |
+*HAS64 :                          1 - |  IOA :                          640 - |
+ L1 :                          1033 C |  L2 :                          103D C |
+ L3 :                          1027 C |  L4 :                          1069 C |
+ L5 :                          109B C |  L6 :                          108A C |
+ LF :                            0A - | *LISTON :                         1 - |
+*MACEXP :                         7 - | *MOMCPU :                      8080 - |
+*MOMCPUNAME :                "8080" - |  MSG1 :                        1045 C |
+*NESTMAX :                      100 - |  RCC :                          3B2 - |
+*RELAXED :                        0 - | *TIME :               "03:06:23 PM" - |
+*TRUE :                           1 - | *VERSION :                     142F - |
+ WCC :                          3C2 - | *Z80SYNTAX :                      0 - |
+
+     31 symbols
+     16 unused symbols
+
+ AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 11 - 2024-05-23 03:06:23 PM
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.01 seconds assembly time
+
+    401 lines source file
+      2 passes
+      0 errors
+      0 warnings
