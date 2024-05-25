@@ -1,5 +1,6 @@
 ; H89 CF Card Boot ROM - Disassembled from binary
 ;
+; Written by Rick Davis Jr
 ; See http://koyado.com/heathkit/New-H8-Website/h89-cf-serial-parallel-rtc.html
 
 ; Constants
@@ -82,7 +83,7 @@ L6      CALL    3261H           ; L13
 ; executed from there, as it uses self-modifying code.
 
 L5      LXI     D,VARS+18
-        LXI     H,0001H
+        LXI     H,1
         SHLD    VARS+4
         XRA     A
         STA     VARS+8
@@ -127,9 +128,9 @@ L38     DI
         STA     DATA
         OUT     0F2H
         STA     DATA
-        LXI     H,0000H
-        MVI     C,00H
-L26     MVI     M,00H
+        LXI     H,0
+        MVI     C,0
+L26     MVI     M,0
         INX     H
         DCR     C
         JNZ     311EH           ; L26
@@ -174,7 +175,7 @@ L27     LDAX    D
         LDA     5A02H
         DCR     A
         MOV     H,A
-        MVI     L,00H
+        MVI     L,0
         LXI     D,0EA00H
         DAD     D
         LXI     D,4400H
@@ -194,8 +195,8 @@ L29     LDAX    D
         LDA     5A02H
         DCR     A
         MOV     H,A
-        MVI     L,00H
-        MVI     A,03H
+        MVI     L,0
+        MVI     A,3
         STA     0004H
         MOV     C,A
         LDA     VARS+11
@@ -238,35 +239,45 @@ L41     MVI     M,0C3H
         INX     H
         ADD     A
         JP      31EBH           ; L41
-        LXI     B,0058H
-        LXI     D,1F5AH
-        LXI     H,2048H
-        CALL    DMOVE
+
+        LXI     B,0058H         ; Set count for DMOVE
+        LXI     D,1F5AH         ; Set source address for DMOVE
+        LXI     H,2048H         ; Set destination address for DMOVE
+        CALL    DMOVE           ; Call move routine
         XRA     A
         STA     2131H
         LXI     H,1C19H
         SHLD    2020H
-        LXI     H,2156H
-        MVI     B,05H
-        CALL    DZERO
+        LXI     H,2156H         ; Set address for DZERO
+        MVI     B,05H           ; Set length for DZERO
+        CALL    DZERO           ; Call zero routine
         EI
         JMP     2280H
-L18     IN      0D4H
+
+L18     IN      0D4H            ; Here and below, the port is set using self-modifying code
         RET
+
 L20     IN      0D5H
         RET
+
 L8      OUT     0D4H
         RET
+
 L9      OUT     0D5H
         RET
+
 L10     OUT     0D6H
         RET
+
 L15     OUT     0D7H
         RET
+
 L7      MVI     A,92H
         JMP     3229H           ; L15
+
 L16     MVI     A,80H
         JMP     3229H           ; L15
+
 L11     MVI     A,0FH
         CALL    3229H           ; L15
         MVI     A,64H
@@ -278,7 +289,9 @@ L31     DCR     A
 L32     DCR     A
         JNZ     3248H           ; L32
         RET
+
 L12     JMP     3226H           ; L10
+
 L19     CALL    3231H           ; L16
         MVI     A,06H
         CALL    324DH           ; L12
@@ -286,6 +299,7 @@ L19     CALL    3231H           ; L16
         ORI     0E0H
         CALL    327CH           ; L17
         RET
+
 L13     MVI     A,07H
         CALL    3229H           ; L15
         MVI     A,0DH
@@ -299,6 +313,7 @@ L13     MVI     A,07H
         CALL    3229H           ; L15
         POP     PSW
         RET
+
 L17     CALL    3220H           ; L8
         MVI     A,07H
         CALL    3229H           ; L15
@@ -310,16 +325,19 @@ L17     CALL    3220H           ; L8
         MVI     A,06H
         CALL    3229H           ; L15
         RET
+
 L21     MVI     A,07H
         CALL    3229H           ; L15
         MVI     A,0DH
         CALL    3229H           ; L15
         RET
+
 L22     MVI     A,0CH
         CALL    3229H           ; L15
         MVI     A,06H
         CALL    3229H           ; L15
         RET
+
 L25     STA     321BH           ; L18+1
         STA     3221H           ; L8+1
         INR     A
@@ -330,6 +348,7 @@ L25     STA     321BH           ; L18+1
         INR     A
         STA     322AH           ; L15+1
         RET
+
 L14     CALL    3250H           ; L19
         CALL    322CH           ; L7
         MVI     A,07H
@@ -371,10 +390,10 @@ L34     CALL    3261H           ; L14
         LDA     VARS
         ANA     A
         JZ      332BH           ; L40
-        MVI     C,00H
-L40     MVI     A,00H
+        MVI     C,0
+L40     MVI     A,0
         CALL    324DH           ; L12
-L35     MVI     A,07H
+L35     MVI     A,7
         CALL    3229H           ; L15
         MVI     A,0DH
         CALL    3229H           ; L15
@@ -386,7 +405,7 @@ L35     MVI     A,07H
         INX     D
         MVI     A,0CH
         CALL    3229H           ; L15
-        MVI     A,06H
+        MVI     A,6
         CALL    3229H           ; L15
         DCR     C
         JNZ     3330H           ; L35
@@ -398,7 +417,7 @@ L24     CALL    3295H           ; L21
         CALL    32A0H           ; L22
         DCR     C
         JNZ     335BH           ; L24
-L36     MVI     A,07H
+L36     MVI     A,7
         CALL    324DH           ; L12
 L23     CALL    3261H           ; L13
         ANI     0C0H
@@ -406,6 +425,7 @@ L23     CALL    3261H           ; L13
         JNZ     336AH           ; L23
         XRA     A
         RET
+
         DB      4EH,36H,59H,50H,43H
 
         DB      1800H-$ DUP 0   ; Fill rest of ROM with zeroes
