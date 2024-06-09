@@ -1,4 +1,4 @@
-all: mtr89.hex mtr89.bin bootcf89.hex bootcf89.bin
+all: mtr89.hex mtr89.bin bootcf89.hex bootcf89.bin bios.bin
 
 mtr89.hex: mtr89.p
 	p2hex -F Intel mtr89.p
@@ -17,6 +17,12 @@ bootcf89.bin: bootcf89.p
 
 bootcf89.p: bootcf89.asm
 	asl -L -cpu 8080 bootcf89.asm
+
+bios.bin: bios.p
+	p2bin -r '$$-$$' bios.p
+
+bios.p: bios.asm
+	asl -L -cpu 8080 bios.asm
 
 clean:
 	$(RM) *.p
