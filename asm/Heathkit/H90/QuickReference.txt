@@ -1,0 +1,98 @@
+                     Heathkit H89 Quick Reference
+                        For MTR-90 Monitor ROM
+
+                   Jeff Tranter <tranter@pobox.com>
+                             26 Jun 2024
+
+General
+-------
+
+Monitor prompt is "H:".
+You only type the first letter of each command.
+Addresses are in split octal or hex format depending on the selected base.
+<DELETE> will cancel a partially entered command.
+<RIGHT SHIFT><RESET> will reset the machine.
+
+Monitor Commands
+----------------
+
+B[oot] [<drive>] <RETURN>
+
+Boot from disk drive. The optional value of <drive> can be a numeric
+unit number to boot from the primary device, or "S" followed by an
+optional unit number to boot from a secondary device. The unit number
+can be optionally followed by a command string beginning with a colon.
+The default boot device is determined by DIP switch settings.
+
+C[onvert] <address> <RETURN>
+
+Converts a 16-bit number specified in the opposite radix to the
+currently selected radix (as determined by the R[adix] command).
+
+G[o] [<address>] <RETURN>
+
+Start execution at <address>, specified in the current radix.
+If <address> is omitted, starts from Program Counter address.
+
+I[in] <port> <RETURN>
+
+Inputs from the i/o port specified by <port> in the current radix and
+displays the result.
+
+O[ut] <port>,<data> <RETURN>
+
+Outputs the specified <data> to the input/output port specified by
+<port> (both in the current radix).
+
+P[rogram Counter] [<address>] <RETURN>
+
+Set program counter address, specified in the current radix.
+If <address> is omitted, displays current address which can
+subsequently be changed.
+
+R[adix] [O|H] <RETURN>
+
+With no arguments, displays the current radix, Octal or Hexadecimal.
+With an O or H argument, sets the radix to split octal or hexadecimal,
+respectively.
+
+S[ubstitute] <address> <RETURN>
+
+Display memory at location <address>.
+Type in a new byte value to write to current address,
+<space> moves to next address,
+'-' moves to previous address,
+<RETURN> exits to monitor prompt.
+The address and data are specified using the current radix.
+
+T[est] <RETURN>
+
+Initiate a RAM memory test.
+
+V[iew] <start>,<end> <RETURN>
+
+Display a block of memory in the current radix and in ASCII from
+address <start> to <end>. If <start> or <end> is omitted, they default
+to zero. Displays 128 bytes in octal or 256 bytes in hexadecimal.
+Subsequent V[iew] commands with no arguments display the next block of
+memory.
+
+Other Notes
+-----------
+
+Write a HLT instruction (octal 166) to an address to set a breakpoint
+to stop execution and enter monitor during debugging. To continue
+execution, write original byte back to the address, use the P command
+to set the PC to one less than it's current value, then use the G[o]
+command.
+
+Run memory test: G[o] 7375
+
+Run disk speed test: G[o] 7372
+
+With the MTR-88 monitor ROM, there are cassette tape L[oad] and D[ump]
+commands and the B[oot] command does not take any options.
+
+With the MTR-89 monitor ROM, the [In], O[ut], R[adix], T[est], and
+V[iew] commands are not available, the B[oot] command only accepts a
+numeric drive number, and values are always in octal.
