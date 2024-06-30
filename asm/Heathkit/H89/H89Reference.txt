@@ -1,6 +1,6 @@
                    Heathkit H89 Hardware Reference
                    Jeff Tranter <tranter@pobox.com>
-                              9 May 2024
+                             30 June 2024
 
 Memory Map:
 
@@ -143,6 +143,8 @@ Newer Units:    J504 J505 J506 J507
 MTR-88, MTR-89   0    0    0    1
 MTR-90           1    X    1    1
 
+Note: A jumper should be installed between the center pin of JJ506 (or
+JJ505) and pin 14 of P508 when you are using an MTR-90.
 
 Jumper Settings - Serial I/O Board
 
