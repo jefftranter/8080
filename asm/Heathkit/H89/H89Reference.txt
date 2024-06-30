@@ -140,7 +140,7 @@ Note: Newer CPU boards do not have J504.
 ROM Decode Jumpers:
 Older Units:    J505 J506 J507 J508
 Newer Units:    J504 J505 J506 J507
-MTR-88, MTR-90   0    0    0    1
+MTR-88, MTR-89   0    0    0    1
 MTR-90           1    X    1    1
 
 
