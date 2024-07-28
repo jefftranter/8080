@@ -106,4 +106,50 @@ MEM4    INX     H
 
 DDMOVE  EQU     $
         MOV     A,B
+        ORA     C
+        RZ                      ; NONE TO MOVE
+        MOV     A,L             ; COMPARE *FROM* TO *TO*
+        SUB     E
+        MOV     A,H
+        SBB     D
+        JC      MOV2            ; IS MOVE DOWN (TO LOWER ADDRESSES)
 
+;       IF MOVE UP (TI HIGHER ADDRESSES)
+
+        DCX     B
+        DAD     B               ; (HL) = *TO* LUA
+        PUSH    H               ; SAVE *TO* LIMIT
+        XCHG
+        DAD     B               ; (HL) = *FROM* LWA
+        PUSH    H               ; SABE *FROM* LIMIT
+
+MOV1    MOV     A,M             ; MOVE BYTE
+        STAX    D
+        DCX     D               ; DECREMENT *TO* ADDRESS
+        DCX     H               ; DECREMENT *FROM* ADDRESS
+        DCX     B               ; DECREMENT COUNT
+        MOV     A,B
+        ANA     A
+        JP      MOV1            ; MORE TO GO
+        POP     D               ; (DE) = *FROM* LIMIT
+        POP     H               ; (HL) = *TO* LIMIT
+        INX     D
+        INX     H
+        RET                     ; DONE
+
+;       IS MOVE DOWN (TO LOWER ADDRESSES)
+
+MOV2    LDAX    D               ; MOVE BYTE
+        MOV     M,A
+        INX     H               ; INCREMENT *FROM*
+        INX     D               ; INCREMENT *TO*
+        DCX     B               ; DECREMENT COUNT
+        MOV     A,B
+        ORA     C
+        JNZ     MOV2            ; IF NOT DONE
+        RET                     ; DONE
+
+        INCLUDE mu10.asm
+        INCLUDE mu66.asm
+        INCLUDE mu86.asm
+        INCLUDE savall.asm

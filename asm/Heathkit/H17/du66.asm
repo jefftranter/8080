@@ -41,7 +41,7 @@ DU661   MOV     H,D
         XCHG
         DCR     A               ; REMOVE EXTRA COUNT
 
-;       REAXY TO START SUBTRACTING. (A) = LOOP COUNT
+;       READY TO START SUBTRACTING. (A) = LOOP COUNT
 
 DU662   MOV   H,B               ; (H,L) = WORKING VALU
         MOV   L,C
