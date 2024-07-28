@@ -1,0 +1,12 @@
+;;      DHLIHL - LOAD HL INDIRECT THROUGH HL.
+;
+;       (HL) = ((HL))
+;
+;       ENTRY   NONE
+;       EXIT    NONE
+;       USES    A,H,L
+
+DHLIHL  MOV     A,M
+        INX     H
+        MOV     L,A
+        RET

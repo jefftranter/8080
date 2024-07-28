@@ -76,3 +76,34 @@ MEM4    INX     H
         JNZ     MEM3            ; NOT AT END OF PASS
         JMP     MEM2            ; AT END OF PASS
 
+        INCLUDE comp.asm
+        INCLUDE dada.asm
+        INCLUDE dada2.asm
+        INCLUDE du66.asm
+        INCLUDE hlihl.asm
+        INCLUDE chl.asm         ; COMPLEMENT (HL)
+        INCLUDE indl.asm        ; INDEXED LOAD
+
+;;      DMOVE - MOVE DATA
+;
+;       DMOVE MOVES A BLOCK OF BYTES TO A NEW MEMORY ADDRESS.
+;       IF THE MOVE IS TO A LOWER ADDRESS, THE BYTES ARE MOVED FROM
+;       FIRST TO LAST.
+;
+;       IF THE MOVE IS TO A HIGHER ADDRESS, THE BYTES ARE MOVED FROM
+;       LAST TO FIRST.
+;
+;       THIS IS DONE SO THAT AN OVERLAPPED MOVE WILL NOT 'RIPPLE'.
+;
+;       ENTRY   (BC) = COUNT
+;               (DE) = FROM
+;               (HL) = TO
+;       EXIT    MOVED
+;               (DE) = ADDRESS OF NEXT FROM BYTE
+;               (HL) = ADDRESS OF NEXT *TO* BYTE
+;               'C' CLEAR
+;       USES    ALL
+
+DDMOVE  EQU     $
+        MOV     A,B
+

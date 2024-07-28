@@ -7,7 +7,7 @@
         ORG     D.RAM
 
 D.TT    DS      1               ; TARGET TRACK (CURRENT OPERATION)
-D.TS    DS      1               ; TARGET SECOTR (CURRENT OPERATION)
+D.TS    DS      1               ; TARGET SECTOR (CURRENT OPERATION)
 
 D.DVCTL DS      1               ; DEVICE CONTROL BYTE
 
