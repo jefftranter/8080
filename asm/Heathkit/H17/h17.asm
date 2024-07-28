@@ -28,6 +28,7 @@ ERPTCNT EQU     10              ; SOFT ERROR RETRY COUNT
         INCLUDE edvec.asm
         INCLUDE edram.asm
         INCLUDE esval.asm
+        INCLUDE esint.asm
 
 
 
