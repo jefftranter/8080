@@ -6,7 +6,7 @@
 ;               'C' SET IF OVERFLOW
 ;       USES    F,H,L
 
-DDATA   PUSH    D
+DDADA   PUSH    D
         MOV     E,A
         MVI     D,0
         DAD     D

@@ -9,7 +9,7 @@ SYSCALL EQU     377Q            ; SYSCALL INSTRUCTION
 
 .EXIT   DS      1               ; EXIT (MUST BE FIRST)
 .SCIN   DS      1               ; SCIN
-.SCOUT  DS      1               ; SCOUT
+SCOUT   DS      1               ; SCOUT
 .PRINT  DS      1               ; PRINT
 .READ   DS      1               ; READ
 .WRITE  DS      1               ; WRITE

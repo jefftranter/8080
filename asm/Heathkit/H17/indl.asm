@@ -4,7 +4,7 @@
 ;
 ;       THIS ACTS AS AN INDEXED FULL WORD LOAD.
 ;
-;       (DE) = ( (HL) + DISPLACMENT )
+;       (DE) = ( (HL) + DISPLACEMENT )
 ;
 ;       ENTRY   ((RET)) = DISPLACEMENT (FULL WORD)
 ;               (HL) = TABLE ADDRESS
