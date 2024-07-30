@@ -1,4 +1,4 @@
-SUBDIRS = H8 H88 H89 H19 H90
+SUBDIRS = H8 H88 H89 H19 H90 H17
 
 all:
 	@for i in $(SUBDIRS); do \
