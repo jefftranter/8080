@@ -1,7 +1,7 @@
-This is the source code for the Heathkit H17 floppy ROM. It was based
-on the published source code with minimal changes to adapt it to the
-ASL assembler. The listing is in split octal, like the original
-Heathkit assembler listing.
+This is the source code for the Heathkit H17 floppy ROM part number
+444-19. It was based on the published source code with minimal changes
+to adapt it to the ASL assembler. The listing is in split octal, like
+the original Heathkit assembler listing.
 
 I have confirmed that the output matches the published binary for the
 ROM.
@@ -20,8 +20,6 @@ as some could not be supported by the ASL assembler.
 
 Some source code that was not included in the published listing has
 been reverse-engineered.
-
-Unused code was filled with zeroes to match the original ROM binaries.
 
 A few obvious spelling and grammatical errors in comments have been
 corrected.
