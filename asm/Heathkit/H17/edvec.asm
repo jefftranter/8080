@@ -20,7 +20,7 @@ D.SDT   DS      3               ; JMP  R.SDT
 D.MAI   DS      3               ; JMP  R.MAI
 D.MAO   DS      3               ; JMP  R.MAO
 D.LPS   DS      3               ; JMP  R.LPS
-D.RDP   DS      3               ; JMP  R.RDP
+D.RDB   DS      3               ; JMP  R.RDB
 D.SDP   DS      3               ; JMP  R.SDP
 D.STS   DS      3               ; JMP  R.STS
 D.STZ   DS      3               ; JMP  R.STZ

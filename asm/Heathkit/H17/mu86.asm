@@ -10,7 +10,7 @@
 ;       USES    A,F,H,L
 
 
-DMU86   LXi     H,0             ; (HL) = RESULT ACCUMULATOR
+DMU86   LXI     H,0             ; (HL) = RESULT ACCUMULATOR
         PUSH    B
         MOV     B,H             ; (B) = OVERFLOW FLAG
 MU860   ORA     A               ; CLEAR CARRY
@@ -19,6 +19,7 @@ MU861   RAR
         JNC     MU862           ; IF NOT TO ADD
         DAD     D
         JNC     MU862           ; NOT OVERFLOW
+        INR     B
 MU862   ORA     A
         JZ      MU863           ; IF DONE
         XCHG

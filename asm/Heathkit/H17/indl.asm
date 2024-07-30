@@ -12,7 +12,7 @@
 ;       USES    A,F,D,E
 
 DINDL   XTHL                    ; (HL) = RET, ((SP) = TBL ADDRESS
-;       MOV     E,M
+        MOV     E,M
         INX     H
         MOV     D,M             ; (DE) = DISPLACEMENT
 

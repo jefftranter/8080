@@ -69,6 +69,8 @@ DU664   MOV   A,C
         RAR
         MOV   D,A
         MOV   A,E
+        RAR
+        MOV   E,A
         POP   PSW
         DCR   A
         JP    DU663             ; IF NOT DONE

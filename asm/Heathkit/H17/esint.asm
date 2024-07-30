@@ -29,7 +29,7 @@ S.DDLEN DS      2               ; CODE LENGTH IN BYTES
 S.DDGRP DS      1               ; GROUP NUMBER FOR DRIVER
         DS      1               ; HOLD PLACE
 ;S.DDSEC DS     2               ; SECTOR NUMBER FOR DRIVER ( * OBSOLETE ! * )
-S.DDTA  DS      2               ; DEVICE'S ADDRESS IKN DEVLST +DEV.RES
+S.DDDTA DS      2               ; DEVICE'S ADDRESS IKN DEVLST +DEV.RES
 S.DDOPC DS      1               ; OPEN OPCODE PENDING
 
 ;;      OVERLAY MANAGEMENT FLAGS
@@ -38,7 +38,7 @@ OVL.IN  EQU     00000001B       ; IN MEMORY
 OVL.RES EQU     00000010B       ; PERMANENTLY RESIDENT
 OVL.UCS EQU     10000000B       ; USER CODE SWAPPED FOR OVERLAY
 
-S.OVFL  DS      1               ; OVERLAY FLAG
+S.OVLFL DS      1               ; OVERLAY FLAG
 S.UCSF  DS      2               ; FWA SWAPPED USER CODE
 S.UCSL  DS      2               ; LENGTH SWAPPED USER CODE
 S.OVLS  DS      2               ; SIZE OF OVERLAY CODE

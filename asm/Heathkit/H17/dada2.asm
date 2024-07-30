@@ -7,5 +7,5 @@
 DDADA.  ADD     L
         MOV     L,A
         RNC
-        INR     M
+        INR     H
         RET

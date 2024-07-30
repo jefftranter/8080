@@ -12,6 +12,7 @@
 DMU10   XCHG                    ; (HL) = MULTIPLIER
         DAD     H               ; (HL) = X*2
         RC
+        MOV     D,H
         MOV     E,L
         DAD     H               ; (HL) = X*4
         RC

@@ -8,5 +8,6 @@
 
 DHLIHL  MOV     A,M
         INX     H
+        MOV     H,M
         MOV     L,A
         RET
