@@ -1737,16 +1737,44 @@ R.ERRT  INR     M               ; COUNT ERROR
         JMP     R.DLY           ; D.DLY
 BOOTAL  EQU     $-BOOTA
 
-; The remaining bytes were reverse engineered from the Heathkit ROM.
+; The remaining code was reverse engineered from the Heathkit ROM.
 
-        DB      076Q, 031Q, 323Q, 177Q, 016Q, 372Q, 171Q, 315Q
-        DB      303Q, 035Q, 171Q, 315Q, 303Q, 035Q, 363Q, 315Q
-        DB      306Q, 037Q, 373Q, 166Q, 315Q, 355Q, 036Q, 001Q
-        DB      134Q, 014Q, 076Q, 107Q, 315Q, 373Q, 036Q, 013Q
-        DB      170Q, 261Q, 302Q, 314Q, 037Q, 076Q, 030Q, 323Q
-        DB      177Q, 076Q, 333Q, 062Q, 125Q, 040Q, 315Q, 307Q
-        DB      036Q, 330Q, 001Q, 132Q, 014Q, 315Q, 044Q, 036Q
-        DB      376Q, 107Q, 300Q, 013Q, 170Q, 261Q, 302Q, 347Q
-        DB      037Q, 373Q, 166Q, 000Q
+        MVI     A,31Q
+        OUT     DP.DC
+        MVI     C,372Q
+        MOV     A,C
+        CALL    R.DLY
+        MOV     A,C
+        CALL    R.DLY
+        DI
+        CALL    L1
+        EI
+        HLT
+L1      CALL    WSP1
+        LXI     B,6134Q
+L2      MVI     A,107Q
+        CALL    R.WNB
+        DCX     B
+        MOV     A,B
+        ORA     C
+        JNZ     L2
+        MVI     A,30Q
+        OUT     DP.DC
+        MVI     A,333Q
+        STA     D.WSCA
+        CALL    R.WSC
+        RC
+        LXI     B,6132Q
+L3      CALL    R.RDB
+        CPI     107Q
+        RNZ
+        DCX     B
+        MOV     A,B
+        ORA     C
+        JNZ     L3
+        EI
+        HLT
+        NOP
+
         DB      "JGL", 0        ; INITIALS OF J.G. LETWIN
         DB      "HEATH", 0

@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 1 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 1 - 2024-07-31 11:12:52 AM
 
 
        1/      0 :                      ;;;     SYDD - SYSTEM DEVICE DRIVER.
@@ -61,7 +61,7 @@
 (1)   34/      0 : =1O                  UCI.TE  EQU     00000001B       ; TRANSMIT ENABLE
 (1)   35/      0 :                      
 (1)   36/      0 :                      ;       STATUS READ BITS.
- AS V1.42 Beta [Bld 269] - Source File h17.asm(u8251.asm) - Page 2 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(u8251.asm) - Page 2 - 2024-07-31 11:12:52 AM
 
 
 (1)   37/      0 :                      
@@ -124,7 +124,7 @@
 (1)   39/     57 :                      .ERROR  DS      1               ; LOOKUP ERROR
 (1)   40/     60 :                      .CHFLG  DS      1               ; CHANGE FLAGS
 (1)   41/     61 :                      .DISMT  DS      1               ; FLAG SYSTEM DISK DISMOUNTED
- AS V1.42 Beta [Bld 269] - Source File h17.asm(hosdef.asm) - Page 3 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(hosdef.asm) - Page 3 - 2024-07-31 11:12:52 AM
 
 
 (1)   42/     62 :                      
@@ -187,7 +187,7 @@
 (1)    5/     22 : =1O                  DF.HD   EQU     00000001B       ; HOLE DETECT
 (1)    6/     22 : =2O                  DF.T0   EQU     00000010B       ; TRACK 0 DETECT
 (1)    7/     22 : =4O                  DF.WP   EQU     00000100B       ; WRITE PROTECT
- AS V1.42 Beta [Bld 269] - Source File h17.asm(h17def.asm) - Page 4 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(h17def.asm) - Page 4 - 2024-07-31 11:12:52 AM
 
 
 (1)    8/     22 : =10O                 DF.SD   EQU     00001000B       ; SYNC DETECT
@@ -250,7 +250,7 @@
 (1)   28/     30 :                      EC.FL   DS      1               ; FILE LOCKED
 (1)   29/     31 :                      EC.FAO  DS      1               ; FILE ALREADY OPEN
 (1)   30/     32 :                      EC.IS   DS      1               ; ILLEGAL SWITCH
- AS V1.42 Beta [Bld 269] - Source File h17.asm(ecdef.asm) - Page 5 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(ecdef.asm) - Page 5 - 2024-07-31 11:12:52 AM
 
 
 (1)   31/     33 :                      EC.UUN  DS      1               ; UNKNOWN UNIT NUMBER
@@ -313,7 +313,7 @@
 (1)   23/ 42.200 : =42.200O             USERFWA EQU     $               ; USER FWA
 (1)   24/ 42.200 :                      
       27/ 42.200 :                              INCLUDE edcon.asm
- AS V1.42 Beta [Bld 269] - Source File h17.asm(edcon.asm) - Page 6 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(edcon.asm) - Page 6 - 2024-07-31 11:12:52 AM
 
 
 (1)    1/ 42.200 :                      ;;      D.CON DETAILED EQUIVALENCES.
@@ -376,7 +376,7 @@
 (1)    1/ 40.240 :                      ;;      EDRAM - DISK RAM WORAREA DEFINITION.
 (1)    2/ 40.240 :                      ;
 (1)    3/ 40.240 :                      ;       ZEROED UPON BOOTING UP.
- AS V1.42 Beta [Bld 269] - Source File h17.asm(edram.asm) - Page 7 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(edram.asm) - Page 7 - 2024-07-31 11:12:52 AM
 
 
 (1)    4/ 40.240 :                      ;
@@ -439,7 +439,7 @@
 (1)   17/ 40.324 :                      
 (1)   18/ 40.324 :                      S.OMAX  DS      2               ; MAX OVERLAY SIZE FOR SYSTEM
 (1)   19/ 40.326 :                      
- AS V1.42 Beta [Bld 269] - Source File h17.asm(esval.asm) - Page 8 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(esval.asm) - Page 8 - 2024-07-31 11:12:52 AM
 
 
 (1)   20/ 40.326 :                      ;;      THE FOLLOWING FIVE CELLS SHOULD BE MODIFIED/READ ONLY VIA THE .CONSL SYSCALL
@@ -502,7 +502,7 @@
 (1)   25/ 40.360 :                      ;;      DEVICE DRIVER DELAYED LOAD FLAGS
 (1)   26/ 40.360 :                      
 (1)   27/ 40.360 :                      S.DDLDA DS      2               ; DRIVER LOAD ADDRESS (HIGH BYTE=0 IF NO LOAD PENDING)
- AS V1.42 Beta [Bld 269] - Source File h17.asm(esint.asm) - Page 9 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(esint.asm) - Page 9 - 2024-07-31 11:12:52 AM
 
 
 (1)   28/ 40.362 :                      S.DDLEN DS      2               ; CODE LENGTH IN BYTES
@@ -565,7 +565,7 @@
 (1)   85/ 41.040 :                      ;       8080 HAS NO GOOD INDEXED ADDRESSING, THE DATA IS MANUALLY
 (1)   86/ 41.040 :                      ;       COPIES INTO THE AIO.XXX CELLS BEFORE PROCESSING, AND
 (1)   87/ 41.040 :                      ;       BACKDATED AFTER PROCESSING.
- AS V1.42 Beta [Bld 269] - Source File h17.asm(esint.asm) - Page 10 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(esint.asm) - Page 10 - 2024-07-31 11:12:52 AM
 
 
 (1)   88/ 41.040 :                      
@@ -628,7 +628,7 @@
       66/ 30.040 : 270                          CMP     B
       67/ 30.041 : 312 046 030                  JZ      MEM4            ; IS OK
       68/ 30.044 :                      
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 11 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 11 - 2024-07-31 11:12:52 AM
 
 
       69/ 30.044 :                      ;       HAVE ERROR. (HL) = ADDRESS OF BYTE IN ERROR
@@ -691,7 +691,7 @@
 (1)    4/ 30.101 :                      ;       EXIT    (H,L) = (H,L) + (0A)
 (1)    5/ 30.101 :                      ;       USES    A,F,H,L
 (1)    6/ 30.101 :                      
- AS V1.42 Beta [Bld 269] - Source File h17.asm(dada2.asm) - Page 12 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(dada2.asm) - Page 12 - 2024-07-31 11:12:52 AM
 
 
 (1)    7/ 30.101 : 205                  DDADA.  ADD     L
@@ -754,7 +754,7 @@
 (1)   51/ 30.152 : 332 163 030                  JC    DU664             ; IF SUBTRACT OK
 (1)   52/ 30.155 : 175                          MOV   A,L               ; ADD BACK IN
 (1)   53/ 30.156 : 223                          SUB   E
- AS V1.42 Beta [Bld 269] - Source File h17.asm(du66.asm) - Page 13 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(du66.asm) - Page 13 - 2024-07-31 11:12:52 AM
 
 
 (1)   54/ 30.157 : 157                          MOV   L,A
@@ -817,7 +817,7 @@
 (1)   14/ 30.223 : 311                          RET
 (1)   15/ 30.224 :                      
       85/ 30.224 :                              INCLUDE chl.asm         ; COMPLEMENT (HL)
- AS V1.42 Beta [Bld 269] - Source File h17.asm(chl.asm) - Page 14 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(chl.asm) - Page 14 - 2024-07-31 11:12:52 AM
 
 
 (1)    1/ 30.224 :                      ;;      DCHL - COMPLEMENT (HL).
@@ -880,7 +880,7 @@
       97/ 30.252 :                      ;       THIS IS DONE SO THAT AN OVERLAPPED MOVE WILL NOT 'RIPPLE'.
       98/ 30.252 :                      ;
       99/ 30.252 :                      ;       ENTRY   (BC) = COUNT
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 15 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 15 - 2024-07-31 11:12:52 AM
 
 
      100/ 30.252 :                      ;               (DE) = FROM
@@ -943,7 +943,7 @@
 (1)    4/ 30.324 :                      ;
 (1)    5/ 30.324 :                      ;       ENTRY   (DE) = MULTIPLIER
 (1)    6/ 30.324 :                      ;       EXIT    'C' CLEAR IF OK
- AS V1.42 Beta [Bld 269] - Source File h17.asm(mu10.asm) - Page 16 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(mu10.asm) - Page 16 - 2024-07-31 11:12:52 AM
 
 
 (1)    7/ 30.324 :                      ;               (HL) = PRODUCT
@@ -1006,7 +1006,7 @@
 (1)   37/ 31.005 :                      
 (1)   38/ 31.005 : 361                  MU663   POP     PSW             ; (A,F) = OVERFLOW STATUS
 (1)   39/ 31.006 : 311                          RET
- AS V1.42 Beta [Bld 269] - Source File h17.asm(mu66.asm) - Page 17 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(mu66.asm) - Page 17 - 2024-07-31 11:12:52 AM
 
 
 (1)   40/ 31.007 :                      
@@ -1069,7 +1069,7 @@
 (1)   20/ 31.053 : 311                          RET
 (1)   21/ 31.054 :                      
 (1)   22/ 31.054 :                      ;;      DSAVALL - SAVE ALL REGISTERS ON STACK.
- AS V1.42 Beta [Bld 269] - Source File h17.asm(savall.asm) - Page 18 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(savall.asm) - Page 18 - 2024-07-31 11:12:52 AM
 
 
 (1)   23/ 31.054 :                      ;
@@ -1132,7 +1132,7 @@
 (1)    8/ 31.076 :                      ;       DB      LAB1-*          ; INDEX = 0 FOR LAB1
 (1)    9/ 31.076 :                      ;       DB      LAB2-*          ; INDEX = 0 FOR LAB2
 (1)   10/ 31.076 :                      ;       DB      LABN-*          ; INDEX = 0 FOR LABN
- AS V1.42 Beta [Bld 269] - Source File h17.asm(tbra.asm) - Page 19 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(tbra.asm) - Page 19 - 2024-07-31 11:12:52 AM
 
 
 (1)   11/ 31.076 :                      ;
@@ -1195,7 +1195,7 @@
 (1)   68/ 31.136 :                      ;
 (1)   69/ 31.136 :                      ;       DTYPTX IS CALLED TO TYPE A BLOCK OF TEXT ON THE SYSTEM CONSOLE.
 (1)   70/ 31.136 :                      ;
- AS V1.42 Beta [Bld 269] - Source File h17.asm(tbra.asm) - Page 20 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(tbra.asm) - Page 20 - 2024-07-31 11:12:52 AM
 
 
 (1)   71/ 31.136 :                      ;       EMBEDDED ZERO BYTES INDICATE A CARRIAGE RETURN LINE FEED,
@@ -1258,7 +1258,7 @@
 (1)    1/ 31.212 :                      ;;      DZERO - ZERO MEMORY
 (1)    2/ 31.212 :                      ;
 (1)    3/ 31.212 :                      ;       DZERO ZEROS A BLOCK OF MEMORY.
- AS V1.42 Beta [Bld 269] - Source File h17.asm(zero.asm) - Page 21 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm(zero.asm) - Page 21 - 2024-07-31 11:12:52 AM
 
 
 (1)    4/ 31.212 :                      ;
@@ -1321,7 +1321,7 @@
      204/ 31.253 :                      ;                TO S.FASER (FATAL SYSTEM ERROR) IF UNIT 0
      205/ 31.253 :                      ;                TO CALLER IF OTHER UNIT
      206/ 31.253 :                      ;                 (A) = ERROR CODE
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 22 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 22 - 2024-07-31 11:12:52 AM
 
 
      207/ 31.253 :                      
@@ -1384,7 +1384,7 @@
      263/ 31.344 :                      ;;      ERR.FNO - ERROR: FILE NOT OPEN
      264/ 31.344 :                      
      265/ 31.344 : 076 011              ERR.FNO MVI     A,EC.FNO        ; FILE NOT OPEN
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 23 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 23 - 2024-07-31 11:12:52 AM
 
 
      266/ 31.346 : 067                          STC
@@ -1447,7 +1447,7 @@
      323/ 32.021 : 310                          RZ                      ; IS EOF
      324/ 32.022 : 072 050 041                  LDA     AIO.CSI         ; (A) = CURRENT SECTOR INDEX
      325/ 32.025 : 147                          MOV     H,A
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 24 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 24 - 2024-07-31 11:12:52 AM
 
 
      326/ 32.026 : 072 046 041                  LDA     AIO.SPG
@@ -1510,7 +1510,7 @@
      383/ 32.133 :                      ;       FREE CHAIN.
      384/ 32.133 :                      ;
      385/ 32.133 :                      ;       FFB WILL ATTEMPT TO GET A 'PREFERRED BLOCK', IF POSSIBLE.
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 25 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 25 - 2024-07-31 11:12:52 AM
 
 
      386/ 32.133 :                      ;       IF THE PREFERRED BLOCK IS NOT AVAILABLE, FFB WILL (OPTIONALLY) DO
@@ -1573,7 +1573,7 @@
      443/ 32.203 : 156                          MOV     L,M             ; (HL) = ADDRESS OF FIRST FREE BLOCK BYTE
      444/ 32.204 : 311                          RET                     ; RETURN WITH 'Z': GOT ONE
      445/ 32.205 :                      
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 26 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 26 - 2024-07-31 11:12:52 AM
 
 
      446/ 32.205 :                      ;;      FFL - FOLLOW FORWARD LINK.
@@ -1636,7 +1636,7 @@
      503/ 32.252 :                      ;       LOAD BINARY
      504/ 32.252 :                      
      505/ 32.252 : 315 362 032          LDD2    CALL    LDD8            ; FIND NEXT BYTE
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 27 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 27 - 2024-07-31 11:12:52 AM
 
 
      506/ 32.255 : 176                          MOV     A,M             ; (A) = NEXT BYTE
@@ -1699,7 +1699,7 @@
      563/ 32.362 :                      ;               S.DDESC = SECTOR NUMBER OF NEXT SECTOR
      564/ 32.362 :                      ;       EXIT    (HL) = ADDRESS OF NEXT BYTE
      565/ 32.362 :                      ;       USES    L
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 28 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 28 - 2024-07-31 11:12:52 AM
 
 
      566/ 32.362 :                      
@@ -1762,7 +1762,7 @@
      623/ 33.047 :                      
      624/ 33.047 : 325                          PUSH    D               ; SAVE ADDRESS
      625/ 33.050 : 042 374 040                  SHLD    S.UCSL          ; SET LENGTH OF DUMP
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 29 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 29 - 2024-07-31 11:12:52 AM
 
 
      626/ 33.053 : 104                          MOV     B,H
@@ -1825,7 +1825,7 @@
      683/ 33.145 : 052 114 041          PDI     LHLD    AIO.TFP         ; (L) = AIO.CGN, (H) = AIO.CSI
      684/ 33.150 : 072 046 041                  LDA     AIO.SPG         ; (A) = SECTORS PER GROUP
      685/ 33.153 : 117                          MOV     C,A
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 30 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 30 - 2024-07-31 11:12:52 AM
 
 
      686/ 33.154 : 175                          MOV     A,L             ; (A) = GROUP NUMBER
@@ -1888,7 +1888,7 @@
      743/ 33.226 : 353                          XCHG                    ; (DE) = RELOCATION FACTOR
      744/ 33.227 : 341                          POP     H               ; (HL) = RELOCATION TABLE ENTRY ADDRESS
      745/ 33.230 : 303 177 033                  JMP     REL             ; DO IT AGAIN
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 31 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 31 - 2024-07-31 11:12:52 AM
 
 
      746/ 33.233 :                      
@@ -1951,7 +1951,7 @@
      803/ 33.307 : 353                          XCHG                    ; (DE) = ADDRESS
      804/ 33.310 : 052 002 041                  LHLD    S.SSN           ; (HL) = SECTORS FOR SWAP
      805/ 33.313 : 303 275 031                  JMP     SREAD           ; READ AND EXIT
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 32 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 32 - 2024-07-31 11:12:52 AM
 
 
      806/ 33.316 :                      
@@ -2014,7 +2014,7 @@
      863/ 33.374 : 257                  R.XOK   XRA     A
      864/ 33.375 : 365                  R.XIT   PUSH    PSW             ; SAVE STATUS
      865/ 33.376 : 072 244 040          XIT1    LDA     D.DLYHS
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 33 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 33 - 2024-07-31 11:12:52 AM
 
 
      866/ 34.001 : 247                          ANA     A
@@ -2077,7 +2077,7 @@
      923/ 34.107 : 042 273 040                  SHLD    D.OPR           ; COUNT OPERATION
      924/ 34.112 :                      
      925/ 34.112 :                      ;       READ TO READ SECTOR
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 34 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 34 - 2024-07-31 11:12:52 AM
 
 
      926/ 34.112 :                      ;
@@ -2140,7 +2140,7 @@
      983/ 34.210 : 014                          INR     C
      984/ 34.211 : 302 205 034                  JNZ     READ5
      985/ 34.214 : 102                  READ6   MOV     B,D             ; (B) = CHECKSUM
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 35 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 35 - 2024-07-31 11:12:52 AM
 
 
      986/ 34.215 : 315 202 040                  CALL    D.RDB
@@ -2203,7 +2203,7 @@
     1043/ 34.321 :                      
     1044/ 34.321 : 345                  R.READR PUSH    H               ; SAVE (HL)
     1045/ 34.322 : 315 205 040                  CALL    D.SDP           ; SETUP DEVICE PARAMETERS
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 36 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 36 - 2024-07-31 11:12:52 AM
 
 
     1046/ 34.325 : 041 320 031                  LXI     H,ZEROS
@@ -2266,7 +2266,7 @@
     1103/ 35.017 : 302 016 035                  JNZ     WRITE4          ; PAUSE OVER GUARDBAND
     1104/ 35.022 : 072 113 040                  LDA     D.WRITB
     1105/ 35.025 : 117                          MOV     C,A             ; (C) = # OF 00 CHARACTERS
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 37 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 37 - 2024-07-31 11:12:52 AM
 
 
     1106/ 35.026 : 072 114 040                  LDA     D.WRITC         ; (A) = 128/8 = TWO CHARACTER TIMES BEFORE WRITING
@@ -2329,7 +2329,7 @@
     1163/ 35.136 :                      ;       USES    A,F,H,L
     1164/ 35.136 :                      
     1165/ 35.136 : 373                  R.CDE   EI                      ; RESTORE INTERRUPTS
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 38 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 38 - 2024-07-31 11:12:52 AM
 
 
     1166/ 35.137 : 315 213 040                  CALL    D.STZ           ; SEEK TRACK ZERO
@@ -2392,7 +2392,7 @@
     1223/ 35.225 :                      
     1224/ 35.225 : 052 245 040          R.SDT   LHLD    D.TRKPT
     1225/ 35.230 : 072 240 040                  LDA     D.TT
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 39 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 39 - 2024-07-31 11:12:52 AM
 
 
     1226/ 35.233 : 276                          CMP     M
@@ -2455,7 +2455,7 @@
     1283/ 35.316 :                      ;       LPS READS OVER SECTOR HEADERS UNTIL THE PROPER SECTOR
     1284/ 35.316 :                      ;       IS FOUND.
     1285/ 35.316 :                      ;
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 40 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 40 - 2024-07-31 11:12:52 AM
 
 
     1286/ 35.316 :                      ;       UPON ENTRY, THE ARM SHOULD BE POSITIONED OVER THE SECTOR.
@@ -2518,7 +2518,7 @@
     1343/ 36.034 : 303 007 036                  JMP     LPS1.5
     1344/ 36.037 :                      
     1345/ 36.037 : 056 272              LPS5    MVI     L,D.E.TRK#256   ; BAD TRACK NUMBER
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 41 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 41 - 2024-07-31 11:12:52 AM
 
 
     1346/ 36.041 : 303 007 036                  JMP     LPS1.5
@@ -2581,7 +2581,7 @@
     1403/ 36.124 : 072 117 040                  LDA     D.SDPA          ; (A) = HEAD SETTLE WAIT TIME/4
     1404/ 36.127 : 167                          MOV     M,A             ; SET FOR CLOCK TIMER
     1405/ 36.130 : 053                  SDP1    DCX     H
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 42 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 42 - 2024-07-31 11:12:52 AM
 
 
     1406/ 36.131 : 176                          MOV     A,M             ; (A) = MOTOR ON DELAY
@@ -2644,7 +2644,7 @@
     1463/ 36.222 :                      
     1464/ 36.222 :                      ;       HAVE HOLE, SKIP IT AND WAIT 12 MS
     1465/ 36.222 :                      
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 43 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 43 - 2024-07-31 11:12:52 AM
 
 
     1466/ 36.222 : 315 271 036          STS2    CALL    WNH             ; WAIT FOR NO HOLE
@@ -2707,7 +2707,7 @@
     1523/ 36.302 :                      
     1524/ 36.302 :                      ;;      UDLY - MICROSECOND DELAY
     1525/ 36.302 :                      ;
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 44 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 44 - 2024-07-31 11:12:52 AM
 
 
     1526/ 36.302 :                      ;       UDLY IS CALLED (WITH INTERRUPTS DISABLED)
@@ -2770,7 +2770,7 @@
     1583/ 36.343 :                      ;
     1584/ 36.343 :                      ;       ENTRY   (A) = INITIAL DELAY COUNTER
     1585/ 36.343 :                      ;               (C) = # OF ZERO BYTES TO WRITE
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 45 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 45 - 2024-07-31 11:12:52 AM
 
 
     1586/ 36.343 :                      ;       EXIT    (D) = CHECKSUM
@@ -2833,7 +2833,7 @@
     1643/ 37.031 : 315 252 030                  CALL    DMOVE           ; MOVE IN CONSTANTS AND VECTORS
     1644/ 37.034 :                      
     1645/ 37.034 :                      ;       ZERO WORK FIELD
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 46 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 46 - 2024-07-31 11:12:52 AM
 
 
     1646/ 37.034 :                      
@@ -2896,7 +2896,7 @@
     1703/ 37.145 : 024                          DB      20              ; UDLY COUNT FOR HOLE DEBOUNCE
     1704/ 37.146 : 024                          DB      20              ; UDLY COUNT FOR HOLE DEBOUNCE
     1705/ 37.147 : 120                          DB      64*25/20        ; LOOP COUNT FOR 25 CHARACTERS
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 47 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 47 - 2024-07-31 11:12:52 AM
 
 
     1706/ 37.150 :                      
@@ -2933,30 +2933,53 @@
     1737/ 37.257 : 303 303 035                  JMP     R.DLY           ; D.DLY
     1738/ 37.262 : =130O                BOOTAL  EQU     $-BOOTA
     1739/ 37.262 :                      
-    1740/ 37.262 :                      ; The remaining bytes were reverse engineered from the Heathkit ROM.
+    1740/ 37.262 :                      ; The remaining code was reverse engineered from the Heathkit ROM.
     1741/ 37.262 :                      
-    1742/ 37.262 : 076 031 323 177 016          DB      076Q, 031Q, 323Q, 177Q, 016Q, 372Q, 171Q, 315Q
-          37.267 : 372 171 315        
-    1743/ 37.272 : 303 035 171 315 303          DB      303Q, 035Q, 171Q, 315Q, 303Q, 035Q, 363Q, 315Q
-          37.277 : 035 363 315        
-    1744/ 37.302 : 306 037 373 166 315          DB      306Q, 037Q, 373Q, 166Q, 315Q, 355Q, 036Q, 001Q
-          37.307 : 355 036 001        
-    1745/ 37.312 : 134 014 076 107 315          DB      134Q, 014Q, 076Q, 107Q, 315Q, 373Q, 036Q, 013Q
-          37.317 : 373 036 013        
-    1746/ 37.322 : 170 261 302 314 037          DB      170Q, 261Q, 302Q, 314Q, 037Q, 076Q, 030Q, 323Q
-          37.327 : 076 030 323        
-    1747/ 37.332 : 177 076 333 062 125          DB      177Q, 076Q, 333Q, 062Q, 125Q, 040Q, 315Q, 307Q
-          37.337 : 040 315 307        
-    1748/ 37.342 : 036 330 001 132 014          DB      036Q, 330Q, 001Q, 132Q, 014Q, 315Q, 044Q, 036Q
-          37.347 : 315 044 036        
-    1749/ 37.352 : 376 107 300 013 170          DB      376Q, 107Q, 300Q, 013Q, 170Q, 261Q, 302Q, 347Q
-          37.357 : 261 302 347        
-    1750/ 37.362 : 037 373 166 000              DB      037Q, 373Q, 166Q, 000Q
-    1751/ 37.366 : 112 107 114 000              DB      "JGL", 0        ; INITIALS OF J.G. LETWIN
-    1752/ 37.372 : 110 105 101 124 110          DB      "HEATH", 0
+    1742/ 37.262 : 076 031                      MVI     A,31Q
+    1743/ 37.264 : 323 177                      OUT     DP.DC
+    1744/ 37.266 : 016 372                      MVI     C,372Q
+    1745/ 37.270 : 171                          MOV     A,C
+    1746/ 37.271 : 315 303 035                  CALL    R.DLY
+    1747/ 37.274 : 171                          MOV     A,C
+    1748/ 37.275 : 315 303 035                  CALL    R.DLY
+    1749/ 37.300 : 363                          DI
+    1750/ 37.301 : 315 306 037                  CALL    L1
+    1751/ 37.304 : 373                          EI
+    1752/ 37.305 : 166                          HLT
+    1753/ 37.306 : 315 355 036          L1      CALL    WSP1
+    1754/ 37.311 : 001 134 014                  LXI     B,6134Q
+    1755/ 37.314 : 076 107              L2      MVI     A,107Q
+    1756/ 37.316 : 315 373 036                  CALL    R.WNB
+    1757/ 37.321 : 013                          DCX     B
+    1758/ 37.322 : 170                          MOV     A,B
+    1759/ 37.323 : 261                          ORA     C
+    1760/ 37.324 : 302 314 037                  JNZ     L2
+    1761/ 37.327 : 076 030                      MVI     A,30Q
+    1762/ 37.331 : 323 177                      OUT     DP.DC
+    1763/ 37.333 : 076 333                      MVI     A,333Q
+    1764/ 37.335 : 062 125 040                  STA     D.WSCA
+    1765/ 37.340 : 315 307 036                  CALL    R.WSC
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 48 - 2024-07-31 11:12:52 AM
+
+
+    1766/ 37.343 : 330                          RC
+    1767/ 37.344 : 001 132 014                  LXI     B,6132Q
+    1768/ 37.347 : 315 044 036          L3      CALL    R.RDB
+    1769/ 37.352 : 376 107                      CPI     107Q
+    1770/ 37.354 : 300                          RNZ
+    1771/ 37.355 : 013                          DCX     B
+    1772/ 37.356 : 170                          MOV     A,B
+    1773/ 37.357 : 261                          ORA     C
+    1774/ 37.360 : 302 347 037                  JNZ     L3
+    1775/ 37.363 : 373                          EI
+    1776/ 37.364 : 166                          HLT
+    1777/ 37.365 : 000                          NOP
+    1778/ 37.366 :                      
+    1779/ 37.366 : 112 107 114 000              DB      "JGL", 0        ; INITIALS OF J.G. LETWIN
+    1780/ 37.372 : 110 105 101 124 110          DB      "HEATH", 0
           37.377 : 000                
-    1753/ 40.000 :                      
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 48 - 2024-07-30 06:38:20 PM
+    1781/ 40.000 :                      
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 49 - 2024-07-31 11:12:52 AM
 
 
   Symbol Table (* = unused):
@@ -3017,9 +3040,9 @@
  D.WRITE :                   40.155 C |  D.WSC :                     40.221 C |
  D.WSCA :                    40.125 C |  D.WSP :                     40.224 C |
  D.XIT :                     40.144 C |  D.XITA :                    40.110 C |
- D.XOK :                     40.136 C | *DATE :                "2024-07-30" - |
+ D.XOK :                     40.136 C | *DATE :                "2024-07-31" - |
  DC.ABT :                         7 C | *DC.CLU :                         6 C |
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 49 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 50 - 2024-07-31 11:12:52 AM
 
 
 *DC.MOV :                        10 C | *DC.OPR :                         3 C |
@@ -3082,7 +3105,7 @@
  EC.ILR :                        12 C | *EC.ILV :                        37 C |
 *EC.IS :                         32 C | *EC.NEM :                        21 C |
 *EC.NRD :                        10 C |  EC.RF :                         22 C |
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 50 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 51 - 2024-07-31 11:12:52 AM
 
 
 *EC.UNA :                        36 C | *EC.UND :                        15 C |
@@ -3096,139 +3119,140 @@
 *HAS64 :                          1 - | *I.CONFL :                        4 - |
 *I.CONTY :                        1 - | *I.CONWI :                        3 - |
 *I.CSLMD :                        0 - | *I.CUSOR :                        2 - |
-*LDD :                       32.223 C |  LDD2 :                      32.252 C |
- LDD3 :                      32.271 C |  LDD4 :                      32.323 C |
- LDD8 :                      32.362 C | *LDO :                       33.012 C |
- LDO1 :                      33.073 C | *LF :                            12 - |
-*LISTON :                         1 - |  LPS0 :                      35.316 C |
- LPS1 :                      35.334 C |  LPS1.5 :                    36.007 C |
- LPS2 :                      36.014 C |  LPS3 :                      36.025 C |
- LPS4 :                      36.032 C |  LPS5 :                      36.037 C |
-*MACEXP :                         7 - |  MEM1 :                      30.017 C |
- MEM2 :                      30.032 C |  MEM3 :                      30.036 C |
- MEM4 :                      30.046 C |  MFLAG :                     40.010 - |
- MI.CPI :                       376 - | *MOMCPU :                   200.200 - |
-*MOMCPUNAME :                "8080" - |  MOV1 :                      30.272 C |
- MOV2 :                      30.311 C |  MU661 :                     30.344 C |
- MU662 :                     30.364 C |  MU663 :                     31.005 C |
- MU860 :                     31.014 C |  MU861 :                     31.015 C |
- MU862 :                     31.026 C |  MU863 :                     31.044 C |
-*NESTMAX :                    1.000 - |  OVL.IN :                         1 - |
-*OVL.RES :                        2 - |  OVL.UCS :                      200 - |
- PCHL :                      32.361 C | *PDI :                       33.145 C |
- PDI1 :                      33.161 C |  PIC.COD :                        6 C |
-*PIC.ID :                         0 C | *PIC.LEN :                        2 C |
-*PIC.PTR :                        4 C |  R.ABORT :                   33.366 - |
- R.CDE :                     35.136 C |  R.DLY :                     35.303 C |
- R.DTS :                     35.172 C |  R.ERRT :                    37.150 C |
- R.LPS :                     35.321 C |  R.MAI :                     35.251 C |
- R.MAO :                     35.254 C |  R.MOUNT :                   33.345 - |
- R.RDB :                     36.044 C |  R.READ :                    34.077 C |
- R.READR :                   34.321 C |  R.SDP :                     36.062 C |
- R.SDT :                     35.225 C |  R.STS :                     36.165 C |
- R.STZ :                     36.254 C |  R.SYDD :                    33.316 - |
- R.UDLY :                    36.302 C |  R.WNB :                     36.373 C |
- R.WRITE :                   34.336 - |  R.WSC :                     36.307 C |
- R.WSP :                     36.343 C |  R.XIT :                     33.375 C |
- R.XOK :                     33.374 C |  READ1 :                     34.112 C |
- READ1.5 :                   34.122 C |  READ2 :                     34.126 C |
- READ2.4 :                   34.130 C | *READ3 :                     34.143 C |
- READ3.5 :                   34.160 C |  READ4 :                     34.167 C |
- READ5 :                     34.205 C |  READ6 :                     34.214 C |
- READ7 :                     34.300 C |  READ71 :                    34.261 C |
- READ72 :                    34.272 C |  READ8 :                     34.315 C |
- REL :                       33.177 C |  REL. :                      33.175 C |
- REL1 :                      33.213 C | *RELAXED :                        0 - |
-*ROMBOOT :                   30.000 - | *RUC :                       33.257 C |
-*S.BAUD :                    40.346 C | *S.CAADR :                   40.332 C |
-*S.CACC :                    41.006 C | *S.CCTAB :                   40.334 C |
-*S.CDB :                     40.345 C | *S.CFWA :                    40.352 C |
-*S.CODE :                    41.007 C | *S.CONFL :                   40.331 C |
-*S.CONTY :                   40.326 C | *S.CONWI :                   40.330 C |
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 51 - 2024-07-30 06:38:20 PM
+ L1 :                        37.306 C |  L2 :                        37.314 C |
+ L3 :                        37.347 C | *LDD :                       32.223 C |
+ LDD2 :                      32.252 C |  LDD3 :                      32.271 C |
+ LDD4 :                      32.323 C |  LDD8 :                      32.362 C |
+*LDO :                       33.012 C |  LDO1 :                      33.073 C |
+*LF :                            12 - | *LISTON :                         1 - |
+ LPS0 :                      35.316 C |  LPS1 :                      35.334 C |
+ LPS1.5 :                    36.007 C |  LPS2 :                      36.014 C |
+ LPS3 :                      36.025 C |  LPS4 :                      36.032 C |
+ LPS5 :                      36.037 C | *MACEXP :                         7 - |
+ MEM1 :                      30.017 C |  MEM2 :                      30.032 C |
+ MEM3 :                      30.036 C |  MEM4 :                      30.046 C |
+ MFLAG :                     40.010 - |  MI.CPI :                       376 - |
+*MOMCPU :                   200.200 - | *MOMCPUNAME :                "8080" - |
+ MOV1 :                      30.272 C |  MOV2 :                      30.311 C |
+ MU661 :                     30.344 C |  MU662 :                     30.364 C |
+ MU663 :                     31.005 C |  MU860 :                     31.014 C |
+ MU861 :                     31.015 C |  MU862 :                     31.026 C |
+ MU863 :                     31.044 C | *NESTMAX :                    1.000 - |
+ OVL.IN :                         1 - | *OVL.RES :                        2 - |
+ OVL.UCS :                      200 - |  PCHL :                      32.361 C |
+*PDI :                       33.145 C |  PDI1 :                      33.161 C |
+ PIC.COD :                        6 C | *PIC.ID :                         0 C |
+*PIC.LEN :                        2 C | *PIC.PTR :                        4 C |
+ R.ABORT :                   33.366 - |  R.CDE :                     35.136 C |
+ R.DLY :                     35.303 C |  R.DTS :                     35.172 C |
+ R.ERRT :                    37.150 C |  R.LPS :                     35.321 C |
+ R.MAI :                     35.251 C |  R.MAO :                     35.254 C |
+ R.MOUNT :                   33.345 - |  R.RDB :                     36.044 C |
+ R.READ :                    34.077 C |  R.READR :                   34.321 C |
+ R.SDP :                     36.062 C |  R.SDT :                     35.225 C |
+ R.STS :                     36.165 C |  R.STZ :                     36.254 C |
+ R.SYDD :                    33.316 - |  R.UDLY :                    36.302 C |
+ R.WNB :                     36.373 C |  R.WRITE :                   34.336 - |
+ R.WSC :                     36.307 C |  R.WSP :                     36.343 C |
+ R.XIT :                     33.375 C |  R.XOK :                     33.374 C |
+ READ1 :                     34.112 C |  READ1.5 :                   34.122 C |
+ READ2 :                     34.126 C |  READ2.4 :                   34.130 C |
+*READ3 :                     34.143 C |  READ3.5 :                   34.160 C |
+ READ4 :                     34.167 C |  READ5 :                     34.205 C |
+ READ6 :                     34.214 C |  READ7 :                     34.300 C |
+ READ71 :                    34.261 C |  READ72 :                    34.272 C |
+ READ8 :                     34.315 C |  REL :                       33.177 C |
+ REL. :                      33.175 C |  REL1 :                      33.213 C |
+*RELAXED :                        0 - | *ROMBOOT :                   30.000 - |
+*RUC :                       33.257 C | *S.BAUD :                    40.346 C |
+*S.CAADR :                   40.332 C | *S.CACC :                    41.006 C |
+*S.CCTAB :                   40.334 C | *S.CDB :                     40.345 C |
+*S.CFWA :                    40.352 C | *S.CODE :                    41.007 C |
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 52 - 2024-07-31 11:12:52 AM
 
 
-*S.CSLMD :                        1 - | *S.CUSOR :                   40.327 C |
-*S.DATC :                    40.310 C | *S.DATE :                    40.277 C |
-*S.DCS :                     41.030 C |  S.DDDTA :                   40.366 C |
- S.DDGRP :                   40.364 C |  S.DDLDA :                   40.360 C |
- S.DDLEN :                   40.362 C |  S.DDOPC :                   40.370 C |
- S.DDSEC :                   40.364 - | *S.DFWA :                    40.354 C |
-*S.DIREA :                   41.016 C | *S.DLINK :                   40.350 C |
- S.FASER :                   41.013 C | *S.FCI :                     41.021 C |
-*S.GRT :                     24.000 - | *S.GRT1 :                    25.000 - |
-*S.HIMEM :                   40.316 C |  S.INT :                     40.345 C |
-*S.JUMPS :                   41.010 C | *S.MOUNT :                   41.027 C |
-*S.OMAX :                    40.324 C |  S.OSN :                     41.004 C |
- S.OVLE :                    41.000 C |  S.OVLFL :                   40.371 C |
- S.OVLS :                    40.376 C | *S.OVSTK :                   41.032 C |
-*S.RFWA :                    40.356 C | *S.S1DIS :                   41.034 C |
-*S.S1GRT :                   41.036 C | *S.SCI :                     41.024 C |
-*S.SDD :                     41.010 C | *S.SOVR :                    41.146 C |
- S.SSN :                     41.002 C |  S.SYSM :                    40.320 C |
-*S.TIME :                    40.312 C |  S.UCSF :                    40.372 C |
- S.UCSL :                    40.374 C |  S.USRM :                    40.322 C |
- S.VAL :                     40.277 C | *SC.UART :                      372 - |
- SCOUT :                          2 C | *SCOUT.CHFLG :                   60 C |
-*SCOUT.CLEAR :                   55 C | *SCOUT.CLEARA :                  56 C |
-*SCOUT.CLOSE :                   46 C | *SCOUT.CLRCO :                    7 C |
-*SCOUT.CONSL :                    6 C | *SCOUT.CTLC :                    41 C |
-*SCOUT.DECODE :                  53 C | *SCOUT.DELET :                   50 C |
-*SCOUT.DISMT :                   61 C | *SCOUT.ERROR :                   57 C |
-*SCOUT.LINK :                    40 C | *SCOUT.NAME :                    54 C |
-*SCOUT.OPENC :                   45 C | *SCOUT.OPENR :                   42 C |
-*SCOUT.OPENU :                   44 C | *SCOUT.OPENW :                   43 C |
-*SCOUT.POSIT :                   47 C | *SCOUT.PRINT :                    3 C |
-*SCOUT.READ :                     4 C | *SCOUT.RENAM :                   51 C |
-*SCOUT.SETTP :                   52 C | *SCOUT.SYSRES :                  10 C |
-*SCOUT.WRITE :                    5 C |  SDP1 :                      36.130 C |
- SDP2 :                      36.145 C | *SDT1 :                      35.242 C |
- SDT3 :                      35.221 C |  SECSCR :                    26.000 - |
- SREAD :                     31.275 C |  SREAD1 :                    31.305 C |
- STACK :                     42.200 - |  STS1 :                      36.201 C |
- STS2 :                      36.222 C |  STS3 :                      36.233 C |
- STZ0 :                      36.251 C |  SWRITE :                    31.330 C |
- SYDD :                      40.130 - |  SYSCALL :                      377 - |
-*SYSCALL.EXIT :                   0 C | *SYSCALL.SCIN :                   1 C |
- TFE :                       33.233 C |  TICCNT :                    40.033 - |
-*TIME :               "06:38:20 PM" - | *TRUE :                           1 - |
-*UBR :                            1 - | *UCI.ER :                        20 - |
-*UCI.IE :                         2 - | *UCI.IR :                       100 - |
-*UCI.RE :                         4 - | *UCI.RO :                        40 - |
-*UCI.TE :                         1 - |  UDD1 :                      31.163 C |
-*UDR :                            0 - | *UF.FCT :                       100 - |
-*UF.RDA :                         1 - | *UF.ROR :                         2 - |
-*UF.RPE :                         4 - | *UF.TB :                        200 - |
- UIVEC :                     40.037 - | *UMI.16X :                        2 - |
-*UMI.1B :                       100 - | *UMI.1X :                         1 - |
-*UMI.2B :                       300 - | *UMI.64X :                        3 - |
-*UMI.HB :                       200 - | *UMI.L5 :                         0 - |
-*UMI.L6 :                         4 - | *UMI.L7 :                        10 - |
-*UMI.L8 :                        14 - | *UMI.PA :                        20 - |
-*UMI.PE :                        40 - |  UP.DP :                        174 - |
-*UP.FC :                        175 - |  UP.SC :                        176 - |
-*UP.SR :                        176 - |  UP.ST :                        175 - |
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 52 - 2024-07-30 06:38:20 PM
+*S.CONFL :                   40.331 C | *S.CONTY :                   40.326 C |
+*S.CONWI :                   40.330 C | *S.CSLMD :                        1 - |
+*S.CUSOR :                   40.327 C | *S.DATC :                    40.310 C |
+*S.DATE :                    40.277 C | *S.DCS :                     41.030 C |
+ S.DDDTA :                   40.366 C |  S.DDGRP :                   40.364 C |
+ S.DDLDA :                   40.360 C |  S.DDLEN :                   40.362 C |
+ S.DDOPC :                   40.370 C |  S.DDSEC :                   40.364 - |
+*S.DFWA :                    40.354 C | *S.DIREA :                   41.016 C |
+*S.DLINK :                   40.350 C |  S.FASER :                   41.013 C |
+*S.FCI :                     41.021 C | *S.GRT :                     24.000 - |
+*S.GRT1 :                    25.000 - | *S.HIMEM :                   40.316 C |
+ S.INT :                     40.345 C | *S.JUMPS :                   41.010 C |
+*S.MOUNT :                   41.027 C | *S.OMAX :                    40.324 C |
+ S.OSN :                     41.004 C |  S.OVLE :                    41.000 C |
+ S.OVLFL :                   40.371 C |  S.OVLS :                    40.376 C |
+*S.OVSTK :                   41.032 C | *S.RFWA :                    40.356 C |
+*S.S1DIS :                   41.034 C | *S.S1GRT :                   41.036 C |
+*S.SCI :                     41.024 C | *S.SDD :                     41.010 C |
+*S.SOVR :                    41.146 C |  S.SSN :                     41.002 C |
+ S.SYSM :                    40.320 C | *S.TIME :                    40.312 C |
+ S.UCSF :                    40.372 C |  S.UCSL :                    40.374 C |
+ S.USRM :                    40.322 C |  S.VAL :                     40.277 C |
+*SC.UART :                      372 - |  SCOUT :                          2 C |
+*SCOUT.CHFLG :                   60 C | *SCOUT.CLEAR :                   55 C |
+*SCOUT.CLEARA :                  56 C | *SCOUT.CLOSE :                   46 C |
+*SCOUT.CLRCO :                    7 C | *SCOUT.CONSL :                    6 C |
+*SCOUT.CTLC :                    41 C | *SCOUT.DECODE :                  53 C |
+*SCOUT.DELET :                   50 C | *SCOUT.DISMT :                   61 C |
+*SCOUT.ERROR :                   57 C | *SCOUT.LINK :                    40 C |
+*SCOUT.NAME :                    54 C | *SCOUT.OPENC :                   45 C |
+*SCOUT.OPENR :                   42 C | *SCOUT.OPENU :                   44 C |
+*SCOUT.OPENW :                   43 C | *SCOUT.POSIT :                   47 C |
+*SCOUT.PRINT :                    3 C | *SCOUT.READ :                     4 C |
+*SCOUT.RENAM :                   51 C | *SCOUT.SETTP :                   52 C |
+*SCOUT.SYSRES :                  10 C | *SCOUT.WRITE :                    5 C |
+ SDP1 :                      36.130 C |  SDP2 :                      36.145 C |
+*SDT1 :                      35.242 C |  SDT3 :                      35.221 C |
+ SECSCR :                    26.000 - |  SREAD :                     31.275 C |
+ SREAD1 :                    31.305 C |  STACK :                     42.200 - |
+ STS1 :                      36.201 C |  STS2 :                      36.222 C |
+ STS3 :                      36.233 C |  STZ0 :                      36.251 C |
+ SWRITE :                    31.330 C |  SYDD :                      40.130 - |
+ SYSCALL :                      377 - | *SYSCALL.EXIT :                   0 C |
+*SYSCALL.SCIN :                   1 C |  TFE :                       33.233 C |
+ TICCNT :                    40.033 - | *TIME :               "11:12:52 AM" - |
+*TRUE :                           1 - | *UBR :                            1 - |
+*UCI.ER :                        20 - | *UCI.IE :                         2 - |
+*UCI.IR :                       100 - | *UCI.RE :                         4 - |
+*UCI.RO :                        40 - | *UCI.TE :                         1 - |
+ UDD1 :                      31.163 C | *UDR :                            0 - |
+*UF.FCT :                       100 - | *UF.RDA :                         1 - |
+*UF.ROR :                         2 - | *UF.RPE :                         4 - |
+*UF.TB :                        200 - |  UIVEC :                     40.037 - |
+*UMI.16X :                        2 - | *UMI.1B :                       100 - |
+*UMI.1X :                         1 - | *UMI.2B :                       300 - |
+*UMI.64X :                        3 - | *UMI.HB :                       200 - |
+*UMI.L5 :                         0 - | *UMI.L6 :                         4 - |
+*UMI.L7 :                        10 - | *UMI.L8 :                        14 - |
+*UMI.PA :                        20 - | *UMI.PE :                        40 - |
+ UP.DP :                        174 - | *UP.FC :                        175 - |
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 53 - 2024-07-31 11:12:52 AM
 
 
- USERFWA :                   42.200 - | *USR.FE :                        40 - |
-*USR.OE :                        20 - | *USR.PE :                        10 - |
-*USR.RXR :                        2 - | *USR.TXE :                        4 - |
-*USR.TXR :                        1 - | *VERSION :                   24.057 - |
- WHD :                       36.235 C |  WNB1 :                      36.374 C |
- WNH :                       36.271 C |  WRIT2.5 :                   34.377 C |
-*WRITE1 :                    34.370 C |  WRITE2 :                    34.375 C |
- WRITE4 :                    35.016 C |  WRITE5 :                    35.034 C |
- WRITE7 :                    35.122 C |  WRITE8 :                    35.132 C |
- WSC1 :                      36.321 C |  WSC2 :                      36.336 C |
- WSP1 :                      36.355 C |  XIT1 :                      33.376 C |
-*Z80SYNTAX :                      0 - |  ZEROS :                     31.320 C |
- ZRO1 :                      31.213 C |
+ UP.SC :                        176 - | *UP.SR :                        176 - |
+ UP.ST :                        175 - |  USERFWA :                   42.200 - |
+*USR.FE :                        40 - | *USR.OE :                        20 - |
+*USR.PE :                        10 - | *USR.RXR :                        2 - |
+*USR.TXE :                        4 - | *USR.TXR :                        1 - |
+*VERSION :                   24.057 - |  WHD :                       36.235 C |
+ WNB1 :                      36.374 C |  WNH :                       36.271 C |
+ WRIT2.5 :                   34.377 C | *WRITE1 :                    34.370 C |
+ WRITE2 :                    34.375 C |  WRITE4 :                    35.016 C |
+ WRITE5 :                    35.034 C |  WRITE7 :                    35.122 C |
+ WRITE8 :                    35.132 C |  WSC1 :                      36.321 C |
+ WSC2 :                      36.336 C |  WSP1 :                      36.355 C |
+ XIT1 :                      33.376 C | *Z80SYNTAX :                      0 - |
+ ZEROS :                     31.320 C |  ZRO1 :                      31.213 C |
 
-  1.241 symbols
+  1.244 symbols
     244 unused symbols
 
- AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 53 - 2024-07-30 06:38:20 PM
+ AS V1.42 Beta [Bld 269] - Source File h17.asm - Page 54 - 2024-07-31 11:12:52 AM
 
 
   Code Pages:
@@ -3240,7 +3264,7 @@ STANDARD (0 changed characters)
 
 0.02 seconds assembly time
 
- 10.247 lines source file
+ 11.019 lines source file
       2 passes
       0 errors
       0 warnings

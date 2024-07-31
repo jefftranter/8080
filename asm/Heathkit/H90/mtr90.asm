@@ -3337,7 +3337,7 @@ RADIX1  CALL    RCC             ; READ CHARACTER
         JR      RADIX1
         CPU     8080
 
-;       SET OCTAL RADIO
+;       SET OCTAL RADIX
 
 RADIX2  LXI     H,RAD.OCT
         CALL    TYPMSG
