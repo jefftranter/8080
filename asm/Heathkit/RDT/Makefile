@@ -14,7 +14,3 @@ clean:
 
 distclean:
 	$(RM) *.lst *.p *.bin *.abs
-
-compare: rdt.abs
-	hexdump -b 885-1092_Relocating_Debugger.h8d/RDT.ABS >GOOD
-	hexdump -b rdt.abs >BAD
