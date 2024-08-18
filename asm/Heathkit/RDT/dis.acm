@@ -1,0 +1,281 @@
+; 8080 DISASSEMBLER (DIS-8)
+;
+;        WRITTEN BY PATRICK SWAYNE  11-11-78
+;        REVISED  3-27-79
+;        VERSION 4.0 WRITTEN 6-21-80
+;        RDT VERSION WRITTEN 11-14-80
+;
+EXAM    LXI     H,XAMIN
+        CALL    PSTRNG    ; COMPLETE COMMAND
+        CALL    GETLN     ; IN LINE MODE
+        CALL    DATA      ; GET ADDRESSES
+        CALL    CLRBF
+        POP     D         ; GET END ADDRESS
+        POP     H         ; GET START ADDRESS
+        PUSH    D         ; SAVE END ADDRESS
+        CALL    CRLF
+DIS2    CALL    PADDR     ; PRINT ADDRESS
+        MOV     B,M       ; GET INSTRUCTION
+        PUSH    H         ; SAVE ADDRESS
+;
+;       PROCESS 1, 2, AND 3 BYTE INSTRUCTIONS
+;
+        LXI     H,TABL1   ; IS IT 2 BYTE
+DIS3    MOV     A,M       ; INSTRUCTION?
+        CMP     B         ; 3 BYTES
+        JZ      DIS6      ; 2 BYTE INST.
+        CPI     0FFH
+        JZ      DIS4      ; CHECK IF 3 BYTES
+        INX     H
+        JMP     DIS3
+DIS4    INX     H         ; IS IT 3 BYTE
+        MOV     A,M       ; INSTRUCTION?
+        CPI     0FFH
+        JZ      DIS5      ; NO, 1 BYTE
+        CMP     B
+        JZ      DIS7      ; YES, PRINT REST
+        JMP     DIS4      ; OF INSTRUCTION
+;
+;       SINGLE BYTE INSTRUCTIONS
+;
+DIS5    POP     H         ; RESTORE ADDR
+        PUSH    H         ; SAVE AGAIN
+        LXI     D,BUFF+9  ; POINT TO BUFFER
+        MOV     A,M       ; GET BYTE
+        CALL    ASC       ; PUT IN BUFFER
+        CALL    MNEM      ; PUT IN MNEMONIC
+        LXI     D,BUFF+50 ; PUT ; IN BUFF
+        MVI     A,'*'
+        STAX    D
+        INX     D
+        POP     H         ; RESTORE ADDR
+        CALL    COM2      ; PRINT COMMENT
+        JMP     PAGE      ; CK END OF PAGE
+;
+;       2 BYTE INSTRUCTIONS
+;
+DIS6    POP     H         ; RESTORE ADDR
+        PUSH    H         ; SAVE AGAIN
+        LXI     D,BUFF+9  ; POINT TO BUFFER
+        MOV     A,M       ; GET BYTE
+        CALL    ASC       ; PUT IT IN BUFF
+        INX     D         ; SPACE
+        INX     H         ; NEXT BYTE
+        MOV     A,M
+        CALL    ASC       ; PUT IT IN BUFF
+        CALL    MNEM      ; PRINT MNEMONIC
+        POP     H
+        INX     H         ; PRINT NEXT BYTE
+        MOV     A,M       ; OF 2 BYTE INST.
+        CALL    ASC
+        LDA     BFLAG
+        ORA     A         ; CHECK BASE
+        JZ      XDIS0
+        MVI     A,'Q'
+        JMP     XDIS1
+XDIS0   MVI     A,'H'
+XDIS1   STAX    D
+        LXI     D,BUFF+50
+        MVI     A,'*'
+        STAX    D
+        INX     D
+        DCX     H         ; BACK UP
+        CALL    COM1      ; PRINT COMMENT
+        JMP     PAGE      ; CK END OF PAGE
+;
+;        3 BYTE INSTRUCTIONS
+;
+DIS7    POP     H         ; RESTORE ADDR
+        PUSH    H         ; SAVE AGAIN
+        LXI     D,BUFF+9  ; POINT TO BUFF
+        MOV     A,M       ; GET BYTE
+        CALL    ASC       ; PUT IT IN BUFF
+        INX     D         ; SPACE
+        INX     H         ; NEXT BYTE
+        MOV     A,M
+        CALL    ASC       ; PUT IT IN BUFF
+        INX     D
+        INX     H
+        MOV     A,M
+        CALL    ASC       ; 3RD BYTE IN BUFF
+        CALL    MNEM      ; PRINT MNEMONIC
+        POP     H
+        INX     H
+        INX     H         ; PRINT NEXT
+        MOV     A,M       ; 2 BYTES OF
+        CALL    ASC       ; 3 BYTE INST.
+        DCX     H
+        MOV     A,M
+        CALL    ASC       ; PRINT NXT BYTE
+        LDA     BFLAG
+        ORA     A         ; CHECK BASE
+        JZ      XDIS2
+        MVI     A,'A'
+        JMP     XDIS3
+XDIS2   MVI     A,'H'
+XDIS3   STAX    D
+        LXI     D,BUFF+50
+        MVI     A,'*'
+        STAX    D
+        INX     D
+        DCX     H
+        CALL    COM       ; PRINT COMMENTS
+;
+;        END OF PAGE CHECK
+;
+PAGE    PUSH    H
+        LXI     H,BUFF    ; PRINT CONTENTS
+        CALL    PSTRG     ; OF BUFFER
+        CALL    CLRBF
+        POP     H
+        CALL    CRLF
+        POP     D         ; RESTORE END ADDRESS
+        CALL    CPHD      ; END OF DISASSEMBLY?
+        JC      START     ; IF SO, EXIT
+        PUSH    D         ; SAVE DE AGAIN
+        JMP     DIS2      ; CONTINUE
+;
+;        PRINT MNEMONICS
+;
+MNEM    LXI     H,TABLA   ; LOOK UP OPCODE
+MNEM0   MOV     A,M       ; IN TABLE
+        CMP     B         ; IS THIS IT?
+        JZ      MNEM2     ; YES, PUT IN BUFF
+MNEM1   INX     H         ; NO, GET NEXT
+        MOV     A,M       ; OPCODE
+        CPI     4
+        JNZ     MNEM1
+        INX     H
+        JMP     MNEM0     ; TRY AGAIN
+MNEM2   INX     H         ; SKIP OVER OPCODE
+        LXI     D,BUFF+25 ; POINT TO BUFFER
+        MOV     A,M       ; GET FIRST CHAR.
+MNEM3   STAX    D         ; PUT IT IN BUFF
+        INX     H         ; GET NEXT CHAR
+        INX     D
+        MOV     A,M
+        CPI     8         ; CHECK FOR SPACES
+        CZ      SPAC
+        CPI     7
+        CZ      SPAC
+        CPI     6
+        CZ      SPAC
+        CPI     4         ; END OF MNEM.?
+        JNZ     MNEM3     ; NO, CONTINUE
+        RET               ;   YES, RETURN
+;
+;        PRINT SPACES
+;
+SPAC    PUSH    B
+        MOV     C,A       ; NO OF SPACES
+SPACE1  INX     D         ; "PRINT" A SPACE
+        DCR     C         ; END OF SPACES?
+        JNZ     SPACE1    ; NO, CONTINUE
+        POP     B         ; YES,
+        INX     H         ; GET NEXT CHAR
+        MOV     A,M
+        RET               ; RETURN
+;
+;        CLEAR BUFFER
+;
+CLRBF   MVI     D,54      ; SIZE OF BUFFER - 1
+BSIZE   EQU     $-1
+        LXI     H,BUFF
+CLRB1   MVI     M,20H     ; PUT SPACE IN BUFFER
+        INX     H
+        DCR     D
+        JNZ     CLRB1
+        MVI     M,4
+        RET
+;
+;        PRINT ASCII COMMENTS
+;
+COM     MOV     A,M       ; GET 1ST BYTE
+        CALL    COMA      ; PRINT IT
+        INX     H
+        INX     D
+COM1    MOV     A,M       ; GET BYTE
+        CALL    COMA      ; PRINT IT
+        INX     H
+        INX     D
+COM2    MOV     A,M       ; GET BYTE
+COMA    ANI     7FH       ; NO PARITY
+        PUSH    PSW
+        SUI     21H       ; CONTROL CHARS?
+        JP      COMA2
+        POP     PSW       ; IF SO, DON'T
+        RET               ;   PRINT THEM
+COMA2   POP     PSW
+        STAX    D         ; PUT IT IN BUFF
+        RET
+;
+;
+;        PRINT ADDRESS
+;
+PADDR   MOV     A,H       ; GET ADDR HI BYTE
+        LXI     D,BUFF
+        CALL    ASC       ; PRINT IT
+        LDA     BFLAG
+        ORA     A         ; TEST BASE
+        JZ      PADDR0    ; HEX, NO PERIOD
+        MVI     A,'.'     ; PRINT A PERIOD
+        STAX    D
+        INX     D
+PADDR0  MOV     A,L       ; GET LOW BYTE
+;       JMP     ASC       ; PRINT IT
+;
+;        BINARY TO ASCII CONVERSION ROUTINE
+;
+ASC     PUSH    PSW       ; SAVE BYTE
+        LDA     BFLAG
+        ORA     A         ; TEST BASE
+        JNZ     OASC      ; OCTAL
+        POP     PSW       ; RESTORE BYTE
+        PUSH    PSW       ; SAVE AGAIN
+        RRC               ;   MOVE HIGH NIBBLE
+        RRC               ;    DOWN
+        RRC
+        RRC
+        ANI     0FH       ; STRIP LOW NIBBLE
+        CALL    HASC      ; CONVERT TO ASCII
+        POP     PSW       ; RESTORE BYTE
+        ANI     0FH       ; STRIP HIGH NIBBLE
+HASC    ADI     90H       ; ASCII CONVERSION
+        DAA               ;    ROUTINE
+        ACI     40H
+        DAA
+        STAX    D
+        INX     D
+        RET
+OASC    POP     PSW       ; RESTORE BYTE
+        PUSH    PSW       ; SAVE AGAIN
+        RRC               ;   MOVE MOST
+        RRC               ;   SIGNIFICANT BITS
+        RRC               ;   DOWN
+        RRC
+        RRC
+        RRC
+        ANI     3         ; STRIP OTHER BITS
+        CALL    OASC0     ; CONVERT TO ASCII
+        POP     PSW       ; RESTORE BYTE
+        PUSH    PSW       ; SAVE IT
+        RRC               ;   MOVE 3 MIDDLE BITS
+        RRC               ;   DOWN
+        RRC
+        ANI     7         ; STRIP OTHER BITS
+        CALL    OASC0     ; CONVERT TO ASCII
+        POP     PSW       ; RESTORE BYTE
+        ANI     7         ; STRIP HIGH BITS
+OASC0   ADI     30H       ; ADD ASCII BIAS
+        STAX    D         ; PUT CHAR IN BUFF
+        INX     D
+        RET
+;
+;        STRING PRINTING ROUTINE
+;
+PSTRG   MOV     A,M       ; POINT TO STRING
+        CPI     4         ; END OF STRING?
+        RZ                ; YES, RETURN
+        CALL    OUTCH     ;   NO, PRINT CHAR
+        INX     H         ; MOVE TO NEXT CHAR
+        JMP     PSTRG
