@@ -1,9 +1,9 @@
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 1 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 1 - 08/05/2025 06:59:03 PM
 
 
     1/   0 :                            ; H89 CF Card Boot ROM - Disassembled from binary
     2/   0 :                            ;
-    3/   0 :                            ; Written by Rick Davis Jr
+    3/   0 :                            ; Written by Joe Travis
     4/   0 :                            ; See http://koyado.com/heathkit/New-H8-Website/h89-cf-serial-parallel-rtc.html
     5/   0 :                            
     6/   0 :                            ; Constants
@@ -61,7 +61,7 @@
    58/1045 :                            
    59/1045 : 0D 0A 42 4F 4F 54 20 43 46 MSG1    DB      CR,LF,"BOOT CF LOGICAL DRIVE (0-6)? <0> ",0
       104E : 20 4C 4F 47 49 43 41 4C 20
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 2 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 2 - 08/05/2025 06:59:03 PM
 
 
       1057 : 44 52 49 56 45 20 28 30 2D
@@ -124,7 +124,7 @@
   115/10E8 : CA AD 31                           JZ      31ADH           ; L37
   116/10EB : FE 43                              CPI     43H
   117/10ED : CA 0E 31                           JZ      310EH           ; L38
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 3 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 3 - 08/05/2025 06:59:03 PM
 
 
   118/10F0 : FE 63                              CPI     63H
@@ -187,7 +187,7 @@
   173/1175 : 0D                                 DCR     C
   174/1176 : C2 36 31                           JNZ     3136H           ; L28
   175/1179 : 3A 02 5A                           LDA     5A02H
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 4 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 4 - 08/05/2025 06:59:03 PM
 
 
   176/117C : 3D                                 DCR     A
@@ -250,7 +250,7 @@
   233/11F1 : 21 1F 20                           LXI     H,201FH
   234/11F4 : 36 C3                      L41     MVI     M,0C3H
   235/11F6 : 23                                 INX     H
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 5 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 5 - 08/05/2025 06:59:03 PM
 
 
   236/11F7 : 36 17                              MVI     M,17H
@@ -313,7 +313,7 @@
   293/1256 : C3 26 32                   L12     JMP     3226H           ; L10
   294/1259 :                            
   295/1259 : CD 31 32                   L19     CALL    3231H           ; L16
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 6 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 6 - 08/05/2025 06:59:03 PM
 
 
   296/125C : 3E 06                              MVI     A,06H
@@ -376,7 +376,7 @@
   353/12CD : CD 2C 32                           CALL    322CH           ; L7
   354/12D0 : 3E 07                              MVI     A,07H
   355/12D2 : CD 4D 32                           CALL    324DH           ; L12
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 7 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 7 - 08/05/2025 06:59:03 PM
 
 
   356/12D5 : CD 61 32                   L33     CALL    3261H           ; L13
@@ -439,7 +439,7 @@
   413/135E : A7                                 ANA     A
   414/135F : C2 65 33                           JNZ     3365H           ; L36
   415/1362 : 0E 80                              MVI     C,80H
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 8 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 8 - 08/05/2025 06:59:03 PM
 
 
   416/1364 : CD 95 32                   L24     CALL    3295H           ; L21
@@ -502,7 +502,7 @@
       14FE : 00 00 00 00 00 00 00 00 00
       1507 : 00 00 00 00 00 00 00 00 00
       1510 : 00 00 00 00 00 00 00 00 00
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 9 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 9 - 08/05/2025 06:59:03 PM
 
 
       1519 : 00 00 00 00 00 00 00 00 00
@@ -565,7 +565,7 @@
       171A : 00 00 00 00 00 00 00 00 00
       1723 : 00 00 00 00 00 00 00 00 00
       172C : 00 00 00 00 00 00 00 00 00
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 10 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 10 - 08/05/2025 06:59:03 PM
 
 
       1735 : 00 00 00 00 00 00 00 00 00
@@ -592,7 +592,7 @@
       17F2 : 00 00 00 00 00 00 00 00 00
       17FB : 00 00 00 00 00            
   432/1800 :                            
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 11 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 11 - 08/05/2025 06:59:03 PM
 
 
   Symbol Table (* = unused):
@@ -600,44 +600,44 @@
 
 *ARCHITECTURE :                                      "x86_64-unknown-linux" - |
  BELL :                           7 - | *CASESENSITIVE :                  0 - |
-*CONSTPI :        3.141592653589793 - |  CR :                            0D - |
- DATA :                        2036 - | *DATE :                "2024-05-24" - |
+*CONSTPI :     3.141592653589793239 - |  CR :                            0D - |
+ DATA :                        2036 - | *DATE :                "08/05/2025" - |
  DMOVE :                       18AA - |  DZERO :                       198A - |
-*FALSE :                          0 - | *HAS64 :                          1 - |
- IOA :                          640 - |  L1 :                          1033 C |
-*L10 :                         122F C | *L11 :                         123F C |
-*L12 :                         1256 C | *L13 :                         126A C |
-*L14 :                         12CA C | *L15 :                         1232 C |
-*L16 :                         123A C | *L17 :                         1285 C |
-*L18 :                         1223 C | *L19 :                         1259 C |
- L2 :                          103D C | *L20 :                         1226 C |
-*L21 :                         129E C | *L22 :                         12A9 C |
-*L23 :                         1373 C | *L24 :                         1364 C |
-*L25 :                         12B4 C | *L26 :                         1127 C |
-*L27 :                         1161 C | *L28 :                         113F C |
-*L29 :                         1187 C |  L3 :                          1027 C |
-*L30 :                         11C6 C | *L31 :                         1246 C |
-*L32 :                         1251 C | *L33 :                         12D5 C |
-*L34 :                         131F C | *L35 :                         1339 C |
-*L36 :                         136E C | *L37 :                         10D3 C |
-*L38 :                         1117 C | *L39 :                         115E C |
- L4 :                          1069 C | *L40 :                         1334 C |
-*L41 :                         11F4 C |  L5 :                          109B C |
- L6 :                          108A C | *L7 :                          1235 C |
-*L8 :                          1229 C | *L9 :                          122C C |
- LF :                            0A - | *LISTON :                         1 - |
-*MACEXP :                         7 - | *MOMCPU :                      8080 - |
-*MOMCPUNAME :                "8080" - |  MSG1 :                        1045 C |
-*NESTMAX :                      100 - |  RCC :                          3B2 - |
-*RELAXED :                        0 - | *TIME :               "09:53:02 PM" - |
-*TRUE :                           1 - |  VARS :                        2C80 - |
-*VERSION :                     142F - |  WCC :                          3C2 - |
-*Z80SYNTAX :                      0 - |
+*FALSE :                          0 - | *FLOATMAX :   1.18973149535725E4932 - |
+*HAS64 :                          1 - |  IOA :                          640 - |
+ L1 :                          1033 C | *L10 :                         122F C |
+*L11 :                         123F C | *L12 :                         1256 C |
+*L13 :                         126A C | *L14 :                         12CA C |
+*L15 :                         1232 C | *L16 :                         123A C |
+*L17 :                         1285 C | *L18 :                         1223 C |
+*L19 :                         1259 C |  L2 :                          103D C |
+*L20 :                         1226 C | *L21 :                         129E C |
+*L22 :                         12A9 C | *L23 :                         1373 C |
+*L24 :                         1364 C | *L25 :                         12B4 C |
+*L26 :                         1127 C | *L27 :                         1161 C |
+*L28 :                         113F C | *L29 :                         1187 C |
+ L3 :                          1027 C | *L30 :                         11C6 C |
+*L31 :                         1246 C | *L32 :                         1251 C |
+*L33 :                         12D5 C | *L34 :                         131F C |
+*L35 :                         1339 C | *L36 :                         136E C |
+*L37 :                         10D3 C | *L38 :                         1117 C |
+*L39 :                         115E C |  L4 :                          1069 C |
+*L40 :                         1334 C | *L41 :                         11F4 C |
+ L5 :                          109B C |  L6 :                          108A C |
+*L7 :                          1235 C | *L8 :                          1229 C |
+*L9 :                          122C C |  LF :                            0A - |
+*LISTON :                         1 - | *MACEXP :                         7 - |
+*MOMCPU :                      8080 - | *MOMCPUNAME :                "8080" - |
+ MSG1 :                        1045 C | *NESTMAX :                      100 - |
+ RCC :                          3B2 - | *RELAXED :                        0 - |
+*TIME :               "06:59:03 PM" - | *TRUE :                           1 - |
+ VARS :                        2C80 - | *VERSION :                     142F - |
+ WCC :                          3C2 - | *Z80SYNTAX :                      0 - |
 
-     68 symbols
-     51 unused symbols
+     69 symbols
+     52 unused symbols
 
- AS V1.42 Beta [Bld 269] - Source File bootcf89.asm - Page 12 - 2024-05-24 09:53:02 PM
+ AS V1.42 Beta [Bld 288] - Source File bootcf89.asm - Page 12 - 08/05/2025 06:59:03 PM
 
 
   Code Pages:

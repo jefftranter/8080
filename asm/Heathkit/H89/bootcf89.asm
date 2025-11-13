@@ -1,6 +1,6 @@
 ; H89 CF Card Boot ROM - Disassembled from binary
 ;
-; Written by Rick Davis Jr
+; Written by Joe Travis
 ; See http://koyado.com/heathkit/New-H8-Website/h89-cf-serial-parallel-rtc.html
 
 ; Constants
