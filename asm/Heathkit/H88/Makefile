@@ -22,7 +22,7 @@ test.hex: test.p
 	p2hex -F Intel test.p
 
 xdemo.bin: xdemo.asm
-	asmx -l -h -b0x2040 -C8080 -lxdemo.lst -oxdemo.bin xdemo.asm
+	asmx -O -l -h -b0x2040 -C8080 -lxdemo.lst -oxdemo.bin xdemo.asm
 
 test.bin: test.p
 	p2bin -r '$$-$$' test.p
