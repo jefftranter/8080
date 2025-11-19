@@ -1,0 +1,115 @@
+                        *** **************************************************
+                        *
+                        *       DEMO: MTR-88
+                        *
+                        *       SYSTEM DEFINITIONS
+                        *
+      = 025E            ALARM   EQU     2136A          ;MAKE NOISE
+      = 03C2            WCC     EQU     3302A          ;WRITE CHAR TO CONSOLE
+      = 2008            .MFLAG   EQU    40010A         ;USER FLAG OPTIONS
+      = 201F            UIVEC   EQU     40037A         ;USER INTERRUPT VECTOR
+      = 0001            UO.CLK  EQU     1A             ;ALLOW CLOCK INTERRUPT PROCESSING
+      = 00C3            MI.JMP  EQU     303A           ;MACHINE INSTRUCTION JUMP
+      = 0336            IOB     EQU     3066A          ;INPUT OCTAL BYTE
+      = 05E3            TOB     EQU     5343A          ;TYPE OCTAL BYTE
+
+      = 001B            ESC     EQU     33A
+      = 000D            CR      EQU     15A
+      = 000A            LF      EQU     12A
+
+2040                            ORG     40100A
+
+                        *** **************************************************
+                        *
+                        *       ERASE SCREEN
+                        *
+2040  3E 1B             MTR88   MVI     A,ESC          ;ESCAPE SEQUENCE TO
+2042  CD C203                   CALL    WCC
+2045  3E 45                     MVI     A,'E'              ;ERASE SCREEN
+2047  CD C203                   CALL    WCC
+
+                        *** **************************************************
+                        *
+                        *       READ A OCTAL INTEGER FROM KEYBOARD
+                        *          STORE THE NUMBER.
+                        *
+204A  21 9C20                   LXI     H,NUMBER       ;GET ADDRESS OF NUMBER
+204D  A7                        ANA     A              ;CLEAR CARRY (SIDE EFFECT)
+204E  CD 3603                   CALL    IOB            ;INPUT OCTAL BYTE
+2051  CD 9320                   CALL    SETICK         ;SETUP TICK TO 500 FOR ONE SEC
+
+                        *** **************************************************
+                        *
+                        *       INITIALIZE SERVICE INTERRUPT ROUTINE
+                        *          LOAD THE USER INTERRUPT VECTOR (UIVEC) WITH A
+                        *          JUMP INSTRUCTION AND THE ADDRESS OF THE SERVICE
+                        *          ROUTINE.  ENABLE USER CLOCK INTERRUPT!
+                        *
+2054  3E C3                     MVI     A,MI.JMP       ;SET-UP JUMP INSTRUCTION
+2056  32 1F20                   STA     UIVEC          ;STORE 'JMP' INSTRUCTION
+2059  21 7520                   LXI     H,INTRP           ;USER INTERRUPT ADDRESS
+205C  22 2020                   SHLD    UIVEC+1              ;POSITIONED
+205F  3E 01                     MVI     A,UO.CLK
+2061  32 0820                   STA     .MFLAG         ;ENABLE CLOCK INTERRUPT
+
+                        *** **************************************************
+                        *
+                        *       WAIT FOR CLOCK TO REACH ZERO
+                        *
+2064  3A 9C20           LOOP    LDA     NUMBER         ;DO NOTHING LOOP.
+2067  FE 00                     CPI     0                 ;WAIT FOR END
+2069  C2 6420                   JNZ     LOOP              ;OF COUNT DOWN.
+
+                        *** **************************************************
+                        *
+                        *       RETURN TO NORMAL INTERRUPT STATUS & HALT
+                        *          DISABLE INTERRUPT & TURN ON SPEAKER
+                        *
+206C  3E 00                     MVI     A,0
+206E  32 0820                   STA     .MFLAG         ;DISABLE CLOCK INTERRUPT
+2071  CD 5E02                   CALL    ALARM
+2074  76                        HLT
+
+                        *** **************************************************
+                        *
+                        *       INTERRUPT ROUTINE
+                        *          CLOCK AND DISPLAY INTERRUPT
+                        *
+2075  2A 9A20           INTRP   LHLD    TICK           ;GET COUNT (BETWEEN 0 & 500)
+2078  2B                        DCX     H              ;TICK=TICK-1
+2079  22 9A20                   SHLD    TICK           ;STORE COUNT
+207C  7D                        MOV     A,L            ;TEST FOR ZERO
+207D  B4                        ORA     H                 ;COMPARE WITH 'H'
+207E  C0                        RNE                        EXIT;IF .NE. 0
+
+                        *** **************************************************
+                        *
+                        *       UPDATE DISPLAY FOR 'NEW' NUMBER.
+                        *
+207F  3E 0D                     MVI     A,CR           ;DO CARRIAGE RETURN
+2081  CD C203                   CALL    WCC
+2084  3E 0A                     MVI     A,LF              ;AND LINE FEED
+2086  CD C203                   CALL    WCC
+2089  3A 9C20                   LDA     NUMBER         ;GET NUMBER
+208C  3D                        DCR     A              ;NUMBER=NUMBER-1
+208D  32 9C20                   STA     NUMBER         ;SAVE NUMBER
+2090  CD E305                   CALL    TOB            ;TYPE OCTAL BYTE
+2093  21 F401           SETICK  LXI     H,500          ;RESTORE COUNT
+2096  22 9A20                   SHLD    TICK             ;WITH 500
+2099  C9                        RET
+
+                        *       STORAGE AREA & END ASSEMBLY
+209A   (0002)           TICK    DS      2
+209C   (0001)           NUMBER  DS      1
+209D   (2040)                   END     MTR88
+
+00000 Total Errors
+00000 Total Warnings
+
+.DATE.             0001 E  .MFLAG             2008 E  .TIME.             0002 E
+ALARM              025E E  CR                 000D E  ESC                001B E
+INTRP              2075    IOB                0336 E  LF                 000A E
+LOOP               2064    MI.JMP             00C3 E  MTR88              2040
+NUMBER             209C    SETICK             2093    TICK               209A
+TOB                05E3 E  UIVEC              201F E  UO.CLK             0001 E
+WCC                03C2 E

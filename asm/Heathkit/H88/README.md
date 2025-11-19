@@ -53,6 +53,10 @@ Unused code was filled with zeroes to match the original ROM binaries.
 A few obvious spelling and grammatical errors in comments have been
 corrected.
 
+The file xdemo.asm is a version of demo.asm that can be assembled
+using the asmx assembler. The code matches the source in the Heathkit
+manual.
+
 References:
 
 https://sebhc.github.io/sebhc/documentation/software/roms/Heath_595-2349_MTR-88_Listing.pdf
@@ -60,3 +64,5 @@ https://sebhc.github.io/sebhc/documentation/software/roms/Heath_595-2349_MTR-88_
 https://heathkit.garlanger.com/software/OSes/HDOS/2.0/Manual/595-2349_Volume-2_Chapter-3_Monitor_MTR-88.pdf
 
 http://john.ccac.rwth-aachen.de:8000/as/
+
+https://github.com/mgarlanger/asmx/

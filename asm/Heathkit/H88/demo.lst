@@ -1,159 +1,114 @@
- AS V1.42 Beta [Bld 269] - Source File demo.asm - Page 1 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 288] - Source File demo.asm - Page 1 - 11/19/2025 11:14:01 AM
 
 
-    1/      0 :                         ;                               APPENDIX B
-    2/      0 :                         ;                              MTR-88 DEMO
-    3/      0 :                         ; 
-    4/      0 :                         ; The sample program that follows shows some of the advanced features
-    5/      0 :                         ; that are available to you with MTR-88. The program is not designed to
-    6/      0 :                         ; be efficient or particularly useful by itself. It uses the H88 clock,
-    7/      0 :                         ; console terminal, and interrupt capability to create an accurate
-    8/      0 :                         ; interval timer that will time up to 377(octal) seconds. When the
-    9/      0 :                         ; interval ends, the H88 audio alarm is sounded.
-   10/      0 :                         ; 
-   11/      0 :                         ; Use the H89 keyboard and the "Substitute" command to enter the machine
-   12/      0 :                         ; code and start the program. You will also use the keyboard to enter
-   13/      0 :                         ; the octal time.
-   14/      0 :                         ; 
-   15/      0 :                         ; The demo uses the MTR-88 firmware (program in a ROM) for most of the
-   16/      0 :                         ; working routines, and you should look up the details of these routines
-   17/      0 :                         ; (in Appendix A). The listing of the demo was prepared using the text
-   18/      0 :                         ; editor and assembler that are available for the H88. However, the
-   19/      0 :                         ; program should be loaded by hand using the "Substitute" command.
-   20/      0 :                         ; 
-   21/      0 :                         ;                           THE SAMPLE PROGRAM
-   22/      0 :                         ; 
-   23/      0 :                         ; This program initially blanks out the screen and then waits for you
-   24/      0 :                         ; to enter an octal value. The MTR-88 routine WCC is used to send the
-   25/      0 :                         ; characters to the screen, and IOB is used to Input an Octal Byte.
-   26/      0 :                         ; 
-   27/      0 :                         ; The most subtle part of the program is the interrupt processing.
-   28/      0 :                         ; First, a jump to the interrupt processor is planted in UIVEC to allow
-   29/      0 :                         ; processing of the clock interrupts. Then .MFLAG is set so MTR-88 will
-   30/      0 :                         ; pass interrupts to the program. Finally, interrupts are enabled.
-   31/      0 :                         ; 
-   32/      0 :                         ; The main part of the program is a "do-nothing" loop that waits for the
-   33/      0 :                         ; time to count down to zero. When the time is exhausted, the program
-   34/      0 :                         ; restores the original state of .MFLAG and stops.
-   35/      0 :                         ; 
-   36/      0 :                         ; The interrupt processor keeps its own local TICCNT and counts it down
-   37/      0 :                         ; from 500. When this count reaches zero, one second has elapses and the
-   38/      0 :                         ; new reduced time is displayed on the screen using TOB (Type Octal
-   39/      0 :                         ; Byte). The local TICCNT is reset to 500. When the time is exhausted,
-   40/      0 :                         ; the main program stops clock processing, so the processor is not
-   41/      0 :                         ; called again.
-   42/      0 :                         
-   43/      0 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   44/      0 :                         ;
-   45/      0 :                         ;       DEMO: MTR-88
-   46/      0 :                         ;
-   47/      0 :                         ;       SYSTEM DEFINITIONS
-   48/      0 :                         ;
-   49/      0 : =2.136O                 ALARM   EQU     1136Q           ; MAKE NOISE
-   50/      0 : =3.302O                 WCC     EQU     1702Q           ; WRITE CHAR TO CONSOLE
-   51/      0 : =40.010O                MFLAG   EQU     20010Q          ; USER FLAG OPTIONS
-   52/      0 : =40.037O                UIVEC   EQU     20037Q          ; USER INTERRUPT VECTOR
-   53/      0 : =1O                     UO.CLK  EQU     1Q              ; ALLOW CLOCK INTERRUPT PROCESSING
-   54/      0 : =303O                   MI.JMP  EQU     303Q            ; MACHINE INSTRUCTION JUMP
-   55/      0 : =3.066O                 IOB     EQU     1466Q           ; INPUT OCTAL BYTE
-   56/      0 : =5.343O                 TOB     EQU     2743Q           ; TYPE OCTAL BYTE
-   57/      0 :                         
-   58/      0 : =33O                    ESC     EQU     33Q
-   59/      0 : =15O                    CR      EQU     15Q
-   60/      0 : =12O                    LF      EQU     12Q
- AS V1.42 Beta [Bld 269] - Source File demo.asm - Page 2 - 2024-05-01 01:09:38 PM
+    1/      0 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    2/      0 :                         ;
+    3/      0 :                         ;       DEMO: MTR-88
+    4/      0 :                         ;
+    5/      0 :                         ;       SYSTEM DEFINITIONS
+    6/      0 :                         ;
+    7/      0 : =2.136O                 ALARM   EQU     1136Q           ; MAKE NOISE
+    8/      0 : =3.302O                 WCC     EQU     1702Q           ; WRITE CHAR TO CONSOLE
+    9/      0 : =40.010O                MFLAG   EQU     20010Q          ; USER FLAG OPTIONS
+   10/      0 : =40.037O                UIVEC   EQU     20037Q          ; USER INTERRUPT VECTOR
+   11/      0 : =1O                     UO.CLK  EQU     1Q              ; ALLOW CLOCK INTERRUPT PROCESSING
+   12/      0 : =303O                   MI.JMP  EQU     303Q            ; MACHINE INSTRUCTION JUMP
+   13/      0 : =3.066O                 IOB     EQU     1466Q           ; INPUT OCTAL BYTE
+   14/      0 : =5.343O                 TOB     EQU     2743Q           ; TYPE OCTAL BYTE
+   15/      0 :                         
+   16/      0 : =33O                    ESC     EQU     33Q
+   17/      0 : =15O                    CR      EQU     15Q
+   18/      0 : =12O                    LF      EQU     12Q
+   19/      0 :                         
+   20/ 40.100 :                                 ORG     20100Q
+   21/ 40.100 :                         
+   22/ 40.100 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   23/ 40.100 :                         ;
+   24/ 40.100 :                         ;       ERASE SCREEN
+   25/ 40.100 :                         ;
+   26/ 40.100 : 076 033                 MTR88   MVI     A,ESC           ; ESCAPE SEQUENCE TO
+   27/ 40.102 : 315 302 003                     CALL    WCC
+   28/ 40.105 : 076 105                         MVI     A,'E'           ;     ERASE SCREEN
+   29/ 40.107 : 315 302 003                     CALL    WCC
+   30/ 40.112 :                         
+   31/ 40.112 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   32/ 40.112 :                         ;
+   33/ 40.112 :                         ;       READ A OCTAL INTEGER FROM KEYBOARD
+   34/ 40.112 :                         ;          STORE THE NUMBER.
+   35/ 40.112 :                         ;
+   36/ 40.112 : 041 234 040                     LXI     H,NUMBER        ; GET ADDRESS OF NUMBER
+   37/ 40.115 : 247                             ANA     A               ; CLEAR CARRY (SIDE EFFECT)
+   38/ 40.116 : 315 066 003                     CALL    IOB             ; INPUT OCTAL BYTE
+   39/ 40.121 : 315 223 040                     CALL    SETICK          ; SETUP TICK TO 500 FOR ONE SEC
+   40/ 40.124 :                         
+   41/ 40.124 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   42/ 40.124 :                         ;
+   43/ 40.124 :                         ;       INITIALIZE SERVICE INTERRUPT ROUTINE
+   44/ 40.124 :                         ;          LOAD THE USER INTERRUPT VECTOR (UIVEC) WITH A
+   45/ 40.124 :                         ;          JUMP INSTRUCTION AND THE ADDRESS OF THE SERVICE
+   46/ 40.124 :                         ;          ROUTINE.  ENABLE USER CLOCK INTERRUPT!
+   47/ 40.124 :                         ;
+   48/ 40.124 : 076 303                         MVI     A,MI.JMP        ; SET-UP JUMP INSTRUCTION
+   49/ 40.126 : 062 037 040                     STA     UIVEC           ; STORE 'JMP' INSTRUCTION
+   50/ 40.131 : 041 165 040                     LXI     H,INTRP         ;    USER INTERRUPT ADDRESS
+   51/ 40.134 : 042 040 040                     SHLD    UIVEC+1         ;       POSITIONED
+   52/ 40.137 : 076 001                         MVI     A,UO.CLK
+   53/ 40.141 : 062 010 040                     STA     MFLAG           ; ENABLE CLOCK INTERRUPT
+   54/ 40.144 :                         
+   55/ 40.144 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   56/ 40.144 :                         ;
+   57/ 40.144 :                         ;       WAIT FOR CLOCK TO REACH ZERO
+   58/ 40.144 :                         ;
+   59/ 40.144 : 072 234 040             LOOP    LDA     NUMBER          ; DO NOTHING LOOP.
+   60/ 40.147 : 376 000                         CPI     0               ;    WAIT FOR END
+ AS V1.42 Beta [Bld 288] - Source File demo.asm - Page 2 - 11/19/2025 11:14:01 AM
 
 
-   61/      0 :                         
-   62/ 40.100 :                                 ORG     20100Q
-   63/ 40.100 :                         
-   64/ 40.100 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   65/ 40.100 :                         ;
-   66/ 40.100 :                         ;       ERASE SCREEN
-   67/ 40.100 :                         ;
-   68/ 40.100 : 076 033                 MTR88   MVI     A,ESC           ; ESCAPE SEQUENCE TO
-   69/ 40.102 : 315 302 003                     CALL    WCC
-   70/ 40.105 : 076 105                         MVI     A,'E'           ;     ERASE SCREEN
-   71/ 40.107 : 315 302 003                     CALL    WCC
-   72/ 40.112 :                         
-   73/ 40.112 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   74/ 40.112 :                         ;
-   75/ 40.112 :                         ;       READ A OCTAL INTEGER FROM KEYBOARD
-   76/ 40.112 :                         ;          STORE THE NUMBER.
-   77/ 40.112 :                         ;
-   78/ 40.112 : 041 234 040                     LXI     H,NUMBER        ; GET ADDRESS OF NUMBER
-   79/ 40.115 : 247                             ANA     A               ; CLEAR CARRY (SIDE EFFECT)
-   80/ 40.116 : 315 066 003                     CALL    IOB             ; INPUT OCTAL BYTE
-   81/ 40.121 : 315 223 040                     CALL    SETICK          ; SETUP TICK TO 500 FOR ONE SEC
-   82/ 40.124 :                         
-   83/ 40.124 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   84/ 40.124 :                         ;
-   85/ 40.124 :                         ;       INITIALIZE SERVICE INTERRUPT ROUTINE
-   86/ 40.124 :                         ;          LOAD THE USER INTERRUPT VECTOR (UIVEC) WITH A
-   87/ 40.124 :                         ;          JUMP INSTRUCTION AND THE ADDRESS OF THE SERVICE
-   88/ 40.124 :                         ;          ROUTINE.  ENABLE USER CLOCK INTERRUPT!
-   89/ 40.124 :                         ;
-   90/ 40.124 : 076 303                         MVI     A,MI.JMP        ; SET-UP JUMP INSTRUCTION
-   91/ 40.126 : 062 037 040                     STA     UIVEC           ; STORE 'JMP' INSTRUCTION
-   92/ 40.131 : 041 165 040                     LXI     H,INTRP         ;    USER INTERRUPT ADDRESS
-   93/ 40.134 : 042 040 040                     SHLD    UIVEC+1         ;       POSITIONED
-   94/ 40.137 : 076 001                         MVI     A,UO.CLK
-   95/ 40.141 : 062 010 040                     STA     MFLAG           ; ENABLE CLOCK INTERRUPT
-   96/ 40.144 :                         
-   97/ 40.144 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   98/ 40.144 :                         ;
-   99/ 40.144 :                         ;       WAIT FOR CLOCK TO REACH ZERO
-  100/ 40.144 :                         ;
-  101/ 40.144 : 072 234 040             LOOP    LDA     NUMBER          ; DO NOTHING LOOP.
-  102/ 40.147 : 376 000                         CPI     0               ;    WAIT FOR END
-  103/ 40.151 : 302 144 040                     JNZ     LOOP            ;    OF COUNT DOWN.
-  104/ 40.154 :                         
-  105/ 40.154 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  106/ 40.154 :                         ;
-  107/ 40.154 :                         ;       RETURN TO NORMAL INTERRUPT STATUS & HALT
-  108/ 40.154 :                         ;          DISABLE INTERRUPT & TURN ON SPEAKER
-  109/ 40.154 :                         ;
-  110/ 40.154 : 076 000                         MVI     A,0
-  111/ 40.156 : 062 010 040                     STA     MFLAG           ; DISABLE CLOCK INTERRUPT
-  112/ 40.161 : 315 136 002                     CALL    ALARM
-  113/ 40.164 : 166                             HLT
-  114/ 40.165 :                         
-  115/ 40.165 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  116/ 40.165 :                         ;
-  117/ 40.165 :                         ;       INTERRUPT ROUTINE
-  118/ 40.165 :                         ;          CLOCK AND DISPLAY INTERRUPT
-  119/ 40.165 :                         ;
-  120/ 40.165 : 052 232 040             INTRP   LHLD    TICK            ; GET COUNT (BETWEEN 0 & 500)
- AS V1.42 Beta [Bld 269] - Source File demo.asm - Page 3 - 2024-05-01 01:09:38 PM
-
-
-  121/ 40.170 : 053                             DCX     H               ; TICK=TICK-1
-  122/ 40.171 : 042 232 040                     SHLD    TICK            ; STORE COUNT
-  123/ 40.174 : 175                             MOV     A,L             ; TEST FOR ZERO
-  124/ 40.175 : 264                             ORA     H               ;    COMPARE WITH 'H'
-  125/ 40.176 : 300                             RNZ                     ;    EXIT IF .NE. 0
-  126/ 40.177 :                         
-  127/ 40.177 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  128/ 40.177 :                         ;
-  129/ 40.177 :                         ;       UPDATE DISPLAY FOR 'NEW' NUMBER.
-  130/ 40.177 :                         ;
-  131/ 40.177 : 076 015                         MVI     A,CR            ; DO CARRIAGE RETURN
-  132/ 40.201 : 315 302 003                     CALL    WCC
-  133/ 40.204 : 076 012                         MVI     A,LF            ;    AND LINE FEED
-  134/ 40.206 : 315 302 003                     CALL    WCC
-  135/ 40.211 : 072 234 040                     LDA     NUMBER          ; GET NUMBER
-  136/ 40.214 : 075                             DCR     A               ; NUMBER=NUMBER-1
-  137/ 40.215 : 062 234 040                     STA     NUMBER          ; SAVE NUMBER
-  138/ 40.220 : 315 343 005                     CALL    TOB             ; TYPE OCTAL BYTE
-  139/ 40.223 : 041 364 001             SETICK  LXI     H,500           ; RESTORE COUNT
-  140/ 40.226 : 042 232 040                     SHLD    TICK            ;   WITH 500
-  141/ 40.231 : 311                             RET
-  142/ 40.232 :                         
-  143/ 40.232 :                         ;       STORAGE AREA & END ASSEMBLY
-  144/ 40.232 :                         TICK    DS      2
-  145/ 40.234 :                         NUMBER  DS      1
-  146/ 40.235 :                                 END
- AS V1.42 Beta [Bld 269] - Source File demo.asm - Page 4 - 2024-05-01 01:09:38 PM
+   61/ 40.151 : 302 144 040                     JNZ     LOOP            ;    OF COUNT DOWN.
+   62/ 40.154 :                         
+   63/ 40.154 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   64/ 40.154 :                         ;
+   65/ 40.154 :                         ;       RETURN TO NORMAL INTERRUPT STATUS & HALT
+   66/ 40.154 :                         ;          DISABLE INTERRUPT & TURN ON SPEAKER
+   67/ 40.154 :                         ;
+   68/ 40.154 : 076 000                         MVI     A,0
+   69/ 40.156 : 062 010 040                     STA     MFLAG           ; DISABLE CLOCK INTERRUPT
+   70/ 40.161 : 315 136 002                     CALL    ALARM
+   71/ 40.164 : 166                             HLT
+   72/ 40.165 :                         
+   73/ 40.165 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   74/ 40.165 :                         ;
+   75/ 40.165 :                         ;       INTERRUPT ROUTINE
+   76/ 40.165 :                         ;          CLOCK AND DISPLAY INTERRUPT
+   77/ 40.165 :                         ;
+   78/ 40.165 : 052 232 040             INTRP   LHLD    TICK            ; GET COUNT (BETWEEN 0 & 500)
+   79/ 40.170 : 053                             DCX     H               ; TICK=TICK-1
+   80/ 40.171 : 042 232 040                     SHLD    TICK            ; STORE COUNT
+   81/ 40.174 : 175                             MOV     A,L             ; TEST FOR ZERO
+   82/ 40.175 : 264                             ORA     H               ;    COMPARE WITH 'H'
+   83/ 40.176 : 300                             RNZ                     ;    EXIT IF .NE. 0
+   84/ 40.177 :                         
+   85/ 40.177 :                         ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   86/ 40.177 :                         ;
+   87/ 40.177 :                         ;       UPDATE DISPLAY FOR 'NEW' NUMBER.
+   88/ 40.177 :                         ;
+   89/ 40.177 : 076 015                         MVI     A,CR            ; DO CARRIAGE RETURN
+   90/ 40.201 : 315 302 003                     CALL    WCC
+   91/ 40.204 : 076 012                         MVI     A,LF            ;    AND LINE FEED
+   92/ 40.206 : 315 302 003                     CALL    WCC
+   93/ 40.211 : 072 234 040                     LDA     NUMBER          ; GET NUMBER
+   94/ 40.214 : 075                             DCR     A               ; NUMBER=NUMBER-1
+   95/ 40.215 : 062 234 040                     STA     NUMBER          ; SAVE NUMBER
+   96/ 40.220 : 315 343 005                     CALL    TOB             ; TYPE OCTAL BYTE
+   97/ 40.223 : 041 364 001             SETICK  LXI     H,500           ; RESTORE COUNT
+   98/ 40.226 : 042 232 040                     SHLD    TICK            ;   WITH 500
+   99/ 40.231 : 311                             RET
+  100/ 40.232 :                         
+  101/ 40.232 :                         ;       STORAGE AREA & END ASSEMBLY
+  102/ 40.232 :                         TICK    DS      2
+  103/ 40.234 :                         NUMBER  DS      1
+  104/ 40.235 :                                 END
+ AS V1.42 Beta [Bld 288] - Source File demo.asm - Page 3 - 11/19/2025 11:14:01 AM
 
 
   Symbol Table (* = unused):
@@ -161,27 +116,27 @@
 
  ALARM :                      2.136 - |
 *ARCHITECTURE :                                      "x86_64-unknown-linux" - |
-*CASESENSITIVE :                  0 - | *CONSTPI :        3.141592653589793 - |
- CR :                            15 - | *DATE :                "2024-05-01" - |
+*CASESENSITIVE :                  0 - | *CONSTPI :     3.141592653589793239 - |
+ CR :                            15 - | *DATE :                "11/19/2025" - |
  ESC :                           33 - | *FALSE :                          0 - |
-*HAS64 :                          1 - |  INTRP :                     40.165 C |
- IOB :                        3.066 - |  LF :                            12 - |
-*LISTON :                         1 - |  LOOP :                      40.144 C |
-*MACEXP :                         7 - |  MFLAG :                     40.010 - |
- MI.JMP :                       303 - | *MOMCPU :                   200.200 - |
-*MOMCPUNAME :                "8080" - | *MTR88 :                     40.100 C |
-*NESTMAX :                    1.000 - |  NUMBER :                    40.234 C |
-*RELAXED :                        0 - |  SETICK :                    40.223 C |
- TICK :                      40.232 C | *TIME :               "01:09:38 PM" - |
- TOB :                        5.343 - | *TRUE :                           1 - |
- UIVEC :                     40.037 - |  UO.CLK :                         1 - |
-*VERSION :                   24.057 - |  WCC :                        3.302 - |
-*Z80SYNTAX :                      0 - |
+*FLOATMAX :   1.18973149535725E4932 - | *HAS64 :                          1 - |
+ INTRP :                     40.165 C |  IOB :                        3.066 - |
+ LF :                            12 - | *LISTON :                         1 - |
+ LOOP :                      40.144 C | *MACEXP :                         7 - |
+ MFLAG :                     40.010 - |  MI.JMP :                       303 - |
+*MOMCPU :                   200.200 - | *MOMCPUNAME :                "8080" - |
+*MTR88 :                     40.100 C | *NESTMAX :                    1.000 - |
+ NUMBER :                    40.234 C | *RELAXED :                        0 - |
+ SETICK :                    40.223 C |  TICK :                      40.232 C |
+*TIME :               "11:14:01 AM" - |  TOB :                        5.343 - |
+*TRUE :                           1 - |  UIVEC :                     40.037 - |
+ UO.CLK :                         1 - | *VERSION :                   24.057 - |
+ WCC :                        3.302 - | *Z80SYNTAX :                      0 - |
 
-     33 symbols
-     17 unused symbols
+     34 symbols
+     18 unused symbols
 
- AS V1.42 Beta [Bld 269] - Source File demo.asm - Page 5 - 2024-05-01 01:09:38 PM
+ AS V1.42 Beta [Bld 288] - Source File demo.asm - Page 4 - 11/19/2025 11:14:01 AM
 
 
   Code Pages:
@@ -191,9 +146,9 @@ STANDARD (0 changed characters)
 
 1 code page
 
-0.01 seconds assembly time
+0.00 seconds assembly time
 
-    147 lines source file
+    105 lines source file
       2 passes
       0 errors
       0 warnings
