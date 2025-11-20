@@ -23,20 +23,20 @@
                         *
                         *       ERASE SCREEN
                         *
-040.1076 33             MTR88   MVI     A,ESC          ;ESCAPE SEQUENCE TO
-040.10315 30203                 CALL    WCC
-040.1076 105                    MVI     A,'E'              ;ERASE SCREEN
-040.10315 30203                 CALL    WCC
+040.100  076  033       MTR88   MVI     A,ESC          ;ESCAPE SEQUENCE TO
+040.102  315  302 003           CALL    WCC
+040.105  076  105               MVI     A,'E'              ;ERASE SCREEN
+040.107  315  302 003           CALL    WCC
 
                         *** **************************************************
                         *
                         *       READ A OCTAL INTEGER FROM KEYBOARD
                         *          STORE THE NUMBER.
                         *
-040.1141 23440                  LXI     H,NUMBER       ;GET ADDRESS OF NUMBER
-040.11247                       ANA     A              ;CLEAR CARRY (SIDE EFFECT)
-040.11315 6603                  CALL    IOB            ;INPUT OCTAL BYTE
-040.12315 22340                 CALL    SETICK         ;SETUP TICK TO 500 FOR ONE SEC
+040.112  041  234 040           LXI     H,NUMBER       ;GET ADDRESS OF NUMBER
+040.115  247                    ANA     A              ;CLEAR CARRY (SIDE EFFECT)
+040.116  315  066 003           CALL    IOB            ;INPUT OCTAL BYTE
+040.121  315  223 040           CALL    SETICK         ;SETUP TICK TO 500 FOR ONE SEC
 
                         *** **************************************************
                         *
@@ -45,58 +45,58 @@
                         *          JUMP INSTRUCTION AND THE ADDRESS OF THE SERVICE
                         *          ROUTINE.  ENABLE USER CLOCK INTERRUPT!
                         *
-040.1276 303                    MVI     A,MI.JMP       ;SET-UP JUMP INSTRUCTION
-040.1262 3740                   STA     UIVEC          ;STORE 'JMP' INSTRUCTION
-040.1341 16540                  LXI     H,INTRP           ;USER INTERRUPT ADDRESS
-040.1342 4040                   SHLD    UIVEC+1              ;POSITIONED
-040.1376 01                     MVI     A,UO.CLK
-040.1462 1040                   STA     .MFLAG         ;ENABLE CLOCK INTERRUPT
+040.124  076  303               MVI     A,MI.JMP       ;SET-UP JUMP INSTRUCTION
+040.126  062  037 040           STA     UIVEC          ;STORE 'JMP' INSTRUCTION
+040.131  041  165 040           LXI     H,INTRP           ;USER INTERRUPT ADDRESS
+040.134  042  040 040           SHLD    UIVEC+1              ;POSITIONED
+040.137  076  001               MVI     A,UO.CLK
+040.141  062  010 040           STA     .MFLAG         ;ENABLE CLOCK INTERRUPT
 
                         *** **************************************************
                         *
                         *       WAIT FOR CLOCK TO REACH ZERO
                         *
-040.1472 23440          LOOP    LDA     NUMBER         ;DO NOTHING LOOP.
-040.14376 00                    CPI     0                 ;WAIT FOR END
-040.15302 14440                 JNZ     LOOP              ;OF COUNT DOWN.
+040.144  072  234 040   LOOP    LDA     NUMBER         ;DO NOTHING LOOP.
+040.147  376  000               CPI     0                 ;WAIT FOR END
+040.151  302  144 040           JNZ     LOOP              ;OF COUNT DOWN.
 
                         *** **************************************************
                         *
                         *       RETURN TO NORMAL INTERRUPT STATUS & HALT
                         *          DISABLE INTERRUPT & TURN ON SPEAKER
                         *
-040.1576 00                     MVI     A,0
-040.1562 1040                   STA     .MFLAG         ;DISABLE CLOCK INTERRUPT
-040.16315 13602                 CALL    ALARM
-040.16166                       HLT
+040.154  076  000               MVI     A,0
+040.156  062  010 040           STA     .MFLAG         ;DISABLE CLOCK INTERRUPT
+040.161  315  136 002           CALL    ALARM
+040.164  166                    HLT
 
                         *** **************************************************
                         *
                         *       INTERRUPT ROUTINE
                         *          CLOCK AND DISPLAY INTERRUPT
                         *
-040.1652 23240          INTRP   LHLD    TICK           ;GET COUNT (BETWEEN 0 & 500)
-040.1753                        DCX     H              ;TICK=TICK-1
-040.1742 23240                  SHLD    TICK           ;STORE COUNT
-040.17175                       MOV     A,L            ;TEST FOR ZERO
-040.17264                       ORA     H                 ;COMPARE WITH 'H'
-040.17300                       RNE                        EXIT;IF .NE. 0
+040.165  052  232 040   INTRP   LHLD    TICK           ;GET COUNT (BETWEEN 0 & 500)
+040.170  053                    DCX     H              ;TICK=TICK-1
+040.171  042  232 040           SHLD    TICK           ;STORE COUNT
+040.174  175                    MOV     A,L            ;TEST FOR ZERO
+040.175  264                    ORA     H                 ;COMPARE WITH 'H'
+040.176  300                    RNE                        EXIT;IF .NE. 0
 
                         *** **************************************************
                         *
                         *       UPDATE DISPLAY FOR 'NEW' NUMBER.
                         *
-040.1776 15                     MVI     A,CR           ;DO CARRIAGE RETURN
-040.20315 30203                 CALL    WCC
-040.2076 12                     MVI     A,LF              ;AND LINE FEED
-040.20315 30203                 CALL    WCC
-040.2172 23440                  LDA     NUMBER         ;GET NUMBER
-040.2175                        DCR     A              ;NUMBER=NUMBER-1
-040.2162 23440                  STA     NUMBER         ;SAVE NUMBER
-040.22315 34305                 CALL    TOB            ;TYPE OCTAL BYTE
-040.2241 36401          SETICK  LXI     H,500          ;RESTORE COUNT
-040.2242 23240                  SHLD    TICK             ;WITH 500
-040.23311                       RET
+040.177  076  015               MVI     A,CR           ;DO CARRIAGE RETURN
+040.201  315  302 003           CALL    WCC
+040.204  076  012               MVI     A,LF              ;AND LINE FEED
+040.206  315  302 003           CALL    WCC
+040.211  072  234 040           LDA     NUMBER         ;GET NUMBER
+040.214  075                    DCR     A              ;NUMBER=NUMBER-1
+040.215  062  234 040           STA     NUMBER         ;SAVE NUMBER
+040.220  315  343 005           CALL    TOB            ;TYPE OCTAL BYTE
+040.223  041  364 001   SETICK  LXI     H,500          ;RESTORE COUNT
+040.226  042  232 040           SHLD    TICK             ;WITH 500
+040.231  311                    RET
 
                         *       STORAGE AREA & END ASSEMBLY
 040.232   (000.002)     TICK    DS      2
