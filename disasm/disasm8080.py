@@ -63,7 +63,7 @@ lookupTable = [
     ["mvi     d,",  2],  # 16
     ["ral",         1],  # 17
     ["*nop",        1],  # 18
-    ["dad",         1],  # 19
+    ["dad     d",   1],  # 19
     ["ldax    d",   1],  # 1A
     ["dcx     d",   1],  # 1B
     ["inr     e",   1],  # 1C
